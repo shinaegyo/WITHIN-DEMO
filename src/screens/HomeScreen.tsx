@@ -20,6 +20,8 @@ interface Props {
   onOpenMenu: () => void;
   onOpenLeaderboard: () => void;
   onOpenFriends: () => void;
+  /** A friend request is waiting, so the menu button carries a dot. */
+  menuAlert?: boolean;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
   username: string;
@@ -31,6 +33,7 @@ export function HomeScreen({
   onOpenMenu,
   onOpenLeaderboard,
   onOpenFriends,
+  menuAlert = false,
   practiceEpoch,
   username,
 }: Props) {
@@ -138,6 +141,7 @@ export function HomeScreen({
   // Most days have no twist, which is the point: an everyday twist is just the
   // rules, and there is nothing left to notice.
   const twist = modifierCopy(game.modifier);
+  const lastHour = !finished && remaining < 60 * 60 * 1000;
 
   const renderBoard = (
     title: string,
@@ -204,9 +208,12 @@ export function HomeScreen({
         <Pressable
           style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
           onPress={onOpenMenu}
-          accessibilityLabel="Open menu"
+          accessibilityLabel={menuAlert ? 'Open menu, friend request waiting' : 'Open menu'}
         >
           <Text style={[styles.menuIcon, { color: colors.text }]}>☰</Text>
+          {menuAlert && (
+            <View style={[styles.dot, { backgroundColor: colors.accent, borderColor: colors.background }]} />
+          )}
         </Pressable>
 
         {started ? <Wordmark size={24} /> : <View />}
@@ -371,7 +378,17 @@ export function HomeScreen({
           it should be readable wherever the player happens to be on the page,
           and it should never move while they read it. */}
       <View style={[styles.footer, { borderColor: colors.border, backgroundColor: colors.background }]}>
-        <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBERS IN</Text>
+        {/* The clock only becomes urgent for someone who still has a day to
+            play. Once the day is done it is just a countdown to the next one. */}
+        <Text
+          style={[
+            styles.nextLabel,
+            { color: lastHour ? colors.text : colors.textMuted },
+            lastHour && styles.nextLabelUrgent,
+          ]}
+        >
+          {lastHour ? 'LAST HOUR TO PLAY TODAY' : 'NEXT NUMBERS IN'}
+        </Text>
         <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
       </View>
     </SafeAreaView>
@@ -395,6 +412,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuIcon: { fontSize: 19, fontFamily: fonts.bold },
+  dot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+  },
   iconText: { fontSize: 17 },
   scroll: { flex: 1 },
   body: {
@@ -551,6 +577,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     letterSpacing: 1.2,
   },
+  nextLabelUrgent: { fontFamily: fonts.extraBold },
   countdown: {
     fontSize: 32,
     fontFamily: fonts.extraBold,

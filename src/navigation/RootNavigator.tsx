@@ -19,6 +19,7 @@ import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
 import { shareResult } from '../utils/share';
+import { loadFriends } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
@@ -53,6 +54,18 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
   const [introStep, setIntroStep] = useState<'rules' | 'practice'>('rules');
 
   const [sound, setSound] = useState(true);
+  // Nobody is going to open a Friends screen on the off chance. A waiting
+  // request has to announce itself, or it sits there until the sender gives up.
+  const [pending, setPending] = useState(0);
+  const [friendsEpoch, setFriendsEpoch] = useState(0);
+
+  useEffect(() => {
+    loadFriends()
+      .then((f) => setPending(f.incoming.length))
+      .catch(() => {
+        /* a badge is not worth disturbing the screen for */
+      });
+  }, [friendsEpoch]);
 
   useEffect(() => {
     hasSeenIntro().then(setIntroSeen);
@@ -129,6 +142,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
               onPlay={() => navigation.navigate('Game')}
               onPractice={startPractice}
               onOpenMenu={() => setMenuOpen(true)}
+              menuAlert={pending > 0}
               onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
               onOpenFriends={() => navigation.navigate('Friends')}
               practiceEpoch={practiceEpoch}
@@ -165,7 +179,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         </Stack.Screen>
 
         <Stack.Screen name="Friends" options={{ title: 'Friends', headerBackTitle: 'Back' }}>
-          {() => <FriendsScreen username={username} />}
+          {() => <FriendsScreen username={username} onChanged={() => setFriendsEpoch((n) => n + 1)} />}
         </Stack.Screen>
 
         <Stack.Screen
@@ -186,7 +200,11 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         onClose={() => setMenuOpen(false)}
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
-          { label: 'Friends', onPress: () => navRef.isReady() && navRef.navigate('Friends') },
+          {
+            label: 'Friends',
+            count: pending,
+            onPress: () => navRef.isReady() && navRef.navigate('Friends'),
+          },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
           { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
           game && game.dayStatus !== 'playing'

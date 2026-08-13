@@ -11,6 +11,8 @@ export interface MenuItem {
   soon?: boolean;
   /** Dims the item and shows this label, for things not available right now. */
   badge?: string;
+  /** A count needing attention. Unlike badge, the item stays usable. */
+  count?: number;
 }
 
 const WIDTH = Math.min(320, Dimensions.get('window').width * 0.82);
@@ -86,6 +88,11 @@ export function MenuDrawer({
               >
                 {item.label}
               </Text>
+              {!!item.count && item.count > 0 && (
+                <View style={[styles.count, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.countText}>{item.count}</Text>
+                </View>
+              )}
               {(item.soon || item.badge) && (
                 <Text style={[styles.soon, { color: colors.textMuted }]}>
                   {item.badge ?? 'SOON'}
@@ -130,6 +137,15 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   itemLabel: { flex: 1, fontSize: 16, fontFamily: fonts.semiBold },
+  count: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countText: { color: '#FFFFFF', fontSize: 11, fontFamily: fonts.extraBold },
   soon: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 0.8 },
   dim: { opacity: 0.4 },
 });

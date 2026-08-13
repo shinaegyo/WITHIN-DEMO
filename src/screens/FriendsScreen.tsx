@@ -19,7 +19,13 @@ import { useTheme } from '../theme/ThemeContext';
  * you play with, who is waiting on you, and who you are waiting on. Leaving the
  * last two out would make a sent request look like nothing happened.
  */
-export function FriendsScreen({ username }: { username: string }) {
+export function FriendsScreen({
+  username,
+  onChanged,
+}: {
+  username: string;
+  onChanged?: () => void;
+}) {
   const { colors } = useTheme();
   const [state, setState] = useState<FriendsState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +58,7 @@ export function FriendsScreen({ username }: { username: string }) {
     try {
       await action();
       await load();
+      onChanged?.();
     } catch (err) {
       say(messageFor(err instanceof ApiError ? err.code : 'network'), true);
     } finally {
