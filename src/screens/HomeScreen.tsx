@@ -10,6 +10,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
+import { MAX_DAILY_SCORE } from '../game/scoring';
 
 interface Props {
   onPlay: () => void;
@@ -20,30 +21,11 @@ interface Props {
   username: string;
 }
 
-const POINTS_MAX_SIZE = 128;
-const POINTS_MIN_SIZE = 34;
-
-/**
- * Approximate width of the string in em units for Archivo ExtraBold, then
- * divide the available width by it. Digits are near-monospaced in this face;
- * separators are much narrower.
- */
-function pointsFontSize(text: string, available: number): number {
-  if (!available) return POINTS_MIN_SIZE;
-  let units = 0;
-  for (const ch of text) units += ch >= '0' && ch <= '9' ? 0.64 : 0.32;
-  // 4% margin: the per-character estimate is close but not exact, and glyph
-  // measurement showed longer totals overshooting the container without it.
-  const size = (available * 0.96) / Math.max(units, 0.64);
-  return Math.max(POINTS_MIN_SIZE, Math.min(POINTS_MAX_SIZE, size));
-}
-
 export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, username }: Props) {
   const { colors, mode, toggle } = useTheme();
   const { phase, game, loadError, reload } = useDailyGameContext();
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
-  const [pointsWidth, setPointsWidth] = useState(0);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
 
@@ -76,8 +58,34 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
   const eliminated = game.dayStatus === 'eliminated';
   const inProgress =
     game.dayStatus === 'playing' && (game.currentRound > 1 || game.round.attemptsUsed > 0);
-  // Separators keep five- and six-figure totals readable rather than a wall of digits.
-  const points = game.stats.totalPoints.toLocaleString();
+  // The score leads only once there is one to lead with. Part-way through the
+  // first round the total is still zero, and a screen-filling 0 reads as a
+  // verdict rather than a starting point. A finished day always shows its
+  // score, including a zero — that one is a real result.
+  const started = finished || game.totalScore > 0;
+
+  const byRound = new Map(game.rounds.map((r) => [r.round, r]));
+
+  const status = eliminated
+    ? `ELIMINATED ON ROUND ${game.currentRound}`
+    : finished
+      ? 'ALL 3 ROUNDS DONE'
+      : 'TODAY SO FAR';
+
+  const primaryLabel = finished
+    ? 'Share result'
+    : inProgress
+      ? `Continue round ${game.currentRound}`
+      : 'Press to play';
+
+  const onPrimary = finished
+    ? async () => {
+        const res = await shareResult(game);
+        setShareFailed(!res.ok);
+        if (res.copied) setShareNote('Copied — paste it anywhere.');
+        else if (!res.ok) setShareNote('Could not share — try again.');
+      }
+    : onPlay;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
@@ -89,109 +97,109 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
         >
           <Text style={[styles.menuIcon, { color: colors.text }]}>☰</Text>
         </Pressable>
-        <View style={styles.headerRight}>
-          <View style={[styles.streakPill, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-            <Text style={[styles.streakValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
-            <Text style={[styles.streakLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
-          </View>
-          <Pressable
-            style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
-            onPress={toggle}
-            accessibilityLabel="Toggle light/dark mode"
-          >
-            <Text style={styles.iconText}>{mode === 'dark' ? '☀' : '☾'}</Text>
-          </Pressable>
-        </View>
+
+        {started ? <Wordmark size={24} /> : <View />}
+
+        <Pressable
+          style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
+          onPress={toggle}
+          accessibilityLabel="Toggle light/dark mode"
+        >
+          <Text style={styles.iconText}>{mode === 'dark' ? '☀' : '☾'}</Text>
+        </Pressable>
       </View>
 
       <View style={styles.body}>
-        <Text style={[styles.welcome, { color: colors.textMuted }]} numberOfLines={1}>
-          Welcome, <Text style={{ color: colors.text, fontFamily: fonts.extraBold }}>{username}</Text>
-        </Text>
+        {started ? (
+          <>
+            <Text style={[styles.status, { color: colors.textMuted }]}>{status}</Text>
 
-        {/* Sized to fill the available width rather than sitting at a fixed
-            size. adjustsFontSizeToFit only ever shrinks text, so a short total
-            like "95" would stay small; this scales up to fill and back down as
-            digits are added. */}
-        <View style={styles.pointsRow} onLayout={(e) => setPointsWidth(e.nativeEvent.layout.width)}>
-          <Text
-            style={[styles.points, { color: colors.text, fontSize: pointsFontSize(points, pointsWidth) }]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {points}
-          </Text>
-        </View>
-        <Text style={[styles.pointsLabel, { color: colors.textMuted }]}>TOTAL POINTS</Text>
+            {/* The total is stacked under the score rather than sitting beside
+                it. A permanent "/300" next to every result reads as a shortfall,
+                since almost nobody finishes on 300. */}
+            <Text style={[styles.score, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+              {game.totalScore}
+            </Text>
+            <Text style={[styles.scoreMax, { color: colors.textMuted }]}>OF {MAX_DAILY_SCORE}</Text>
 
-        <Wordmark size={64} />
-        <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
-
-        {finished ? (
-          <Text style={[styles.doneTitle, { color: colors.text }]}>
-            {eliminated
-              ? `Eliminated on round ${game.currentRound} · ${game.totalScore} points`
-              : `All 3 rounds done · ${game.totalScore} of 300 points`}
-          </Text>
+            {/* Same reading as the in-game progress bar: green solved with its
+                score, red lost, grey not reached. */}
+            <View style={styles.chips}>
+              {[1, 2, 3].map((n) => {
+                const r = byRound.get(n);
+                const won = r?.status === 'won';
+                const lost = r?.status === 'lost';
+                return (
+                  <View
+                    key={n}
+                    style={[
+                      styles.chip,
+                      {
+                        backgroundColor: won
+                          ? feedbackColors.correct
+                          : lost
+                            ? feedbackColors.oneAway
+                            : colors.border,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.chipText}>{won ? r?.score : lost ? '✕' : ''}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </>
         ) : (
-          <Pressable
-            style={({ pressed }) => [
-              styles.playButton,
-              { backgroundColor: colors.accent, opacity: pressed ? 0.88 : 1 },
-            ]}
-            onPress={onPlay}
-          >
-            <Text style={styles.playText}>{inProgress ? `CONTINUE ROUND ${game.currentRound}` : 'PRESS TO PLAY'}</Text>
-          </Pressable>
+          <>
+            <Wordmark size={62} />
+            <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
+          </>
         )}
 
-        {finished && (
-          <Pressable
-            style={({ pressed }) => [
-              styles.shareButton,
-              { backgroundColor: feedbackColors.correct, opacity: pressed ? 0.88 : 1 },
-            ]}
-            onPress={async () => {
-              const res = await shareResult(game);
-              setShareFailed(!res.ok);
-              if (res.copied) setShareNote('Copied — paste it anywhere.');
-              else if (!res.ok) setShareNote('Could not share — try again.');
-            }}
-          >
-            <Text style={styles.shareText}>Share result</Text>
-          </Pressable>
-        )}
+        <Pressable
+          style={({ pressed }) => [
+            styles.primary,
+            { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+          ]}
+          onPress={onPrimary}
+        >
+          <Text style={[styles.primaryText, { color: colors.background }]}>{primaryLabel}</Text>
+        </Pressable>
+
         {shareNote && (
           <Text
-            style={[
-              styles.practiceMeta,
-              { color: shareFailed ? colors.textMuted : feedbackColors.correct },
-            ]}
+            style={[styles.note, { color: shareFailed ? colors.textMuted : feedbackColors.correct }]}
           >
             {shareNote}
           </Text>
         )}
 
+        <View style={styles.statRow}>
+          <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Text style={[styles.statValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
+          </View>
+          <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Text style={[styles.statValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+              {game.stats.totalPoints.toLocaleString()}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>ALL TIME</Text>
+          </View>
+        </View>
+
         {/* Practice unlocks after the daily, so it tops up a session rather
             than replacing the thing people came for. */}
         {finished && practiceLeft !== null && (
-          <Pressable
-            disabled={practiceLeft === 0}
-            style={({ pressed }) => [
-              styles.practiceButton,
-              {
-                borderColor: colors.border,
-                backgroundColor: pressed && practiceLeft > 0 ? colors.surfaceAlt : 'transparent',
-                opacity: practiceLeft === 0 ? 0.45 : 1,
-              },
-            ]}
-            onPress={onPractice}
-          >
-            <Text style={[styles.practiceText, { color: colors.text }]}>
-              {practiceLeft > 0 ? 'Play a practice round' : 'No practice rounds left today'}
-            </Text>
-            <Text style={[styles.practiceMeta, { color: colors.textMuted }]}>
-              {practiceLeft > 0 ? `${practiceLeft} of 3 left today · unranked` : 'Resets at midnight'}
+          <Pressable disabled={practiceLeft === 0} onPress={onPractice} style={styles.practice}>
+            <Text
+              style={[
+                styles.practiceText,
+                { color: colors.textMuted, opacity: practiceLeft === 0 ? 0.5 : 1 },
+              ]}
+            >
+              {practiceLeft > 0
+                ? `Play a practice round · ${practiceLeft} left`
+                : 'No practice rounds left today'}
             </Text>
           </Pressable>
         )}
@@ -212,6 +220,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 8,
   },
@@ -230,62 +239,70 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 28,
   },
-  welcome: { fontSize: 15, fontFamily: fonts.medium, marginBottom: 16 },
-  pointsRow: { alignSelf: 'stretch' },
-  points: {
+  status: {
+    fontSize: 10.5,
+    fontFamily: fonts.bold,
+    letterSpacing: 1.5,
+    marginBottom: 6,
+  },
+  score: {
+    fontSize: 84,
     fontFamily: fonts.extraBold,
-    letterSpacing: -2,
-    textAlign: 'center',
+    letterSpacing: -3,
+    lineHeight: 90,
     includeFontPadding: false,
   },
-  pointsLabel: {
+  scoreMax: {
     fontSize: 11,
     fontFamily: fonts.bold,
     letterSpacing: 1.6,
     marginTop: 2,
-    marginBottom: 24,
   },
-  logo: {
-    fontSize: 64,
-    fontFamily: fonts.logo,
-    letterSpacing: -2,
+  chips: {
+    flexDirection: 'row',
+    gap: 6,
+    alignSelf: 'stretch',
+    marginTop: 18,
   },
+  chip: {
+    flex: 1,
+    height: 22,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipText: { color: '#FFFFFF', fontSize: 11, fontFamily: fonts.extraBold },
   tagline: {
     fontSize: 14,
     fontFamily: fonts.medium,
-    marginTop: 2,
-    marginBottom: 34,
+    marginTop: 4,
   },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  streakPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-  },
-  streakValue: { fontSize: 16, fontFamily: fonts.extraBold },
-  streakLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.1 },
-  playButton: {
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 40,
+  primary: {
+    borderRadius: 15,
+    paddingVertical: 16,
     alignSelf: 'stretch',
     alignItems: 'center',
+    marginTop: 22,
   },
-  playText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontFamily: fonts.logo,
-    letterSpacing: 0.4,
+  primaryText: { fontSize: 15.5, fontFamily: fonts.extraBold },
+  note: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 8 },
+  statRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignSelf: 'stretch',
+    marginTop: 14,
   },
-  doneTitle: {
-    fontSize: 16,
-    fontFamily: fonts.semiBold,
-    textAlign: 'center',
+  stat: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
   },
+  statValue: { fontSize: 19, fontFamily: fonts.extraBold },
+  statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
+  practice: { marginTop: 18, paddingVertical: 6 },
+  practiceText: { fontSize: 12.5, fontFamily: fonts.bold, textDecorationLine: 'underline' },
   footer: {
     alignItems: 'center',
     paddingBottom: 18,
@@ -297,30 +314,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   countdown: {
-    fontSize: 34,
+    fontSize: 32,
     fontFamily: fonts.extraBold,
     letterSpacing: 1,
     marginTop: 2,
-    color: feedbackColors.correct,
   },
-  shareButton: {
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    marginTop: 20,
-    alignItems: 'center',
-    alignSelf: 'stretch',
-  },
-  shareText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.bold },
-  practiceButton: {
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 22,
-    marginTop: 24,
-    alignItems: 'center',
-    alignSelf: 'stretch',
-  },
-  practiceText: { fontSize: 14, fontFamily: fonts.bold },
-  practiceMeta: { fontSize: 11, fontFamily: fonts.medium, marginTop: 2 },
 });

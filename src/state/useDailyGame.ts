@@ -125,6 +125,11 @@ export function useDailyGame(): UseDailyGameResult {
               }
             : prev,
         );
+        // Closing the day makes the server recompute lifetime stats. Without
+        // pulling them back, Home shows a total from before the last round —
+        // visibly lower than the day the player has just finished.
+        if (res.dayStatus !== 'playing') void refresh();
+
         return { ok: true as const };
       } catch (err) {
         const code = err instanceof ApiError ? err.code : 'network';
@@ -134,7 +139,7 @@ export function useDailyGame(): UseDailyGameResult {
         setSubmitting(false);
       }
     },
-    [game, submitting, load],
+    [game, submitting, load, refresh],
   );
 
   /**
