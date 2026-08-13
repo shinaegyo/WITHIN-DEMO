@@ -73,10 +73,26 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
     ]);
 
     const sequence = Animated.sequence([entrance, emphasis, Animated.delay(90), exit]);
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      onDone();
+    };
+
     sequence.start(({ finished }) => {
-      if (finished) onDone();
+      if (finished) finish();
     });
-    return () => sequence.stop();
+
+    // Animation callbacks stop firing if the app is backgrounded mid-burst,
+    // which would otherwise strand the overlay on screen. Clear it regardless
+    // once the burst has had more than enough time to play.
+    const failsafe = setTimeout(finish, 3000);
+
+    return () => {
+      clearTimeout(failsafe);
+      sequence.stop();
+    };
   }, [isOneAway, glow, flash, scale, opacity, shake, onDone]);
 
   return (

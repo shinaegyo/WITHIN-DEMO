@@ -1,0 +1,141 @@
+<!doctype html>
+<!--
+  Preview harness — not app code.
+
+  Wraps the running Expo web build (localhost:8081) in an iPhone 15 Pro sized
+  frame (393x852pt) and simulates the real safe-area insets (59pt top, 34pt
+  bottom) that a browser reports as zero. Without that simulation the app
+  content sits under the status bar, which is NOT what happens on device.
+
+  Still an approximation — native rendering differs in font hinting, true
+  safe areas and native-driver animation. Use Expo Go on a real phone for
+  the final word.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WITHIN — device preview</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;
+    background:linear-gradient(160deg,#cfe4ef 0%,#e8f1f5 45%,#dbe9f0 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:-apple-system,system-ui,sans-serif;padding:30px;
+  }
+  .stage{display:flex;flex-direction:column;align-items:center;gap:14px;flex-shrink:0}
+
+  .device{
+    position:relative;flex-shrink:0;
+    width:417px;height:876px;
+    border-radius:66px;padding:12px;
+    background:linear-gradient(145deg,#5b6b73 0%,#8fa3ac 12%,#3f4c52 30%,#7d9099 55%,#3a464b 78%,#8fa3ac 94%,#4a575d 100%);
+    box-shadow:0 32px 70px rgba(20,40,55,.36),0 8px 20px rgba(20,40,55,.22),inset 0 0 0 1px rgba(255,255,255,.18);
+  }
+  .screen{
+    position:relative;flex-shrink:0;
+    width:393px;height:852px;
+    border-radius:55px;overflow:hidden;
+    background:#F7F8FA;               /* stands in for the app's own background
+                                         behind the status bar / home area */
+    transition:background .2s;
+  }
+  .screen.dark{background:#0E0F13}
+
+  /* The app is inset by the same amounts iOS reserves, so what you see here
+     lines up with what SafeAreaView produces on hardware. */
+  iframe{
+    position:absolute;left:0;top:59px;
+    width:393px;height:759px;        /* 852 - 59 top - 34 bottom */
+    border:0;display:block;background:transparent;
+  }
+
+  .island{
+    position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:124px;height:36px;border-radius:20px;background:#000;z-index:5;pointer-events:none;
+  }
+
+  .status{
+    position:absolute;top:0;left:0;right:0;height:59px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 30px 0;font-size:15px;font-weight:600;
+    z-index:4;pointer-events:none;color:#15161A;
+  }
+  .screen.dark .status{color:#fff}
+  .status .right{display:flex;align-items:center;gap:5px}
+  .bars{display:flex;align-items:flex-end;gap:2px;height:11px}
+  .bars i{width:3px;border-radius:1px;background:currentColor;display:block}
+  .bars i:nth-child(1){height:4px}
+  .bars i:nth-child(2){height:6px}
+  .bars i:nth-child(3){height:8px}
+  .bars i:nth-child(4){height:11px}
+  .batt{width:25px;height:12px;border-radius:3.5px;border:1.4px solid currentColor;position:relative;opacity:.9}
+  .batt::after{content:'';position:absolute;top:2px;left:2px;bottom:2px;width:15px;border-radius:1.5px;background:currentColor}
+  .batt::before{content:'';position:absolute;right:-3.5px;top:3.5px;width:2px;height:5px;border-radius:0 1px 1px 0;background:currentColor;opacity:.55}
+
+  .home{
+    position:absolute;bottom:9px;left:50%;transform:translateX(-50%);
+    width:140px;height:5px;border-radius:3px;background:#15161A;opacity:.3;z-index:5;pointer-events:none;
+  }
+  .screen.dark .home{background:#fff;opacity:.42}
+
+  .btn-side{position:absolute;background:linear-gradient(180deg,#6f8189,#3d494f);border-radius:2px}
+  .b-silent{left:-3px;top:150px;width:4px;height:30px}
+  .b-up{left:-3px;top:210px;width:4px;height:56px}
+  .b-down{left:-3px;top:280px;width:4px;height:56px}
+  .b-power{right:-3px;top:230px;width:4px;height:88px}
+
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .toolbar button{
+    font:inherit;font-size:12px;font-weight:600;padding:7px 13px;border-radius:20px;
+    border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.78);color:#2b3a42;cursor:pointer;
+  }
+  .toolbar button:hover{background:#fff}
+  .label{font-size:12px;color:#4a5c66;opacity:.85}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="device">
+    <span class="btn-side b-silent"></span>
+    <span class="btn-side b-up"></span>
+    <span class="btn-side b-down"></span>
+    <span class="btn-side b-power"></span>
+
+    <div class="screen" id="screen">
+      <div class="status">
+        <span id="clock">9:41</span>
+        <span class="right">
+          <span class="bars"><i></i><i></i><i></i><i></i></span>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+            <path d="M8 10.2 9.6 8.6a2.3 2.3 0 0 0-3.2 0L8 10.2Z" fill="currentColor"/>
+            <path d="M4.6 6.9a4.9 4.9 0 0 1 6.8 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M2.2 4.4a8.3 8.3 0 0 1 11.6 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="batt"></span>
+        </span>
+      </div>
+      <div class="island"></div>
+      <iframe id="app" src="http://localhost:8081" title="WITHIN app preview"></iframe>
+      <div class="home"></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button onclick="document.getElementById('app').contentWindow.location.reload()">Reload app</button>
+    <button onclick="document.getElementById('screen').classList.toggle('dark')">Match dark mode</button>
+    <span class="label">iPhone 15 Pro · 393 × 852 pt · safe areas simulated</span>
+  </div>
+</div>
+
+<script>
+  function tick(){
+    const d = new Date();
+    let h = d.getHours() % 12; if (h === 0) h = 12;
+    document.getElementById('clock').textContent = h + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  tick(); setInterval(tick, 10000);
+</script>
+</body>
+</html>
