@@ -23,7 +23,7 @@ drop table if exists public.puzzles cascade;
 
 -- ------------------------------------------------------------- puzzle data
 
-create table public.puzzle_rounds (
+create table if not exists public.puzzle_rounds (
   puzzle_date date not null,
   round       smallint not null check (round between 1 and 3),
   clue1       text not null,
@@ -32,11 +32,12 @@ create table public.puzzle_rounds (
 
 alter table public.puzzle_rounds enable row level security;
 
+drop policy if exists "rounds are public" on public.puzzle_rounds;
 create policy "rounds are public" on public.puzzle_rounds for select using (true);
 
 -- Answers and the bonus clue live here, with RLS on and no policies at all:
 -- the public API returns nothing from this table no matter who asks.
-create table public.puzzle_round_secrets (
+create table if not exists public.puzzle_round_secrets (
   puzzle_date date not null,
   round       smallint not null check (round between 1 and 3),
   answer      smallint not null check (answer between 1 and 1000),
@@ -48,10 +49,13 @@ alter table public.puzzle_round_secrets enable row level security;
 
 -- ------------------------------------------------------------------ games
 
+drop type if exists public.day_status cascade;
+drop type if exists public.round_status cascade;
+
 create type public.day_status as enum ('playing', 'complete', 'eliminated');
 create type public.round_status as enum ('playing', 'won', 'lost');
 
-create table public.games (
+create table if not exists public.games (
   id               uuid primary key default gen_random_uuid(),
   user_id          uuid not null references auth.users(id) on delete cascade,
   puzzle_date      date not null,
@@ -69,13 +73,14 @@ create table public.games (
 );
 
 alter table public.games enable row level security;
+drop policy if exists "read own games" on public.games;
 create policy "read own games" on public.games for select using (auth.uid() = user_id);
 
-create index games_leaderboard_idx
+create index if not exists games_leaderboard_idx
   on public.games (puzzle_date, total_score desc, finished_at asc)
   where status = 'complete';
 
-create table public.round_results (
+create table if not exists public.round_results (
   game_id          uuid not null references public.games(id) on delete cascade,
   round            smallint not null check (round between 1 and 3),
   -- Which of the day's three shared numbers this slot maps to.
@@ -89,10 +94,11 @@ create table public.round_results (
 );
 
 alter table public.round_results enable row level security;
+drop policy if exists "read own rounds" on public.round_results;
 create policy "read own rounds" on public.round_results for select
   using (exists (select 1 from public.games g where g.id = game_id and g.user_id = auth.uid()));
 
-create table public.guesses (
+create table if not exists public.guesses (
   id          uuid primary key default gen_random_uuid(),
   game_id     uuid not null references public.games(id) on delete cascade,
   round       smallint not null check (round between 1 and 3),
@@ -108,6 +114,7 @@ create table public.guesses (
 );
 
 alter table public.guesses enable row level security;
+drop policy if exists "read own guesses" on public.guesses;
 create policy "read own guesses" on public.guesses for select
   using (exists (select 1 from public.games g where g.id = game_id and g.user_id = auth.uid()));
 
@@ -129,8 +136,16 @@ returns smallint[]
 language sql
 immutable
 as $$
-  select (array[
-    array[1,2,3], array[1,3,2], array[2,1,3],
-    array[2,3,1], array[3,1,2], array[3,2,1]
-  ])[ (abs(hashtext(p_uid::text || ':' || p_date::text)) % 6) + 1 ]::smallint[];
+  -- Postgres arrays of arrays are flattened into one multi-dimensional array,
+  -- so indexing a list of permutations needs a CASE rather than a subscript.
+  -- The double modulo keeps a negative hash in range without abs(), which
+  -- overflows on the minimum integer.
+  select case ((hashtext(p_uid::text || ':' || p_date::text) % 6) + 6) % 6
+    when 0 then array[1,2,3]::smallint[]
+    when 1 then array[1,3,2]::smallint[]
+    when 2 then array[2,1,3]::smallint[]
+    when 3 then array[2,3,1]::smallint[]
+    when 4 then array[3,1,2]::smallint[]
+    else        array[3,2,1]::smallint[]
+  end;
 $$;
