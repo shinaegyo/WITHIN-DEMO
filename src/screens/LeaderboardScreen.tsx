@@ -3,18 +3,8 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { StatusScreen } from '../components/StatusScreen';
 import { ApiError, LeaderboardEntry, loadLeaderboard, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
+import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
-
-/**
- * Metallics for the top three. Deliberately not the app's game colours — blue
- * and red already mean "too low" and "too high" on the board, and reusing them
- * for placement would blur that.
- */
-const MEDALS: Record<number, { ring: string; ink: string }> = {
-  1: { ring: '#D4A017', ink: '#3A2A00' },
-  2: { ring: '#AEB6BF', ink: '#2A2F35' },
-  3: { ring: '#B87333', ink: '#3A1F0A' },
-};
 
 export function LeaderboardScreen() {
   const { colors } = useTheme();

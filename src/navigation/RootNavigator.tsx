@@ -88,6 +88,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
               onPlay={() => navigation.navigate('Game')}
               onPractice={startPractice}
               onOpenMenu={() => setMenuOpen(true)}
+              onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
               practiceEpoch={practiceEpoch}
               username={username}
             />

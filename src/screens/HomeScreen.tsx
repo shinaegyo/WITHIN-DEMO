@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Wordmark } from '../components/Wordmark';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusScreen } from '../components/StatusScreen';
@@ -10,19 +10,28 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
-import { loadLeaderboard } from '../lib/api';
+import { LeaderboardEntry, loadLeaderboard } from '../lib/api';
+import { MEDALS } from '../theme/medals';
 import { MAX_DAILY_SCORE } from '../game/scoring';
 
 interface Props {
   onPlay: () => void;
   onPractice: () => void;
   onOpenMenu: () => void;
+  onOpenLeaderboard: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
   username: string;
 }
 
-export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, username }: Props) {
+export function HomeScreen({
+  onPlay,
+  onPractice,
+  onOpenMenu,
+  onOpenLeaderboard,
+  practiceEpoch,
+  username,
+}: Props) {
   const { colors, mode, toggle } = useTheme();
   const { phase, game, loadError, reload } = useDailyGameContext();
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
@@ -30,6 +39,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
   const [rank, setRank] = useState<{ place: number; of: number } | null>(null);
+  const [board, setBoard] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -40,25 +50,21 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
     return () => clearInterval(id);
   }, []);
 
-  // The daily leaderboard only lists players who have finished all three
-  // rounds, so there is no rank to ask for before then. Stays null if the
-  // player is past the fetched page rather than showing a wrong number.
+  // Fetched whether or not the day is done: the standings are worth seeing
+  // before you play as much as after. A rank only appears once the player is
+  // actually on the board.
   const dayOver = !!game && game.dayStatus !== 'playing';
   useEffect(() => {
-    if (!dayOver) {
-      setRank(null);
-      return;
-    }
     let cancelled = false;
     loadLeaderboard()
-      .then((board) => {
-        const me = board.entries.find((e) => e.isMe);
-        if (!cancelled) {
-          setRank(me ? { place: me.rank, of: board.totalPlayers } : null);
-        }
+      .then((res) => {
+        if (cancelled) return;
+        setBoard(res.entries);
+        const me = res.entries.find((e) => e.isMe);
+        setRank(me ? { place: me.rank, of: res.totalPlayers } : null);
       })
       .catch(() => {
-        /* the rank is a nicety; a failure here shouldn't disturb the screen */
+        /* the board is a nicety; a failure here shouldn't disturb the screen */
       });
     return () => {
       cancelled = true;
@@ -105,6 +111,12 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
       ? `Continue round ${game.currentRound}`
       : 'Press to play';
 
+  // Top ten, with the player appended when they placed outside it — a board
+  // that never shows your own row is just a list of other people.
+  const top = board.slice(0, 10);
+  const me = board.find((e) => e.isMe);
+  const preview = me && !top.some((e) => e.isMe) ? [...top, me] : top;
+
   const onPrimary = finished
     ? async () => {
         const res = await shareResult(game);
@@ -149,7 +161,11 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
         </View>
       )}
 
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+      >
         {started ? (
           <>
             <Text style={[styles.status, { color: colors.textMuted }]}>{status}</Text>
@@ -246,14 +262,63 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
             </Text>
           </Pressable>
         )}
-      </View>
+        {/* Today's standings, in reach without leaving the screen. They move
+            through the day, which is the point: a reason to look again this
+            evening rather than only tomorrow. */}
+        {board.length > 0 && (
+          <Pressable style={styles.boardCard} onPress={onOpenLeaderboard}>
+            <View style={styles.boardHead}>
+              <Text style={[styles.boardTitle, { color: colors.textMuted }]}>TODAY'S TOP</Text>
+              <Text style={[styles.boardMore, { color: colors.textMuted }]}>See all ›</Text>
+            </View>
 
-      {finished && (
-        <View style={styles.footer}>
-          <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBERS IN</Text>
-          <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
-        </View>
-      )}
+            {preview.map((item, i) => (
+              <View
+                key={item.rank}
+                style={[
+                  styles.boardRow,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor: item.isMe ? colors.surfaceAlt : colors.surface,
+                  },
+                  // A gap in the numbering means the player's own row was
+                  // pulled up from further down; say so with space.
+                  i > 0 && preview[i - 1].rank < item.rank - 1 && styles.boardGap,
+                ]}
+              >
+                {MEDALS[item.rank] ? (
+                  <View style={[styles.boardMedal, { backgroundColor: MEDALS[item.rank].ring }]}>
+                    <Text style={[styles.boardMedalText, { color: MEDALS[item.rank].ink }]}>
+                      {item.rank}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={[styles.boardRank, { color: colors.textMuted }]}>{item.rank}</Text>
+                )}
+
+                <Text style={[styles.boardName, { color: colors.text }]} numberOfLines={1}>
+                  {item.name}
+                  {item.isMe ? '  (you)' : ''}
+                </Text>
+
+                {!item.isComplete && (
+                  <Text style={[styles.boardOut, { color: colors.textMuted }]}>OUT</Text>
+                )}
+                <Text style={[styles.boardScore, { color: colors.text }]}>{item.score}</Text>
+              </View>
+            ))}
+          </Pressable>
+        )}
+
+        {finished && (
+          <View style={styles.footer}>
+            <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBERS IN</Text>
+            <Text style={[styles.countdown, { color: colors.text }]}>
+              {formatCountdown(remaining)}
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -276,12 +341,49 @@ const styles = StyleSheet.create({
   },
   menuIcon: { fontSize: 19, fontFamily: fonts.bold },
   iconText: { fontSize: 17 },
+  scroll: { flex: 1 },
   body: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 28,
+    paddingBottom: 24,
   },
+  boardCard: {
+    alignSelf: 'stretch',
+    marginTop: 28,
+    gap: 6,
+  },
+  boardHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 2,
+  },
+  boardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4 },
+  boardMore: { fontSize: 11.5, fontFamily: fonts.bold },
+  boardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 11,
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+  },
+  boardGap: { marginTop: 10 },
+  boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
+  boardMedal: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boardMedalText: { fontSize: 10, fontFamily: fonts.extraBold },
+  boardName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
+  boardOut: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.8 },
+  boardScore: { fontSize: 14, fontFamily: fonts.extraBold },
   status: {
     fontSize: 10.5,
     fontFamily: fonts.bold,
@@ -352,8 +454,7 @@ const styles = StyleSheet.create({
   practiceText: { fontSize: 12.5, fontFamily: fonts.bold, textDecorationLine: 'underline' },
   footer: {
     alignItems: 'center',
-    paddingBottom: 18,
-    paddingHorizontal: 28,
+    paddingTop: 28,
   },
   nextLabel: {
     fontSize: 10,
