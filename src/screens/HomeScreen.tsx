@@ -29,7 +29,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
-  const [rank, setRank] = useState<number | null>(null);
+  const [rank, setRank] = useState<{ place: number; of: number } | null>(null);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -52,7 +52,10 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
     let cancelled = false;
     loadLeaderboard()
       .then((board) => {
-        if (!cancelled) setRank(board.entries.find((e) => e.isMe)?.rank ?? null);
+        const me = board.entries.find((e) => e.isMe);
+        if (!cancelled) {
+          setRank(me ? { place: me.rank, of: board.totalPlayers } : null);
+        }
       })
       .catch(() => {
         /* the rank is a nicety; a failure here shouldn't disturb the screen */
@@ -133,10 +136,16 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
         </Pressable>
       </View>
 
+      {/* The field grows through the day as more people finish, so a bare
+          position appears to slide backwards for no reason. Naming the field
+          size makes the movement legible. */}
       {rank !== null && (
         <View style={styles.rankRow}>
           <Text style={[styles.rankLabel, { color: colors.textMuted }]}>TODAY'S RANK</Text>
-          <Text style={[styles.rankValue, { color: colors.text }]}>#{rank}</Text>
+          <Text style={[styles.rankValue, { color: colors.text }]}>
+            #{rank.place}
+            <Text style={[styles.rankOf, { color: colors.textMuted }]}> of {rank.of}</Text>
+          </Text>
         </View>
       )}
 
@@ -339,6 +348,7 @@ const styles = StyleSheet.create({
   rankRow: { alignItems: 'center', marginTop: 10 },
   rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
   rankValue: { fontSize: 22, fontFamily: fonts.extraBold, marginTop: 1 },
+  rankOf: { fontSize: 13, fontFamily: fonts.bold },
   practiceText: { fontSize: 12.5, fontFamily: fonts.bold, textDecorationLine: 'underline' },
   footer: {
     alignItems: 'center',
