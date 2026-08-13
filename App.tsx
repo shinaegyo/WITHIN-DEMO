@@ -9,7 +9,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GameScreen } from './src/screens/GameScreen';
+import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider } from './src/theme/ThemeContext';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -33,7 +33,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <GameScreen />
+        <RootNavigator />
       </ThemeProvider>
     </SafeAreaProvider>
   );

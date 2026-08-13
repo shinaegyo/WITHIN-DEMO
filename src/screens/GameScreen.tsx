@@ -8,15 +8,15 @@ import { Header } from '../components/Header';
 import { NumberInput } from '../components/NumberInput';
 import { ResultOverlay } from '../components/ResultOverlay';
 import { StatusScreen } from '../components/StatusScreen';
-import { useDailyGame } from '../state/useDailyGame';
+import { useDailyGameContext } from '../state/DailyGameContext';
 import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
 
-export function GameScreen() {
+export function GameScreen({ onExit }: { onExit: () => void }) {
   const { colors, mode } = useTheme();
   const { phase, game, loadError, submitting, lastResult, submit, reload, startFreshTestPlayer } =
-    useDailyGame();
+    useDailyGameContext();
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
 
   // True when today's game was already finished before this session started,
@@ -93,6 +93,7 @@ export function GameScreen() {
           stats={game.stats}
           resumed={resumedFinished.current}
           onNewTestPlayer={startFreshTestPlayer}
+          onExit={onExit}
         />
       )}
     </SafeAreaView>

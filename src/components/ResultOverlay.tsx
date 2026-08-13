@@ -18,6 +18,7 @@ interface Props {
   /** True when the game was already over on load, so we skip the celebration. */
   resumed: boolean;
   onNewTestPlayer: () => void;
+  onExit: () => void;
 }
 
 export function ResultOverlay({
@@ -28,6 +29,7 @@ export function ResultOverlay({
   stats,
   resumed,
   onNewTestPlayer,
+  onExit,
 }: Props) {
   const { colors } = useTheme();
   const scale = useRef(new Animated.Value(resumed ? 1 : 0.7)).current;
@@ -102,6 +104,18 @@ export function ResultOverlay({
 
         <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
         <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
+
+        {/* Deliberately not a dead end: send players home, where the streak and
+            the leaderboard live, rather than leaving the app as the only exit. */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.homeButton,
+            { backgroundColor: colors.accent, opacity: pressed ? 0.88 : 1 },
+          ]}
+          onPress={onExit}
+        >
+          <Text style={styles.homeText}>Back to home</Text>
+        </Pressable>
 
         {__DEV__ && (
           <Pressable
@@ -202,6 +216,19 @@ const styles = StyleSheet.create({
     fontFamily: fonts.extraBold,
     letterSpacing: 1,
     marginTop: 2,
+  },
+  homeButton: {
+    marginTop: 20,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  homeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: fonts.bold,
   },
   devButton: {
     marginTop: 18,
