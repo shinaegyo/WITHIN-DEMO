@@ -388,7 +388,9 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   body: {
     paddingHorizontal: 28,
-    paddingBottom: 32,
+    // Room to scroll past the last section rather than ending flush against
+    // the pinned clock.
+    paddingBottom: 72,
   },
   hero: {
     alignItems: 'center',
@@ -396,14 +398,17 @@ const styles = StyleSheet.create({
   },
   boardCard: {
     alignSelf: 'stretch',
-    marginTop: 8,
+    // Sections are separated by a clear band of space rather than a hairline.
+    // Sitting eight points apart, two different lists read as one confusing
+    // one.
+    marginTop: 44,
     gap: 8,
   },
   boardHead: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   boardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4 },
   boardMore: { fontSize: 11.5, fontFamily: fonts.bold },
@@ -419,7 +424,7 @@ const styles = StyleSheet.create({
   boardGap: { marginTop: 10 },
   inviteCard: {
     alignSelf: 'stretch',
-    marginTop: 8,
+    marginTop: 44,
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 14,
