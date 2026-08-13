@@ -1,0 +1,53 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import 'react-native-url-polyfill/auto';
+
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const key = process.env.EXPO_PUBLIC_SUPABASE_KEY;
+
+if (!url || !key) {
+  throw new Error(
+    'Missing EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_KEY. Copy .env.example to .env.',
+  );
+}
+
+export const supabase = createClient(url, key, {
+  auth: {
+    // Keeps the anonymous session across launches, so a player's streak
+    // survives closing the app.
+    storage: AsyncStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+    // No deep-link callbacks in a native app.
+    detectSessionInUrl: false,
+  },
+});
+
+/**
+ * Every player gets an account immediately, with no signup wall — anonymous
+ * at first, upgradeable to a real login later without losing history.
+ * Returns the user id.
+ */
+export async function ensureSignedIn(): Promise<string> {
+  const { data } = await supabase.auth.getSession();
+  if (data.session?.user) return data.session.user.id;
+
+  const { data: created, error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+  if (!created.user) throw new Error('anonymous sign-in returned no user');
+  return created.user.id;
+}
+
+/**
+ * The device's IANA timezone, e.g. "America/Los_Angeles".
+ * Sent once at sign-up and stored on the profile; from then on the server
+ * uses the stored value to decide which puzzle the player is on, so changing
+ * the device clock can't pull tomorrow's number forward.
+ */
+export function deviceTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
