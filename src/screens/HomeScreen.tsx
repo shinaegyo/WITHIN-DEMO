@@ -266,13 +266,17 @@ export function HomeScreen({
           <>
             <Text style={[styles.status, { color: colors.textMuted }]}>{status}</Text>
 
-            {/* The total is stacked under the score rather than sitting beside
-                it. A permanent "/300" next to every result reads as a shortfall,
-                since almost nobody finishes on 300. */}
+            {/* No denominator. It read as a shortfall against a maximum almost
+                nobody reaches, and once a Bonus day multiplies the total the
+                figure to measure against changes too — so the number stopped
+                meaning anything at a glance. The score alone is the thing
+                worth knowing. */}
             <Text style={[styles.score, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
               {game.totalScore}
             </Text>
-            <Text style={[styles.scoreMax, { color: colors.textMuted }]}>OF {game.maxScore}</Text>
+            <Text style={[styles.scoreMax, { color: colors.textMuted }]}>
+              {game.totalScore === 1 ? 'POINT' : 'POINTS'}
+            </Text>
 
             {/* Same reading as the in-game progress bar: green solved with its
                 score, red lost, grey not reached. */}
