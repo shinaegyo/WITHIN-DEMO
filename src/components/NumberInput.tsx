@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
@@ -16,6 +16,15 @@ export function NumberInput({ disabled, onSubmit }: Props) {
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const focus = useRef(new Animated.Value(0)).current;
+  const inputRef = useRef<TextInput>(null);
+
+  // Guessing is a rapid back-and-forth: read the feedback, type the next
+  // number. Losing the caret on every submit meant tapping back into the field
+  // between guesses, which on a phone also closed and reopened the keyboard.
+  // The field keeps focus while the round is live and lets go when it ends.
+  useEffect(() => {
+    if (disabled) inputRef.current?.blur();
+  }, [disabled]);
 
   // Colour interpolation can't run on the native driver, but this is one small
   // element so the JS-driven animation is not a concern.
@@ -33,6 +42,7 @@ export function NumberInput({ disabled, onSubmit }: Props) {
     if (result.ok) {
       setValue('');
       setError(null);
+      inputRef.current?.focus();
     } else {
       setError(result.error);
     }
@@ -62,6 +72,10 @@ export function NumberInput({ disabled, onSubmit }: Props) {
       <Animated.View style={[styles.shell, { borderColor, backgroundColor }]}>
         <View style={styles.fieldWrap}>
           <TextInput
+            ref={inputRef}
+            // Without this the keyboard dismisses itself on submit, undoing
+            // the refocus above.
+            blurOnSubmit={false}
             style={[
               styles.input,
               { color: colors.text },

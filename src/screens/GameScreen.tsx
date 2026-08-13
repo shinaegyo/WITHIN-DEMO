@@ -76,7 +76,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     if (phase === 'failed' || !game) return <StatusScreen message={loadError} onRetry={reload} />;
 
     const { round } = game;
-    const onFinalAttempt = round.attemptsUsed === round.attemptsAllowed - 1;
     const canLeave = round.attemptsUsed === 0 && game.currentRound === 1;
 
     return (
@@ -98,14 +97,13 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={!!round.clue2} />
 
           <View style={styles.boardWrap}>
-            <GuessBoard guesses={round.guesses} maxAttempts={round.attemptsAllowed} />
+            <GuessBoard
+              guesses={round.guesses}
+              attemptsAllowed={round.attemptsAllowed}
+              showRemaining={round.status === 'playing' && game.dayStatus === 'playing'}
+              finalNote="Solving now leaves you one fewer next round."
+            />
           </View>
-
-          {onFinalAttempt && round.status === 'playing' && (
-            <Text style={[styles.finalWarning, { color: feedbackColors.within10 }]}>
-              Last attempt — solving now leaves you one fewer next round.
-            </Text>
-          )}
 
           <NumberInput
             disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
@@ -152,10 +150,4 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   boardWrap: { flex: 1 },
-  finalWarning: {
-    fontSize: 12,
-    fontFamily: fonts.bold,
-    textAlign: 'center',
-    marginTop: -4,
-  },
 });

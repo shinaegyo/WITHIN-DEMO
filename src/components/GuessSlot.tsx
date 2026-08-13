@@ -20,43 +20,6 @@ const slotBase = {
   overflow: 'hidden',
 } as const;
 
-export function EmptySlot({
-  attemptNumber,
-  isFinal = false,
-}: {
-  attemptNumber: number;
-  isFinal?: boolean;
-}) {
-  const { colors } = useTheme();
-
-  // The final slot is marked before it's reached, because solving on it costs
-  // an attempt in the next round — the player needs that in mind while
-  // choosing, not after.
-  //
-  // Marked in the foreground colour rather than a warning hue: black on the
-  // light theme, white on the dark one. The board already carries meaning in
-  // colour — blue for low, red for high, green for solved — so spending
-  // another colour here competed with the feedback instead of supporting it.
-  // Maximum contrast against the background does the same job quietly.
-  const finalColor = colors.text;
-
-  return (
-    <View
-      style={[
-        styles.slot,
-        styles.empty,
-        { borderColor: isFinal ? finalColor : colors.border },
-        isFinal && styles.finalSlot,
-      ]}
-    >
-      <Text style={[styles.attemptLabel, { color: isFinal ? finalColor : colors.textMuted }]}>
-        #{attemptNumber}
-      </Text>
-      {isFinal && <Text style={[styles.finalNote, { color: finalColor }]}>LAST ATTEMPT</Text>}
-    </View>
-  );
-}
-
 export function FilledSlot({ result, attemptNumber }: { result: GuessResult; attemptNumber: number }) {
   const { colors } = useTheme();
   const anim = useRef(new Animated.Value(0)).current;

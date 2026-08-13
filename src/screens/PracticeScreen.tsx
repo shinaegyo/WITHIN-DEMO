@@ -114,7 +114,11 @@ export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Pr
           <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={clue2Unlocked} />
 
           <View style={styles.boardWrap}>
-            <GuessBoard guesses={guesses} maxAttempts={MAX_ATTEMPTS} />
+            <GuessBoard
+              guesses={guesses}
+              attemptsAllowed={MAX_ATTEMPTS}
+              showRemaining={status === 'playing'}
+            />
           </View>
 
           <NumberInput disabled={finished} onSubmit={submit} />

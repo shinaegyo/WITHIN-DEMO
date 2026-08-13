@@ -49,7 +49,7 @@ export function LeaderboardScreen() {
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        {total} {total === 1 ? 'player has' : 'players have'} finished all 3 rounds today
+        {total} {total === 1 ? 'player has' : 'players have'} played today
       </Text>
 
       <FlatList
@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   rank: { width: 30, fontSize: 14, fontFamily: fonts.extraBold },
+  out: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.8, marginRight: 8 },
   medal: {
     width: 26,
     height: 26,

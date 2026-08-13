@@ -1,31 +1,52 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { GuessResult } from '../game/types';
-import { EmptySlot, FilledSlot } from './GuessSlot';
+import { fonts } from '../theme/fonts';
+import { useTheme } from '../theme/ThemeContext';
+import { FilledSlot } from './GuessSlot';
 
 interface Props {
   guesses: GuessResult[];
-  maxAttempts: number;
-  /** Highlights the final slot so the cost of reaching it is visible early. */
-  warnLastAttempt?: boolean;
+  /** Drives the count shown under the board. */
+  attemptsAllowed: number;
+  /** Hidden once the round is over, when the count no longer means anything. */
+  showRemaining?: boolean;
+  /** Extra line on the final guess. Round-specific, so the screen supplies it. */
+  finalNote?: string;
 }
 
 /**
- * Always renders every attempt slot so the player can see up front how many
- * guesses they get; slots fill in from the top as guesses are made.
+ * Only the guesses actually made. Laying out every empty slot in advance turned
+ * the board into a countdown of everything still to lose, and left the real
+ * guesses squeezed into a strip at the top. The board now grows with the round,
+ * and how many guesses remain is stated in words underneath instead.
  */
-export function GuessBoard({ guesses, maxAttempts, warnLastAttempt = true }: Props) {
+export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, finalNote }: Props) {
+  const { colors } = useTheme();
+  const remaining = Math.max(0, attemptsAllowed - guesses.length);
+
   return (
     <View style={styles.board}>
-      {Array.from({ length: maxAttempts }).map((_, index) => {
-        const result = guesses[index];
-        const isFinal = index + 1 === maxAttempts;
-        return result ? (
+      <View style={styles.slots}>
+        {guesses.map((result, index) => (
           <FilledSlot key={index} result={result} attemptNumber={index + 1} />
-        ) : (
-          <EmptySlot key={index} attemptNumber={index + 1} isFinal={warnLastAttempt && isFinal} />
-        );
-      })}
+        ))}
+      </View>
+
+      {showRemaining && remaining > 0 && (
+        <View style={styles.footer}>
+          {remaining === 1 ? (
+            <>
+              <Text style={[styles.count, { color: colors.text }]}>LAST GUESS</Text>
+              {!!finalNote && (
+                <Text style={[styles.note, { color: colors.textMuted }]}>{finalNote}</Text>
+              )}
+            </>
+          ) : (
+            <Text style={[styles.count, { color: colors.textMuted }]}>{remaining} GUESSES LEFT</Text>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -34,5 +55,23 @@ const styles = StyleSheet.create({
   board: {
     flex: 1,
     gap: 8,
+  },
+  slots: {
+    gap: 8,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingTop: 4,
+  },
+  count: {
+    fontSize: 11,
+    fontFamily: fonts.bold,
+    letterSpacing: 1.4,
+  },
+  note: {
+    fontSize: 11.5,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+    marginTop: 3,
   },
 });

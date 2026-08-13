@@ -200,6 +200,9 @@ export interface LeaderboardEntry {
   name: string;
   score: number;
   isMe: boolean;
+  /** False for a day that ended in elimination rather than all three rounds. */
+  isComplete: boolean;
+  roundsWon: number;
 }
 
 export interface Leaderboard {
@@ -220,6 +223,8 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
       name: e.name,
       score: e.score,
       isMe: !!e.is_me,
+      isComplete: !!e.is_complete,
+      roundsWon: e.rounds_won ?? 0,
     })),
   };
 }

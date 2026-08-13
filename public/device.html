@@ -2,7 +2,7 @@
 <!--
   Preview harness — not app code.
 
-  Wraps the running Expo web build (localhost:8081) in an iPhone 15 Pro sized
+  Wraps the running web build in an iPhone 15 Pro sized
   frame (393x852pt) and simulates the real safe-area insets (59pt top, 34pt
   bottom) that a browser reports as zero. Without that simulation the app
   content sits under the status bar, which is NOT what happens on device.
@@ -117,7 +117,7 @@
         </span>
       </div>
       <div class="island"></div>
-      <iframe id="app" src="http://localhost:8081" title="WITHIN app preview"></iframe>
+      <iframe id="app" title="WITHIN app preview"></iframe>
       <div class="home"></div>
     </div>
   </div>
@@ -161,5 +161,17 @@
   }
   setInterval(syncTheme, 400);
 </script>
+  <script>
+    // Defaults to the origin serving this page, so the harness works against
+    // the Expo dev server and an exported build alike. ?src= overrides it.
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var src = params.get('src') || (location.origin + '/');
+      var frame = document.getElementById('app');
+      frame.src = src;
+      var reload = document.getElementById('reload');
+      if (reload) reload.addEventListener('click', function () { frame.src = src; });
+    })();
+  </script>
 </body>
 </html>
