@@ -45,8 +45,10 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
         tension: isOneAway ? 150 : 90,
       }),
       Animated.timing(opacity, { toValue: 1, duration: 120, useNativeDriver: true }),
+      // Kept low on purpose: a heavy full-screen wash turned the whole board
+      // tan/muddy. The rings, emoji and label carry the moment instead.
       Animated.timing(glow, {
-        toValue: isOneAway ? 0.5 : 0.32,
+        toValue: isOneAway ? 0.26 : 0.15,
         duration: 140,
         useNativeDriver: true,
       }),

@@ -48,26 +48,32 @@ export const proximityColors = {
     dark: '#2563EB',
     intense: '#1230C4',
   },
+  // Deliberately coral→red rather than amber→red. Brown *is* dark desaturated
+  // orange, so any amber hue turns brown once it's dimmed or laid over a dark
+  // background. Keeping the green and blue channels close together holds these
+  // in the red family at every opacity, on either theme.
   above: {
-    light: '#FBC38E',
-    medium: '#F5913C',
-    dark: '#ED5F22',
-    intense: '#D01C1C',
+    light: '#FFB3A7',
+    medium: '#FF8A75',
+    dark: '#F4453F',
+    intense: '#E01B1B',
   },
   correct: '#22A559',
 };
 
 /**
- * Tiles are drawn translucent over the app background rather than as solid
- * blocks. Opacity climbs as the guess closes in, so distant guesses recede and
- * only the guess that matters carries real colour — the board reads much
- * calmer while "am I getting warmer?" stays obvious.
+ * Fill opacity per tier. The far tiers are deliberately 0 — a warm hue at low
+ * opacity loses most of its saturation and the eye reads the result as brown,
+ * which no amount of hue tuning fixes. So distant guesses get no fill at all
+ * and carry their colour in a full-saturation accent bar instead; only the
+ * close tiers, which stay saturated enough to read as true red or blue, are
+ * filled. The board stays calm and brown never appears.
  */
 const TIER_ALPHA: Record<string, number> = {
-  light: 0.22,
-  medium: 0.34,
-  dark: 0.48,
-  intense: 0.62,
+  light: 0,
+  medium: 0,
+  dark: 0.5,
+  intense: 0.72,
 };
 
 function withAlpha(hex: string, alpha: number): string {
@@ -80,15 +86,26 @@ function withAlpha(hex: string, alpha: number): string {
 
 
 export const feedbackColors = {
-  within10: '#F5A524',
+  within10: '#FFA51F',
   oneAway: '#E8452C',
   correct: '#22A559',
 };
 
-export function getTileColor(direction: 'below' | 'above' | 'correct', tier: string): string {
-  // The winning tile stays fully opaque — it's the payoff, it should shout.
+/** Full-saturation colour for the tier — used for the accent bar and labels. */
+export function getTileAccent(direction: 'below' | 'above' | 'correct', tier: string): string {
   if (direction === 'correct') return proximityColors.correct;
   const scale = direction === 'below' ? proximityColors.below : proximityColors.above;
-  const base = (scale as Record<string, string>)[tier] ?? scale.light;
-  return withAlpha(base, TIER_ALPHA[tier] ?? TIER_ALPHA.light);
+  return (scale as Record<string, string>)[tier] ?? scale.light;
+}
+
+/**
+ * Tile fill. Returns null for the far tiers, meaning "use the neutral surface"
+ * — see TIER_ALPHA for why they aren't tinted.
+ */
+export function getTileFill(direction: 'below' | 'above' | 'correct', tier: string): string | null {
+  // The winning tile stays fully opaque — it's the payoff, it should shout.
+  if (direction === 'correct') return proximityColors.correct;
+  const alpha = TIER_ALPHA[tier] ?? 0;
+  if (alpha === 0) return null;
+  return withAlpha(getTileAccent(direction, tier), alpha);
 }

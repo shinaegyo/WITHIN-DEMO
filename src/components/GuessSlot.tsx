@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { getBandLabel } from '../game/proximity';
 import { GuessResult } from '../game/types';
-import { getTileColor } from '../theme/colors';
+import { getTileAccent, getTileFill } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -15,7 +15,9 @@ const slotBase = {
   borderRadius: 14,
   flexDirection: 'row',
   alignItems: 'center',
-  paddingHorizontal: 16,
+  paddingLeft: 20,
+  paddingRight: 16,
+  overflow: 'hidden',
 } as const;
 
 export function EmptySlot({ attemptNumber }: { attemptNumber: number }) {
@@ -41,9 +43,15 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
     }).start();
   }, [anim]);
 
-  // Tiles are translucent over the app background, so normal theme text stays
-  // legible on every tier. The solid winning tile is the one exception.
-  const ink = result.direction === 'correct' ? '#FFFFFF' : colors.text;
+  const accent = getTileAccent(result.direction, result.tier);
+  const fill = getTileFill(result.direction, result.tier);
+
+  // Filled tiles are saturated enough to carry white; unfilled ones sit on the
+  // neutral surface and use normal theme text.
+  const ink = fill ? '#FFFFFF' : colors.text;
+  // On an unfilled tile the accent is the only colour, so it does the work of
+  // signalling direction and closeness.
+  const bandInk = fill ? '#FFFFFF' : accent;
   const arrow = result.direction === 'correct' ? '✓' : result.direction === 'below' ? '▲' : '▼';
   const arrowLabel =
     result.direction === 'correct'
@@ -57,7 +65,7 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
       style={[
         styles.slot,
         {
-          backgroundColor: getTileColor(result.direction, result.tier),
+          backgroundColor: fill ?? colors.surface,
           opacity: anim,
           transform: [
             { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) },
@@ -66,10 +74,11 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
         },
       ]}
     >
-      <Text style={[styles.attemptLabelFilled, { color: ink, opacity: 0.7 }]}>#{attemptNumber}</Text>
+      <View style={[styles.accentBar, { backgroundColor: accent }]} />
+      <Text style={[styles.attemptLabelFilled, { color: ink, opacity: 0.65 }]}>#{attemptNumber}</Text>
       <Text style={[styles.guessText, { color: ink }]}>{result.guess}</Text>
-      <Text style={[styles.band, { color: ink, opacity: 0.9 }]}>{getBandLabel(result)}</Text>
-      <Text style={[styles.arrow, { color: ink }]} accessibilityLabel={arrowLabel}>
+      <Text style={[styles.band, { color: bandInk }]}>{getBandLabel(result)}</Text>
+      <Text style={[styles.arrow, { color: bandInk }]} accessibilityLabel={arrowLabel}>
         {arrow}
       </Text>
     </Animated.View>
@@ -80,6 +89,15 @@ const styles = StyleSheet.create({
   slot: slotBase,
   empty: {
     borderWidth: 1.5,
+  },
+  // Full-saturation stripe: the one element that never dims, so direction and
+  // closeness stay readable even on the unfilled tiles.
+  accentBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
   },
   attemptLabel: {
     fontSize: 12,

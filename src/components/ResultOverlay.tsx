@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { scoreForGame } from '../game/scoring';
 import { GameStatus } from '../game/types';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -57,9 +58,19 @@ export function ResultOverlay({ status, answer, attemptsUsed, maxAttempts, onRes
         >
           {isWin ? 'CORRECT!' : 'OUT OF ATTEMPTS'}
         </Text>
+
+        <Text
+          style={[styles.points, { color: isWin ? feedbackColors.correct : colors.textMuted }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
+          {scoreForGame(isWin, attemptsUsed)} POINTS
+        </Text>
+
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
           {isWin
-            ? `You found it in ${attemptsUsed} of ${maxAttempts} attempts.`
+            ? `Solved in ${attemptsUsed} ${attemptsUsed === 1 ? 'attempt' : 'attempts'}`
             : `The number was ${answer}.`}
         </Text>
         <Pressable
@@ -104,10 +115,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
+  points: {
+    fontSize: 40,
+    fontFamily: fonts.logo,
+    letterSpacing: -0.5,
+    marginTop: 2,
+  },
   subtitle: {
     fontSize: 15,
     fontFamily: fonts.medium,
     textAlign: 'center',
+    marginTop: 4,
     marginBottom: 24,
   },
   button: {
