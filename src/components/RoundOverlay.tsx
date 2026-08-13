@@ -143,7 +143,7 @@ export function RoundOverlay({
         {eliminated && canRetry && (
           <>
             <Text style={[styles.sub, { color: colors.textMuted, marginTop: 12 }]}>
-              You keep your {game.totalScore} points. Watch an ad for another go at round{' '}
+              You keep your {game.totalScore} points. Take another go at round{' '}
               {game.currentRound}: the round won't score and today won't count toward your streak,
               but you can finish the day and still place on the leaderboard.
             </Text>
@@ -151,9 +151,11 @@ export function RoundOverlay({
               style={({ pressed }) => [styles.primary, { backgroundColor: colors.accent, opacity: pressed ? 0.88 : 1 }]}
               onPress={onRetry}
             >
-              {/* Stubbed: grants the retry immediately. Swapping in a real
-                  rewarded ad only changes what happens before onRetry runs. */}
-              <Text style={styles.primaryText}>Watch ad to retry (0 points)</Text>
+              {/* No ad is served yet, so the copy doesn't promise one — a
+                  button that offers an ad and then silently skips it reads as
+                  broken. Wiring up a real rewarded ad changes what happens
+                  before onRetry runs, and this label goes back to naming it. */}
+              <Text style={styles.primaryText}>Retry this round (0 points)</Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [styles.secondary, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
