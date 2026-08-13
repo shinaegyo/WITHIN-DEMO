@@ -10,6 +10,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
+import { loadLeaderboard } from '../lib/api';
 import { MAX_DAILY_SCORE } from '../game/scoring';
 
 interface Props {
@@ -28,6 +29,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
+  const [rank, setRank] = useState<number | null>(null);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -37,6 +39,28 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
     const id = setInterval(() => setRemaining(msUntilLocalMidnight()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // The daily leaderboard only lists players who have finished all three
+  // rounds, so there is no rank to ask for before then. Stays null if the
+  // player is past the fetched page rather than showing a wrong number.
+  const dayOver = !!game && game.dayStatus !== 'playing';
+  useEffect(() => {
+    if (!dayOver) {
+      setRank(null);
+      return;
+    }
+    let cancelled = false;
+    loadLeaderboard()
+      .then((board) => {
+        if (!cancelled) setRank(board.entries.find((e) => e.isMe)?.rank ?? null);
+      })
+      .catch(() => {
+        /* the rank is a nicety; a failure here shouldn't disturb the screen */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [dayOver, game?.totalScore]);
 
   if (phase === 'loading') {
     return (
@@ -109,6 +133,13 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
         </Pressable>
       </View>
 
+      {rank !== null && (
+        <View style={styles.rankRow}>
+          <Text style={[styles.rankLabel, { color: colors.textMuted }]}>TODAY'S RANK</Text>
+          <Text style={[styles.rankValue, { color: colors.text }]}>#{rank}</Text>
+        </View>
+      )}
+
       <View style={styles.body}>
         {started ? (
           <>
@@ -156,9 +187,14 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
           </>
         )}
 
+        {/* Share is sized to its words. Stretched across the screen it left a
+            wide gap either side of two short words, which read as an empty bar
+            rather than a button. Play still spans, because starting the day is
+            the one thing the screen is for. */}
         <Pressable
           style={({ pressed }) => [
             styles.primary,
+            finished ? styles.primaryHug : styles.primaryWide,
             { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
           ]}
           onPress={onPrimary}
@@ -197,9 +233,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
                 { color: colors.textMuted, opacity: practiceLeft === 0 ? 0.5 : 1 },
               ]}
             >
-              {practiceLeft > 0
-                ? `Play a practice round · ${practiceLeft} left`
-                : 'No practice rounds left today'}
+              {practiceLeft > 0 ? 'Practice' : 'No practice left today'}
             </Text>
           </Pressable>
         )}
@@ -279,11 +313,11 @@ const styles = StyleSheet.create({
   },
   primary: {
     borderRadius: 15,
-    paddingVertical: 16,
-    alignSelf: 'stretch',
     alignItems: 'center',
     marginTop: 22,
   },
+  primaryWide: { alignSelf: 'stretch', paddingVertical: 16 },
+  primaryHug: { alignSelf: 'center', paddingVertical: 13, paddingHorizontal: 30 },
   primaryText: { fontSize: 15.5, fontFamily: fonts.extraBold },
   note: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 8 },
   statRow: {
@@ -302,6 +336,9 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 19, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
   practice: { marginTop: 18, paddingVertical: 6 },
+  rankRow: { alignItems: 'center', marginTop: 10 },
+  rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
+  rankValue: { fontSize: 22, fontFamily: fonts.extraBold, marginTop: 1 },
   practiceText: { fontSize: 12.5, fontFamily: fonts.bold, textDecorationLine: 'underline' },
   footer: {
     alignItems: 'center',
