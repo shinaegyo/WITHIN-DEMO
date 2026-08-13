@@ -103,8 +103,11 @@ export function HomeScreen({
 
   const byRound = new Map(game.rounds.map((r) => [r.round, r]));
 
+  // Only days played before rounds stopped ending the day can be eliminated.
+  // Nothing new produces this, but showing such a day as a normal finish would
+  // claim all three rounds were played when only one was.
   const status = eliminated
-    ? `ELIMINATED ON ROUND ${game.currentRound}`
+    ? `KNOCKED OUT ON ROUND ${game.currentRound}`
     : finished
       ? 'ALL 3 ROUNDS DONE'
       : 'TODAY SO FAR';
