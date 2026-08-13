@@ -1,29 +1,38 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { hasOnboarded, markOnboarded } from '../lib/api';
 
 /**
- * Whether this device has been walked through the game.
+ * Whether this player has been walked through the game.
  *
- * Held on the device rather than the server because it describes the app's
- * behaviour, not the player's record. The gate that matters is checked
- * alongside it: someone with days already played is never shown the tutorial,
- * so signing in on a second phone does not restart it.
+ * The account is the answer, because being taught is a fact about the person:
+ * it follows them to a new phone, and it does not depend on guessing from how
+ * much they have played. The device flag is only a fallback for when the server
+ * cannot be reached, where showing the tutorial twice beats hiding it from
+ * someone who has never seen it.
  */
 
 const KEY = 'within.intro';
 
 export async function hasSeenIntro(): Promise<boolean> {
   try {
-    return (await AsyncStorage.getItem(KEY)) === 'done';
+    const onboarded = await hasOnboarded();
+    if (onboarded) AsyncStorage.setItem(KEY, 'done').catch(() => {});
+    return onboarded;
   } catch {
-    // Storage being unavailable should not trap someone in a tutorial loop.
-    return true;
+    // Server unreachable: fall back to whatever this device remembers.
+    try {
+      return (await AsyncStorage.getItem(KEY)) === 'done';
+    } catch {
+      return true;
+    }
   }
 }
 
 export async function markIntroSeen(): Promise<void> {
+  AsyncStorage.setItem(KEY, 'done').catch(() => {});
   try {
-    await AsyncStorage.setItem(KEY, 'done');
+    await markOnboarded();
   } catch {
-    /* nothing to do; worst case they see it once more */
+    /* the device flag still covers this session */
   }
 }

@@ -292,6 +292,19 @@ export async function loadFriendsLeaderboard(): Promise<LeaderboardEntry[]> {
   }));
 }
 
+/** Whether this account has already been shown the rules. */
+export async function hasOnboarded(): Promise<boolean> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('intro_state');
+  return !!unwrap<any>(data, error).onboarded;
+}
+
+export async function markOnboarded(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('mark_onboarded');
+  unwrap<any>(data, error);
+}
+
 export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });

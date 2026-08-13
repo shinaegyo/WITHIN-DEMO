@@ -78,10 +78,10 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
     if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left });
   };
 
-  // Shown once, and only to someone who has genuinely never played: the device
-  // flag alone would restart the tutorial for an existing player signing in on
-  // a new phone.
-  const needsIntro = introSeen === false && !!game && game.stats.gamesPlayed === 0;
+  // The account records whether these rules have been shown, so no guessing
+  // from how much someone has played — that heuristic sent players who had
+  // never seen the rules straight past them.
+  const needsIntro = introSeen === false;
 
   const finishIntro = () => {
     markIntroSeen();
