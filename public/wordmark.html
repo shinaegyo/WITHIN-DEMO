@@ -1,0 +1,96 @@
+<!doctype html>
+<!--
+  SCRATCH — wordmark colour options. Not part of the app; delete once decided.
+  Each option is shown on both themes because a tint that reads well on the
+  dark background is usually too pale on the light one, and vice versa.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WITHIN — wordmark colours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#E9ECF1;font-family:'Archivo',system-ui,sans-serif;padding:26px;color:#15161A}
+  h2{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#5A6472;margin-bottom:3px}
+  .sub{font-size:12px;color:#8A93A0;margin-bottom:14px}
+  section{margin-bottom:26px}
+  .grid{display:flex;gap:14px;flex-wrap:wrap}
+
+  .card{width:262px;border-radius:20px;padding:22px 18px 18px;text-align:center;position:relative}
+  .dark{background:#0E0F13}
+  .light{background:#F7F8FA;border:1px solid #DDE1E6}
+
+  .tag{position:absolute;top:10px;left:12px;font-size:9px;font-weight:800;letter-spacing:1px;
+       padding:3px 7px;border-radius:20px;background:rgba(127,127,127,.22);color:#9aa3ad}
+
+  .pts{font-family:'Archivo';font-weight:800;font-size:44px;letter-spacing:-1.5px;line-height:1.05}
+  .dark .pts{color:#F5F5F7}
+  .light .pts{color:#15161A}
+  .ptsl{font-size:8px;font-weight:700;letter-spacing:1.6px;margin-top:1px}
+  .dark .ptsl{color:#9CA3AF}
+  .light .ptsl{color:#6B7280}
+
+  .mark{font-family:'Archivo Black';font-size:42px;letter-spacing:-1.3px;margin-top:14px;line-height:1}
+  .tag2{font-size:10px;font-weight:500;margin-top:3px}
+  .dark .tag2{color:#9CA3AF}
+  .light .tag2{color:#6B7280}
+
+  .pill{display:inline-flex;align-items:baseline;gap:6px;border-radius:99px;padding:6px 13px;margin-top:14px;border:1px solid}
+  .dark .pill{border-color:#2E3138;background:#1A1C22}
+  .light .pill{border-color:#DDE1E6;background:#fff}
+  .pv{font-family:'Archivo';font-weight:800;font-size:14px}
+  .dark .pv{color:#F5F5F7}
+  .light .pv{color:#15161A}
+  .pl{font-size:8px;font-weight:700;letter-spacing:1.1px}
+  .dark .pl{color:#9CA3AF}
+  .light .pl{color:#6B7280}
+
+  .note{font-size:11px;color:#6B7280;width:262px;margin-top:6px;line-height:1.45}
+</style>
+</head>
+<body>
+
+<section>
+  <h2>Dark mode</h2>
+  <div class="sub">Same layout, only the wordmark colour changes.</div>
+  <div class="grid" id="dark"></div>
+</section>
+
+<section>
+  <h2>Light mode</h2>
+  <div class="sub">Each option uses a deeper shade here — the dark-mode tint would be too pale on white.</div>
+  <div class="grid" id="light"></div>
+</section>
+
+<script>
+  const OPTIONS = [
+    { name: '0 · CURRENT',   dark: '#F5F5F7', light: '#15161A', note: 'Plain text colour. Maximum contrast, no personality.' },
+    { name: '1 · INDIGO',    dark: '#818CF8', light: '#4F46E5', note: 'Your existing accent, already used for buttons. Most cohesive with what is on screen.' },
+    { name: '2 · ELECTRIC',  dark: '#5B92DF', light: '#2563EB', note: 'Pulled from the "too low" tile family, so it ties the brand to the gameplay palette.' },
+    { name: '3 · GREEN',     dark: '#3DD07A', light: '#16A34A', note: 'The winning colour. Positive, but may pre-empt the CORRECT moment.' },
+    { name: '4 · CORAL',     dark: '#FF8A75', light: '#E5412F', note: 'From the "too high" family. Warm and energetic, slightly alarming for a logo.' },
+    { name: '5 · AMBER',     dark: '#FFB020', light: '#C2740A', note: 'Ties to WITHIN 10. Strong on dark, muddies toward brown on light.' },
+    { name: '6 · STEEL',     dark: '#8FA3B8', light: '#5A6B7D', note: 'Barely a colour — a cool grey. The most subtle option by far.' },
+  ];
+
+  const render = (mode) => OPTIONS.map(o => `
+    <div>
+      <div class="card ${mode}">
+        <span class="tag">${o.name}</span>
+        <div class="pts">101,000</div>
+        <div class="ptsl">TOTAL POINTS</div>
+        <div class="mark" style="color:${o[mode]}">WITHIN</div>
+        <div class="tag2">One number. Seven guesses.</div>
+        <div class="pill"><span class="pv">7</span><span class="pl">DAY STREAK</span></div>
+      </div>
+      ${mode === 'dark' ? `<div class="note">${o.note}</div>` : ''}
+    </div>`).join('');
+
+  document.getElementById('dark').innerHTML = render('dark');
+  document.getElementById('light').innerHTML = render('light');
+</script>
+</body>
+</html>

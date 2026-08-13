@@ -82,13 +82,19 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
         >
           <Text style={[styles.menuIcon, { color: colors.text }]}>☰</Text>
         </Pressable>
-        <Pressable
-          style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
-          onPress={toggle}
-          accessibilityLabel="Toggle light/dark mode"
-        >
-          <Text style={styles.iconText}>{mode === 'dark' ? '☀' : '☾'}</Text>
-        </Pressable>
+        <View style={styles.headerRight}>
+          <View style={[styles.streakPill, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Text style={[styles.streakValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
+            <Text style={[styles.streakLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
+          </View>
+          <Pressable
+            style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
+            onPress={toggle}
+            accessibilityLabel="Toggle light/dark mode"
+          >
+            <Text style={styles.iconText}>{mode === 'dark' ? '☀' : '☾'}</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.body}>
@@ -109,11 +115,6 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
 
         <Text style={[styles.logo, { color: colors.text }]}>WITHIN</Text>
         <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
-
-        <View style={[styles.streakPill, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-          <Text style={[styles.streakValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
-          <Text style={[styles.streakLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
-        </View>
 
         {finished ? (
           <Text style={[styles.doneTitle, { color: colors.text }]}>
@@ -212,20 +213,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.medium,
     marginTop: 2,
-  },
-  streakPill: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-    borderWidth: 1,
-    borderRadius: 99,
-    paddingVertical: 9,
-    paddingHorizontal: 18,
-    marginTop: 22,
     marginBottom: 34,
   },
-  streakValue: { fontSize: 20, fontFamily: fonts.extraBold },
-  streakLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+  },
+  streakValue: { fontSize: 16, fontFamily: fonts.extraBold },
+  streakLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.1 },
   playButton: {
     borderRadius: 16,
     paddingVertical: 18,
