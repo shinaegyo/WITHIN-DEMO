@@ -67,6 +67,9 @@ export function LeaderboardScreen() {
               {item.name}
               {item.isMe ? '  (you)' : ''}
             </Text>
+            {/* The same total means something different after four days than
+                after four hundred. */}
+            <Text style={[styles.meta, { color: colors.textMuted }]}>{item.daysPlayed}d</Text>
             <Text style={[styles.score, { color: colors.text }]}>{item.score}</Text>
           </View>
         )}
