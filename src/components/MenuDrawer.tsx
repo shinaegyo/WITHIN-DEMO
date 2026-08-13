@@ -104,9 +104,9 @@ const styles = StyleSheet.create({
     elevation: 16,
   },
   brand: {
-    fontSize: 22,
+    fontSize: 32,
     fontFamily: fonts.logo,
-    letterSpacing: -0.5,
+    letterSpacing: -1,
     paddingHorizontal: 14,
     marginBottom: 18,
   },

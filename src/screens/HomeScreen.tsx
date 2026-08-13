@@ -168,9 +168,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   logo: {
-    fontSize: 46,
+    fontSize: 64,
     fontFamily: fonts.logo,
-    letterSpacing: -1,
+    letterSpacing: -2,
   },
   tagline: {
     fontSize: 14,
