@@ -15,6 +15,7 @@ interface Props {
   submit: SubmitResult | null;
   onNextRound: () => void;
   onRetry: () => void;
+  onConcede: () => void;
   onExit: () => void;
 }
 
@@ -22,7 +23,7 @@ interface Props {
  * Shown between rounds and at the end of the day. Three shapes:
  * round won with more to play, day complete, and eliminated.
  */
-export function RoundOverlay({ game, submit, onNextRound, onRetry, onExit }: Props) {
+export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, onExit }: Props) {
   const { colors } = useTheme();
   const scale = useRef(new Animated.Value(0.7)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -53,6 +54,9 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onExit }: Pro
   const attemptsCut =
     !!submit && submit.nextAttemptsAllowed !== null && submit.nextAttemptsAllowed < submit.attemptsAllowed;
 
+  // Retry is still open, so the number must stay hidden — showing it here is
+  // what let players read the answer and retype it for full marks.
+  const canRetry = game.canRetry;
   const title = eliminated ? 'OUT OF ATTEMPTS' : roundWon ? 'CORRECT!' : 'ROUND OVER';
 
   return (
@@ -79,11 +83,16 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onExit }: Pro
             <Text style={[styles.sub, { color: colors.textMuted }]}>
               Round {game.round.round} solved in {game.round.attemptsUsed}{' '}
               {game.round.attemptsUsed === 1 ? 'attempt' : 'attempts'}
+              {game.round.retried ? ' · retried, so no points' : ''}
             </Text>
           </>
-        ) : (
+        ) : game.round.answer !== null ? (
           <Text style={[styles.sub, { color: colors.textMuted }]}>
             The number was {game.round.answer}.
+          </Text>
+        ) : (
+          <Text style={[styles.sub, { color: colors.textMuted }]}>
+            Round {game.round.round} got away from you.
           </Text>
         )}
 
@@ -111,11 +120,11 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onExit }: Pro
           </Pressable>
         )}
 
-        {eliminated && (
+        {eliminated && canRetry && (
           <>
             <Text style={[styles.sub, { color: colors.textMuted, marginTop: 12 }]}>
-              You keep the {game.totalScore} points you've earned. Watch an ad to retry round{' '}
-              {game.currentRound}.
+              You keep your {game.totalScore} points. Watch an ad for another go at round{' '}
+              {game.currentRound} — it won't score, but it keeps your day alive.
             </Text>
             <Pressable
               style={({ pressed }) => [styles.primary, { backgroundColor: colors.accent, opacity: pressed ? 0.88 : 1 }]}
@@ -123,7 +132,13 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onExit }: Pro
             >
               {/* Stubbed: grants the retry immediately. Swapping in a real
                   rewarded ad only changes what happens before onRetry runs. */}
-              <Text style={styles.primaryText}>Watch ad to retry</Text>
+              <Text style={styles.primaryText}>Watch ad to retry (0 points)</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [styles.secondary, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+              onPress={onConcede}
+            >
+              <Text style={[styles.secondaryText, { color: colors.text }]}>End my day and show the number</Text>
             </Pressable>
           </>
         )}

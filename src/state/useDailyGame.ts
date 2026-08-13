@@ -6,6 +6,7 @@ import {
   devResetToday,
   loadDailyGame,
   messageFor,
+  giveUp,
   retryRound,
   submitGuess,
   SubmitResult,
@@ -27,6 +28,8 @@ export interface UseDailyGameResult {
   /** Moves to the next round after its summary has been dismissed. */
   advance: () => Promise<void>;
   retry: () => Promise<void>;
+  /** Stop for the day and reveal the answer. */
+  concede: () => Promise<void>;
   reload: () => void;
   /** Dev only — signs in as a new anonymous player. */
   startFreshTestPlayer: () => Promise<void>;
@@ -132,6 +135,11 @@ export function useDailyGame(): UseDailyGameResult {
     await load();
   }, [load]);
 
+  const concede = useCallback(async () => {
+    await giveUp();
+    await refresh();
+  }, [refresh]);
+
   const startFreshTestPlayer = useCallback(async () => {
     setPhase('loading');
     await signOutForTesting();
@@ -156,6 +164,7 @@ export function useDailyGame(): UseDailyGameResult {
     submit,
     advance,
     retry,
+    concede,
     reload: load,
     startFreshTestPlayer,
     resetToday,

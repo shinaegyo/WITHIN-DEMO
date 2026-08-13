@@ -23,7 +23,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const { colors, mode } = useTheme();
   const {
     phase, game, loadError, submitting, lastResult, lastSubmit,
-    submit, advance, retry, reload,
+    submit, advance, retry, concede, reload,
   } = useDailyGameContext();
 
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
@@ -132,6 +132,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             advance();
           }}
           onRetry={retry}
+          onConcede={concede}
           onExit={onExit}
         />
       )}

@@ -87,12 +87,14 @@ export function HowToPlayScreen() {
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         Cut it fine and it costs you. Solve a round on your very last attempt and the next round
-        gives you one attempt fewer: 7, then 6, then 5, then 4. It never drops below 3. Solve with
-        even one attempt to spare and your limit stays exactly where it is.
+        gives you one attempt fewer: 7, then 6, then 5. Solve with even one attempt to spare and
+        your limit stays exactly where it is.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Run out of attempts and your day ends there. You keep the points you've already earned, and
-        you can watch an ad to retry the round you lost.
+        Run out of attempts and your day ends there. You keep the points you've already earned.
+        You can watch an ad for another go at the round you lost — it scores nothing, but it lets
+        you finish the day and keep your streak. The number stays hidden until you either solve it
+        or choose to stop.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>

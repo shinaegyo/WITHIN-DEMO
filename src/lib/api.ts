@@ -26,6 +26,8 @@ export interface RoundSummary {
   score: number;
   attemptsUsed: number;
   attemptsAllowed: number;
+  /** True once replayed after an elimination — such a round scores nothing. */
+  retried: boolean;
 }
 
 export interface CurrentRound {
@@ -37,6 +39,7 @@ export interface CurrentRound {
   clue1: string;
   clue2: string | null;
   answer: number | null;
+  retried: boolean;
   guesses: GuessResult[];
 }
 
@@ -47,6 +50,9 @@ export interface DailyGame {
   totalRounds: number;
   totalScore: number;
   retriesUsed: number;
+  /** The player chose to stop; only then is the answer shown. */
+  gaveUp: boolean;
+  canRetry: boolean;
   round: CurrentRound;
   rounds: RoundSummary[];
   stats: PlayerStats;
@@ -97,6 +103,7 @@ function toRound(raw: any): CurrentRound {
     clue1: raw.clue1,
     clue2: raw.clue2 ?? null,
     answer: raw.answer ?? null,
+    retried: !!raw.retried,
     guesses: (raw.guesses ?? []).map(toGuessResult),
   };
 }
@@ -120,6 +127,8 @@ export async function loadDailyGame(): Promise<DailyGame> {
     totalRounds: raw.totalRounds ?? 3,
     totalScore: raw.totalScore ?? 0,
     retriesUsed: raw.retriesUsed ?? 0,
+    gaveUp: !!raw.gaveUp,
+    canRetry: !!raw.canRetry,
     round: toRound(raw.round),
     rounds: raw.rounds ?? [],
     stats: raw.stats,
@@ -136,6 +145,8 @@ export interface SubmitResult {
   attemptsUsed: number;
   attemptsAllowed: number;
   nextAttemptsAllowed: number | null;
+  retried: boolean;
+  canRetry: boolean;
   clue2: string | null;
   answer: number | null;
 }
@@ -154,6 +165,8 @@ export async function submitGuess(guess: number): Promise<SubmitResult> {
     attemptsUsed: raw.attemptsUsed,
     attemptsAllowed: raw.attemptsAllowed,
     nextAttemptsAllowed: raw.nextAttemptsAllowed ?? null,
+    retried: !!raw.retried,
+    canRetry: !!raw.canRetry,
     clue2: raw.clue2 ?? null,
     answer: raw.answer ?? null,
   };
@@ -166,6 +179,12 @@ export async function submitGuess(guess: number): Promise<SubmitResult> {
  * RetryOverlay. The server only checks that there is something to retry, so
  * swapping in a real ad later needs no change here.
  */
+/** Ends the day deliberately, which is what makes the answer safe to show. */
+export async function giveUp(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('give_up');
+  return !error && !data?.error;
+}
+
 export async function retryRound(): Promise<boolean> {
   const { data, error } = await supabase.rpc('retry_round');
   return !error && !data?.error;
