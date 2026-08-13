@@ -36,7 +36,7 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 
 function Screens() {
   const { colors, mode } = useTheme();
-  const { startFreshTestPlayer, reload } = useDailyGameContext();
+  const { startFreshTestPlayer, reload, game } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
@@ -79,7 +79,14 @@ function Screens() {
           )}
         </Stack.Screen>
 
-        <Stack.Screen name="Game" options={{ headerShown: false }}>
+        <Stack.Screen
+          name="Game"
+          options={{
+            headerShown: false,
+            // Swiping back would otherwise bypass the in-app rule above.
+            gestureEnabled: !game || game.attemptsUsed === 0,
+          }}
+        >
           {({ navigation }) => <GameScreen onExit={() => navigation.navigate('Home')} />}
         </Stack.Screen>
 

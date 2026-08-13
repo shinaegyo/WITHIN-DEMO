@@ -1,15 +1,24 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { Wordmark } from './Wordmark';
 
-export function Header() {
+/** `onBack` is only supplied while a game can still be abandoned — see GameScreen. */
+export function Header({ onBack }: { onBack?: () => void }) {
   const { colors, mode, toggle } = useTheme();
 
   return (
     <View style={styles.wrap}>
-      <Wordmark size={24} />
+      <View style={styles.left}>
+        {onBack && (
+          <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Back to home">
+            <Text style={[styles.back, { color: colors.textMuted }]}>‹</Text>
+          </Pressable>
+        )}
+        <Wordmark size={24} />
+      </View>
+
       <Pressable
         style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
         onPress={toggle}
@@ -27,10 +36,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  title: {
-    fontSize: 24,
-    fontFamily: fonts.logo,
-    letterSpacing: -0.5,
+  left: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  back: {
+    fontSize: 30,
+    lineHeight: 32,
+    fontFamily: fonts.bold,
   },
   iconButton: {
     width: 40,

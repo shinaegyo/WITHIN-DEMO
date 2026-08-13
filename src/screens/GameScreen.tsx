@@ -66,7 +66,9 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         keyboardVerticalOffset={12}
       >
         <View style={styles.content}>
-          <Header />
+          {/* Once a guess is in, the day is committed — leaving must not look
+              like a way to undo it. */}
+          <Header onBack={game.attemptsUsed === 0 ? onExit : undefined} />
           <ClueCard clue1={game.clue1} clue2={game.clue2} clue2Unlocked={!!game.clue2} />
           <View style={styles.boardWrap}>
             <GuessBoard guesses={game.guesses} maxAttempts={game.maxAttempts} />

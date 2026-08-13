@@ -11,7 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 const slotBase = {
   flex: 1,
   minHeight: 44,
-  maxHeight: 66,
+  maxHeight: 84,
   borderRadius: 14,
   flexDirection: 'row',
   alignItems: 'center',

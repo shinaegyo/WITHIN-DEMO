@@ -47,7 +47,7 @@ export function NumberInput({ disabled, onSubmit }: Props) {
             setValue(text.replace(/[^0-9]/g, ''));
             if (error) setError(null);
           }}
-          placeholder={`${MIN_NUMBER}-${MAX_NUMBER}`}
+          placeholder="Enter number"
           placeholderTextColor={colors.textMuted}
           keyboardType="number-pad"
           maxLength={4}
