@@ -64,6 +64,19 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     return () => clearTimeout(t);
   }, [roundOver, lastResult]);
 
+  // Leaving the game with a round already solved keeps the finished round in
+  // state while the day has moved on, so coming back showed the old board and
+  // its summary again. Entering the screen re-reads the server whenever the two
+  // disagree.
+  const stale = !!game && game.dayStatus === 'playing' && game.round.round !== game.currentRound;
+  useEffect(() => {
+    // advance() rather than a plain refetch: it also clears the finished
+    // round's result, which would otherwise pop its summary card up again.
+    if (stale) advance();
+    // Only on entry: mid-round the two agree, so this does not re-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const clearFeedback = useCallback(() => setFeedbackTrigger(null), []);
 
   const handleSubmit = useCallback(
