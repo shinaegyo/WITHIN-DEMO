@@ -89,6 +89,9 @@ export function useDailyGame(): UseDailyGameResult {
             ? {
                 ...prev,
                 dayStatus: res.dayStatus,
+                // The server advances the round on a win; without copying it
+                // across, the summary still names the round just finished.
+                currentRound: res.currentRound,
                 totalScore: res.totalScore,
                 round: {
                   ...prev.round,
