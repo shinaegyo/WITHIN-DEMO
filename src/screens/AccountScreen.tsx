@@ -181,7 +181,7 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
               <TextInput
                 value={code}
                 onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
-                placeholder="Code from your email"
+                placeholder="6-digit code"
                 placeholderTextColor={colors.textMuted}
                 keyboardType="number-pad"
                 maxLength={10}
@@ -202,7 +202,7 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
                     () => startLinkEmail(email),
                     () => {
                       setCodeSent(true);
-                      setNotice('Check your email for your code.');
+                      setNotice('Check your email for your 6-digit code.');
                     },
                   )
                 }
@@ -265,7 +265,7 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
               onPress={() =>
                 run(() => startSignIn(email), () => {
                   setCodeSent(true);
-                  setNotice('Check your email for your code.');
+                  setNotice('Check your email for your 6-digit code.');
                 })
               }
               style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
