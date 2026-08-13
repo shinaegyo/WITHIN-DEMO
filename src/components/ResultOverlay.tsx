@@ -68,8 +68,6 @@ export function ResultOverlay({
       )}
 
       <Animated.View style={[styles.card, { backgroundColor: colors.surface, opacity, transform: [{ scale }] }]}>
-        <Text style={styles.emoji}>{isWin ? '🎉' : '💔'}</Text>
-
         <Text
           style={[styles.title, { color: colors.text }]}
           numberOfLines={1}
@@ -160,10 +158,6 @@ const styles = StyleSheet.create({
     paddingVertical: 28,
     paddingHorizontal: 22,
     alignItems: 'center',
-  },
-  emoji: {
-    fontSize: 44,
-    marginBottom: 6,
   },
   title: {
     fontSize: 25,

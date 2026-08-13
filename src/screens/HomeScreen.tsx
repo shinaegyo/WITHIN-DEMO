@@ -57,7 +57,7 @@ export function HomeScreen({ onPlay, onOpenMenu }: Props) {
           onPress={toggle}
           accessibilityLabel="Toggle light/dark mode"
         >
-          <Text style={styles.iconText}>{mode === 'dark' ? '☀️' : '🌙'}</Text>
+          <Text style={styles.iconText}>{mode === 'dark' ? '☀' : '☾'}</Text>
         </Pressable>
       </View>
 
@@ -66,7 +66,6 @@ export function HomeScreen({ onPlay, onOpenMenu }: Props) {
         <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
 
         <View style={[styles.streakCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={styles.streakFlame}>🔥</Text>
           <Text style={[styles.streakValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
           <Text style={[styles.streakLabel, { color: colors.textMuted }]}>
             {game.stats.currentStreak === 1 ? 'DAY STREAK' : 'DAY STREAK'}
@@ -127,7 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuIcon: { fontSize: 19, fontFamily: fonts.bold },
-  iconText: { fontSize: 18 },
+  iconText: { fontSize: 17 },
   body: {
     flex: 1,
     alignItems: 'center',
@@ -153,12 +152,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     marginBottom: 30,
   },
-  streakFlame: { fontSize: 26 },
   streakValue: {
     fontSize: 46,
     fontFamily: fonts.logo,
     letterSpacing: -1,
-    marginTop: 2,
   },
   streakLabel: {
     fontSize: 10,

@@ -73,13 +73,13 @@ function Screens() {
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
         items={[
-          { icon: '❓', label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
-          { icon: '🏆', label: 'Leaderboard', soon: true },
-          { icon: '👤', label: 'Sign In', soon: true },
-          { icon: '📤', label: 'Share', soon: true },
-          { icon: '⚙️', label: 'Settings', soon: true },
+          { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
+          { label: 'Leaderboard', soon: true },
+          { label: 'Sign In', soon: true },
+          { label: 'Share', soon: true },
+          { label: 'Settings', soon: true },
           ...(__DEV__
-            ? [{ icon: '🧪', label: 'New test player (dev)', onPress: startFreshTestPlayer }]
+            ? [{ label: 'New test player (dev)', onPress: startFreshTestPlayer }]
             : []),
         ]}
       />

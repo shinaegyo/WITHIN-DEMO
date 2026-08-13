@@ -14,7 +14,7 @@ export function Header() {
         onPress={toggle}
         accessibilityLabel="Toggle light/dark mode"
       >
-        <Text style={styles.iconText}>{mode === 'dark' ? '☀️' : '🌙'}</Text>
+        <Text style={styles.iconText}>{mode === 'dark' ? '☀' : '☾'}</Text>
       </Pressable>
     </View>
   );
@@ -39,6 +39,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconText: {
-    fontSize: 18,
+    fontSize: 17,
   },
 });

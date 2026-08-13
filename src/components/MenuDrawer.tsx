@@ -4,7 +4,6 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 export interface MenuItem {
-  icon: string;
   label: string;
   onPress?: () => void;
   /** Shown greyed out with a note — for things not built yet. */
@@ -76,7 +75,6 @@ export function MenuDrawer({
                 { backgroundColor: pressed && !item.soon ? colors.surfaceAlt : 'transparent' },
               ]}
             >
-              <Text style={[styles.itemIcon, item.soon && styles.dim]}>{item.icon}</Text>
               <Text style={[styles.itemLabel, { color: colors.text }, item.soon && styles.dim]}>
                 {item.label}
               </Text>
@@ -115,12 +113,10 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
     paddingVertical: 15,
     paddingHorizontal: 14,
     borderRadius: 14,
   },
-  itemIcon: { fontSize: 19, width: 26, textAlign: 'center' },
   itemLabel: { flex: 1, fontSize: 16, fontFamily: fonts.semiBold },
   soon: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 0.8 },
   dim: { opacity: 0.4 },
