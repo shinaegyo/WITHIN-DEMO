@@ -92,6 +92,37 @@ export async function loadDailyGame(): Promise<DailyGame> {
   };
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  score: number;
+  attempts: number;
+  isMe: boolean;
+}
+
+export interface Leaderboard {
+  puzzleDate: string;
+  entries: LeaderboardEntry[];
+  totalPlayers: number;
+}
+
+export async function loadLeaderboard(): Promise<Leaderboard> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('daily_leaderboard', { p_limit: 50 });
+  const raw = unwrap<any>(data, error);
+  return {
+    puzzleDate: raw.puzzleDate,
+    totalPlayers: raw.totalPlayers ?? 0,
+    entries: (raw.entries ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      score: e.score,
+      attempts: e.attempts,
+      isMe: !!e.is_me,
+    })),
+  };
+}
+
 export interface SubmitResult {
   result: GuessResult;
   status: ServerStatus;

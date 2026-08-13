@@ -123,9 +123,13 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
             transform: [{ scale }, { translateX: shake }],
           }}
         >
-          <Text style={[styles.emoji, isOneAway && styles.emojiLarge]}>{isOneAway ? '😳' : '👀'}</Text>
+          {/* Typography carries the moment now — the rings, flash and shake
+              already provide the energy the emoji used to. */}
+          <Text style={[styles.kicker, isOneAway && styles.kickerLarge]}>
+            {isOneAway ? 'SO' : 'YOU\u2019RE'}
+          </Text>
           <Text style={[styles.label, isOneAway && styles.labelLarge]}>
-            {isOneAway ? 'ONE AWAY!' : 'WITHIN 10!'}
+            {isOneAway ? 'ONE AWAY' : 'WITHIN 10'}
           </Text>
         </Animated.View>
       </View>
@@ -144,16 +148,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: {
-    fontSize: 58,
-    marginBottom: 6,
+  kicker: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontFamily: fonts.bold,
+    letterSpacing: 5,
+    opacity: 0.85,
+    marginBottom: 2,
+    textShadowColor: 'rgba(0,0,0,0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
-  emojiLarge: {
-    fontSize: 78,
+  kickerLarge: {
+    fontSize: 20,
+    letterSpacing: 7,
   },
   label: {
     color: '#FFFFFF',
-    fontSize: 32,
+    fontSize: 40,
     fontFamily: fonts.logo,
     letterSpacing: 0.5,
     textShadowColor: 'rgba(0,0,0,0.45)',
@@ -161,6 +173,6 @@ const styles = StyleSheet.create({
     textShadowRadius: 10,
   },
   labelLarge: {
-    fontSize: 40,
+    fontSize: 52,
   },
 });

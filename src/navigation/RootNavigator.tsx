@@ -10,6 +10,7 @@ import { MenuDrawer } from '../components/MenuDrawer';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
+import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
@@ -20,6 +21,7 @@ export type RootStackParamList = {
   Home: undefined;
   Game: undefined;
   Practice: { remainingAfterThis: number };
+  Leaderboard: undefined;
   HowToPlay: undefined;
 };
 
@@ -92,6 +94,12 @@ function Screens() {
         </Stack.Screen>
 
         <Stack.Screen
+          name="Leaderboard"
+          component={LeaderboardScreen}
+          options={{ title: 'Today', headerBackTitle: 'Back' }}
+        />
+
+        <Stack.Screen
           name="HowToPlay"
           component={HowToPlayScreen}
           options={{ title: 'How to Play', headerBackTitle: 'Back' }}
@@ -103,7 +111,7 @@ function Screens() {
         onClose={() => setMenuOpen(false)}
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
-          { label: 'Leaderboard', soon: true },
+          { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
           { label: 'Sign In', soon: true },
           { label: 'Share', soon: true },
           { label: 'Settings', soon: true },
