@@ -116,13 +116,9 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
         </View>
 
         {finished ? (
-          <View style={styles.doneBlock}>
-            <Text style={[styles.doneTitle, { color: colors.text }]}>
-              {game.status === 'won' ? `Solved for ${game.score} points` : `Today's number was ${game.answer}`}
-            </Text>
-            <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
-            <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
-          </View>
+          <Text style={[styles.doneTitle, { color: colors.text }]}>
+            {game.status === 'won' ? `Solved for ${game.score} points` : `Today's number was ${game.answer}`}
+          </Text>
         ) : (
           <Pressable
             style={({ pressed }) => [
@@ -159,6 +155,13 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
           </Pressable>
         )}
       </View>
+
+      {finished && (
+        <View style={styles.footer}>
+          <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
+          <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -236,12 +239,15 @@ const styles = StyleSheet.create({
     fontFamily: fonts.logo,
     letterSpacing: 0.4,
   },
-  doneBlock: { alignItems: 'center', alignSelf: 'stretch' },
   doneTitle: {
     fontSize: 16,
     fontFamily: fonts.semiBold,
-    marginBottom: 16,
     textAlign: 'center',
+  },
+  footer: {
+    alignItems: 'center',
+    paddingBottom: 18,
+    paddingHorizontal: 28,
   },
   nextLabel: {
     fontSize: 10,
@@ -249,7 +255,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   countdown: {
-    fontSize: 40,
+    fontSize: 34,
     fontFamily: fonts.extraBold,
     letterSpacing: 1,
     marginTop: 2,
