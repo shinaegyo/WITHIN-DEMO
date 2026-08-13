@@ -38,7 +38,7 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 
 function Screens({ username, onProfileChanged }: { username: string; onProfileChanged: () => void }) {
   const { colors, mode } = useTheme();
-  const { startFreshTestPlayer, reload, game } = useDailyGameContext();
+  const { startFreshTestPlayer, resetToday, reload, game } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
@@ -132,7 +132,10 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           { label: 'Share', soon: true },
           { label: 'Settings', soon: true },
           ...(__DEV__
-            ? [{ label: 'New test player (dev)', onPress: startFreshTestPlayer }]
+            ? [
+                { label: 'Replay today (dev)', onPress: resetToday },
+                { label: 'New test player (dev)', onPress: startFreshTestPlayer },
+              ]
             : []),
         ]}
       />

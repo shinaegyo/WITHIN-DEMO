@@ -123,6 +123,13 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
   };
 }
 
+/** Dev only; the server refuses unless the caller is on the tester allowlist. */
+export async function devResetToday(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('dev_reset_today');
+  if (error || data?.error) return false;
+  return true;
+}
+
 export interface SubmitResult {
   result: GuessResult;
   status: ServerStatus;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiError, DailyGame, loadDailyGame, messageFor, submitGuess } from '../lib/api';
+import { ApiError, DailyGame, devResetToday, loadDailyGame, messageFor, submitGuess } from '../lib/api';
 import { signOutForTesting } from '../lib/supabase';
 import { GuessResult } from '../game/types';
 
@@ -16,6 +16,8 @@ export interface UseDailyGameResult {
   reload: () => void;
   /** Dev only — signs in as a new anonymous player to get a fresh game. */
   startFreshTestPlayer: () => Promise<void>;
+  /** Dev only — replays today as the same player, keeping identity. */
+  resetToday: () => Promise<void>;
 }
 
 export function useDailyGame(): UseDailyGameResult {
@@ -59,6 +61,12 @@ export function useDailyGame(): UseDailyGameResult {
   const startFreshTestPlayer = useCallback(async () => {
     setPhase('loading');
     await signOutForTesting();
+    await load();
+  }, [load]);
+
+  const resetToday = useCallback(async () => {
+    setPhase('loading');
+    await devResetToday();
     await load();
   }, [load]);
 
@@ -117,5 +125,6 @@ export function useDailyGame(): UseDailyGameResult {
     submit,
     reload: load,
     startFreshTestPlayer,
+    resetToday,
   };
 }
