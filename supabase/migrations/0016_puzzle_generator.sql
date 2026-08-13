@@ -1,5 +1,10 @@
 -- Generate puzzles inside the database.
 --
+-- Note on the casts below: `text_array || 'a literal'` is ambiguous in
+-- PL/pgSQL. Postgres sees an array on the left and an untyped literal on the
+-- right, assumes array-to-array concatenation, and fails trying to parse the
+-- sentence as an array literal. Every appended literal is cast to text.
+--
 -- Until now the schedule was produced by a script and pasted in as SQL, which
 -- capped the runway at whatever fitted in the editor and meant coming back to
 -- extend it. This does the same job server-side, so a decade can be filled
@@ -55,12 +60,12 @@ as $$
 declare
   opts text[] := '{}';
 begin
-  opts := opts || (case when n % 2 = 0 then 'The number is even.' else 'The number is odd.' end);
-  opts := opts || format('The number ends in %s.', n % 10);
-  if n % 3 = 0 then opts := opts || 'The number is divisible by 3.'; end if;
-  if n % 5 = 0 then opts := opts || 'The number is divisible by 5.'; end if;
+  opts := opts || (case when n % 2 = 0 then 'The number is even.' else 'The number is odd.' end)::text;
+  opts := opts || format('The number ends in %s.', n % 10)::text;
+  if n % 3 = 0 then opts := opts || 'The number is divisible by 3.'::text; end if;
+  if n % 5 = 0 then opts := opts || 'The number is divisible by 5.'::text; end if;
   if (select count(*) from unnest(public.digits_of(n)) d where d % 2 = 0) >= 2 then
-    opts := opts || 'The number contains two even digits.';
+    opts := opts || 'The number contains two even digits.'::text;
   end if;
 
   return opts[1 + floor(random() * array_length(opts, 1))::int];
@@ -82,24 +87,24 @@ declare
   ds   integer := public.digit_sum(n);
   dg   integer[] := public.digits_of(n);
 begin
-  opts := opts || format('The number contains the digit %s.', dg[1 + floor(random() * array_length(dg, 1))::int]);
-  opts := opts || (case when n > 500 then 'The number is greater than 500.' else 'The number is less than 500.' end);
-  opts := opts || (case when ds % 2 = 0 then 'The digits add up to an even number.' else 'The digits add up to an odd number.' end);
+  opts := opts || format('The number contains the digit %s.', dg[1 + floor(random() * array_length(dg, 1))::int])::text;
+  opts := opts || (case when n > 500 then 'The number is greater than 500.' else 'The number is less than 500.' end)::text;
+  opts := opts || (case when ds % 2 = 0 then 'The digits add up to an even number.' else 'The digits add up to an odd number.' end)::text;
 
-  if ds between 5 and 20 then opts := opts || format('The digits add up to %s.', ds); end if;
-  if n % 4  = 0 then opts := opts || 'The number is divisible by 4.';  end if;
-  if n % 6  = 0 then opts := opts || 'The number is divisible by 6.';  end if;
-  if n % 7  = 0 then opts := opts || 'The number is divisible by 7.';  end if;
-  if n % 9  = 0 then opts := opts || 'The number is divisible by 9.';  end if;
-  if n % 11 = 0 then opts := opts || 'The number is divisible by 11.'; end if;
+  if ds between 5 and 20 then opts := opts || format('The digits add up to %s.', ds)::text; end if;
+  if n % 4  = 0 then opts := opts || 'The number is divisible by 4.'::text;  end if;
+  if n % 6  = 0 then opts := opts || 'The number is divisible by 6.'::text;  end if;
+  if n % 7  = 0 then opts := opts || 'The number is divisible by 7.'::text;  end if;
+  if n % 9  = 0 then opts := opts || 'The number is divisible by 9.'::text;  end if;
+  if n % 11 = 0 then opts := opts || 'The number is divisible by 11.'::text; end if;
   if array_length(dg, 1) <> (select count(distinct d) from unnest(dg) d) then
-    opts := opts || 'The number contains a repeated digit.';
+    opts := opts || 'The number contains a repeated digit.'::text;
   end if;
   if dg[1] > dg[array_length(dg, 1)] then
-    opts := opts || 'The first digit is greater than the last digit.';
+    opts := opts || 'The first digit is greater than the last digit.'::text;
   end if;
-  if public.is_prime(n) then opts := opts || 'The number is prime.';
-  else                       opts := opts || 'The number is not prime.'; end if;
+  if public.is_prime(n) then opts := opts || 'The number is prime.'::text;
+  else                       opts := opts || 'The number is not prime.'::text; end if;
 
   return opts[1 + floor(random() * array_length(opts, 1))::int];
 end;
