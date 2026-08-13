@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameStatus } from '../game/types';
+import { feedbackColors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { Confetti } from './Confetti';
+import { Rings } from './effects/Rings';
 
 interface Props {
   status: GameStatus;
@@ -33,7 +35,14 @@ export function ResultOverlay({ status, answer, attemptsUsed, maxAttempts, onRes
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.backdrop]}>
-      {isWin && <Confetti />}
+      {isWin && (
+        <>
+          <Confetti />
+          <View style={[StyleSheet.absoluteFill, styles.rings]} pointerEvents="none">
+            <Rings color={feedbackColors.correct} count={3} size={180} maxScale={3.4} duration={1100} />
+          </View>
+        </>
+      )}
       <Animated.View
         style={[styles.card, { backgroundColor: colors.surface, opacity, transform: [{ scale }] }]}
       >
@@ -61,6 +70,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 30,
+  },
+  rings: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     width: '84%',

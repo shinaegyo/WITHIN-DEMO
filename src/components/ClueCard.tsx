@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
@@ -10,24 +10,36 @@ interface Props {
 
 export function ClueCard({ clue1, clue2, clue2Unlocked }: Props) {
   const { colors } = useTheme();
+  const reveal = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!clue2Unlocked) {
+      reveal.setValue(0);
+      return;
+    }
+    Animated.spring(reveal, { toValue: 1, useNativeDriver: true, friction: 7, tension: 60 }).start();
+  }, [clue2Unlocked, reveal]);
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <View style={styles.clueRow}>
-        <Text style={[styles.clueLabel, { color: colors.textMuted }]}>CLUE 1</Text>
-        <Text style={[styles.clueText, { color: colors.text }]}>{clue1}</Text>
-      </View>
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-      <View style={styles.clueRow}>
-        <Text style={[styles.clueLabel, { color: colors.textMuted }]}>CLUE 2</Text>
-        {clue2Unlocked ? (
+      <Text style={[styles.label, { color: colors.textMuted }]}>CLUE</Text>
+      <Text style={[styles.clueText, { color: colors.text }]}>{clue1}</Text>
+
+      {clue2Unlocked && (
+        <Animated.View
+          style={[
+            styles.bonusWrap,
+            {
+              opacity: reveal,
+              transform: [{ translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
+            },
+          ]}
+        >
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <Text style={[styles.label, { color: colors.accent }]}>BONUS CLUE</Text>
           <Text style={[styles.clueText, { color: colors.text }]}>{clue2}</Text>
-        ) : (
-          <Text style={[styles.clueText, styles.locked, { color: colors.textMuted }]}>
-            🔒 Unlocks when you get WITHIN 10
-          </Text>
-        )}
-      </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -38,25 +50,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
+    alignItems: 'center',
   },
-  clueRow: {
-    gap: 4,
-  },
-  clueLabel: {
+  label: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.8,
+    textAlign: 'center',
+    marginBottom: 3,
   },
   clueText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
-  locked: {
-    fontStyle: 'italic',
-    fontWeight: '500',
+  bonusWrap: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
   },
   divider: {
     height: 1,
+    alignSelf: 'stretch',
     marginVertical: 10,
   },
 });

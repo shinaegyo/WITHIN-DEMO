@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AttemptsIndicator } from '../components/AttemptsIndicator';
 import { ClueCard } from '../components/ClueCard';
 import { DevPanel } from '../components/DevPanel';
-import { FeedbackBanner, FeedbackTrigger } from '../components/FeedbackBanner';
-import { GuessHistory } from '../components/GuessHistory';
+import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
+import { GuessBoard } from '../components/GuessBoard';
 import { Header } from '../components/Header';
 import { NumberInput } from '../components/NumberInput';
 import { ResultOverlay } from '../components/ResultOverlay';
@@ -35,15 +34,22 @@ export function GameScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.guesses.length]);
 
+  const clearFeedback = useCallback(() => setFeedbackTrigger(null), []);
+
   const handleSubmit = (value: number) => {
     const result = submitGuess(value);
     if (!result.ok) hapticInvalid();
     return result;
   };
 
-  const handleReset = () => reset(getDailyAnswer());
+  const handleReset = () => {
+    // Drop any in-flight burst so an interrupted animation can't linger.
+    setFeedbackTrigger(null);
+    reset(getDailyAnswer());
+  };
 
   const handleSetDevAnswer = (answer: number) => {
+    setFeedbackTrigger(null);
     setDevAnswerOverride(answer);
     reset(answer);
   };
@@ -61,10 +67,8 @@ export function GameScreen() {
 
           <ClueCard clue1={state.clue1} clue2={state.clue2} clue2Unlocked={state.clue2Unlocked} />
 
-          <AttemptsIndicator used={state.guesses.length} max={state.maxAttempts} />
-
-          <View style={styles.historyWrap}>
-            <GuessHistory guesses={state.guesses} />
+          <View style={styles.boardWrap}>
+            <GuessBoard guesses={state.guesses} maxAttempts={state.maxAttempts} />
           </View>
 
           <NumberInput disabled={state.status !== 'playing'} onSubmit={handleSubmit} />
@@ -73,7 +77,7 @@ export function GameScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      <FeedbackBanner trigger={feedbackTrigger} />
+      <FeedbackOverlay trigger={feedbackTrigger} onDone={clearFeedback} />
 
       <ResultOverlay
         status={state.status}
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     gap: 16,
   },
-  historyWrap: {
+  boardWrap: {
     flex: 1,
   },
 });

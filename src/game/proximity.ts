@@ -13,6 +13,20 @@ function tierForDistance(distance: number): ProximityTier {
   return 'light';
 }
 
+/**
+ * Short label describing the proximity band, shown on the guess tile.
+ * Deliberately a *band*, never the exact distance — the only precise
+ * readings are ONE AWAY and CORRECT, which are intentional spec moments.
+ */
+export function getBandLabel(result: GuessResult): string {
+  if (result.isCorrect) return 'CORRECT';
+  if (result.isOneAway) return 'ONE AWAY';
+  if (result.isWithin10) return 'WITHIN 10';
+  if (result.tier === 'dark') return '11–24 AWAY';
+  if (result.tier === 'medium') return '25–99 AWAY';
+  return '100+ AWAY';
+}
+
 export function evaluateGuess(guess: number, answer: number): GuessResult {
   const distance = Math.abs(guess - answer);
   const isCorrect = distance === 0;
