@@ -1,5 +1,5 @@
 import { Platform, Share } from 'react-native';
-import { DailyGame, modifierCopy } from '../lib/api';
+import { DailyGame } from '../lib/api';
 
 /**
  * The shareable result.
@@ -32,8 +32,7 @@ export function buildShareText(game: DailyGame): string {
     grid,
   ];
 
-  const twist = modifierCopy(game.modifier);
-  if (twist) lines.push(twist.label.toLowerCase());
+  if (game.modifier.kind !== 'standard') lines.push(game.modifier.label.toLowerCase());
   if (!solved) lines.push('', 'Knocked out 💀');
   if (game.retriesUsed > 0) lines.push('(used a retry)');
   if (game.stats.currentStreak > 0) lines.push('', `🔥 ${game.stats.currentStreak} day streak`);

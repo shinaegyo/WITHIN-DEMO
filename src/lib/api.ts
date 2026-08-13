@@ -47,28 +47,21 @@ export interface CurrentRound {
 
 const MAX_DAILY_SCORE_FALLBACK = 300;
 
-export type DayModifier = 'standard' | 'double' | 'no_bonus' | 'early_bonus' | 'generous';
-
-/** Short label and explanation for the day's twist, or null on an ordinary day. */
-export function modifierCopy(m: DayModifier): { label: string; detail: string } | null {
-  switch (m) {
-    case 'double':
-      return { label: 'DOUBLE POINTS', detail: 'Every round scores twice as much today.' };
-    case 'no_bonus':
-      return { label: 'NO BONUS CLUE', detail: 'The second clue stays locked, however close you get.' };
-    case 'early_bonus':
-      return { label: 'BOTH CLUES', detail: 'The bonus clue is open from your first guess.' };
-    case 'generous':
-      return { label: 'EXTRA ATTEMPT', detail: 'Every round gives you one more guess than usual.' };
-    default:
-      return null;
-  }
+/**
+ * The day's twist or bonus. Named and described by the server so there is one
+ * list of them rather than a copy here that would drift.
+ */
+export interface DayModifier {
+  id: string;
+  kind: 'standard' | 'twist' | 'bonus';
+  label: string;
+  detail: string;
 }
 
 export interface DailyGame {
   puzzleDate: string;
   modifier: DayModifier;
-  /** 300 normally, 600 on a doubled day. */
+  /** 300 normally; scaled by the day's multiplier. */
   maxScore: number;
   /** Days since launch, so a shared result can name the puzzle. */
   puzzleNumber: number;
@@ -150,8 +143,12 @@ export async function loadDailyGame(): Promise<DailyGame> {
   return {
     puzzleDate: raw.puzzleDate,
     puzzleNumber: raw.puzzleNumber ?? 0,
-    // Older servers predate modifiers; an ordinary day is the safe reading.
-    modifier: (raw.modifier ?? 'standard') as DayModifier,
+    // Older servers predate modifiers, and older ones still sent a bare
+    // string; an ordinary day is the safe reading for both.
+    modifier:
+      raw.modifier && typeof raw.modifier === 'object'
+        ? (raw.modifier as DayModifier)
+        : { id: 'standard', kind: 'standard', label: '', detail: '' },
     maxScore: raw.maxScore ?? MAX_DAILY_SCORE_FALLBACK,
     dayStatus: raw.dayStatus,
     currentRound: raw.currentRound,

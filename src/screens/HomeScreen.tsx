@@ -12,7 +12,7 @@ import { practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
 import { LeaderboardEntry, loadFriendsLeaderboard, loadLeaderboard } from '../lib/api';
 import { MEDALS } from '../theme/medals';
-import { modifierCopy } from '../lib/api';
+
 
 interface Props {
   onPlay: () => void;
@@ -138,9 +138,13 @@ export function HomeScreen({
   const me = board.find((e) => e.isMe);
   const preview = me && !top.some((e) => e.isMe) ? [...top, me] : top;
 
-  // Most days have no twist, which is the point: an everyday twist is just the
-  // rules, and there is nothing left to notice.
-  const twist = modifierCopy(game.modifier);
+  // Two marked days a week: one harder, one kinder. The other five are plain,
+  // which is what gives these any weight.
+  const mod = game.modifier;
+  const twist =
+    mod.kind === 'twist' || mod.kind === 'bonus'
+      ? { heading: mod.kind === 'twist' ? 'TWIST OF THE WEEK' : 'BONUS OF THE WEEK', ...mod }
+      : null;
   const lastHour = !finished && remaining < 60 * 60 * 1000;
 
   const renderBoard = (
@@ -249,7 +253,8 @@ export function HomeScreen({
         <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
         {twist && (
           <View style={[styles.twist, { borderColor: colors.text }]}>
-            <Text style={[styles.twistLabel, { color: colors.text }]}>TODAY · {twist.label}</Text>
+            <Text style={[styles.twistHeading, { color: colors.textMuted }]}>{twist.heading}</Text>
+            <Text style={[styles.twistLabel, { color: colors.text }]}>{twist.label}</Text>
             <Text style={[styles.twistDetail, { color: colors.textMuted }]}>{twist.detail}</Text>
           </View>
         )}
@@ -495,7 +500,8 @@ const styles = StyleSheet.create({
     marginBottom: 22,
     gap: 2,
   },
-  twistLabel: { fontSize: 11, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
+  twistHeading: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.5 },
+  twistLabel: { fontSize: 14, fontFamily: fonts.extraBold },
   twistDetail: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
   status: {
     fontSize: 10.5,

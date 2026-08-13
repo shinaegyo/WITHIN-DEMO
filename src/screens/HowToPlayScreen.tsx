@@ -108,12 +108,16 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         The number is revealed once the round ends, whether you found it or not.
       </Text>
 
-      <Text style={[styles.h2, { color: colors.text }]}>Some days have a twist</Text>
+      <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Five days a week play by the rules above. On two of them — the same two for everyone — the
-        home screen announces something different: every round worth double, the bonus clue withheld all day, both
-        clues open from your first guess, or an extra attempt in every round. Everyone gets the
-        same twist on the same day.
+        Five days a week play by the rules above. The other two are marked, and the home screen
+        says which is which. The Twist of the Week makes the day harder — fewer attempts, a clue
+        withheld, or no clues at all. The Bonus of the Week does the opposite — extra attempts,
+        clues opened early, or points multiplied.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        There are twenty-five of each, and everyone in the world gets the same two on the same
+        days.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
