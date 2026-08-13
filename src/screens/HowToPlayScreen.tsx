@@ -109,8 +109,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
 
       <Text style={[styles.h2, { color: colors.text }]}>Some days have a twist</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Most days play by the rules above. Now and then a day announces something different at the
-        top of the home screen: every round worth double, the bonus clue withheld all day, both
+        Five days a week play by the rules above. On two of them — the same two for everyone — the
+        home screen announces something different: every round worth double, the bonus clue withheld all day, both
         clues open from your first guess, or an extra attempt in every round. Everyone gets the
         same twist on the same day.
       </Text>
