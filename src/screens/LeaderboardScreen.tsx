@@ -4,6 +4,7 @@ import { StatusScreen } from '../components/StatusScreen';
 import { AllTimeEntry, ApiError, loadAllTimeLeaderboard, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
+import { formatRelative } from '../utils/relativeTime';
 import { useTheme } from '../theme/ThemeContext';
 
 export function LeaderboardScreen() {
@@ -67,9 +68,12 @@ export function LeaderboardScreen() {
               {item.name}
               {item.isMe ? '  (you)' : ''}
             </Text>
-            {/* The same total means something different after four days than
-                after four hundred. */}
-            <Text style={[styles.meta, { color: colors.textMuted }]}>{item.daysPlayed}d</Text>
+            {/* When they were last seen, rather than how many days they have
+                played: a day count only moves once every twenty-four hours, so
+                the board looked frozen. */}
+            <Text style={[styles.meta, { color: colors.textMuted }]}>
+              {formatRelative(item.lastPlayedAt)}
+            </Text>
             <Text style={[styles.score, { color: colors.text }]}>{item.score}</Text>
           </View>
         )}

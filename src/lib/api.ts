@@ -211,6 +211,8 @@ export interface AllTimeEntry {
   score: number;
   daysPlayed: number;
   bestStreak: number;
+  /** ISO timestamp of the player's most recent guess, or null. */
+  lastPlayedAt: string | null;
   isMe: boolean;
 }
 
@@ -238,6 +240,7 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
       score: e.score,
       daysPlayed: e.days_played ?? 0,
       bestStreak: e.best_streak ?? 0,
+      lastPlayedAt: e.last_played_at ?? null,
       isMe: !!e.is_me,
     })),
   };
