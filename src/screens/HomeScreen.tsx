@@ -192,7 +192,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
         ) : (
           <>
             <Wordmark size={62} />
-            <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
+            <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
           </>
         )}
 

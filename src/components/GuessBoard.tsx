@@ -27,11 +27,9 @@ export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, fin
 
   return (
     <View style={styles.board}>
-      <View style={styles.slots}>
-        {guesses.map((result, index) => (
-          <FilledSlot key={index} result={result} attemptNumber={index + 1} />
-        ))}
-      </View>
+      {guesses.map((result, index) => (
+        <FilledSlot key={index} result={result} attemptNumber={index + 1} />
+      ))}
 
       {showRemaining && remaining > 0 && (
         <View style={styles.footer}>
@@ -55,9 +53,11 @@ const styles = StyleSheet.create({
   board: {
     flex: 1,
     gap: 8,
-  },
-  slots: {
-    gap: 8,
+    // Guesses stack upward from the input rather than down from the clue.
+    // With rounds as short as five attempts, top-aligning left a wide gap
+    // between the last guess and the field, and put the newest guess furthest
+    // from where the player is typing.
+    justifyContent: 'flex-end',
   },
   footer: {
     alignItems: 'center',

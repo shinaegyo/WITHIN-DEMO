@@ -92,7 +92,7 @@ export function OnboardingScreen({ onDone }: { onDone: () => Promise<void> | voi
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
             <Wordmark size={44} />
-            <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
+            <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
           </View>
 
           {/* Progress */}

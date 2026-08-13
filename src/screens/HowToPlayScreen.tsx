@@ -83,15 +83,17 @@ export function HowToPlayScreen() {
 
       <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Round 1 gives you seven attempts. Solve a round and you move on to the next one.
+        Each round is tighter than the last: seven attempts in round 1, six in round 2, five in
+        round 3.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         Cut it fine and it costs you. Solve a round on your very last attempt and the next round
-        gives you one attempt fewer: 7, then 6, then 5. Solve with even one attempt to spare and
-        your limit stays exactly where it is.
+        gives you one attempt fewer still, down to a minimum of five. Solve with even one attempt
+        to spare and your limit stays exactly where it is.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Run out of attempts and your day ends there. You keep the points you've already earned.
+        Run out of attempts and that round scores nothing — but the day carries on, and you still
+        get the rounds that are left.
         You can watch an ad for another go at the round you lost. That round scores nothing and the
         day no longer counts toward your streak, but you can still finish and place on the
         leaderboard. The number stays hidden until you solve it or choose to stop.
