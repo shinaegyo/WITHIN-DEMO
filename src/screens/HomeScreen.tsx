@@ -140,6 +140,9 @@ export function HomeScreen({
 
   // Two marked days a week: one harder, one kinder. The other five are plain,
   // which is what gives these any weight.
+  // The board always includes the player, so a single row means no friends.
+  const hasFriendsToday = friendsBoard.some((e) => !e.isMe);
+
   const mod = game.modifier;
   const twist =
     mod.kind === 'twist' || mod.kind === 'bonus'
@@ -359,10 +362,10 @@ export function HomeScreen({
         {/* Friends first. Beating eight people you know is a stronger pull
             than placing fortieth among strangers, so the wider board sits
             underneath rather than on top. */}
-        {friendsBoard.length > 0 &&
+        {hasFriendsToday &&
           renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
 
-        {friendsBoard.length === 0 && (
+        {!hasFriendsToday && (
           <Pressable style={styles.inviteCard} onPress={onOpenFriends}>
             <Text style={[styles.inviteTitle, { color: colors.text }]}>Play with friends</Text>
             <Text style={[styles.inviteBody, { color: colors.textMuted }]}>
