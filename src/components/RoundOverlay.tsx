@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DailyGame, SubmitResult } from '../lib/api';
-import { MAX_DAILY_SCORE } from '../game/scoring';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { noHit } from '../theme/styles';
@@ -117,7 +116,7 @@ export function RoundOverlay({
           <Text style={[styles.totalLabel, { color: colors.textMuted }]}>TODAY'S SCORE</Text>
           <Text style={[styles.totalValue, { color: colors.text }]}>
             {game.totalScore}
-            <Text style={[styles.totalMax, { color: colors.textMuted }]}> / {MAX_DAILY_SCORE}</Text>
+            <Text style={[styles.totalMax, { color: colors.textMuted }]}> / {game.maxScore}</Text>
           </Text>
         </View>
 

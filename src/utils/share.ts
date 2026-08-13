@@ -1,6 +1,5 @@
 import { Platform, Share } from 'react-native';
-import { DailyGame } from '../lib/api';
-import { MAX_DAILY_SCORE } from '../game/scoring';
+import { DailyGame, modifierCopy } from '../lib/api';
 
 /**
  * The shareable result.
@@ -28,11 +27,13 @@ export function buildShareText(game: DailyGame): string {
     .join('\n');
 
   const lines = [
-    `WITHIN #${game.puzzleNumber} · ${game.totalScore}/${MAX_DAILY_SCORE}`,
+    `WITHIN #${game.puzzleNumber} · ${game.totalScore}/${game.maxScore}`,
     '',
     grid,
   ];
 
+  const twist = modifierCopy(game.modifier);
+  if (twist) lines.push(twist.label.toLowerCase());
   if (!solved) lines.push('', 'Knocked out 💀');
   if (game.retriesUsed > 0) lines.push('(used a retry)');
   if (game.stats.currentStreak > 0) lines.push('', `🔥 ${game.stats.currentStreak} day streak`);

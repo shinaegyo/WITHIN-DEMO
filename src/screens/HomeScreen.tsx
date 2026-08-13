@@ -12,7 +12,7 @@ import { practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
 import { LeaderboardEntry, loadFriendsLeaderboard, loadLeaderboard } from '../lib/api';
 import { MEDALS } from '../theme/medals';
-import { MAX_DAILY_SCORE } from '../game/scoring';
+import { modifierCopy } from '../lib/api';
 
 interface Props {
   onPlay: () => void;
@@ -135,6 +135,10 @@ export function HomeScreen({
   const me = board.find((e) => e.isMe);
   const preview = me && !top.some((e) => e.isMe) ? [...top, me] : top;
 
+  // Most days have no twist, which is the point: an everyday twist is just the
+  // rules, and there is nothing left to notice.
+  const twist = modifierCopy(game.modifier);
+
   const renderBoard = (
     title: string,
     link: string,
@@ -236,6 +240,13 @@ export function HomeScreen({
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
         <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
+        {twist && (
+          <View style={[styles.twist, { borderColor: colors.text }]}>
+            <Text style={[styles.twistLabel, { color: colors.text }]}>TODAY · {twist.label}</Text>
+            <Text style={[styles.twistDetail, { color: colors.textMuted }]}>{twist.detail}</Text>
+          </View>
+        )}
+
         {started ? (
           <>
             <Text style={[styles.status, { color: colors.textMuted }]}>{status}</Text>
@@ -246,7 +257,7 @@ export function HomeScreen({
             <Text style={[styles.score, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
               {game.totalScore}
             </Text>
-            <Text style={[styles.scoreMax, { color: colors.textMuted }]}>OF {MAX_DAILY_SCORE}</Text>
+            <Text style={[styles.scoreMax, { color: colors.textMuted }]}>OF {game.maxScore}</Text>
 
             {/* Same reading as the in-game progress bar: green solved with its
                 score, red lost, grey not reached. */}
@@ -448,6 +459,18 @@ const styles = StyleSheet.create({
   boardName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
   boardOut: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.8 },
   boardScore: { fontSize: 14, fontFamily: fonts.extraBold },
+  twist: {
+    alignSelf: 'stretch',
+    borderWidth: 1.5,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    marginBottom: 22,
+    gap: 2,
+  },
+  twistLabel: { fontSize: 11, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
+  twistDetail: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
   status: {
     fontSize: 10.5,
     fontFamily: fonts.bold,
