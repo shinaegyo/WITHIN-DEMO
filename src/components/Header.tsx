@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
@@ -41,9 +42,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   title: {
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: 1.5,
+    fontSize: 24,
+    fontFamily: fonts.logo,
+    letterSpacing: -0.5,
   },
   actions: {
     flexDirection: 'row',

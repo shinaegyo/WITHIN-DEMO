@@ -12,6 +12,7 @@ import { getDailyAnswer, setDevAnswerOverride } from '../game/dailyAnswer';
 import { useGameState } from '../state/useGameState';
 import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
+import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
 
 export function GameScreen() {
   const { colors, mode } = useTheme();
@@ -24,12 +25,15 @@ export function GameScreen() {
 
     if (last.isCorrect) {
       hapticCorrect();
+      playCorrect();
     } else if (last.isOneAway) {
       setFeedbackTrigger({ type: 'oneAway', key: Date.now() });
       hapticOneAway();
+      playOneAway();
     } else if (last.isWithin10) {
       setFeedbackTrigger({ type: 'within10', key: Date.now() });
       hapticWithin10();
+      playWithin10();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.guesses.length]);

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
+import { noHit } from '../../theme/styles';
 
 interface Props {
   colors: string[];
@@ -61,9 +62,9 @@ function Spark({
 
   return (
     <Animated.View
-      pointerEvents="none"
       style={[
         styles.spark,
+        noHit,
         {
           width: size,
           height: size,

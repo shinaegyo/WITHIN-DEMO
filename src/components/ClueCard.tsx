@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
+import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
@@ -54,14 +55,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     letterSpacing: 0.8,
     textAlign: 'center',
     marginBottom: 3,
   },
   clueText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     textAlign: 'center',
   },
   bonusWrap: {

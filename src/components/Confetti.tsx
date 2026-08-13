@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, Dimensions, Easing, StyleSheet, View } from 'react-native';
+import { noHit } from '../theme/styles';
 
 const COLORS = ['#22A559', '#F5A524', '#4F46E5', '#E8452C', '#22D3EE', '#F472B6'];
 const PIECE_COUNT = 24;
@@ -29,7 +30,7 @@ export function Confetti() {
   );
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.wrap]} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFill, styles.wrap, noHit]}>
       {pieces.map((piece, index) => (
         <ConfettiPiece key={index} piece={piece} />
       ))}

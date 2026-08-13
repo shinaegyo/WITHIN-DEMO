@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MAX_NUMBER, MIN_NUMBER } from '../game/constants';
+import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 14,
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   button: {
     borderRadius: 14,
@@ -92,11 +93,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFFFFF',
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   error: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     marginBottom: 8,
   },
 });

@@ -33,23 +33,31 @@ export const darkColors: ThemeColors = {
 
 // Proximity tile colors are intentionally constant across light/dark mode —
 // same convention as Wordle: the tiles are the game's identity, only the
-// surrounding chrome adapts to theme. All are tuned to stay legible with
-// white bold text.
+// surrounding chrome adapts to theme.
+//
+// Both families intensify rather than simply darkening as the guess closes in:
+// orange heats toward red, blue toward electric. This keeps close guesses
+// feeling urgent instead of muddy, while direction stays readable at a glance.
 export const proximityColors = {
   below: {
-    light: '#8FB4DE',
-    medium: '#4E7FC4',
-    dark: '#2A5090',
-    intense: '#0F2E63',
+    light: '#A9C9EF',
+    medium: '#5B92DF',
+    dark: '#2563EB',
+    intense: '#1230C4',
   },
   above: {
-    light: '#F0B37E',
-    medium: '#E08A3D',
-    dark: '#B8630F',
-    intense: '#7A3D00',
+    light: '#FBC38E',
+    medium: '#F5913C',
+    dark: '#ED5F22',
+    intense: '#D01C1C',
   },
   correct: '#22A559',
 };
+
+// The two lightest tiers need dark text to stay legible; the two most intense
+// tiers are dark enough to carry white.
+const INK = '#15161A';
+
 
 export const feedbackColors = {
   within10: '#F5A524',
@@ -61,4 +69,10 @@ export function getTileColor(direction: 'below' | 'above' | 'correct', tier: str
   if (direction === 'correct') return proximityColors.correct;
   const scale = direction === 'below' ? proximityColors.below : proximityColors.above;
   return (scale as Record<string, string>)[tier] ?? scale.light;
+}
+
+/** Text colour that stays legible on the given tile. */
+export function getTileTextColor(direction: 'below' | 'above' | 'correct', tier: string): string {
+  if (direction === 'correct') return '#FFFFFF';
+  return tier === 'light' || tier === 'medium' ? INK : '#FFFFFF';
 }

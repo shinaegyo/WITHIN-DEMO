@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MAX_NUMBER, MIN_NUMBER } from '../game/constants';
+import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   controls: {
     flexDirection: 'row',
@@ -84,6 +85,6 @@ const styles = StyleSheet.create({
   applyText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
 });

@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameStatus } from '../game/types';
 import { feedbackColors } from '../theme/colors';
+import { fonts } from '../theme/fonts';
+import { noHit } from '../theme/styles';
 import { useTheme } from '../theme/ThemeContext';
 import { Confetti } from './Confetti';
 import { Rings } from './effects/Rings';
@@ -38,7 +40,7 @@ export function ResultOverlay({ status, answer, attemptsUsed, maxAttempts, onRes
       {isWin && (
         <>
           <Confetti />
-          <View style={[StyleSheet.absoluteFill, styles.rings]} pointerEvents="none">
+          <View style={[StyleSheet.absoluteFill, styles.rings, noHit]}>
             <Rings color={feedbackColors.correct} count={3} size={180} maxScale={3.4} duration={1100} />
           </View>
         </>
@@ -87,14 +89,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '900',
-    letterSpacing: 0.5,
+    fontSize: 28,
+    fontFamily: fonts.logo,
+    letterSpacing: -0.3,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: fonts.medium,
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -106,6 +108,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
 });

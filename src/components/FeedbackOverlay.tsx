@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { feedbackColors } from '../theme/colors';
+import { fonts } from '../theme/fonts';
+import { noHit } from '../theme/styles';
 import { Rings } from './effects/Rings';
 import { Sparks } from './effects/Sparks';
 
@@ -78,7 +80,7 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
   }, [isOneAway, glow, flash, scale, opacity, shake, onDone]);
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.wrap]} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFill, styles.wrap, noHit]}>
       <Animated.View
         style={[StyleSheet.absoluteFill, { backgroundColor: accent, opacity: glow }]}
       />
@@ -86,7 +88,7 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
         <Animated.View style={[StyleSheet.absoluteFill, styles.flash, { opacity: flash }]} />
       )}
 
-      <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">
+      <View style={[StyleSheet.absoluteFill, styles.center, noHit]}>
         <Rings
           color={accent}
           count={isOneAway ? 3 : 2}
@@ -134,8 +136,8 @@ const styles = StyleSheet.create({
   label: {
     color: '#FFFFFF',
     fontSize: 32,
-    fontWeight: '900',
-    letterSpacing: 1,
+    fontFamily: fonts.logo,
+    letterSpacing: 0.5,
     textShadowColor: 'rgba(0,0,0,0.45)',
     textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 10,

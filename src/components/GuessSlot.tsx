@@ -2,7 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { getBandLabel } from '../game/proximity';
 import { GuessResult } from '../game/types';
-import { getTileColor } from '../theme/colors';
+import { getTileColor, getTileTextColor } from '../theme/colors';
+import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 // Slots flex to share the available board height, but never grow so tall
@@ -39,6 +40,7 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
     }).start();
   }, [anim]);
 
+  const ink = getTileTextColor(result.direction, result.tier);
   const arrow = result.direction === 'correct' ? '✓' : result.direction === 'below' ? '▲' : '▼';
   const arrowLabel =
     result.direction === 'correct'
@@ -61,10 +63,10 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
         },
       ]}
     >
-      <Text style={styles.attemptLabelFilled}>#{attemptNumber}</Text>
-      <Text style={styles.guessText}>{result.guess}</Text>
-      <Text style={styles.band}>{getBandLabel(result)}</Text>
-      <Text style={styles.arrow} accessibilityLabel={arrowLabel}>
+      <Text style={[styles.attemptLabelFilled, { color: ink, opacity: 0.7 }]}>#{attemptNumber}</Text>
+      <Text style={[styles.guessText, { color: ink }]}>{result.guess}</Text>
+      <Text style={[styles.band, { color: ink, opacity: 0.9 }]}>{getBandLabel(result)}</Text>
+      <Text style={[styles.arrow, { color: ink }]} accessibilityLabel={arrowLabel}>
         {arrow}
       </Text>
     </Animated.View>
@@ -78,32 +80,27 @@ const styles = StyleSheet.create({
   },
   attemptLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     opacity: 0.6,
   },
   attemptLabelFilled: {
-    color: 'rgba(255,255,255,0.7)',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     width: 26,
   },
   guessText: {
     flex: 1,
-    color: '#FFFFFF',
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.5,
   },
   band: {
-    color: 'rgba(255,255,255,0.9)',
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: 0.6,
   },
   arrow: {
-    color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '900',
     marginLeft: 10,
     width: 18,
     textAlign: 'right',

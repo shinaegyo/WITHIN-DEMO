@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
+import { noHit } from '../../theme/styles';
 
 interface Props {
   color: string;
@@ -50,9 +51,9 @@ function Ring({
 
   return (
     <Animated.View
-      pointerEvents="none"
       style={[
         styles.ring,
+        noHit,
         {
           width: size,
           height: size,
