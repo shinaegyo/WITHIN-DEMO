@@ -108,6 +108,20 @@ export function useDailyGame(): UseDailyGameResult {
                   answer: res.answer ?? prev.round.answer,
                   guesses: [...prev.round.guesses, res.result],
                 },
+                // The progress bar reads from here. Left stale, the round just
+                // finished stayed unfinished while currentRound had already
+                // moved on, so the segment emptied out instead of filling and
+                // the highlight jumped ahead a round.
+                rounds: prev.rounds.map((r) =>
+                  r.round === prev.round.round
+                    ? {
+                        ...r,
+                        status: res.roundStatus,
+                        score: res.roundScore,
+                        attemptsUsed: res.attemptsUsed,
+                      }
+                    : r,
+                ),
               }
             : prev,
         );

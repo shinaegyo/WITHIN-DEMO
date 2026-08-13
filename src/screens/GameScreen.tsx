@@ -89,7 +89,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           <Header onBack={canLeave ? onExit : undefined} />
 
           <RoundProgress
-            currentRound={game.currentRound}
+            activeRound={round.round}
             totalRounds={game.totalRounds}
             rounds={game.rounds}
             totalScore={game.totalScore}

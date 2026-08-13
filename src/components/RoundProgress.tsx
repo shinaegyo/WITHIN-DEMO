@@ -1,22 +1,74 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { RoundSummary } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
-  currentRound: number;
+  /**
+   * The round whose board is on screen — not the day's counter. Those differ
+   * for the moment between solving a round and starting the next one, and the
+   * bar has to describe what the player is actually looking at.
+   */
+  activeRound: number;
   totalRounds: number;
   rounds: RoundSummary[];
   totalScore: number;
 }
 
 /**
- * Three segments, one per round, so a player can see at a glance where they
- * are in the day and what each finished round scored.
+ * One segment per round, so a player can see at a glance where they are in the
+ * day and what each finished round scored.
  */
-export function RoundProgress({ currentRound, totalRounds, rounds, totalScore }: Props) {
+function Segment({
+  base,
+  fillColor,
+  finished,
+  score,
+}: {
+  base: string;
+  fillColor: string | null;
+  finished: boolean;
+  score: number | null;
+}) {
+  // Starts full when the round was already finished on mount — reopening the
+  // app mid-day shouldn't replay every earlier round's animation.
+  const progress = useRef(new Animated.Value(finished ? 1 : 0)).current;
+  const previously = useRef(finished);
+
+  useEffect(() => {
+    if (finished === previously.current) return;
+    previously.current = finished;
+    Animated.timing(progress, {
+      toValue: finished ? 1 : 0,
+      duration: 340,
+      // Width can't be driven natively.
+      useNativeDriver: false,
+    }).start();
+  }, [finished, progress]);
+
+  return (
+    <View style={[styles.segment, { backgroundColor: base }]}>
+      {fillColor && (
+        <Animated.View
+          style={[
+            styles.fill,
+            {
+              backgroundColor: fillColor,
+              width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
+            },
+          ]}
+        />
+      )}
+      {score !== null && (
+        <Animated.Text style={[styles.segmentText, { opacity: progress }]}>{score}</Animated.Text>
+      )}
+    </View>
+  );
+}
+
+export function RoundProgress({ activeRound, totalRounds, rounds, totalScore }: Props) {
   const { colors } = useTheme();
 
   const byRound = new Map(rounds.map((r) => [r.round, r]));
@@ -25,7 +77,7 @@ export function RoundProgress({ currentRound, totalRounds, rounds, totalScore }:
     <View style={styles.wrap}>
       <View style={styles.headRow}>
         <Text style={[styles.label, { color: colors.textMuted }]}>
-          ROUND {currentRound} OF {totalRounds}
+          ROUND {activeRound} OF {totalRounds}
         </Text>
         <Text style={[styles.score, { color: colors.text }]}>
           {totalScore}
@@ -37,28 +89,21 @@ export function RoundProgress({ currentRound, totalRounds, rounds, totalScore }:
         {Array.from({ length: totalRounds }).map((_, i) => {
           const n = i + 1;
           const r = byRound.get(n);
-          const done = r?.status === 'won';
-          const failed = r?.status === 'lost';
-          const active = n === currentRound && !done && !failed;
+          const won = r?.status === 'won';
+          const lost = r?.status === 'lost';
+          const finished = won || lost;
+          const active = n === activeRound && !finished;
 
           return (
-            <View
+            <Segment
               key={n}
-              style={[
-                styles.segment,
-                {
-                  backgroundColor: done
-                    ? feedbackColors.correct
-                    : failed
-                      ? feedbackColors.oneAway
-                      : active
-                        ? colors.accent
-                        : colors.border,
-                },
-              ]}
-            >
-              {done && <Text style={styles.segmentText}>{r?.score}</Text>}
-            </View>
+              // The result sweeps across whatever the segment already was, so
+              // the round being played fills rather than being replaced.
+              base={active ? colors.accent : colors.border}
+              fillColor={won ? feedbackColors.correct : lost ? feedbackColors.oneAway : null}
+              finished={finished}
+              score={won ? (r?.score ?? 0) : null}
+            />
           );
         })}
       </View>
@@ -79,6 +124,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  fill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 4,
   },
   segmentText: {
     color: '#FFFFFF',
