@@ -38,9 +38,12 @@ export function NumberInput({ disabled, onSubmit }: Props) {
     }
   };
 
+  // Focus resolves to the foreground colour rather than the accent. The board
+  // spends blue, red and green on meaning, and an indigo ring here read as a
+  // fourth signal competing with them.
   const borderColor = error
     ? colors.danger
-    : focus.interpolate({ inputRange: [0, 1], outputRange: [colors.border, colors.accent] });
+    : focus.interpolate({ inputRange: [0, 1], outputRange: [colors.border, colors.text] });
 
   // Deepens on focus the way a pressed button does, rather than outlining it.
   const backgroundColor = focus.interpolate({
@@ -48,11 +51,16 @@ export function NumberInput({ disabled, onSubmit }: Props) {
     outputRange: [colors.surface, colors.surfaceAlt],
   });
 
+  const ready = !disabled && !!value;
+
   return (
     <View style={styles.wrap}>
       {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
-      <View style={styles.row}>
-        <Animated.View style={[styles.field, { borderColor, backgroundColor }]}>
+
+      {/* One shell around both halves: the field and its button are a single
+          instrument, so they share an outline instead of each carrying one. */}
+      <Animated.View style={[styles.shell, { borderColor, backgroundColor }]}>
+        <View style={styles.fieldWrap}>
           <TextInput
             style={[
               styles.input,
@@ -68,27 +76,39 @@ export function NumberInput({ disabled, onSubmit }: Props) {
             }}
             onFocus={() => animateFocus(1)}
             onBlur={() => animateFocus(0)}
-            placeholder="Enter number"
-            placeholderTextColor={colors.textMuted}
+            // Drawn separately below so it can be quieter than the number the
+            // player types — a real placeholder inherits the input's own type.
+            placeholder=""
             keyboardType="number-pad"
             maxLength={4}
             editable={!disabled}
             onSubmitEditing={handleSubmit}
             returnKeyType="go"
           />
-        </Animated.View>
+
+          {!value && (
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.placeholderWrap]}>
+              <Text style={[styles.placeholder, { color: colors.textMuted }]}>Enter number</Text>
+            </View>
+          )}
+        </View>
 
         <Pressable
           style={({ pressed }) => [
             styles.button,
-            { backgroundColor: disabled || !value ? colors.border : colors.accent, opacity: pressed ? 0.85 : 1 },
+            {
+              backgroundColor: ready ? colors.text : colors.border,
+              opacity: pressed ? 0.85 : 1,
+            },
           ]}
           onPress={handleSubmit}
-          disabled={disabled || !value}
+          disabled={!ready}
         >
-          <Text style={styles.buttonText}>Guess</Text>
+          <Text style={[styles.buttonText, { color: ready ? colors.background : colors.textMuted }]}>
+            Guess
+          </Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -97,32 +117,42 @@ const styles = StyleSheet.create({
   wrap: {
     width: '100%',
   },
-  row: {
+  shell: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderRadius: 16,
+    padding: 5,
   },
-  field: {
+  fieldWrap: {
     flex: 1,
     minWidth: 0,
-    borderWidth: 1.5,
-    borderRadius: 14,
+    justifyContent: 'center',
   },
   input: {
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
     fontSize: 22,
     fontFamily: fonts.bold,
   },
+  placeholderWrap: {
+    justifyContent: 'center',
+    paddingHorizontal: 13,
+  },
+  placeholder: {
+    fontSize: 16,
+    fontFamily: fonts.semiBold,
+  },
   button: {
-    borderRadius: 14,
-    paddingHorizontal: 22,
+    alignSelf: 'stretch',
+    borderRadius: 12,
+    paddingHorizontal: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontFamily: fonts.bold,
+    fontSize: 16,
+    fontFamily: fonts.extraBold,
   },
   error: {
     fontSize: 13,
