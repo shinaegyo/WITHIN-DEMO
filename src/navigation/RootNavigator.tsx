@@ -10,13 +10,16 @@ import { MenuDrawer } from '../components/MenuDrawer';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
+import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
+import { consumePracticeRound } from '../utils/practiceLimit';
 import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
   Home: undefined;
   Game: undefined;
+  Practice: { remainingAfterThis: number };
   HowToPlay: undefined;
 };
 
@@ -31,6 +34,15 @@ function Screens() {
   const { colors, mode } = useTheme();
   const { startFreshTestPlayer } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Nudged whenever a round is consumed so Home refetches how many are left.
+  const [practiceEpoch, setPracticeEpoch] = useState(0);
+
+  const startPractice = async () => {
+    const left = await consumePracticeRound();
+    setPracticeEpoch((n) => n + 1);
+    if (left === null) return; // cap already reached
+    if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left });
+  };
 
   const navTheme = {
     ...(mode === 'dark' ? DarkTheme : DefaultTheme),
@@ -54,12 +66,29 @@ function Screens() {
       >
         <Stack.Screen name="Home" options={{ headerShown: false }}>
           {({ navigation }) => (
-            <HomeScreen onPlay={() => navigation.navigate('Game')} onOpenMenu={() => setMenuOpen(true)} />
+            <HomeScreen
+              onPlay={() => navigation.navigate('Game')}
+              onPractice={startPractice}
+              onOpenMenu={() => setMenuOpen(true)}
+              practiceEpoch={practiceEpoch}
+            />
           )}
         </Stack.Screen>
 
         <Stack.Screen name="Game" options={{ headerShown: false }}>
           {({ navigation }) => <GameScreen onExit={() => navigation.navigate('Home')} />}
+        </Stack.Screen>
+
+        <Stack.Screen name="Practice" options={{ headerShown: false }}>
+          {({ navigation, route }) => (
+            <PracticeScreen
+              // Remounts for a fresh number each round.
+              key={route.params.remainingAfterThis}
+              remainingAfterThis={route.params.remainingAfterThis}
+              onExit={() => navigation.navigate('Home')}
+              onPlayAnother={startPractice}
+            />
+          )}
         </Stack.Screen>
 
         <Stack.Screen

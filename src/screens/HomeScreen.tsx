@@ -7,16 +7,25 @@ import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
+import { practiceRemaining } from '../utils/practiceLimit';
 
 interface Props {
   onPlay: () => void;
+  onPractice: () => void;
   onOpenMenu: () => void;
+  /** Bumped by the navigator so the count refreshes on return from practice. */
+  practiceEpoch: number;
 }
 
-export function HomeScreen({ onPlay, onOpenMenu }: Props) {
+export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Props) {
   const { colors, mode, toggle } = useTheme();
   const { phase, game, loadError, reload } = useDailyGameContext();
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
+  const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    practiceRemaining().then(setPracticeLeft);
+  }, [practiceEpoch]);
 
   useEffect(() => {
     const id = setInterval(() => setRemaining(msUntilLocalMidnight()), 1000);
@@ -103,6 +112,30 @@ export function HomeScreen({ onPlay, onOpenMenu }: Props) {
             onPress={onPlay}
           >
             <Text style={styles.playText}>{inProgress ? 'CONTINUE' : 'READY TO START?'}</Text>
+          </Pressable>
+        )}
+
+        {/* Practice unlocks after the daily, so it tops up a session rather
+            than replacing the thing people came for. */}
+        {finished && practiceLeft !== null && (
+          <Pressable
+            disabled={practiceLeft === 0}
+            style={({ pressed }) => [
+              styles.practiceButton,
+              {
+                borderColor: colors.border,
+                backgroundColor: pressed && practiceLeft > 0 ? colors.surfaceAlt : 'transparent',
+                opacity: practiceLeft === 0 ? 0.45 : 1,
+              },
+            ]}
+            onPress={onPractice}
+          >
+            <Text style={[styles.practiceText, { color: colors.text }]}>
+              {practiceLeft > 0 ? 'Play a practice round' : 'No practice rounds left today'}
+            </Text>
+            <Text style={[styles.practiceMeta, { color: colors.textMuted }]}>
+              {practiceLeft > 0 ? `${practiceLeft} of 5 left today · unranked` : 'Resets at midnight'}
+            </Text>
           </Pressable>
         )}
       </View>
@@ -210,4 +243,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.bold,
   },
+  practiceButton: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    marginTop: 14,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+  },
+  practiceText: { fontSize: 14, fontFamily: fonts.bold },
+  practiceMeta: { fontSize: 11, fontFamily: fonts.medium, marginTop: 2 },
 });
