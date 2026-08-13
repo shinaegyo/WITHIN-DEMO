@@ -83,9 +83,12 @@ export function HowToPlayScreen() {
 
       <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Round 1 gives you seven attempts. Solve a round and you move to the next one. Solve it on
-        your very last attempt and the next round gives you one attempt fewer — down to a floor of
-        three. Solve with an attempt to spare and the limit stays where it is.
+        Round 1 gives you seven attempts. Solve a round and you move on to the next one.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        Cut it fine and it costs you. Solve a round on your very last attempt and the next round
+        gives you one attempt fewer: 7, then 6, then 5, then 4. It never drops below 3. Solve with
+        even one attempt to spare and your limit stays exactly where it is.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         Run out of attempts and your day ends there. You keep the points you've already earned, and
