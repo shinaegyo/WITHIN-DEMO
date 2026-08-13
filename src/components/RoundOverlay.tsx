@@ -43,6 +43,7 @@ export function RoundOverlay({
   const dayOver = game.dayStatus !== 'playing';
   const eliminated = game.dayStatus === 'eliminated';
   const roundWon = game.round.status === 'won';
+  const earlierMiss = game.rounds.some((r) => r.round < game.round.round && r.status === 'lost');
   // A lost round no longer ends the day, so the way on is offered whether the
   // round was solved or not.
   const moreRounds = !dayOver;
@@ -101,6 +102,12 @@ export function RoundOverlay({
               {game.round.attemptsUsed === 1 ? 'attempt' : 'attempts'}
               {game.round.retried ? ' · retried, so no points' : ''}
             </Text>
+            {/* A solved round worth nothing needs its reason said out loud. */}
+            {earlierMiss && (
+              <Text style={[styles.sub, { color: colors.textMuted }]}>
+                An earlier round was missed, so today no longer scores.
+              </Text>
+            )}
           </>
         ) : game.round.answer !== null ? (
           <Text style={[styles.sub, { color: colors.textMuted }]}>

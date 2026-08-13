@@ -100,8 +100,9 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
 
       <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        The round is over and it scores nothing. Your day is not over: you go straight to the next
-        round, and it scores normally. One bad round costs you that round's points and no more.
+        The round is over and it scores nothing — and neither does the rest of the day. You still
+        play the rounds that are left, and you still see every number, but the day has stopped
+        scoring. Points are only collected while your day is unbroken.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         The number is revealed once the round ends, whether you found it or not.

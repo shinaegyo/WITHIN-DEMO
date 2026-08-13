@@ -94,6 +94,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
     const { round } = game;
     const canLeave = round.attemptsUsed === 0 && game.currentRound === 1;
+    const unscored = game.rounds.some((r) => r.status === 'lost');
 
     return (
       <KeyboardAvoidingView
@@ -112,6 +113,16 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           />
 
           <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={!!round.clue2} />
+
+          {/* Derived from the rounds on the board rather than a flag, so it
+              cannot disagree with what the player can see. Solving an unscored
+              round shows +0, which reads as a bug unless the reason is on
+              screen. */}
+          {unscored && (
+            <Text style={[styles.unscored, { color: colors.textMuted }]}>
+              A round was missed, so today has stopped scoring. You can still play it out.
+            </Text>
+          )}
 
           <View style={styles.boardWrap}>
             <GuessBoard
@@ -160,6 +171,12 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   flex: { flex: 1 },
+  unscored: {
+    fontSize: 11.5,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+    marginTop: -2,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
