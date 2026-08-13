@@ -91,12 +91,22 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         gives you one attempt fewer still, down to a minimum of five. Solve with even one attempt
         to spare and your limit stays exactly where it is.
       </Text>
+
+      <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        The round is over and it scores nothing. Your day is not over: you go straight to the next
+        round, and it scores normally. One bad round costs you that round's points and no more.
+      </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Run out of attempts and that round scores nothing — but the day carries on, and you still
-        get the rounds that are left.
-        You can watch an ad for another go at the round you lost. That round scores nothing and the
-        day no longer counts toward your streak, but you can still finish and place on the
-        leaderboard. The number stays hidden until you solve it or choose to stop.
+        The number is revealed once the round ends, whether you found it or not.
+      </Text>
+
+      <Text style={[styles.h2, { color: colors.text }]}>Some days have a twist</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        Most days play by the rules above. Now and then a day announces something different at the
+        top of the home screen: every round worth double, the bonus clue withheld all day, both
+        clues open from your first guess, or an extra attempt in every round. Everyone gets the
+        same twist on the same day.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
