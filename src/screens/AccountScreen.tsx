@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -29,6 +29,12 @@ import { useTheme } from '../theme/ThemeContext';
  * Signing in is optional. An anonymous player already owns a streak and a
  * leaderboard place; an account only exists so those survive losing the phone.
  */
+
+/** Which path sent the code — resending and confirming differ between them. */
+type Flow = 'link' | 'signin';
+
+const RESEND_COOLDOWN = 30;
+
 export function AccountScreen({ onChanged }: { onChanged: () => void }) {
   const { colors } = useTheme();
 
@@ -39,10 +45,12 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
 
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [codeSent, setCodeSent] = useState(false);
+  const [flow, setFlow] = useState<Flow | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
     setAccount(await currentAccount());
@@ -55,19 +63,20 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
     refresh();
   }, [refresh]);
 
-  const saveName = async () => {
-    setNameNote(null);
-    setBusy(true);
-    const res = await setUsername(name);
-    setBusy(false);
-    if (res.ok) {
-      setSavedName(name.trim());
-      setNameNote({ ok: true, text: 'Saved. This is the name on the leaderboard.' });
-      onChanged();
-    } else {
-      setNameNote({ ok: false, text: res.error });
-    }
-  };
+  // Supabase rate-limits sending, so hold the button briefly rather than
+  // letting people hammer it and get thrown a lockout error.
+  const startCooldown = useCallback(() => {
+    setCooldown(RESEND_COOLDOWN);
+    if (timer.current) clearInterval(timer.current);
+    timer.current = setInterval(() => {
+      setCooldown((n) => {
+        if (n <= 1 && timer.current) clearInterval(timer.current);
+        return Math.max(0, n - 1);
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
 
   const run = async (fn: () => Promise<void>, after?: () => void) => {
     setError(null);
@@ -83,13 +92,49 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
     }
   };
 
+  const send = (which: Flow) =>
+    run(
+      // 'link' attaches the email to the current anonymous user so progress
+      // carries over; 'signin' returns to an account made on another device.
+      () => (which === 'link' ? startLinkEmail(email) : startSignIn(email)),
+      () => {
+        setFlow(which);
+        setCode('');
+        startCooldown();
+        setNotice('Check your email for your 6-digit code.');
+      },
+    );
+
+  const confirm = () =>
+    run(
+      () => (flow === 'signin' ? confirmSignIn(email, code) : confirmLinkEmail(email, code)),
+      () => {
+        setFlow(null);
+        setCode('');
+        refresh();
+        onChanged();
+      },
+    );
+
+  const saveName = async () => {
+    setNameNote(null);
+    setBusy(true);
+    const res = await setUsername(name);
+    setBusy(false);
+    if (res.ok) {
+      setSavedName(name.trim());
+      setNameNote({ ok: true, text: 'Saved. This is the name on the leaderboard.' });
+      onChanged();
+    } else {
+      setNameNote({ ok: false, text: res.error });
+    }
+  };
+
   const signedIn = !!account?.email;
+  const nameUnchanged = busy || name.trim().length < 3 || name.trim() === savedName;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         style={{ backgroundColor: colors.background }}
         contentContainerStyle={styles.content}
@@ -121,14 +166,11 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
           </Text>
         )}
         <Pressable
-          disabled={busy || name.trim().length < 3 || name.trim() === savedName}
+          disabled={nameUnchanged}
           onPress={saveName}
           style={({ pressed }) => [
             styles.primary,
-            {
-              backgroundColor: colors.accent,
-              opacity: busy || name.trim().length < 3 || name.trim() === savedName ? 0.4 : pressed ? 0.85 : 1,
-            },
+            { backgroundColor: colors.accent, opacity: nameUnchanged ? 0.4 : pressed ? 0.85 : 1 },
           ]}
         >
           <Text style={styles.primaryText}>Save name</Text>
@@ -151,7 +193,7 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
               <Text style={[styles.secondaryText, { color: colors.text }]}>Sign out</Text>
             </Pressable>
           </>
-        ) : (
+        ) : flow === null ? (
           <>
             <Text style={[styles.body, { color: colors.textMuted }]}>
               Your streak currently lives only on this phone. Add an email and it follows you — we'll
@@ -161,118 +203,89 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
             <TextInput
               value={email}
               onChangeText={setEmail}
-              editable={!codeSent}
               placeholder="you@example.com"
               placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.border,
-                  color: colors.text,
-                  backgroundColor: codeSent ? colors.surfaceAlt : colors.surface,
-                },
-              ]}
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.surface }]}
             />
 
-            {codeSent && (
-              <TextInput
-                value={code}
-                onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
-                placeholder="6-digit code"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="number-pad"
-                maxLength={10}
-                style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.surface }]}
-              />
-            )}
-
             {error && <Text style={[styles.note, { color: colors.danger }]}>{error}</Text>}
-            {notice && <Text style={[styles.note, { color: feedbackColors.correct }]}>{notice}</Text>}
-
-            {!codeSent ? (
-              <Pressable
-                disabled={busy || !email.includes('@')}
-                onPress={() =>
-                  run(
-                    // Links to the current anonymous user rather than creating
-                    // a second account, so the streak carries over.
-                    () => startLinkEmail(email),
-                    () => {
-                      setCodeSent(true);
-                      setNotice('Check your email for your 6-digit code.');
-                    },
-                  )
-                }
-                style={({ pressed }) => [
-                  styles.primary,
-                  { backgroundColor: colors.accent, opacity: busy || !email.includes('@') ? 0.4 : pressed ? 0.85 : 1 },
-                ]}
-              >
-                <Text style={styles.primaryText}>Send code</Text>
-              </Pressable>
-            ) : (
-              <>
-                <Pressable
-                  disabled={busy || code.length < 6}
-                  onPress={() =>
-                    run(
-                      () => confirmLinkEmail(email, code),
-                      () => {
-                        setCodeSent(false);
-                        setCode('');
-                        refresh();
-                        onChanged();
-                      },
-                    )
-                  }
-                  style={({ pressed }) => [
-                    styles.primary,
-                    { backgroundColor: colors.accent, opacity: busy || code.length < 6 ? 0.4 : pressed ? 0.85 : 1 },
-                  ]}
-                >
-                  <Text style={styles.primaryText}>Confirm</Text>
-                </Pressable>
-
-                {/* If the address already belongs to an account, linking fails;
-                    this signs into that account instead. */}
-                <Pressable
-                  disabled={busy || code.length < 6}
-                  onPress={() =>
-                    run(
-                      () => confirmSignIn(email, code),
-                      () => {
-                        setCodeSent(false);
-                        setCode('');
-                        refresh();
-                        onChanged();
-                      },
-                    )
-                  }
-                  style={({ pressed }) => [styles.secondary, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-                >
-                  <Text style={[styles.secondaryText, { color: colors.text }]}>
-                    I already had an account with this email
-                  </Text>
-                </Pressable>
-              </>
-            )}
 
             <Pressable
               disabled={busy || !email.includes('@')}
-              onPress={() =>
-                run(() => startSignIn(email), () => {
-                  setCodeSent(true);
-                  setNotice('Check your email for your 6-digit code.');
-                })
-              }
+              onPress={() => send('link')}
+              style={({ pressed }) => [
+                styles.primary,
+                { backgroundColor: colors.accent, opacity: busy || !email.includes('@') ? 0.4 : pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={styles.primaryText}>Send code</Text>
+            </Pressable>
+
+            <Pressable
+              disabled={busy || !email.includes('@')}
+              onPress={() => send('signin')}
               style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
             >
               <Text style={[styles.linkText, { color: colors.textMuted }]}>
-                Signing in on a new phone? Send me a sign-in code
+                Already have an account? Send a sign-in code
               </Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Text style={[styles.body, { color: colors.textMuted }]}>
+              We sent a code to {email}.
+            </Text>
+
+            <TextInput
+              value={code}
+              onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ''))}
+              placeholder="6-digit code"
+              placeholderTextColor={colors.textMuted}
+              keyboardType="number-pad"
+              autoFocus
+              // Longer than the label on purpose: the project's OTP length is a
+              // setting, and a mismatch should not make the code untypable.
+              maxLength={10}
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.surface }]}
+            />
+
+            {error && <Text style={[styles.note, { color: colors.danger }]}>{error}</Text>}
+            {notice && !error && <Text style={[styles.note, { color: feedbackColors.correct }]}>{notice}</Text>}
+
+            <Pressable
+              disabled={busy || code.length < 6}
+              onPress={confirm}
+              style={({ pressed }) => [
+                styles.primary,
+                { backgroundColor: colors.accent, opacity: busy || code.length < 6 ? 0.4 : pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={styles.primaryText}>Confirm</Text>
+            </Pressable>
+
+            <Pressable
+              disabled={busy || cooldown > 0}
+              onPress={() => send(flow)}
+              style={({ pressed }) => [
+                styles.secondary,
+                { borderColor: colors.border, opacity: busy || cooldown > 0 ? 0.4 : pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Text style={[styles.secondaryText, { color: colors.text }]}>
+                {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              disabled={busy}
+              onPress={() => { setFlow(null); setCode(''); setError(null); setNotice(null); }}
+              style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Text style={[styles.linkText, { color: colors.textMuted }]}>Use a different email</Text>
             </Pressable>
           </>
         )}
