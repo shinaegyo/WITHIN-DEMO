@@ -28,13 +28,45 @@ export const supabase = createClient(url, key, {
  * at first, upgradeable to a real login later without losing history.
  * Returns the user id.
  */
+/**
+ * Set once the stored session has been confirmed against the server, so the
+ * check costs one request per launch rather than one per call.
+ */
+let sessionVerified = false;
+
 export async function ensureSignedIn(): Promise<string> {
   const { data } = await supabase.auth.getSession();
-  if (data.session?.user) return data.session.user.id;
 
+  if (data.session?.user) {
+    if (sessionVerified) return data.session.user.id;
+
+    // A stored token still looks valid locally after the account behind it has
+    // gone — deleted by hand, or removed in a data reset. Every call then fails
+    // server-side while the app believes it is signed in, which surfaces as an
+    // unexplained "something went wrong" on whatever the player tried first.
+    // Confirming with the server once per launch turns that into a clean
+    // recovery.
+    const { data: live, error } = await supabase.auth.getUser();
+    if (!error && live.user) {
+      sessionVerified = true;
+      return live.user.id;
+    }
+
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      /* already unusable; clearing it locally is what matters */
+    }
+  }
+
+  // Falls through to a new anonymous player. Someone whose email session died
+  // this way lands on onboarding, which offers "Already have an account?" so
+  // they can sign back into the original rather than being stranded on a new
+  // one.
   const { data: created, error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
   if (!created.user) throw new Error('anonymous sign-in returned no user');
+  sessionVerified = true;
   return created.user.id;
 }
 
@@ -47,6 +79,7 @@ export async function ensureSignedIn(): Promise<string> {
  * once-per-day rule.
  */
 export async function signOutForTesting(): Promise<void> {
+  sessionVerified = false;
   await supabase.auth.signOut();
 }
 
