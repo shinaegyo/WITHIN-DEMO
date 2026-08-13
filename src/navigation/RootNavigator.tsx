@@ -13,6 +13,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
 import { AccountScreen } from '../screens/AccountScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
+import { FriendsScreen } from '../screens/FriendsScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
@@ -27,6 +28,7 @@ export type RootStackParamList = {
   Game: undefined;
   Practice: { remainingAfterThis: number };
   Leaderboard: undefined;
+  Friends: undefined;
   Account: undefined;
   HowToPlay: undefined;
 };
@@ -89,6 +91,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
               onPractice={startPractice}
               onOpenMenu={() => setMenuOpen(true)}
               onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
+              onOpenFriends={() => navigation.navigate('Friends')}
               practiceEpoch={practiceEpoch}
               username={username}
             />
@@ -122,6 +125,10 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           {() => <AccountScreen onChanged={() => { reload(); onProfileChanged(); }} />}
         </Stack.Screen>
 
+        <Stack.Screen name="Friends" options={{ title: 'Friends', headerBackTitle: 'Back' }}>
+          {() => <FriendsScreen username={username} />}
+        </Stack.Screen>
+
         <Stack.Screen
           name="Leaderboard"
           component={LeaderboardScreen}
@@ -140,6 +147,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         onClose={() => setMenuOpen(false)}
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
+          { label: 'Friends', onPress: () => navRef.isReady() && navRef.navigate('Friends') },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
           { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
           game && game.dayStatus !== 'playing'

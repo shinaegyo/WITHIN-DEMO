@@ -228,6 +228,70 @@ export interface Leaderboard {
 }
 
 /** The long game: cumulative points across every day played. */
+export interface FriendsState {
+  friends: string[];
+  /** Requests waiting on you. */
+  incoming: string[];
+  /** Requests you are waiting on. */
+  outgoing: string[];
+}
+
+export type FriendAction =
+  | 'requested'
+  | 'accepted'
+  | 'declined'
+  | 'removed'
+  | 'already_friends'
+  | 'already_requested';
+
+export async function loadFriends(): Promise<FriendsState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('friends_state');
+  const raw = unwrap<any>(data, error);
+  const names = (list: any) => (list ?? []).map((e: any) => e.name as string);
+  return {
+    friends: names(raw.friends),
+    incoming: names(raw.incoming),
+    outgoing: names(raw.outgoing),
+  };
+}
+
+export async function sendFriendRequest(username: string): Promise<FriendAction> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('send_friend_request', { p_username: username });
+  return unwrap<any>(data, error).status;
+}
+
+export async function respondToFriendRequest(username: string, accept: boolean): Promise<FriendAction> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('respond_friend_request', {
+    p_username: username,
+    p_accept: accept,
+  });
+  return unwrap<any>(data, error).status;
+}
+
+export async function removeFriend(username: string): Promise<FriendAction> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('remove_friend', { p_username: username });
+  return unwrap<any>(data, error).status;
+}
+
+/** Today's board narrowed to you and your friends. Same shape as the global one. */
+export async function loadFriendsLeaderboard(): Promise<LeaderboardEntry[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('friends_leaderboard');
+  const raw = unwrap<any>(data, error);
+  return (raw.entries ?? []).map((e: any) => ({
+    rank: e.rank,
+    name: e.name,
+    score: e.score,
+    isMe: !!e.is_me,
+    isComplete: !!e.is_complete,
+    roundsWon: e.rounds_won ?? 0,
+  }));
+}
+
 export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });
@@ -284,6 +348,12 @@ export function messageFor(code: string, guess?: number): string {
       return 'This round is already over.';
     case 'no_puzzle_today':
       return 'No puzzle available. Please try again later.';
+    case 'no_such_user':
+      return "No player with that name. Names are exact, apart from capitals.";
+    case 'thats_you':
+      return "That's your own name.";
+    case 'no_such_request':
+      return 'That request is no longer waiting.';
     default:
       return 'Connection problem. Check your network and try again.';
   }

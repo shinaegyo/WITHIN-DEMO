@@ -10,7 +10,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
-import { LeaderboardEntry, loadLeaderboard } from '../lib/api';
+import { LeaderboardEntry, loadFriendsLeaderboard, loadLeaderboard } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 import { MAX_DAILY_SCORE } from '../game/scoring';
 
@@ -19,6 +19,7 @@ interface Props {
   onPractice: () => void;
   onOpenMenu: () => void;
   onOpenLeaderboard: () => void;
+  onOpenFriends: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
   username: string;
@@ -29,6 +30,7 @@ export function HomeScreen({
   onPractice,
   onOpenMenu,
   onOpenLeaderboard,
+  onOpenFriends,
   practiceEpoch,
   username,
 }: Props) {
@@ -40,6 +42,7 @@ export function HomeScreen({
   const [shareFailed, setShareFailed] = useState(false);
   const [rank, setRank] = useState<{ place: number; of: number } | null>(null);
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
+  const [friendsBoard, setFriendsBoard] = useState<LeaderboardEntry[]>([]);
   // The first screen is sized to the viewport so it keeps the open, centred
   // layout it had before anything sat below it. Everything else scrolls in
   // underneath rather than crowding it.
@@ -60,6 +63,14 @@ export function HomeScreen({
   const dayOver = !!game && game.dayStatus !== 'playing';
   useEffect(() => {
     let cancelled = false;
+    loadFriendsLeaderboard()
+      .then((rows) => {
+        if (!cancelled) setFriendsBoard(rows);
+      })
+      .catch(() => {
+        /* a missing friends board shouldn't take the screen down */
+      });
+
     loadLeaderboard()
       .then((res) => {
         if (cancelled) return;
@@ -123,6 +134,56 @@ export function HomeScreen({
   const top = board.slice(0, 10);
   const me = board.find((e) => e.isMe);
   const preview = me && !top.some((e) => e.isMe) ? [...top, me] : top;
+
+  const renderBoard = (
+    title: string,
+    link: string,
+    rows: LeaderboardEntry[],
+    onPress: () => void,
+  ) => (
+    <Pressable style={styles.boardCard} onPress={onPress}>
+      <View style={styles.boardHead}>
+        <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
+        <Text style={[styles.boardMore, { color: colors.textMuted }]}>{link}</Text>
+      </View>
+
+      {rows.map((item, i) => (
+        <View
+          key={`${item.rank}-${item.name}`}
+          style={[
+            styles.boardRow,
+            {
+              borderColor: colors.border,
+              backgroundColor: item.isMe ? colors.surfaceAlt : colors.surface,
+            },
+            // A gap in the numbering means the player's own row was pulled up
+            // from further down; say so with space.
+            i > 0 && rows[i - 1].rank < item.rank - 1 && styles.boardGap,
+          ]}
+        >
+          {MEDALS[item.rank] ? (
+            <View style={[styles.boardMedal, { backgroundColor: MEDALS[item.rank].ring }]}>
+              <Text style={[styles.boardMedalText, { color: MEDALS[item.rank].ink }]}>
+                {item.rank}
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.boardRank, { color: colors.textMuted }]}>{item.rank}</Text>
+          )}
+
+          <Text style={[styles.boardName, { color: colors.text }]} numberOfLines={1}>
+            {item.name}
+            {item.isMe ? '  (you)' : ''}
+          </Text>
+
+          {!item.isComplete && (
+            <Text style={[styles.boardOut, { color: colors.textMuted }]}>OUT</Text>
+          )}
+          <Text style={[styles.boardScore, { color: colors.text }]}>{item.score}</Text>
+        </View>
+      ))}
+    </Pressable>
+  );
 
   const onPrimary = finished
     ? async () => {
@@ -272,53 +333,26 @@ export function HomeScreen({
           </Pressable>
         )}
         </View>
+        {/* Friends first. Beating eight people you know is a stronger pull
+            than placing fortieth among strangers, so the wider board sits
+            underneath rather than on top. */}
+        {friendsBoard.length > 0 &&
+          renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
+
+        {friendsBoard.length === 0 && (
+          <Pressable style={styles.inviteCard} onPress={onOpenFriends}>
+            <Text style={[styles.inviteTitle, { color: colors.text }]}>Play with friends</Text>
+            <Text style={[styles.inviteBody, { color: colors.textMuted }]}>
+              Everyone gets the same three numbers, so adding a friend puts their day beside yours.
+            </Text>
+            <Text style={[styles.inviteLink, { color: colors.textMuted }]}>Add by username ›</Text>
+          </Pressable>
+        )}
+
         {/* Today's standings, in reach without leaving the screen. They move
             through the day, which is the point: a reason to look again this
             evening rather than only tomorrow. */}
-        {board.length > 0 && (
-          <Pressable style={styles.boardCard} onPress={onOpenLeaderboard}>
-            <View style={styles.boardHead}>
-              <Text style={[styles.boardTitle, { color: colors.textMuted }]}>TODAY'S TOP</Text>
-              <Text style={[styles.boardMore, { color: colors.textMuted }]}>All time ›</Text>
-            </View>
-
-            {preview.map((item, i) => (
-              <View
-                key={item.rank}
-                style={[
-                  styles.boardRow,
-                  {
-                    borderColor: colors.border,
-                    backgroundColor: item.isMe ? colors.surfaceAlt : colors.surface,
-                  },
-                  // A gap in the numbering means the player's own row was
-                  // pulled up from further down; say so with space.
-                  i > 0 && preview[i - 1].rank < item.rank - 1 && styles.boardGap,
-                ]}
-              >
-                {MEDALS[item.rank] ? (
-                  <View style={[styles.boardMedal, { backgroundColor: MEDALS[item.rank].ring }]}>
-                    <Text style={[styles.boardMedalText, { color: MEDALS[item.rank].ink }]}>
-                      {item.rank}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text style={[styles.boardRank, { color: colors.textMuted }]}>{item.rank}</Text>
-                )}
-
-                <Text style={[styles.boardName, { color: colors.text }]} numberOfLines={1}>
-                  {item.name}
-                  {item.isMe ? '  (you)' : ''}
-                </Text>
-
-                {!item.isComplete && (
-                  <Text style={[styles.boardOut, { color: colors.textMuted }]}>OUT</Text>
-                )}
-                <Text style={[styles.boardScore, { color: colors.text }]}>{item.score}</Text>
-              </View>
-            ))}
-          </Pressable>
-        )}
+        {board.length > 0 && renderBoard("TODAY'S TOP", 'All time ›', preview, onOpenLeaderboard)}
 
       </ScrollView>
 
@@ -383,6 +417,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
   },
   boardGap: { marginTop: 10 },
+  inviteCard: {
+    alignSelf: 'stretch',
+    marginTop: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#8A8F98',
+    gap: 4,
+  },
+  inviteTitle: { fontSize: 14.5, fontFamily: fonts.extraBold },
+  inviteBody: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
+  inviteLink: { fontSize: 11.5, fontFamily: fonts.bold, marginTop: 4 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {
     width: 18,
