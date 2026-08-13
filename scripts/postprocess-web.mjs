@@ -88,6 +88,9 @@ html = html.replace(
   '</style>',
   `  body { overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
       * { -webkit-tap-highlight-color: transparent; }
+      /* Browsers draw a focus ring in the system accent colour, which clashes
+         with the board. The app animates its own focus state instead. */
+      input:focus, input:focus-visible { outline: none !important; box-shadow: none !important; }
     </style>`,
 );
 
