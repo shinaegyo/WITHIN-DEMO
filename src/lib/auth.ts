@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { ensureSignedIn, invalidateSession, supabase } from './supabase';
 
 /**
  * Optional email accounts, built around one rule: signing in must attach an
@@ -72,8 +72,34 @@ export async function signOut(): Promise<void> {
 }
 
 export async function setUsername(name: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { data, error } = await supabase.rpc('set_username', { p_username: name });
-  if (error) return { ok: false, error: 'Something went wrong. Try again.' };
+  // Every other call in the app establishes a session first; this one did not,
+  // and it is the very first thing a new player does. If the session was
+  // missing, expired, or belonged to a deleted account, the request went up
+  // unauthenticated and came back as a bare transport error — which the player
+  // saw as "Something went wrong" while typing a perfectly good name.
+  try {
+    await ensureSignedIn();
+  } catch {
+    return { ok: false, error: 'Could not reach the server. Check your connection and try again.' };
+  }
+
+  let { data, error } = await supabase.rpc('set_username', { p_username: name });
+
+  // A token can die between being checked and being used. One retry on a fresh
+  // session separates that from a genuine problem.
+  if (error) {
+    invalidateSession();
+    try {
+      await ensureSignedIn();
+    } catch {
+      return { ok: false, error: 'Could not reach the server. Check your connection and try again.' };
+    }
+    ({ data, error } = await supabase.rpc('set_username', { p_username: name }));
+  }
+
+  if (error) {
+    return { ok: false, error: 'Could not save that name. Check your connection and try again.' };
+  }
   if (data?.error) {
     const messages: Record<string, string> = {
       bad_length: 'Use between 3 and 16 characters.',

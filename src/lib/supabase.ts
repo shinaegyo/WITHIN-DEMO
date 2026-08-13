@@ -34,6 +34,15 @@ export const supabase = createClient(url, key, {
  */
 let sessionVerified = false;
 
+/**
+ * Forget that the stored session was confirmed, so the next ensureSignedIn
+ * checks it against the server again. For use when a call has just failed in a
+ * way that suggests the token died after we last looked.
+ */
+export function invalidateSession(): void {
+  sessionVerified = false;
+}
+
 export async function ensureSignedIn(): Promise<string> {
   const { data } = await supabase.auth.getSession();
 
