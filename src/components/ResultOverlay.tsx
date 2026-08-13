@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PlayerStats, ServerStatus } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -17,9 +17,18 @@ interface Props {
   stats: PlayerStats;
   /** True when the game was already over on load, so we skip the celebration. */
   resumed: boolean;
+  onNewTestPlayer: () => void;
 }
 
-export function ResultOverlay({ status, answer, attemptsUsed, score, stats, resumed }: Props) {
+export function ResultOverlay({
+  status,
+  answer,
+  attemptsUsed,
+  score,
+  stats,
+  resumed,
+  onNewTestPlayer,
+}: Props) {
   const { colors } = useTheme();
   const scale = useRef(new Animated.Value(resumed ? 1 : 0.7)).current;
   const opacity = useRef(new Animated.Value(resumed ? 1 : 0)).current;
@@ -92,6 +101,18 @@ export function ResultOverlay({ status, answer, attemptsUsed, score, stats, resu
 
         <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
         <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
+
+        {__DEV__ && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.devButton,
+              { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+            ]}
+            onPress={onNewTestPlayer}
+          >
+            <Text style={[styles.devText, { color: colors.textMuted }]}>Play again as new test player</Text>
+          </Pressable>
+        )}
       </Animated.View>
     </View>
   );
@@ -180,5 +201,16 @@ const styles = StyleSheet.create({
     fontFamily: fonts.extraBold,
     letterSpacing: 1,
     marginTop: 2,
+  },
+  devButton: {
+    marginTop: 18,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  devText: {
+    fontSize: 11,
+    fontFamily: fonts.semiBold,
   },
 });

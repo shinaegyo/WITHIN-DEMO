@@ -39,6 +39,18 @@ export async function ensureSignedIn(): Promise<string> {
 }
 
 /**
+ * Dev only. Drops the current anonymous session so the next call to
+ * ensureSignedIn creates a new player with a fresh daily game.
+ *
+ * Testing works this way on purpose: there is no server-side "replay today"
+ * function, because shipping one would hand every player a way around the
+ * once-per-day rule.
+ */
+export async function signOutForTesting(): Promise<void> {
+  await supabase.auth.signOut();
+}
+
+/**
  * The device's IANA timezone, e.g. "America/Los_Angeles".
  * Sent once at sign-up and stored on the profile; from then on the server
  * uses the stored value to decide which puzzle the player is on, so changing

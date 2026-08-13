@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError, DailyGame, loadDailyGame, messageFor, submitGuess } from '../lib/api';
+import { signOutForTesting } from '../lib/supabase';
 import { GuessResult } from '../game/types';
 
 type Phase = 'loading' | 'ready' | 'failed';
@@ -13,6 +14,8 @@ export interface UseDailyGameResult {
   lastResult: GuessResult | null;
   submit: (guess: number) => Promise<{ ok: true } | { ok: false; error: string }>;
   reload: () => void;
+  /** Dev only — signs in as a new anonymous player to get a fresh game. */
+  startFreshTestPlayer: () => Promise<void>;
 }
 
 export function useDailyGame(): UseDailyGameResult {
@@ -36,6 +39,27 @@ export function useDailyGame(): UseDailyGameResult {
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  /** Refetch without flipping back to the loading screen. */
+  const refresh = useCallback(async () => {
+    try {
+      setGame(await loadDailyGame());
+    } catch {
+      /* keep showing what we have */
+    }
+  }, []);
+
+  /**
+   * Dev only. There is deliberately no way to replay a day, so testing uses a
+   * brand new anonymous player instead — each of whom legitimately gets one
+   * game. Resetting server-side would mean shipping a function that defeats
+   * the once-per-day rule.
+   */
+  const startFreshTestPlayer = useCallback(async () => {
+    setPhase('loading');
+    await signOutForTesting();
+    await load();
   }, [load]);
 
   const submit = useCallback(
@@ -67,6 +91,9 @@ export function useDailyGame(): UseDailyGameResult {
               }
             : prev,
         );
+        // submit_guess doesn't carry stats, so once the game ends we resync to
+        // pick up the new streak and totals for the result screen.
+        if (res.status !== 'playing') refresh();
         return { ok: true as const };
       } catch (err) {
         const code = err instanceof ApiError ? err.code : 'network';
@@ -78,8 +105,17 @@ export function useDailyGame(): UseDailyGameResult {
         setSubmitting(false);
       }
     },
-    [game, submitting, load],
+    [game, submitting, load, refresh],
   );
 
-  return { phase, game, loadError, submitting, lastResult, submit, reload: load };
+  return {
+    phase,
+    game,
+    loadError,
+    submitting,
+    lastResult,
+    submit,
+    reload: load,
+    startFreshTestPlayer,
+  };
 }

@@ -15,7 +15,8 @@ import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
 
 export function GameScreen() {
   const { colors, mode } = useTheme();
-  const { phase, game, loadError, submitting, lastResult, submit, reload } = useDailyGame();
+  const { phase, game, loadError, submitting, lastResult, submit, reload, startFreshTestPlayer } =
+    useDailyGame();
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
 
   // True when today's game was already finished before this session started,
@@ -91,6 +92,7 @@ export function GameScreen() {
           score={game.score}
           stats={game.stats}
           resumed={resumedFinished.current}
+          onNewTestPlayer={startFreshTestPlayer}
         />
       )}
     </SafeAreaView>
