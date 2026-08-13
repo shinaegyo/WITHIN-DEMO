@@ -117,7 +117,7 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
           </Text>
         ) : (
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            3–16 characters · letters, numbers and underscores · no spaces
+            3–16 characters · letters, numbers, underscores
           </Text>
         )}
         <Pressable
