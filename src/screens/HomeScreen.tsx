@@ -16,6 +16,7 @@ interface Props {
   onOpenMenu: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
+  username: string;
 }
 
 const POINTS_MAX_SIZE = 128;
@@ -36,7 +37,7 @@ function pointsFontSize(text: string, available: number): number {
   return Math.max(POINTS_MIN_SIZE, Math.min(POINTS_MAX_SIZE, size));
 }
 
-export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Props) {
+export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, username }: Props) {
   const { colors, mode, toggle } = useTheme();
   const { phase, game, loadError, reload } = useDailyGameContext();
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
@@ -99,6 +100,10 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
       </View>
 
       <View style={styles.body}>
+        <Text style={[styles.welcome, { color: colors.textMuted }]} numberOfLines={1}>
+          Welcome, <Text style={{ color: colors.text, fontFamily: fonts.extraBold }}>{username}</Text>
+        </Text>
+
         {/* Sized to fill the available width rather than sitting at a fixed
             size. adjustsFontSizeToFit only ever shrinks text, so a short total
             like "95" would stay small; this scales up to fill and back down as
@@ -191,6 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 28,
   },
+  welcome: { fontSize: 15, fontFamily: fonts.medium, marginBottom: 16 },
   pointsRow: { alignSelf: 'stretch' },
   points: {
     fontFamily: fonts.extraBold,

@@ -12,8 +12,10 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
 import { AccountScreen } from '../screens/AccountScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
+import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
+import { useProfile } from '../state/useProfile';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
 import { useTheme } from '../theme/ThemeContext';
@@ -34,7 +36,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 // component's render, which React rightly complains about.
 const navRef = createNavigationContainerRef<RootStackParamList>();
 
-function Screens() {
+function Screens({ username, onProfileChanged }: { username: string; onProfileChanged: () => void }) {
   const { colors, mode } = useTheme();
   const { startFreshTestPlayer, reload, game } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -75,6 +77,7 @@ function Screens() {
               onPractice={startPractice}
               onOpenMenu={() => setMenuOpen(true)}
               practiceEpoch={practiceEpoch}
+              username={username}
             />
           )}
         </Stack.Screen>
@@ -103,7 +106,7 @@ function Screens() {
         </Stack.Screen>
 
         <Stack.Screen name="Account" options={{ title: 'Profile', headerBackTitle: 'Back' }}>
-          {() => <AccountScreen onChanged={reload} />}
+          {() => <AccountScreen onChanged={() => { reload(); onProfileChanged(); }} />}
         </Stack.Screen>
 
         <Stack.Screen
@@ -138,9 +141,20 @@ function Screens() {
 }
 
 export function RootNavigator() {
+  const profile = useProfile();
+
+  if (profile.loading) return null;
+
+  // A username is what gates the app: it's required to appear on the
+  // leaderboard, and unlike an email it can be claimed without waiting for a
+  // code to arrive.
+  if (!profile.username) {
+    return <OnboardingScreen onDone={profile.refresh} />;
+  }
+
   return (
     <DailyGameProvider>
-      <Screens />
+      <Screens username={profile.username} onProfileChanged={profile.refresh} />
     </DailyGameProvider>
   );
 }
