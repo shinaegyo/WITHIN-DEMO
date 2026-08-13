@@ -17,11 +17,30 @@ interface Props {
   practiceEpoch: number;
 }
 
+const POINTS_MAX_SIZE = 128;
+const POINTS_MIN_SIZE = 34;
+
+/**
+ * Approximate width of the string in em units for Archivo ExtraBold, then
+ * divide the available width by it. Digits are near-monospaced in this face;
+ * separators are much narrower.
+ */
+function pointsFontSize(text: string, available: number): number {
+  if (!available) return POINTS_MIN_SIZE;
+  let units = 0;
+  for (const ch of text) units += ch >= '0' && ch <= '9' ? 0.64 : 0.32;
+  // 4% margin: the per-character estimate is close but not exact, and glyph
+  // measurement showed longer totals overshooting the container without it.
+  const size = (available * 0.96) / Math.max(units, 0.64);
+  return Math.max(POINTS_MIN_SIZE, Math.min(POINTS_MAX_SIZE, size));
+}
+
 export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Props) {
   const { colors, mode, toggle } = useTheme();
   const { phase, game, loadError, reload } = useDailyGameContext();
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
+  const [pointsWidth, setPointsWidth] = useState(0);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -73,11 +92,19 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
       </View>
 
       <View style={styles.body}>
-        {/* Points sit above the wordmark, where they have the full screen width
-            to grow into — a six-figure total still fits on one line. */}
-        <Text style={[styles.points, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-          {points}
-        </Text>
+        {/* Sized to fill the available width rather than sitting at a fixed
+            size. adjustsFontSizeToFit only ever shrinks text, so a short total
+            like "95" would stay small; this scales up to fill and back down as
+            digits are added. */}
+        <View style={styles.pointsRow} onLayout={(e) => setPointsWidth(e.nativeEvent.layout.width)}>
+          <Text
+            style={[styles.points, { color: colors.text, fontSize: pointsFontSize(points, pointsWidth) }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            {points}
+          </Text>
+        </View>
         <Text style={[styles.pointsLabel, { color: colors.textMuted }]}>TOTAL POINTS</Text>
 
         <Text style={[styles.logo, { color: colors.text }]}>WITHIN</Text>
@@ -159,18 +186,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 28,
   },
+  pointsRow: { alignSelf: 'stretch' },
   points: {
-    fontSize: 40,
     fontFamily: fonts.extraBold,
-    letterSpacing: -0.5,
-    alignSelf: 'stretch',
+    letterSpacing: -2,
     textAlign: 'center',
+    includeFontPadding: false,
   },
   pointsLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: fonts.bold,
-    letterSpacing: 1.4,
-    marginBottom: 22,
+    letterSpacing: 1.6,
+    marginTop: 2,
+    marginBottom: 24,
   },
   logo: {
     fontSize: 64,
