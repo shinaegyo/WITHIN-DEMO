@@ -44,7 +44,9 @@ export function RoundOverlay({
   const dayOver = game.dayStatus !== 'playing';
   const eliminated = game.dayStatus === 'eliminated';
   const roundWon = game.round.status === 'won';
-  const moreRounds = roundWon && !dayOver;
+  // A lost round no longer ends the day, so the way on is offered whether the
+  // round was solved or not.
+  const moreRounds = !dayOver;
 
   useEffect(() => {
     scale.setValue(0.7);
@@ -69,7 +71,7 @@ export function RoundOverlay({
   // Retry is still open, so the number must stay hidden — showing it here is
   // what let players read the answer and retype it for full marks.
   const canRetry = game.canRetry;
-  const title = eliminated ? 'OUT OF ATTEMPTS' : roundWon ? 'CORRECT!' : 'ROUND OVER';
+  const title = roundWon ? 'CORRECT!' : 'OUT OF ATTEMPTS';
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.backdrop]}>
