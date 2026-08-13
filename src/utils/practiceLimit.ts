@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * around the cap and no reason to spend a server round trip on it.
  */
 
-export const PRACTICE_PER_DAY = 5;
+export const PRACTICE_PER_DAY = 3;
 
 const KEY = 'within.practice';
 

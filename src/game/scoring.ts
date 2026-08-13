@@ -1,21 +1,12 @@
-import { MAX_ATTEMPTS } from './constants';
+export const TOTAL_ROUNDS = 3;
+export const MAX_ROUND_SCORE = 100;
+export const MAX_DAILY_SCORE = TOTAL_ROUNDS * MAX_ROUND_SCORE;
 
-/**
- * Points awarded by the attempt number the player solved on.
- * Index 0 is the first attempt. Failing to solve scores nothing.
- *
- * The server recomputes this from its own record of the game — the client
- * value is only ever for display.
- */
-const POINTS_BY_ATTEMPT = [100, 95, 90, 80, 70, 60, 50] as const;
-
-export const MAX_POINTS = POINTS_BY_ATTEMPT[0];
-
+/** Attempt 1 scores 100, dropping by 10 each attempt to 40 on the 7th. */
 export function scoreForAttempt(attemptNumber: number): number {
-  if (attemptNumber < 1 || attemptNumber > MAX_ATTEMPTS) return 0;
-  return POINTS_BY_ATTEMPT[attemptNumber - 1] ?? 0;
+  if (attemptNumber < 1 || attemptNumber > 7) return 0;
+  return 110 - 10 * attemptNumber;
 }
 
-export function scoreForGame(solved: boolean, attemptsUsed: number): number {
-  return solved ? scoreForAttempt(attemptsUsed) : 0;
-}
+/** Attempts never drop below this, however many finals you scrape through. */
+export const MIN_ATTEMPTS = 3;

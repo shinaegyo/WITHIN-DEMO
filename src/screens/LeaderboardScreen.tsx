@@ -31,14 +31,14 @@ export function LeaderboardScreen() {
 
   if (entries.length === 0) {
     return (
-      <StatusScreen message={"Nobody has solved today's number yet. Be the first."} />
+      <StatusScreen message={"Nobody has finished today's 3 rounds yet. Be the first."} />
     );
   }
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        {total} {total === 1 ? 'player has' : 'players have'} solved today
+        {total} {total === 1 ? 'player has' : 'players have'} finished all 3 rounds today
       </Text>
 
       <FlatList
@@ -59,9 +59,6 @@ export function LeaderboardScreen() {
             <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
               {item.name}
               {item.isMe ? '  (you)' : ''}
-            </Text>
-            <Text style={[styles.attempts, { color: colors.textMuted }]}>
-              {item.attempts} {item.attempts === 1 ? 'guess' : 'guesses'}
             </Text>
             <Text style={[styles.score, { color: colors.text }]}>{item.score}</Text>
           </View>
@@ -91,6 +88,5 @@ const styles = StyleSheet.create({
   },
   rank: { width: 30, fontSize: 14, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 15, fontFamily: fonts.semiBold },
-  attempts: { fontSize: 11, fontFamily: fonts.medium, marginRight: 12 },
   score: { fontSize: 18, fontFamily: fonts.extraBold, minWidth: 38, textAlign: 'right' },
 });

@@ -6,21 +6,24 @@ import { EmptySlot, FilledSlot } from './GuessSlot';
 interface Props {
   guesses: GuessResult[];
   maxAttempts: number;
+  /** Highlights the final slot so the cost of reaching it is visible early. */
+  warnLastAttempt?: boolean;
 }
 
 /**
  * Always renders every attempt slot so the player can see up front how many
  * guesses they get; slots fill in from the top as guesses are made.
  */
-export function GuessBoard({ guesses, maxAttempts }: Props) {
+export function GuessBoard({ guesses, maxAttempts, warnLastAttempt = true }: Props) {
   return (
     <View style={styles.board}>
       {Array.from({ length: maxAttempts }).map((_, index) => {
         const result = guesses[index];
+        const isFinal = index + 1 === maxAttempts;
         return result ? (
           <FilledSlot key={index} result={result} attemptNumber={index + 1} />
         ) : (
-          <EmptySlot key={index} attemptNumber={index + 1} />
+          <EmptySlot key={index} attemptNumber={index + 1} isFinal={warnLastAttempt && isFinal} />
         );
       })}
     </View>

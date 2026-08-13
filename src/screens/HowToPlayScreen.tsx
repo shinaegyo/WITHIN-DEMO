@@ -43,8 +43,8 @@ export function HowToPlayScreen() {
     >
       <Text style={[styles.h1, { color: colors.text }]}>How to play</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        One number between 1 and 1000 is chosen each day. Everyone in the world gets the same number,
-        and you have seven guesses to find it.
+        Three numbers between 1 and 1000 are chosen each day. Everyone in the world gets the same
+        three — only the order differs — and you play them one round at a time.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Which way to go</Text>
@@ -76,24 +76,36 @@ export function HowToPlayScreen() {
 
       <Text style={[styles.h2, { color: colors.text }]}>Clues</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        You start with one clue about the number, such as "the number is divisible by 3". Land a guess
-        within 10 and a second, more specific clue unlocks for the rest of the game.
+        Each round starts with one clue about that round's number, such as "the number is divisible
+        by 3". Land a guess within 10 and a second, more specific clue unlocks for the rest of that
+        round.
+      </Text>
+
+      <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        Round 1 gives you seven attempts. Solve a round and you move to the next one. Solve it on
+        your very last attempt and the next round gives you one attempt fewer — down to a floor of
+        three. Solve with an attempt to spare and the limit stays where it is.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        Run out of attempts and your day ends there. You keep the points you've already earned, and
+        you can watch an ad to retry the round you lost.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        The sooner you find it, the more you score.
+        Each round is worth up to 100, so a perfect day is 300.
       </Text>
       <View style={[styles.scoreBox, { borderColor: colors.border }]}>
         {([
-          ['1st guess', 100],
-          ['2nd guess', 95],
-          ['3rd guess', 90],
-          ['4th guess', 80],
-          ['5th guess', 70],
-          ['6th guess', 60],
-          ['7th guess', 50],
-          ['Out of guesses', 0],
+          ['1st attempt', 100],
+          ['2nd attempt', 90],
+          ['3rd attempt', 80],
+          ['4th attempt', 70],
+          ['5th attempt', 60],
+          ['6th attempt', 50],
+          ['7th attempt', 40],
+          ['Out of attempts', 0],
         ] as const).map(([label, points]) => (
           <View key={label} style={styles.scoreRow}>
             <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>{label}</Text>
@@ -104,8 +116,8 @@ export function HowToPlayScreen() {
 
       <Text style={[styles.h2, { color: colors.text }]}>Streaks</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Solve the number every day to build a streak. Miss a day, or run out of guesses, and it starts
-        again from zero. A new number arrives at midnight, your time.
+        Finish all three rounds to keep your streak. Miss a day, or get eliminated without
+        retrying, and it starts again from zero. New numbers arrive at midnight, your time.
       </Text>
     </ScrollView>
   );

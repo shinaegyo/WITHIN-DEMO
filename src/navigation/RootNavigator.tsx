@@ -87,7 +87,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           options={{
             headerShown: false,
             // Swiping back would otherwise bypass the in-app rule above.
-            gestureEnabled: !game || game.attemptsUsed === 0,
+            gestureEnabled: !game || (game.currentRound === 1 && game.round.attemptsUsed === 0),
           }}
         >
           {({ navigation }) => <GameScreen onExit={() => navigation.navigate('Home')} />}

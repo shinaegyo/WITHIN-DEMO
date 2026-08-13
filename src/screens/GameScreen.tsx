@@ -1,14 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
 import { Header } from '../components/Header';
 import { NumberInput } from '../components/NumberInput';
-import { ResultOverlay } from '../components/ResultOverlay';
+import { RoundOverlay } from '../components/RoundOverlay';
+import { RoundProgress } from '../components/RoundProgress';
 import { StatusScreen } from '../components/StatusScreen';
 import { useDailyGameContext } from '../state/DailyGameContext';
+import { feedbackColors } from '../theme/colors';
+import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
@@ -18,21 +21,13 @@ const RESULT_DELAY_MS = 3000;
 
 export function GameScreen({ onExit }: { onExit: () => void }) {
   const { colors, mode } = useTheme();
-  const { phase, game, loadError, submitting, lastResult, submit, reload, startFreshTestPlayer } =
-    useDailyGameContext();
-  const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
-  // The result card is held back briefly so the winning tile, its colour and
-  // the sound register before a modal covers the board.
-  const [showResult, setShowResult] = useState(false);
+  const {
+    phase, game, loadError, submitting, lastResult, lastSubmit,
+    submit, advance, retry, reload,
+  } = useDailyGameContext();
 
-  // True when today's game was already finished before this session started,
-  // so we show the summary without replaying the celebration.
-  const resumedFinished = useRef(false);
-  useEffect(() => {
-    if (phase === 'ready' && game && !lastResult) {
-      resumedFinished.current = game.status !== 'playing';
-    }
-  }, [phase, game, lastResult]);
+  const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
+  const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
     if (!lastResult) return;
@@ -50,19 +45,20 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     }
   }, [lastResult]);
 
+  // Held back so the tile, sound and haptic land before a card covers them.
+  const roundOver = !!game && game.round.status !== 'playing';
   useEffect(() => {
-    if (!game || game.status === 'playing') {
+    if (!roundOver) {
       setShowResult(false);
       return;
     }
-    // Reopening an already-finished day shouldn't sit on a blank board.
     if (!lastResult) {
       setShowResult(true);
       return;
     }
     const t = setTimeout(() => setShowResult(true), RESULT_DELAY_MS);
     return () => clearTimeout(t);
-  }, [game?.status, lastResult]);
+  }, [roundOver, lastResult]);
 
   const clearFeedback = useCallback(() => setFeedbackTrigger(null), []);
 
@@ -79,6 +75,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     if (phase === 'loading') return <StatusScreen loading />;
     if (phase === 'failed' || !game) return <StatusScreen message={loadError} onRetry={reload} />;
 
+    const { round } = game;
+    const onFinalAttempt = round.attemptsUsed === round.attemptsAllowed - 1;
+    const canLeave = round.attemptsUsed === 0 && game.currentRound === 1;
+
     return (
       <KeyboardAvoidingView
         style={styles.flex}
@@ -86,14 +86,31 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         keyboardVerticalOffset={12}
       >
         <View style={styles.content}>
-          {/* Once a guess is in, the day is committed — leaving must not look
-              like a way to undo it. */}
-          <Header onBack={game.attemptsUsed === 0 ? onExit : undefined} />
-          <ClueCard clue1={game.clue1} clue2={game.clue2} clue2Unlocked={!!game.clue2} />
+          <Header onBack={canLeave ? onExit : undefined} />
+
+          <RoundProgress
+            currentRound={game.currentRound}
+            totalRounds={game.totalRounds}
+            rounds={game.rounds}
+            totalScore={game.totalScore}
+          />
+
+          <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={!!round.clue2} />
+
           <View style={styles.boardWrap}>
-            <GuessBoard guesses={game.guesses} maxAttempts={game.maxAttempts} />
+            <GuessBoard guesses={round.guesses} maxAttempts={round.attemptsAllowed} />
           </View>
-          <NumberInput disabled={game.status !== 'playing' || submitting} onSubmit={handleSubmit} />
+
+          {onFinalAttempt && round.status === 'playing' && (
+            <Text style={[styles.finalWarning, { color: feedbackColors.within10 }]}>
+              Last attempt — solving now leaves you one fewer next round.
+            </Text>
+          )}
+
+          <NumberInput
+            disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
+            onSubmit={handleSubmit}
+          />
         </View>
       </KeyboardAvoidingView>
     );
@@ -107,14 +124,14 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
       <FeedbackOverlay trigger={feedbackTrigger} onDone={clearFeedback} />
 
       {game && showResult && (
-        <ResultOverlay
-          status={game.status}
-          answer={game.answer}
-          attemptsUsed={game.attemptsUsed}
-          score={game.score}
-          stats={game.stats}
-          resumed={resumedFinished.current}
-          onNewTestPlayer={startFreshTestPlayer}
+        <RoundOverlay
+          game={game}
+          submit={lastSubmit}
+          onNextRound={() => {
+            setShowResult(false);
+            advance();
+          }}
+          onRetry={retry}
           onExit={onExit}
         />
       )}
@@ -129,7 +146,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 12,
-    gap: 16,
+    gap: 14,
   },
   boardWrap: { flex: 1 },
+  finalWarning: {
+    fontSize: 12,
+    fontFamily: fonts.bold,
+    textAlign: 'center',
+    marginTop: -4,
+  },
 });

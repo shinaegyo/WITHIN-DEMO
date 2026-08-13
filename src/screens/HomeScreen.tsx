@@ -69,8 +69,10 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
     );
   }
 
-  const finished = game.status !== 'playing';
-  const inProgress = game.status === 'playing' && game.attemptsUsed > 0;
+  const finished = game.dayStatus !== 'playing';
+  const eliminated = game.dayStatus === 'eliminated';
+  const inProgress =
+    game.dayStatus === 'playing' && (game.currentRound > 1 || game.round.attemptsUsed > 0);
   // Separators keep five- and six-figure totals readable rather than a wall of digits.
   const points = game.stats.totalPoints.toLocaleString();
 
@@ -124,7 +126,9 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
 
         {finished ? (
           <Text style={[styles.doneTitle, { color: colors.text }]}>
-            {game.status === 'won' ? `Solved for ${game.score} points` : `Today's number was ${game.answer}`}
+            {eliminated
+              ? `Eliminated on round ${game.currentRound} · ${game.totalScore} points`
+              : `All 3 rounds done · ${game.totalScore} of 300 points`}
           </Text>
         ) : (
           <Pressable
@@ -134,7 +138,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
             ]}
             onPress={onPlay}
           >
-            <Text style={styles.playText}>{inProgress ? 'CONTINUE' : 'PRESS TO PLAY'}</Text>
+            <Text style={styles.playText}>{inProgress ? `CONTINUE ROUND ${game.currentRound}` : 'PRESS TO PLAY'}</Text>
           </Pressable>
         )}
 
@@ -157,7 +161,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
               {practiceLeft > 0 ? 'Play a practice round' : 'No practice rounds left today'}
             </Text>
             <Text style={[styles.practiceMeta, { color: colors.textMuted }]}>
-              {practiceLeft > 0 ? `${practiceLeft} of 5 left today · unranked` : 'Resets at midnight'}
+              {practiceLeft > 0 ? `${practiceLeft} of 3 left today · unranked` : 'Resets at midnight'}
             </Text>
           </Pressable>
         )}

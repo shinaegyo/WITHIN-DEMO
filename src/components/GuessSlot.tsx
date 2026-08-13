@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { getBandLabel } from '../game/proximity';
 import { GuessResult } from '../game/types';
-import { getTileAccent, getTileFill } from '../theme/colors';
+import { feedbackColors, getTileAccent, getTileFill } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -20,12 +20,33 @@ const slotBase = {
   overflow: 'hidden',
 } as const;
 
-export function EmptySlot({ attemptNumber }: { attemptNumber: number }) {
+export function EmptySlot({
+  attemptNumber,
+  isFinal = false,
+}: {
+  attemptNumber: number;
+  isFinal?: boolean;
+}) {
   const { colors } = useTheme();
 
+  // The final slot is marked before it's reached, because solving on it costs
+  // an attempt in the next round — the player needs that in mind while
+  // choosing, not after.
   return (
-    <View style={[styles.slot, styles.empty, { borderColor: colors.border }]}>
-      <Text style={[styles.attemptLabel, { color: colors.textMuted }]}>#{attemptNumber}</Text>
+    <View
+      style={[
+        styles.slot,
+        styles.empty,
+        { borderColor: isFinal ? feedbackColors.within10 : colors.border },
+        isFinal && styles.finalSlot,
+      ]}
+    >
+      <Text style={[styles.attemptLabel, { color: isFinal ? feedbackColors.within10 : colors.textMuted }]}>
+        #{attemptNumber}
+      </Text>
+      {isFinal && (
+        <Text style={[styles.finalNote, { color: feedbackColors.within10 }]}>LAST ATTEMPT</Text>
+      )}
     </View>
   );
 }
@@ -89,6 +110,15 @@ const styles = StyleSheet.create({
   slot: slotBase,
   empty: {
     borderWidth: 1.5,
+    justifyContent: 'space-between',
+  },
+  finalSlot: {
+    borderStyle: 'dashed',
+  },
+  finalNote: {
+    fontSize: 9,
+    fontFamily: fonts.bold,
+    letterSpacing: 1,
   },
   // Full-saturation stripe: the one element that never dims, so direction and
   // closeness stay readable even on the unfilled tiles.
