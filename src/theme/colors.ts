@@ -43,6 +43,11 @@ export const darkColors: ThemeColors = {
 // feeling urgent instead of muddy, while direction stays readable at a glance.
 export const proximityColors = {
   below: {
+    // Two steps beyond the old far tier, paling as the guess gets colder. They
+    // carry no fill, so this is the accent bar and the label only — it has to
+    // stay legible on white without competing with the close tiers.
+    vast: '#D3E3F7',
+    distant: '#BED7F3',
     light: '#A9C9EF',
     medium: '#5B92DF',
     dark: '#2563EB',
@@ -53,6 +58,8 @@ export const proximityColors = {
   // background. Keeping the green and blue channels close together holds these
   // in the red family at every opacity, on either theme.
   above: {
+    vast: '#FFDCD5',
+    distant: '#FFC7BE',
     light: '#FFB3A7',
     medium: '#FF8A75',
     dark: '#F4453F',
@@ -70,6 +77,8 @@ export const proximityColors = {
  * filled. The board stays calm and brown never appears.
  */
 const TIER_ALPHA: Record<string, number> = {
+  vast: 0,
+  distant: 0,
   light: 0,
   medium: 0,
   dark: 0.5,
@@ -97,6 +106,20 @@ export const feedbackColors = {
   oneAway: '#E8452C',
   correct: '#22A559',
 };
+
+/**
+ * Ink for the label and arrow on an unfilled tile.
+ *
+ * The bar can be as pale as the scale likes — it is a solid block and reads
+ * fine. Text cannot: the two farthest rungs dropped below legible contrast on a
+ * white surface, so the ink stops paling at the 100-249 step while the bar
+ * carries on. The distance is still stated in words on the same row, so nothing
+ * is lost by holding the colour steady.
+ */
+export function getTileInk(direction: 'below' | 'above' | 'correct', tier: string): string {
+  const floored = tier === 'vast' || tier === 'distant' ? 'light' : tier;
+  return getTileAccent(direction, floored);
+}
 
 /** Full-saturation colour for the tier — used for the accent bar and labels. */
 export function getTileAccent(direction: 'below' | 'above' | 'correct', tier: string): string {

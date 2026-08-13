@@ -24,7 +24,7 @@ export function hapticCorrect() {
  * implementation — so it only reaches players on a native build.
  */
 export function hapticForTier(tier: string) {
-  if (tier === 'light') {
+  if (tier === 'vast' || tier === 'distant' || tier === 'light') {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
   } else if (tier === 'medium') {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});

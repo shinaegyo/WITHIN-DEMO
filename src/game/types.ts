@@ -1,6 +1,13 @@
 export type Direction = 'below' | 'above' | 'correct';
 
-export type ProximityTier = 'light' | 'medium' | 'dark' | 'intense' | 'correct';
+export type ProximityTier =
+  | 'vast'
+  | 'distant'
+  | 'light'
+  | 'medium'
+  | 'dark'
+  | 'intense'
+  | 'correct';
 
 export interface GuessResult {
   guess: number;

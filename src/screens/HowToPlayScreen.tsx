@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { getTileAccent, getTileFill } from '../theme/colors';
+import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -23,12 +23,14 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     const fill = getTileFill(direction, tier);
     const accent = getTileAccent(direction, tier);
     const ink = fill ? '#FFFFFF' : colors.text;
+    // Same legibility floor the real tile uses for the palest two rungs.
+    const bandInk = fill ? '#FFFFFF' : getTileInk(direction, tier);
     return (
       <View style={[styles.tile, { backgroundColor: fill ?? colors.surface }]}>
         <View style={[styles.accentBar, { backgroundColor: accent }]} />
         <Text style={[styles.tileGuess, { color: ink }]}>{guess}</Text>
-        <Text style={[styles.tileBand, { color: fill ? '#FFFFFF' : accent }]}>{band}</Text>
-        <Text style={[styles.tileArrow, { color: fill ? '#FFFFFF' : accent }]}>
+        <Text style={[styles.tileBand, { color: bandInk }]}>{band}</Text>
+        <Text style={[styles.tileArrow, { color: bandInk }]}>
           {direction === 'below' ? '▲' : '▼'}
         </Text>
       </View>
@@ -55,18 +57,22 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
 
       <View style={styles.group}>
         <Text style={[styles.groupLabel, { color: colors.textMuted }]}>TOO LOW — GO HIGHER</Text>
-        <Tile direction="below" tier="light" guess={140} band="100+ AWAY" />
-        <Tile direction="below" tier="medium" guess={365} band="25–99 AWAY" />
-        <Tile direction="below" tier="dark" guess={410} band="11–24 AWAY" />
-        <Tile direction="below" tier="intense" guess={421} band="WITHIN 10" />
+        <Tile direction="below" tier="vast" guess={200} band="500+ AWAY" />
+        <Tile direction="below" tier="distant" guess={400} band="250–499 AWAY" />
+        <Tile direction="below" tier="light" guess={650} band="100–249 AWAY" />
+        <Tile direction="below" tier="medium" guess={750} band="25–99 AWAY" />
+        <Tile direction="below" tier="dark" guess={785} band="11–24 AWAY" />
+        <Tile direction="below" tier="intense" guess={795} band="WITHIN 10" />
       </View>
 
       <View style={styles.group}>
         <Text style={[styles.groupLabel, { color: colors.textMuted }]}>TOO HIGH — GO LOWER</Text>
-        <Tile direction="above" tier="light" guess={890} band="100+ AWAY" />
-        <Tile direction="above" tier="medium" guess={500} band="25–99 AWAY" />
-        <Tile direction="above" tier="dark" guess={445} band="11–24 AWAY" />
-        <Tile direction="above" tier="intense" guess={430} band="WITHIN 10" />
+        <Tile direction="above" tier="vast" guess={900} band="500+ AWAY" />
+        <Tile direction="above" tier="distant" guess={600} band="250–499 AWAY" />
+        <Tile direction="above" tier="light" guess={350} band="100–249 AWAY" />
+        <Tile direction="above" tier="medium" guess={250} band="25–99 AWAY" />
+        <Tile direction="above" tier="dark" guess={215} band="11–24 AWAY" />
+        <Tile direction="above" tier="intense" guess={205} band="WITHIN 10" />
       </View>
 
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 14 }]}>

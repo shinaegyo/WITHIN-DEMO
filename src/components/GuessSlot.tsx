@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { getBandLabel } from '../game/proximity';
 import { GuessResult } from '../game/types';
-import { getTileAccent, getTileFill } from '../theme/colors';
+import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -41,7 +41,7 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
   const ink = fill ? '#FFFFFF' : colors.text;
   // On an unfilled tile the accent is the only colour, so it does the work of
   // signalling direction and closeness.
-  const bandInk = fill ? '#FFFFFF' : accent;
+  const bandInk = fill ? '#FFFFFF' : getTileInk(result.direction, result.tier);
   const arrow = result.direction === 'correct' ? '✓' : result.direction === 'below' ? '▲' : '▼';
   const arrowLabel =
     result.direction === 'correct'

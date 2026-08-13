@@ -10,7 +10,12 @@ function tierForDistance(distance: number): ProximityTier {
   if (distance <= 10) return 'intense';
   if (distance <= 24) return 'dark';
   if (distance <= 99) return 'medium';
-  return 'light';
+  // The far end is split three ways. It covers most of the range and is where
+  // an opening guess lands, so a single band there told the player almost
+  // nothing beyond a direction.
+  if (distance <= 249) return 'light';
+  if (distance <= 499) return 'distant';
+  return 'vast';
 }
 
 /**
@@ -24,7 +29,9 @@ export function getBandLabel(result: GuessResult): string {
   if (result.isWithin10) return 'WITHIN 10';
   if (result.tier === 'dark') return '11–24 AWAY';
   if (result.tier === 'medium') return '25–99 AWAY';
-  return '100+ AWAY';
+  if (result.tier === 'light') return '100–249 AWAY';
+  if (result.tier === 'distant') return '250–499 AWAY';
+  return '500+ AWAY';
 }
 
 export function evaluateGuess(guess: number, answer: number): GuessResult {

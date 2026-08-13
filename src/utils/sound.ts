@@ -62,7 +62,7 @@ export const playCorrect = () => play('correct');
 
 /** The tier the server assigned to a guess, mapped onto the ladder. */
 export function playForTier(tier: string) {
-  if (tier === 'light') play('far');
+  if (tier === 'vast' || tier === 'distant' || tier === 'light') play('far');
   else if (tier === 'medium') play('medium');
   else if (tier === 'dark') play('near');
 }
