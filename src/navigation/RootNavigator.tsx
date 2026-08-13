@@ -6,7 +6,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { MenuSheet } from '../components/MenuSheet';
+import { MenuDrawer } from '../components/MenuDrawer';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
@@ -69,7 +69,7 @@ function Screens() {
         />
       </Stack.Navigator>
 
-      <MenuSheet
+      <MenuDrawer
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
         items={[
