@@ -55,19 +55,28 @@ export async function shareResult(game: DailyGame): Promise<ShareOutcome> {
 
   if (Platform.OS === 'web') {
     const nav = globalThis.navigator as any;
-    try {
-      if (nav?.share) {
+
+    if (nav?.share) {
+      try {
         await nav.share({ text: message });
         return { ok: true };
+      } catch (err: any) {
+        // Dismissing the sheet is a decision, not a failure — don't then copy
+        // something the player just chose not to send.
+        if (err?.name === 'AbortError') return { ok: false };
+        // Anything else means the sheet never opened: present on the browser
+        // but unusable, which is common on desktop. Fall through to the
+        // clipboard rather than leaving the player with nothing.
       }
+    }
+
+    try {
       if (nav?.clipboard?.writeText) {
         await nav.clipboard.writeText(message);
         return { ok: true, copied: true };
       }
     } catch {
-      // A cancelled share sheet lands here too, which is not an error worth
-      // reporting to the player.
-      return { ok: false };
+      // Clipboard access can be denied outright.
     }
     return { ok: false };
   }

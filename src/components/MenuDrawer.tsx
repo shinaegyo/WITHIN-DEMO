@@ -9,6 +9,8 @@ export interface MenuItem {
   onPress?: () => void;
   /** Shown greyed out with a note — for things not built yet. */
   soon?: boolean;
+  /** Dims the item and shows this label, for things not available right now. */
+  badge?: string;
 }
 
 const WIDTH = Math.min(320, Dimensions.get('window').width * 0.82);
@@ -66,20 +68,29 @@ export function MenuDrawer({
           {items.map((item) => (
             <Pressable
               key={item.label}
-              disabled={item.soon}
+              disabled={item.soon || !!item.badge}
               onPress={() => {
                 onClose();
                 item.onPress?.();
               }}
               style={({ pressed }) => [
                 styles.item,
-                { backgroundColor: pressed && !item.soon ? colors.surfaceAlt : 'transparent' },
+                {
+                  backgroundColor:
+                    pressed && !item.soon && !item.badge ? colors.surfaceAlt : 'transparent',
+                },
               ]}
             >
-              <Text style={[styles.itemLabel, { color: colors.text }, item.soon && styles.dim]}>
+              <Text
+                style={[styles.itemLabel, { color: colors.text }, (item.soon || item.badge) && styles.dim]}
+              >
                 {item.label}
               </Text>
-              {item.soon && <Text style={[styles.soon, { color: colors.textMuted }]}>SOON</Text>}
+              {(item.soon || item.badge) && (
+                <Text style={[styles.soon, { color: colors.textMuted }]}>
+                  {item.badge ?? 'SOON'}
+                </Text>
+              )}
             </Pressable>
           ))}
         </Animated.View>

@@ -30,6 +30,7 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
   const opacity = useRef(new Animated.Value(0)).current;
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const [shareFailed, setShareFailed] = useState(false);
 
   const dayOver = game.dayStatus !== 'playing';
   const eliminated = game.dayStatus === 'eliminated';
@@ -160,7 +161,9 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
             ]}
             onPress={async () => {
               const res = await shareResult(game);
+              setShareFailed(!res.ok);
               if (res.copied) setShareNote('Copied — paste it anywhere.');
+              else if (!res.ok) setShareNote('Could not share — try again.');
             }}
           >
             <Text style={styles.primaryText}>Share result</Text>
@@ -168,7 +171,11 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
         )}
 
         {shareNote && (
-          <Text style={[styles.sub, { color: feedbackColors.correct }]}>{shareNote}</Text>
+          <Text
+            style={[styles.sub, { color: shareFailed ? colors.textMuted : feedbackColors.correct }]}
+          >
+            {shareNote}
+          </Text>
         )}
 
         {dayOver && (

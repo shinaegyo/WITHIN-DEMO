@@ -45,6 +45,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [pointsWidth, setPointsWidth] = useState(0);
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const [shareFailed, setShareFailed] = useState(false);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -152,14 +153,23 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
             ]}
             onPress={async () => {
               const res = await shareResult(game);
+              setShareFailed(!res.ok);
               if (res.copied) setShareNote('Copied — paste it anywhere.');
+              else if (!res.ok) setShareNote('Could not share — try again.');
             }}
           >
             <Text style={styles.shareText}>Share result</Text>
           </Pressable>
         )}
         {shareNote && (
-          <Text style={[styles.practiceMeta, { color: feedbackColors.correct }]}>{shareNote}</Text>
+          <Text
+            style={[
+              styles.practiceMeta,
+              { color: shareFailed ? colors.textMuted : feedbackColors.correct },
+            ]}
+          >
+            {shareNote}
+          </Text>
         )}
 
         {/* Practice unlocks after the daily, so it tops up a session rather

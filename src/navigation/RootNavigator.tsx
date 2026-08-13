@@ -5,7 +5,8 @@ import {
   NavigationContainer,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, StyleSheet, Text } from 'react-native';
 import { MenuDrawer } from '../components/MenuDrawer';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -16,6 +17,7 @@ import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
+import { shareResult } from '../utils/share';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
 import { useTheme } from '../theme/ThemeContext';
@@ -42,6 +44,16 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
   const [menuOpen, setMenuOpen] = useState(false);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Sharing from the menu has no surface of its own to report back on, and a
+  // desktop browser copies to the clipboard with no visible sign it worked.
+  const shareFromMenu = async () => {
+    if (!game) return;
+    const res = await shareResult(game);
+    if (res.copied) setToast('Copied — paste it anywhere.');
+    else if (!res.ok) setToast('Could not share.');
+  };
 
   const startPractice = async () => {
     const left = await consumePracticeRound();
@@ -129,6 +141,9 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
           { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
+          game && game.dayStatus !== 'playing'
+            ? { label: 'Share result', onPress: shareFromMenu }
+            : { label: 'Share result', badge: 'AFTER TODAY' },
 
           { label: 'Settings', soon: true },
           ...(__DEV__
@@ -139,9 +154,56 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
             : []),
         ]}
       />
+
+      <Toast message={toast} onDone={() => setToast(null)} />
     </NavigationContainer>
   );
 }
+
+/** A brief confirmation that fades itself out. */
+function Toast({ message, onDone }: { message: string | null; onDone: () => void }) {
+  const { colors } = useTheme();
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!message) return;
+    opacity.setValue(0);
+    Animated.timing(opacity, { toValue: 1, duration: 160, useNativeDriver: true }).start();
+    const t = setTimeout(() => {
+      Animated.timing(opacity, { toValue: 0, duration: 220, useNativeDriver: true }).start(onDone);
+    }, 1800);
+    return () => clearTimeout(t);
+  }, [message]);
+
+  if (!message) return null;
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.toast,
+        { backgroundColor: colors.surfaceAlt, borderColor: colors.border, opacity },
+      ]}
+    >
+      <Text style={[styles.toastText, { color: colors.text }]}>{message}</Text>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  toast: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  toastText: { fontSize: 14, fontFamily: fonts.bold },
+});
 
 export function RootNavigator() {
   const profile = useProfile();

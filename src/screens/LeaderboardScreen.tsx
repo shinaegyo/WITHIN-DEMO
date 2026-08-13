@@ -5,6 +5,17 @@ import { ApiError, LeaderboardEntry, loadLeaderboard, messageFor } from '../lib/
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
+/**
+ * Metallics for the top three. Deliberately not the app's game colours — blue
+ * and red already mean "too low" and "too high" on the board, and reusing them
+ * for placement would blur that.
+ */
+const MEDALS: Record<number, { ring: string; ink: string }> = {
+  1: { ring: '#D4A017', ink: '#3A2A00' },
+  2: { ring: '#AEB6BF', ink: '#2A2F35' },
+  3: { ring: '#B87333', ink: '#3A1F0A' },
+};
+
 export function LeaderboardScreen() {
   const { colors } = useTheme();
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
@@ -55,7 +66,13 @@ export function LeaderboardScreen() {
               },
             ]}
           >
-            <Text style={[styles.rank, { color: colors.textMuted }]}>{item.rank}</Text>
+            {MEDALS[item.rank] ? (
+              <View style={[styles.medal, { backgroundColor: MEDALS[item.rank].ring }]}>
+                <Text style={[styles.medalText, { color: MEDALS[item.rank].ink }]}>{item.rank}</Text>
+              </View>
+            ) : (
+              <Text style={[styles.rank, { color: colors.textMuted }]}>{item.rank}</Text>
+            )}
             <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
               {item.name}
               {item.isMe ? '  (you)' : ''}
@@ -87,6 +104,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   rank: { width: 30, fontSize: 14, fontFamily: fonts.extraBold },
+  medal: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    marginRight: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  medalText: { fontSize: 13, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 15, fontFamily: fonts.semiBold },
   score: { fontSize: 18, fontFamily: fonts.extraBold, minWidth: 38, textAlign: 'right' },
 });
