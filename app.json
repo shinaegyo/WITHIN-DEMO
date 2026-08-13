@@ -24,7 +24,21 @@
     "plugins": [
       "expo-audio",
       "expo-font",
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F7F8FA",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "imageWidth": 180,
+            "resizeMode": "contain",
+            "backgroundColor": "#0E0F13"
+          }
+        }
+      ]
     ]
   }
 }

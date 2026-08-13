@@ -7,9 +7,10 @@ import { useTheme } from '../theme/ThemeContext';
 interface Props {
   currentAnswer: number;
   onSetAnswer: (answer: number) => void;
+  onReset: () => void;
 }
 
-export function DevPanel({ currentAnswer, onSetAnswer }: Props) {
+export function DevPanel({ currentAnswer, onSetAnswer, onReset }: Props) {
   const { colors } = useTheme();
   const [expanded, setExpanded] = useState(false);
   const [value, setValue] = useState('');
@@ -44,6 +45,9 @@ export function DevPanel({ currentAnswer, onSetAnswer }: Props) {
           />
           <Pressable style={[styles.applyButton, { backgroundColor: colors.accent }]} onPress={apply}>
             <Text style={styles.applyText}>Set & Restart</Text>
+          </Pressable>
+          <Pressable style={[styles.applyButton, { backgroundColor: colors.surfaceAlt }]} onPress={onReset}>
+            <Text style={[styles.applyText, { color: colors.text }]}>Reset</Text>
           </Pressable>
         </View>
       )}

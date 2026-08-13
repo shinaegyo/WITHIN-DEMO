@@ -36,11 +36,11 @@
     position:relative;flex-shrink:0;
     width:393px;height:852px;
     border-radius:55px;overflow:hidden;
-    background:#F7F8FA;               /* stands in for the app's own background
-                                         behind the status bar / home area */
-    transition:background .2s;
+    /* Overwritten at runtime with the app's own background colour. On device
+       SafeAreaView paints edge to edge, so these strips are never a different
+       colour from the app — the harness has to mirror that. */
+    background:#F7F8FA;
   }
-  .screen.dark{background:#0E0F13}
 
   /* The app is inset by the same amounts iOS reserves, so what you see here
      lines up with what SafeAreaView produces on hardware. */
@@ -124,7 +124,6 @@
 
   <div class="toolbar">
     <button onclick="document.getElementById('app').contentWindow.location.reload()">Reload app</button>
-    <button onclick="document.getElementById('screen').classList.toggle('dark')">Match dark mode</button>
     <span class="label">iPhone 15 Pro · 393 × 852 pt · safe areas simulated</span>
   </div>
 </div>
@@ -136,6 +135,31 @@
     document.getElementById('clock').textContent = h + ':' + String(d.getMinutes()).padStart(2,'0');
   }
   tick(); setInterval(tick, 10000);
+
+  // Mirror the app's current background onto the status-bar / home-indicator
+  // strips, and pick readable chrome colours for it. Polled rather than pushed
+  // because the app owns its theme and the harness can't subscribe to it.
+  const screen = document.getElementById('screen');
+  function syncTheme(){
+    let doc;
+    try { doc = document.getElementById('app').contentDocument; } catch { return; }
+    if (!doc || !doc.body) return;
+
+    // Walk up from a point just inside the app until something paints.
+    let el = doc.elementFromPoint(6, 6), bg = null;
+    while (el) {
+      const c = getComputedStyle(el).backgroundColor;
+      if (c && c !== 'transparent' && !c.startsWith('rgba(0, 0, 0, 0')) { bg = c; break; }
+      el = el.parentElement;
+    }
+    if (!bg) return;
+
+    screen.style.background = bg;
+    const [r, g, b] = bg.match(/\d+(\.\d+)?/g).map(Number);
+    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+    screen.classList.toggle('dark', luminance < 128);
+  }
+  setInterval(syncTheme, 400);
 </script>
 </body>
 </html>

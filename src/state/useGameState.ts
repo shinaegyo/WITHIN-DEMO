@@ -65,10 +65,14 @@ export function useGameState(initialAnswer: number): UseGameStateResult {
       if (state.status !== 'playing') {
         return { ok: false as const, error: 'The game is already over.' };
       }
+      // Rejected before dispatch, so a repeat never costs an attempt.
+      if (state.guesses.some((g) => g.guess === guess)) {
+        return { ok: false as const, error: `You already guessed ${guess}.` };
+      }
       dispatch({ type: 'SUBMIT_GUESS', guess });
       return { ok: true as const };
     },
-    [state.status],
+    [state.status, state.guesses],
   );
 
   const reset = useCallback((answer: number) => {

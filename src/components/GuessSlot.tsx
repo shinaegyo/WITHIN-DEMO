@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { getBandLabel } from '../game/proximity';
 import { GuessResult } from '../game/types';
-import { getTileColor, getTileTextColor } from '../theme/colors';
+import { getTileColor } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -29,6 +29,7 @@ export function EmptySlot({ attemptNumber }: { attemptNumber: number }) {
 }
 
 export function FilledSlot({ result, attemptNumber }: { result: GuessResult; attemptNumber: number }) {
+  const { colors } = useTheme();
   const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -40,7 +41,9 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
     }).start();
   }, [anim]);
 
-  const ink = getTileTextColor(result.direction, result.tier);
+  // Tiles are translucent over the app background, so normal theme text stays
+  // legible on every tier. The solid winning tile is the one exception.
+  const ink = result.direction === 'correct' ? '#FFFFFF' : colors.text;
   const arrow = result.direction === 'correct' ? '✓' : result.direction === 'below' ? '▲' : '▼';
   const arrowLabel =
     result.direction === 'correct'

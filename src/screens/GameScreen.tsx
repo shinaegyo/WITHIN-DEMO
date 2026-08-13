@@ -67,7 +67,7 @@ export function GameScreen() {
         keyboardVerticalOffset={12}
       >
         <View style={styles.content}>
-          <Header onReset={handleReset} />
+          <Header />
 
           <ClueCard clue1={state.clue1} clue2={state.clue2} clue2Unlocked={state.clue2Unlocked} />
 
@@ -77,7 +77,11 @@ export function GameScreen() {
 
           <NumberInput disabled={state.status !== 'playing'} onSubmit={handleSubmit} />
 
-          <DevPanel currentAnswer={state.answer} onSetAnswer={handleSetDevAnswer} />
+          <DevPanel
+            currentAnswer={state.answer}
+            onSetAnswer={handleSetDevAnswer}
+            onReset={handleReset}
+          />
         </View>
       </KeyboardAvoidingView>
 

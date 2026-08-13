@@ -9,6 +9,9 @@ export interface ThemeColors {
   danger: string;
 }
 
+// NOTE: `background` for each theme is duplicated in app.json as the splash
+// screen colour (light + dark). Keep them in sync, otherwise launching the app
+// flashes the wrong colour before the first frame renders.
 export const lightColors: ThemeColors = {
   background: '#F7F8FA',
   surface: '#FFFFFF',
@@ -54,9 +57,26 @@ export const proximityColors = {
   correct: '#22A559',
 };
 
-// The two lightest tiers need dark text to stay legible; the two most intense
-// tiers are dark enough to carry white.
-const INK = '#15161A';
+/**
+ * Tiles are drawn translucent over the app background rather than as solid
+ * blocks. Opacity climbs as the guess closes in, so distant guesses recede and
+ * only the guess that matters carries real colour — the board reads much
+ * calmer while "am I getting warmer?" stays obvious.
+ */
+const TIER_ALPHA: Record<string, number> = {
+  light: 0.22,
+  medium: 0.34,
+  dark: 0.48,
+  intense: 0.62,
+};
+
+function withAlpha(hex: string, alpha: number): string {
+  const value = hex.replace('#', '');
+  const r = parseInt(value.slice(0, 2), 16);
+  const g = parseInt(value.slice(2, 4), 16);
+  const b = parseInt(value.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 
 export const feedbackColors = {
@@ -66,13 +86,9 @@ export const feedbackColors = {
 };
 
 export function getTileColor(direction: 'below' | 'above' | 'correct', tier: string): string {
+  // The winning tile stays fully opaque — it's the payoff, it should shout.
   if (direction === 'correct') return proximityColors.correct;
   const scale = direction === 'below' ? proximityColors.below : proximityColors.above;
-  return (scale as Record<string, string>)[tier] ?? scale.light;
-}
-
-/** Text colour that stays legible on the given tile. */
-export function getTileTextColor(direction: 'below' | 'above' | 'correct', tier: string): string {
-  if (direction === 'correct') return '#FFFFFF';
-  return tier === 'light' || tier === 'medium' ? INK : '#FFFFFF';
+  const base = (scale as Record<string, string>)[tier] ?? scale.light;
+  return withAlpha(base, TIER_ALPHA[tier] ?? TIER_ALPHA.light);
 }
