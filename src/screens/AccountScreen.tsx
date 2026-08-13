@@ -104,16 +104,20 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
         <TextInput
           value={name}
           onChangeText={(t) => setName(t.replace(/[^A-Za-z0-9_]/g, ''))}
-          placeholder="yourname"
+          placeholder="Pick a username"
           placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={16}
           style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.surface }]}
         />
-        {nameNote && (
+        {nameNote ? (
           <Text style={[styles.note, { color: nameNote.ok ? feedbackColors.correct : colors.danger }]}>
             {nameNote.text}
+          </Text>
+        ) : (
+          <Text style={[styles.hint, { color: colors.textMuted }]}>
+            3–16 characters · letters, numbers and underscores · no spaces
           </Text>
         )}
         <Pressable
@@ -294,6 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   note: { fontSize: 13, fontFamily: fonts.semiBold, marginBottom: 10 },
+  hint: { fontSize: 12, fontFamily: fonts.medium, marginBottom: 10 },
   primary: { borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
   primaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.bold },
   secondary: {
