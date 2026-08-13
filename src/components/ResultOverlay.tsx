@@ -49,7 +49,14 @@ export function ResultOverlay({ status, answer, attemptsUsed, maxAttempts, onRes
         style={[styles.card, { backgroundColor: colors.surface, opacity, transform: [{ scale }] }]}
       >
         <Text style={styles.emoji}>{isWin ? '🎉' : '💔'}</Text>
-        <Text style={[styles.title, { color: colors.text }]}>{isWin ? 'CORRECT!' : 'OUT OF ATTEMPTS'}</Text>
+        <Text
+          style={[styles.title, { color: colors.text }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
+          {isWin ? 'CORRECT!' : 'OUT OF ATTEMPTS'}
+        </Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
           {isWin
             ? `You found it in ${attemptsUsed} of ${maxAttempts} attempts.`
@@ -78,7 +85,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    width: '84%',
+    width: '88%',
     borderRadius: 24,
     paddingVertical: 32,
     paddingHorizontal: 24,
@@ -89,10 +96,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 28,
+    // Archivo Black is wide; "OUT OF ATTEMPTS" needs the smaller size plus
+    // adjustsFontSizeToFit to stay on one line on narrow phones.
+    fontSize: 25,
     fontFamily: fonts.logo,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,

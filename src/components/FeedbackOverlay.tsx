@@ -121,7 +121,7 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
             transform: [{ scale }, { translateX: shake }],
           }}
         >
-          <Text style={[styles.emoji, isOneAway && styles.emojiLarge]}>{isOneAway ? '😳' : '🔥'}</Text>
+          <Text style={[styles.emoji, isOneAway && styles.emojiLarge]}>{isOneAway ? '😳' : '👀'}</Text>
           <Text style={[styles.label, isOneAway && styles.labelLarge]}>
             {isOneAway ? 'ONE AWAY!' : 'WITHIN 10!'}
           </Text>
