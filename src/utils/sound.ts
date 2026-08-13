@@ -1,4 +1,5 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import { soundEnabled } from './soundSettings';
 
 /**
  * Sound effects for the three feedback moments.
@@ -9,6 +10,12 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
  */
 
 const SOURCES = {
+  // A rising ladder: the further off the guess, the lower the note. Most
+  // guesses used to make no sound at all, which left the middle of a round
+  // completely silent and the game feeling inert.
+  far: require('../../assets/sounds/far.wav'),
+  medium: require('../../assets/sounds/medium.wav'),
+  near: require('../../assets/sounds/near.wav'),
   within10: require('../../assets/sounds/within-10.wav'),
   oneAway: require('../../assets/sounds/one-away.wav'),
   correct: require('../../assets/sounds/correct.wav'),
@@ -32,6 +39,7 @@ function ensureAudioMode() {
 }
 
 function play(name: SoundName) {
+  if (!soundEnabled()) return;
   try {
     ensureAudioMode();
     let player = players[name];
@@ -51,3 +59,10 @@ function play(name: SoundName) {
 export const playWithin10 = () => play('within10');
 export const playOneAway = () => play('oneAway');
 export const playCorrect = () => play('correct');
+
+/** The tier the server assigned to a guess, mapped onto the ladder. */
+export function playForTier(tier: string) {
+  if (tier === 'light') play('far');
+  else if (tier === 'medium') play('medium');
+  else if (tier === 'dark') play('near');
+}

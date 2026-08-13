@@ -63,10 +63,13 @@ export function RoundOverlay({
     return () => clearInterval(id);
   }, [dayOver]);
 
-  // Solving on the final attempt costs an attempt next round; say so plainly
-  // rather than letting the player discover a shorter board later.
-  const attemptsCut =
-    !!submit && submit.nextAttemptsAllowed !== null && submit.nextAttemptsAllowed < submit.attemptsAllowed;
+  // Rounds get shorter anyway now — 7, then 6, then 5 — so a drop in the
+  // allowance no longer means the penalty was applied. Comparing the two
+  // numbers claimed a last-attempt solve on every transition, including rounds
+  // the player had just lost. Only an actual solve on the final attempt counts.
+  const solvedOnLast =
+    !!submit && submit.roundStatus === 'won' && submit.attemptsUsed === submit.attemptsAllowed;
+  const nextAllowed = submit?.nextAttemptsAllowed ?? null;
 
   // Retry is still open, so the number must stay hidden — showing it here is
   // what let players read the answer and retype it for full marks.
@@ -118,10 +121,18 @@ export function RoundOverlay({
           </Text>
         </View>
 
-        {attemptsCut && (
-          <Text style={[styles.warn, { color: feedbackColors.within10 }]}>
-            You solved that on your last attempt — the next round has{' '}
-            {submit?.nextAttemptsAllowed} attempts.
+        {/* The shrinking allowance is a rule worth stating either way, so the
+            player meets a shorter board on purpose rather than by surprise. */}
+        {moreRounds && nextAllowed !== null && (
+          <Text
+            style={[
+              styles.warn,
+              { color: solvedOnLast ? feedbackColors.within10 : colors.textMuted },
+            ]}
+          >
+            {solvedOnLast
+              ? `You solved that on your last attempt — round ${game.currentRound} has ${nextAllowed} attempts, one fewer than usual.`
+              : `Round ${game.currentRound} gives you ${nextAllowed} attempts.`}
           </Text>
         )}
 

@@ -22,6 +22,7 @@ import { shareResult } from '../utils/share';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
+import { loadSoundSetting, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
 import { IntroScreen } from '../screens/IntroScreen';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -51,8 +52,11 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
   const [introSeen, setIntroSeen] = useState<boolean | null>(null);
   const [introStep, setIntroStep] = useState<'rules' | 'practice'>('rules');
 
+  const [sound, setSound] = useState(true);
+
   useEffect(() => {
     hasSeenIntro().then(setIntroSeen);
+    loadSoundSetting().then(setSound);
   }, []);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
@@ -189,7 +193,14 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
             ? { label: 'Share result', onPress: shareFromMenu }
             : { label: 'Share result', badge: 'AFTER TODAY' },
 
-          { label: 'Settings', soon: true },
+          {
+            label: sound ? 'Sound on' : 'Sound off',
+            onPress: () => {
+              const next = !soundEnabled();
+              setSoundEnabled(next);
+              setSound(next);
+            },
+          },
           ...(__DEV__
             ? [
                 { label: 'Replay today (dev)', onPress: resetToday },

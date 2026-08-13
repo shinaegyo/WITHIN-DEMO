@@ -12,8 +12,8 @@ import { GuessResult } from '../game/types';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
-import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
-import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
+import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
+import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
 
 /** Matches the daily game so both feel the same. */
 const RESULT_DELAY_MS = 3000;
@@ -60,6 +60,9 @@ export function PracticeScreen({
       setTrigger({ type: 'within10', key: Date.now() });
       hapticWithin10();
       playWithin10();
+    } else {
+      hapticForTier(last.tier);
+      playForTier(last.tier);
     }
   }, [last]);
 

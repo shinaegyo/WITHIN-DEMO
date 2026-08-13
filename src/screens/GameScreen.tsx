@@ -13,8 +13,8 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
-import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
-import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
+import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
+import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
 
 /** Long enough to see the tile land, short enough not to feel stuck. */
 const RESULT_DELAY_MS = 3000;
@@ -42,6 +42,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
       setFeedbackTrigger({ type: 'within10', key: Date.now() });
       hapticWithin10();
       playWithin10();
+    } else {
+      // Everything else used to pass in silence, which is most of a round.
+      hapticForTier(lastResult.tier);
+      playForTier(lastResult.tier);
     }
   }, [lastResult]);
 
