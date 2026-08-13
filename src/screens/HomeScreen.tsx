@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Wordmark } from '../components/Wordmark';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusScreen } from '../components/StatusScreen';
 import { useDailyGameContext } from '../state/DailyGameContext';
@@ -113,7 +114,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
         </View>
         <Text style={[styles.pointsLabel, { color: colors.textMuted }]}>TOTAL POINTS</Text>
 
-        <Text style={[styles.logo, { color: colors.text }]}>WITHIN</Text>
+        <Wordmark size={64} />
         <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
 
         {finished ? (

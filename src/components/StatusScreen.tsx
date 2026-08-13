@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -17,7 +18,7 @@ export function StatusScreen({
 
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.logo, { color: colors.text }]}>WITHIN</Text>
+      <Wordmark size={30} />
       {loading ? (
         <ActivityIndicator color={colors.accent} style={styles.spinner} />
       ) : (

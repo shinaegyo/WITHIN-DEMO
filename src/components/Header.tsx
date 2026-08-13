@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -8,7 +9,7 @@ export function Header() {
 
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.title, { color: colors.text }]}>WITHIN</Text>
+      <Wordmark size={24} />
       <Pressable
         style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
         onPress={toggle}

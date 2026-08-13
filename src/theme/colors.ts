@@ -85,6 +85,13 @@ function withAlpha(hex: string, alpha: number): string {
 }
 
 
+/**
+ * The wordmark gradient runs cold to hot — the same blue-to-red scale the
+ * tiles use for "too low" through "too high", so the logo carries the
+ * mechanic. Defined here so every surface that shows the name shares it.
+ */
+export const wordmarkGradient = ['#5B92DF', '#E5412F'] as const;
+
 export const feedbackColors = {
   within10: '#FFA51F',
   oneAway: '#E8452C',

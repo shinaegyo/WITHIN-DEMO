@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -60,7 +61,7 @@ export function MenuDrawer({
             },
           ]}
         >
-          <Text style={[styles.brand, { color: colors.text }]}>WITHIN</Text>
+          <View style={styles.brand}><Wordmark size={32} /></View>
 
           {items.map((item) => (
             <Pressable
