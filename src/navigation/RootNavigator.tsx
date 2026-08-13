@@ -21,6 +21,8 @@ import { useProfile } from '../state/useProfile';
 import { shareResult } from '../utils/share';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
+import { hasSeenIntro, markIntroSeen } from '../utils/intro';
+import { IntroScreen } from '../screens/IntroScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
@@ -42,8 +44,16 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 
 function Screens({ username, onProfileChanged }: { username: string; onProfileChanged: () => void }) {
   const { colors, mode } = useTheme();
-  const { startFreshTestPlayer, resetToday, reload, game } = useDailyGameContext();
+  const { startFreshTestPlayer, resetToday, reload, game, phase } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
+  // null until the device flag has been read, so the tutorial never flashes up
+  // in front of someone who has already done it.
+  const [introSeen, setIntroSeen] = useState<boolean | null>(null);
+  const [introStep, setIntroStep] = useState<'rules' | 'practice'>('rules');
+
+  useEffect(() => {
+    hasSeenIntro().then(setIntroSeen);
+  }, []);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -63,6 +73,31 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
     if (left === null) return; // cap already reached
     if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left });
   };
+
+  // Shown once, and only to someone who has genuinely never played: the device
+  // flag alone would restart the tutorial for an existing player signing in on
+  // a new phone.
+  const needsIntro = introSeen === false && !!game && game.stats.gamesPlayed === 0;
+
+  const finishIntro = () => {
+    markIntroSeen();
+    setIntroSeen(true);
+  };
+
+  if (introSeen === null || (needsIntro && phase === 'loading')) return null;
+
+  if (needsIntro) {
+    return introStep === 'rules' ? (
+      <IntroScreen onNext={() => setIntroStep('practice')} />
+    ) : (
+      <PracticeScreen
+        introMode
+        remainingAfterThis={0}
+        onExit={finishIntro}
+        onPlayAnother={finishIntro}
+      />
+    );
+  }
 
   const navTheme = {
     ...(mode === 'dark' ? DarkTheme : DefaultTheme),

@@ -22,6 +22,8 @@ interface Props {
   remainingAfterThis: number;
   onExit: () => void;
   onPlayAnother: () => void;
+  /** First run, before the player has seen the real game. */
+  introMode?: boolean;
 }
 
 /**
@@ -29,7 +31,12 @@ interface Props {
  * never reaches a server. Nothing here awards points, streak or leaderboard
  * position, which is what keeps the daily worth caring about.
  */
-export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Props) {
+export function PracticeScreen({
+  remainingAfterThis,
+  onExit,
+  onPlayAnother,
+  introMode = false,
+}: Props) {
   const { colors, mode } = useTheme();
   const round: PracticeRound = useMemo(() => createPracticeRound(), []);
 
@@ -142,7 +149,7 @@ export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Pr
               Practice doesn't affect your streak or points.
             </Text>
 
-            {remainingAfterThis > 0 ? (
+            {introMode ? null : remainingAfterThis > 0 ? (
               <Pressable
                 style={({ pressed }) => [
                   styles.primary,
@@ -167,7 +174,9 @@ export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Pr
               ]}
               onPress={onExit}
             >
-              <Text style={[styles.secondaryText, { color: colors.text }]}>Back to home</Text>
+              <Text style={[styles.secondaryText, { color: colors.text }]}>
+                {introMode ? "Play today's numbers" : 'Back to home'}
+              </Text>
             </Pressable>
           </View>
         </View>
