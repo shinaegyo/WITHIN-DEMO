@@ -204,10 +204,11 @@ begin
   update public.round_results set
     attempts_used  = v_index,
     clue2_unlocked = clue2_unlocked or v_distance <= 10,
-    status = case when v_distance = 0 then 'won'
-                  when v_last_attempt then 'lost'
-                  else 'playing' end,
-    score  = case when v_distance = 0 then public.score_for_attempt(v_index) else 0 end
+    -- A CASE yields text, and this column is an enum, so the cast is required.
+    status = (case when v_distance = 0 then 'won'
+                   when v_last_attempt then 'lost'
+                   else 'playing' end)::public.round_status,
+    score  = (case when v_distance = 0 then public.score_for_attempt(v_index) else 0 end)::smallint
   where game_id = v_game.id and round = v_round.round
   returning * into v_round;
 
