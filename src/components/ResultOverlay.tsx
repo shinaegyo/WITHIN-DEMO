@@ -92,11 +92,12 @@ export function ResultOverlay({
             : `The number was ${answer}.`}
         </Text>
 
+        {/* Only the two numbers a player is actually chasing. Best streak and
+            games played are still tracked server-side for a stats screen
+            later, but here they read as if they described today's game. */}
         <View style={[styles.statsRow, { borderColor: colors.border }]}>
-          <Stat label="STREAK" value={stats.currentStreak} />
-          <Stat label="BEST" value={stats.maxStreak} />
-          <Stat label="PLAYED" value={stats.gamesPlayed} />
-          <Stat label="POINTS" value={stats.totalPoints} />
+          <Stat label="DAY STREAK" value={stats.currentStreak} />
+          <Stat label="TOTAL POINTS" value={stats.totalPoints} />
         </View>
 
         <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
