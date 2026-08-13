@@ -129,7 +129,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
           { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
-          { label: 'Share', soon: true },
+
           { label: 'Settings', soon: true },
           ...(__DEV__
             ? [

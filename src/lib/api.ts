@@ -22,6 +22,8 @@ export type RoundStatus = 'playing' | 'won' | 'lost';
 
 export interface RoundSummary {
   round: number;
+  /** One entry per guess: 'below' | 'above' | 'correct'. Drives the share grid. */
+  marks: string[];
   status: RoundStatus;
   score: number;
   attemptsUsed: number;
@@ -45,6 +47,8 @@ export interface CurrentRound {
 
 export interface DailyGame {
   puzzleDate: string;
+  /** Days since launch, so a shared result can name the puzzle. */
+  puzzleNumber: number;
   dayStatus: DayStatus;
   currentRound: number;
   totalRounds: number;
@@ -122,6 +126,7 @@ export async function loadDailyGame(): Promise<DailyGame> {
 
   return {
     puzzleDate: raw.puzzleDate,
+    puzzleNumber: raw.puzzleNumber ?? 0,
     dayStatus: raw.dayStatus,
     currentRound: raw.currentRound,
     totalRounds: raw.totalRounds ?? 3,
@@ -130,7 +135,7 @@ export async function loadDailyGame(): Promise<DailyGame> {
     gaveUp: !!raw.gaveUp,
     canRetry: !!raw.canRetry,
     round: toRound(raw.round),
-    rounds: raw.rounds ?? [],
+    rounds: (raw.rounds ?? []).map((r: any) => ({ ...r, marks: r.marks ?? [] })),
     stats: raw.stats,
   };
 }

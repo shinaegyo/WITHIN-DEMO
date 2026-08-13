@@ -9,6 +9,7 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { practiceRemaining } from '../utils/practiceLimit';
+import { shareResult } from '../utils/share';
 
 interface Props {
   onPlay: () => void;
@@ -43,6 +44,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [pointsWidth, setPointsWidth] = useState(0);
+  const [shareNote, setShareNote] = useState<string | null>(null);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -140,6 +142,24 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
           >
             <Text style={styles.playText}>{inProgress ? `CONTINUE ROUND ${game.currentRound}` : 'PRESS TO PLAY'}</Text>
           </Pressable>
+        )}
+
+        {finished && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.shareButton,
+              { backgroundColor: feedbackColors.correct, opacity: pressed ? 0.88 : 1 },
+            ]}
+            onPress={async () => {
+              const res = await shareResult(game);
+              if (res.copied) setShareNote('Copied — paste it anywhere.');
+            }}
+          >
+            <Text style={styles.shareText}>Share result</Text>
+          </Pressable>
+        )}
+        {shareNote && (
+          <Text style={[styles.practiceMeta, { color: feedbackColors.correct }]}>{shareNote}</Text>
         )}
 
         {/* Practice unlocks after the daily, so it tops up a session rather
@@ -273,6 +293,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: feedbackColors.correct,
   },
+  shareButton: {
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
+    marginTop: 20,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+  },
+  shareText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.bold },
   practiceButton: {
     borderWidth: 1,
     borderRadius: 14,

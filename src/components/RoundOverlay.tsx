@@ -7,6 +7,7 @@ import { fonts } from '../theme/fonts';
 import { noHit } from '../theme/styles';
 import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
+import { shareResult } from '../utils/share';
 import { Confetti } from './Confetti';
 import { Rings } from './effects/Rings';
 
@@ -28,6 +29,7 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
   const scale = useRef(new Animated.Value(0.7)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
+  const [shareNote, setShareNote] = useState<string | null>(null);
 
   const dayOver = game.dayStatus !== 'playing';
   const eliminated = game.dayStatus === 'eliminated';
@@ -148,6 +150,25 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
           <Text style={[styles.warn, { color: feedbackColors.within10 }]}>
             You used a retry, so today doesn't extend your streak.
           </Text>
+        )}
+
+        {dayOver && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.primary,
+              { backgroundColor: feedbackColors.correct, opacity: pressed ? 0.88 : 1 },
+            ]}
+            onPress={async () => {
+              const res = await shareResult(game);
+              if (res.copied) setShareNote('Copied — paste it anywhere.');
+            }}
+          >
+            <Text style={styles.primaryText}>Share result</Text>
+          </Pressable>
+        )}
+
+        {shareNote && (
+          <Text style={[styles.sub, { color: feedbackColors.correct }]}>{shareNote}</Text>
         )}
 
         {dayOver && (
