@@ -124,7 +124,8 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
           <>
             <Text style={[styles.sub, { color: colors.textMuted, marginTop: 12 }]}>
               You keep your {game.totalScore} points. Watch an ad for another go at round{' '}
-              {game.currentRound} — it won't score, but it keeps your day alive.
+              {game.currentRound}: the round won't score and today won't count toward your streak,
+              but you can finish the day and still place on the leaderboard.
             </Text>
             <Pressable
               style={({ pressed }) => [styles.primary, { backgroundColor: colors.accent, opacity: pressed ? 0.88 : 1 }]}
@@ -141,6 +142,12 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
               <Text style={[styles.secondaryText, { color: colors.text }]}>End my day and show the number</Text>
             </Pressable>
           </>
+        )}
+
+        {dayOver && game.retriesUsed > 0 && (
+          <Text style={[styles.warn, { color: feedbackColors.within10 }]}>
+            You used a retry, so today doesn't extend your streak.
+          </Text>
         )}
 
         {dayOver && (

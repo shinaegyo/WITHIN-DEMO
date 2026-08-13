@@ -92,9 +92,9 @@ export function HowToPlayScreen() {
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         Run out of attempts and your day ends there. You keep the points you've already earned.
-        You can watch an ad for another go at the round you lost — it scores nothing, but it lets
-        you finish the day and keep your streak. The number stays hidden until you either solve it
-        or choose to stop.
+        You can watch an ad for another go at the round you lost. That round scores nothing and the
+        day no longer counts toward your streak, but you can still finish and place on the
+        leaderboard. The number stays hidden until you solve it or choose to stop.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
@@ -121,8 +121,9 @@ export function HowToPlayScreen() {
 
       <Text style={[styles.h2, { color: colors.text }]}>Streaks</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Finish all three rounds to keep your streak. Miss a day, or get eliminated without
-        retrying, and it starts again from zero. New numbers arrive at midnight, your time.
+        Finish all three rounds without using a retry and your streak grows. Miss a day, get
+        eliminated, or take a retry, and it starts again from zero — a streak is meant to be earned
+        outright. New numbers arrive at midnight, your time.
       </Text>
     </ScrollView>
   );
