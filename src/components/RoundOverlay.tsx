@@ -121,19 +121,21 @@ export function RoundOverlay({
           </Text>
         </View>
 
-        {/* The shrinking allowance is a rule worth stating either way, so the
-            player meets a shorter board on purpose rather than by surprise. */}
+        {/* Two statements, not one sentence: the penalty is a consequence of
+            what just happened, the allowance is a fact about what comes next.
+            Kept out of the warning colour — the board already spends amber on
+            proximity, and a rule being explained is not an alarm. */}
         {moreRounds && nextAllowed !== null && (
-          <Text
-            style={[
-              styles.warn,
-              { color: solvedOnLast ? feedbackColors.within10 : colors.textMuted },
-            ]}
-          >
-            {solvedOnLast
-              ? `You solved that on your last attempt — round ${game.currentRound} has ${nextAllowed} attempts, one fewer than usual.`
-              : `Round ${game.currentRound} gives you ${nextAllowed} attempts.`}
-          </Text>
+          <View style={styles.nextInfo}>
+            {solvedOnLast && (
+              <Text style={[styles.warn, { color: colors.text }]}>
+                You solved that on your last attempt.
+              </Text>
+            )}
+            <Text style={[styles.warnSub, { color: colors.textMuted }]}>
+              Next round has {nextAllowed} attempts.
+            </Text>
+          </View>
         )}
 
         {moreRounds && (
@@ -180,7 +182,7 @@ export function RoundOverlay({
         )}
 
         {dayOver && game.retriesUsed > 0 && (
-          <Text style={[styles.warn, { color: feedbackColors.within10 }]}>
+          <Text style={[styles.warnSub, { color: colors.textMuted, marginTop: 12 }]}>
             You used a retry, so today doesn't extend your streak.
           </Text>
         )}
@@ -258,7 +260,13 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1 },
   totalValue: { fontSize: 22, fontFamily: fonts.extraBold },
   totalMax: { fontSize: 13, fontFamily: fonts.bold },
-  warn: { fontSize: 12, fontFamily: fonts.semiBold, textAlign: 'center', marginTop: 12 },
+  nextInfo: { alignItems: 'center', gap: 2, marginTop: 14 },
+  warnSub: {
+    fontSize: 12.5,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+  },
+  warn: { fontSize: 13, fontFamily: fonts.bold, textAlign: 'center' },
   primary: {
     borderRadius: 14,
     paddingVertical: 14,
