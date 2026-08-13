@@ -27,6 +27,8 @@ export interface UseDailyGameResult {
   submit: (guess: number) => Promise<{ ok: true } | { ok: false; error: string }>;
   /** Moves to the next round after its summary has been dismissed. */
   advance: () => Promise<void>;
+  /** True while the next round is being fetched, so the button can say so. */
+  advancing: boolean;
   retry: () => Promise<void>;
   /** Stop for the day and reveal the answer. */
   concede: () => Promise<void>;
@@ -42,6 +44,7 @@ export function useDailyGame(): UseDailyGameResult {
   const [game, setGame] = useState<DailyGame | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
   const [lastResult, setLastResult] = useState<GuessResult | null>(null);
   const [lastSubmit, setLastSubmit] = useState<SubmitResult | null>(null);
 
@@ -120,12 +123,26 @@ export function useDailyGame(): UseDailyGameResult {
     [game, submitting, load],
   );
 
-  /** Pulls the next round's clue and empty board once the summary is dismissed. */
+  /**
+   * Pulls the next round's clue and empty board.
+   *
+   * Order matters. Clearing the summary first left the finished board on
+   * screen for the length of the round trip — and, because the round was still
+   * won, the summary sprang straight back up before the new round arrived. The
+   * fetch happens first now, so the summary stays put until there is something
+   * to replace it with.
+   */
   const advance = useCallback(async () => {
-    setLastResult(null);
-    setLastSubmit(null);
-    await refresh();
-  }, [refresh]);
+    if (advancing) return;
+    setAdvancing(true);
+    try {
+      await refresh();
+      setLastResult(null);
+      setLastSubmit(null);
+    } finally {
+      setAdvancing(false);
+    }
+  }, [refresh, advancing]);
 
   const retry = useCallback(async () => {
     setPhase('loading');
@@ -159,6 +176,7 @@ export function useDailyGame(): UseDailyGameResult {
     game,
     loadError,
     submitting,
+    advancing,
     lastResult,
     lastSubmit,
     submit,

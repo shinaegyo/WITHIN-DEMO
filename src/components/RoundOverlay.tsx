@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DailyGame, SubmitResult } from '../lib/api';
 import { MAX_DAILY_SCORE } from '../game/scoring';
 import { feedbackColors } from '../theme/colors';
@@ -18,13 +18,22 @@ interface Props {
   onRetry: () => void;
   onConcede: () => void;
   onExit: () => void;
+  advancing?: boolean;
 }
 
 /**
  * Shown between rounds and at the end of the day. Three shapes:
  * round won with more to play, day complete, and eliminated.
  */
-export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, onExit }: Props) {
+export function RoundOverlay({
+  game,
+  submit,
+  onNextRound,
+  onRetry,
+  onConcede,
+  onExit,
+  advancing = false,
+}: Props) {
   const { colors } = useTheme();
   const scale = useRef(new Animated.Value(0.7)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -116,10 +125,18 @@ export function RoundOverlay({ game, submit, onNextRound, onRetry, onConcede, on
 
         {moreRounds && (
           <Pressable
-            style={({ pressed }) => [styles.primary, { backgroundColor: colors.accent, opacity: pressed ? 0.88 : 1 }]}
+            disabled={advancing}
+            style={({ pressed }) => [
+              styles.primary,
+              { backgroundColor: colors.accent, opacity: advancing ? 0.7 : pressed ? 0.88 : 1 },
+            ]}
             onPress={onNextRound}
           >
-            <Text style={styles.primaryText}>Start round {game.currentRound}</Text>
+            {advancing ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryText}>Start round {game.currentRound}</Text>
+            )}
           </Pressable>
         )}
 
@@ -232,6 +249,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignSelf: 'stretch',
     alignItems: 'center',
+    // Pinned so swapping the label for a spinner doesn't resize the card.
+    justifyContent: 'center',
+    minHeight: 48,
     marginTop: 18,
   },
   primaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.bold },

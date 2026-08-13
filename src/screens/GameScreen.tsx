@@ -22,7 +22,7 @@ const RESULT_DELAY_MS = 3000;
 export function GameScreen({ onExit }: { onExit: () => void }) {
   const { colors, mode } = useTheme();
   const {
-    phase, game, loadError, submitting, lastResult, lastSubmit,
+    phase, game, loadError, submitting, advancing, lastResult, lastSubmit,
     submit, advance, retry, concede, reload,
   } = useDailyGameContext();
 
@@ -127,10 +127,12 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         <RoundOverlay
           game={game}
           submit={lastSubmit}
-          onNextRound={() => {
-            setShowResult(false);
-            advance();
-          }}
+          // Deliberately does not hide the card itself. The round is still
+          // 'won' until the refetch returns, so hiding it here uncovered the
+          // finished board and then re-triggered the summary a frame later.
+          // Letting the status change dismiss it means one clean transition.
+          advancing={advancing}
+          onNextRound={advance}
           onRetry={retry}
           onConcede={concede}
           onExit={onExit}
