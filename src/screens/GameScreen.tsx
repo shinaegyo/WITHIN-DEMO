@@ -114,13 +114,12 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
           <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={!!round.clue2} />
 
-          {/* Derived from the rounds on the board rather than a flag, so it
-              cannot disagree with what the player can see. Solving an unscored
-              round shows +0, which reads as a bug unless the reason is on
-              screen. */}
+          {/* States the consequence, not the cause. Naming the miss made a bad
+              day feel narrated; the player knows what happened. This only needs
+              to stop a +0 from reading as a bug. */}
           {unscored && (
             <Text style={[styles.unscored, { color: colors.textMuted }]}>
-              A round was missed, so today has stopped scoring. You can still play it out.
+              No more points can be added today.
             </Text>
           )}
 
