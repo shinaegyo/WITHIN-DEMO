@@ -134,7 +134,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
             ]}
             onPress={onPlay}
           >
-            <Text style={styles.playText}>{inProgress ? 'CONTINUE' : 'READY TO START?'}</Text>
+            <Text style={styles.playText}>{inProgress ? 'CONTINUE' : 'PRESS TO PLAY'}</Text>
           </Pressable>
         )}
 
