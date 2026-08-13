@@ -15,6 +15,9 @@ import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
 
+/** Matches the daily game so both feel the same. */
+const RESULT_DELAY_MS = 3000;
+
 interface Props {
   remainingAfterThis: number;
   onExit: () => void;
@@ -34,6 +37,7 @@ export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Pr
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [clue2Unlocked, setClue2Unlocked] = useState(false);
   const [trigger, setTrigger] = useState<FeedbackTrigger>(null);
+  const [showResult, setShowResult] = useState(false);
 
   const [last, setLast] = useState<GuessResult | null>(null);
   useEffect(() => {
@@ -79,6 +83,16 @@ export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Pr
 
   const finished = status !== 'playing';
 
+  // Same hold as the daily game: let the result land on the board first.
+  useEffect(() => {
+    if (!finished) {
+      setShowResult(false);
+      return;
+    }
+    const t = setTimeout(() => setShowResult(true), RESULT_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [finished]);
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <StatusBar barStyle={mode === 'dark' ? 'light-content' : 'dark-content'} />
@@ -109,7 +123,7 @@ export function PracticeScreen({ remainingAfterThis, onExit, onPlayAnother }: Pr
 
       <FeedbackOverlay trigger={trigger} onDone={() => setTrigger(null)} />
 
-      {finished && (
+      {showResult && (
         <View style={[StyleSheet.absoluteFill, styles.backdrop]}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             <Text style={[styles.title, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>

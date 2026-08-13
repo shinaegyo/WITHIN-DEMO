@@ -13,11 +13,17 @@ import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playOneAway, playWithin10 } from '../utils/sound';
 
+/** Long enough to see the tile land, short enough not to feel stuck. */
+const RESULT_DELAY_MS = 3000;
+
 export function GameScreen({ onExit }: { onExit: () => void }) {
   const { colors, mode } = useTheme();
   const { phase, game, loadError, submitting, lastResult, submit, reload, startFreshTestPlayer } =
     useDailyGameContext();
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
+  // The result card is held back briefly so the winning tile, its colour and
+  // the sound register before a modal covers the board.
+  const [showResult, setShowResult] = useState(false);
 
   // True when today's game was already finished before this session started,
   // so we show the summary without replaying the celebration.
@@ -43,6 +49,20 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
       playWithin10();
     }
   }, [lastResult]);
+
+  useEffect(() => {
+    if (!game || game.status === 'playing') {
+      setShowResult(false);
+      return;
+    }
+    // Reopening an already-finished day shouldn't sit on a blank board.
+    if (!lastResult) {
+      setShowResult(true);
+      return;
+    }
+    const t = setTimeout(() => setShowResult(true), RESULT_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [game?.status, lastResult]);
 
   const clearFeedback = useCallback(() => setFeedbackTrigger(null), []);
 
@@ -86,7 +106,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
       <FeedbackOverlay trigger={feedbackTrigger} onDone={clearFeedback} />
 
-      {game && (
+      {game && showResult && (
         <ResultOverlay
           status={game.status}
           answer={game.answer}
