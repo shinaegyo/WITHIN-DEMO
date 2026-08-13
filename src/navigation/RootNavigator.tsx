@@ -10,6 +10,7 @@ import { MenuDrawer } from '../components/MenuDrawer';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
+import { AccountScreen } from '../screens/AccountScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
@@ -22,6 +23,7 @@ export type RootStackParamList = {
   Game: undefined;
   Practice: { remainingAfterThis: number };
   Leaderboard: undefined;
+  Account: undefined;
   HowToPlay: undefined;
 };
 
@@ -34,7 +36,7 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 
 function Screens() {
   const { colors, mode } = useTheme();
-  const { startFreshTestPlayer } = useDailyGameContext();
+  const { startFreshTestPlayer, reload } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
@@ -93,6 +95,10 @@ function Screens() {
           )}
         </Stack.Screen>
 
+        <Stack.Screen name="Account" options={{ title: 'Profile', headerBackTitle: 'Back' }}>
+          {() => <AccountScreen onChanged={reload} />}
+        </Stack.Screen>
+
         <Stack.Screen
           name="Leaderboard"
           component={LeaderboardScreen}
@@ -112,7 +118,7 @@ function Screens() {
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
-          { label: 'Sign In', soon: true },
+          { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
           { label: 'Share', soon: true },
           { label: 'Settings', soon: true },
           ...(__DEV__
