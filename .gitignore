@@ -43,3 +43,6 @@ yarn-error.*
 # Local env / secrets
 .env
 .env.local
+
+# Web build output
+dist/

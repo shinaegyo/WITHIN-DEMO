@@ -6,6 +6,12 @@
       "runtimeExecutable": "./scripts/start-web.sh",
       "runtimeArgs": [],
       "port": 8081
+    },
+    {
+      "name": "within-dist",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8095", "--directory", "dist"],
+      "port": 8095
     }
   ]
 }
