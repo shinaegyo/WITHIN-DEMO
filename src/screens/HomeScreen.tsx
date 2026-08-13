@@ -40,6 +40,10 @@ export function HomeScreen({
   const [shareFailed, setShareFailed] = useState(false);
   const [rank, setRank] = useState<{ place: number; of: number } | null>(null);
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
+  // The first screen is sized to the viewport so it keeps the open, centred
+  // layout it had before anything sat below it. Everything else scrolls in
+  // underneath rather than crowding it.
+  const [viewport, setViewport] = useState(0);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -165,7 +169,9 @@ export function HomeScreen({
         style={styles.scroll}
         contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
+        onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
+        <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
         {started ? (
           <>
             <Text style={[styles.status, { color: colors.textMuted }]}>{status}</Text>
@@ -262,6 +268,7 @@ export function HomeScreen({
             </Text>
           </Pressable>
         )}
+        </View>
         {/* Today's standings, in reach without leaving the screen. They move
             through the day, which is the point: a reason to look again this
             evening rather than only tomorrow. */}
@@ -269,7 +276,7 @@ export function HomeScreen({
           <Pressable style={styles.boardCard} onPress={onOpenLeaderboard}>
             <View style={styles.boardHead}>
               <Text style={[styles.boardTitle, { color: colors.textMuted }]}>TODAY'S TOP</Text>
-              <Text style={[styles.boardMore, { color: colors.textMuted }]}>See all ›</Text>
+              <Text style={[styles.boardMore, { color: colors.textMuted }]}>All time ›</Text>
             </View>
 
             {preview.map((item, i) => (
@@ -310,15 +317,15 @@ export function HomeScreen({
           </Pressable>
         )}
 
-        {finished && (
-          <View style={styles.footer}>
-            <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBERS IN</Text>
-            <Text style={[styles.countdown, { color: colors.text }]}>
-              {formatCountdown(remaining)}
-            </Text>
-          </View>
-        )}
       </ScrollView>
+
+      {/* Pinned rather than scrolled. The clock is the reason to come back, so
+          it should be readable wherever the player happens to be on the page,
+          and it should never move while they read it. */}
+      <View style={[styles.footer, { borderColor: colors.border, backgroundColor: colors.background }]}>
+        <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBERS IN</Text>
+        <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -343,16 +350,17 @@ const styles = StyleSheet.create({
   iconText: { fontSize: 17 },
   scroll: { flex: 1 },
   body: {
-    flexGrow: 1,
+    paddingHorizontal: 28,
+    paddingBottom: 32,
+  },
+  hero: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 28,
-    paddingBottom: 24,
   },
   boardCard: {
     alignSelf: 'stretch',
-    marginTop: 28,
-    gap: 6,
+    marginTop: 8,
+    gap: 8,
   },
   boardHead: {
     flexDirection: 'row',
@@ -454,7 +462,10 @@ const styles = StyleSheet.create({
   practiceText: { fontSize: 12.5, fontFamily: fonts.bold, textDecorationLine: 'underline' },
   footer: {
     alignItems: 'center',
-    paddingTop: 28,
+    borderTopWidth: 1,
+    paddingTop: 10,
+    paddingBottom: 12,
+    paddingHorizontal: 28,
   },
   nextLabel: {
     fontSize: 10,

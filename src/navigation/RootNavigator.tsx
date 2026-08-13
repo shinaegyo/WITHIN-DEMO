@@ -125,7 +125,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         <Stack.Screen
           name="Leaderboard"
           component={LeaderboardScreen}
-          options={{ title: 'Today', headerBackTitle: 'Back' }}
+          options={{ title: 'All time', headerBackTitle: 'Back' }}
         />
 
         <Stack.Screen

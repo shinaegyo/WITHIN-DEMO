@@ -205,10 +205,42 @@ export interface LeaderboardEntry {
   roundsWon: number;
 }
 
+export interface AllTimeEntry {
+  rank: number;
+  name: string;
+  score: number;
+  daysPlayed: number;
+  bestStreak: number;
+  isMe: boolean;
+}
+
+export interface AllTimeLeaderboard {
+  entries: AllTimeEntry[];
+  totalPlayers: number;
+}
+
 export interface Leaderboard {
   puzzleDate: string;
   entries: LeaderboardEntry[];
   totalPlayers: number;
+}
+
+/** The long game: cumulative points across every day played. */
+export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });
+  const raw = unwrap<any>(data, error);
+  return {
+    totalPlayers: raw.totalPlayers ?? 0,
+    entries: (raw.entries ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      score: e.score,
+      daysPlayed: e.days_played ?? 0,
+      bestStreak: e.best_streak ?? 0,
+      isMe: !!e.is_me,
+    })),
+  };
 }
 
 export async function loadLeaderboard(): Promise<Leaderboard> {

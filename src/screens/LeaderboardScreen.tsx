@@ -1,21 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { StatusScreen } from '../components/StatusScreen';
-import { ApiError, LeaderboardEntry, loadLeaderboard, messageFor } from '../lib/api';
+import { AllTimeEntry, ApiError, loadAllTimeLeaderboard, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 
 export function LeaderboardScreen() {
   const { colors } = useTheme();
-  const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
+  const [entries, setEntries] = useState<AllTimeEntry[] | null>(null);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      const board = await loadLeaderboard();
+      const board = await loadAllTimeLeaderboard();
       setEntries(board.entries);
       setTotal(board.totalPlayers);
     } catch (err) {
@@ -32,14 +32,14 @@ export function LeaderboardScreen() {
 
   if (entries.length === 0) {
     return (
-      <StatusScreen message={"Nobody has finished today's 3 rounds yet. Be the first."} />
+      <StatusScreen message={'Nobody has played a day yet. Be the first.'} />
     );
   }
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        {total} {total === 1 ? 'player has' : 'players have'} played today
+        Points from every day played · {total} {total === 1 ? 'player' : 'players'}
       </Text>
 
       <FlatList
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   rank: { width: 30, fontSize: 14, fontFamily: fonts.extraBold },
-  out: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.8, marginRight: 8 },
+  meta: { fontSize: 10, fontFamily: fonts.bold, marginRight: 10 },
   medal: {
     width: 26,
     height: 26,
