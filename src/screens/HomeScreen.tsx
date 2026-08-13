@@ -169,7 +169,7 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch, user
 
       {finished && (
         <View style={styles.footer}>
-          <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
+          <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBERS IN</Text>
           <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
         </View>
       )}
