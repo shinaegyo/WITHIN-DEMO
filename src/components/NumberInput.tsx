@@ -4,9 +4,12 @@ import { MAX_NUMBER, MIN_NUMBER } from '../game/constants';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
+type SubmitOutcome = { ok: true } | { ok: false; error: string };
+
 interface Props {
   disabled: boolean;
-  onSubmit: (value: number) => { ok: true } | { ok: false; error: string };
+  /** Async now that guesses are validated by the server. */
+  onSubmit: (value: number) => Promise<SubmitOutcome>;
 }
 
 export function NumberInput({ disabled, onSubmit }: Props) {
@@ -14,9 +17,10 @@ export function NumberInput({ disabled, onSubmit }: Props) {
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (disabled || !value) return;
     const parsed = Number(value);
-    const result = onSubmit(parsed);
+    const result = await onSubmit(parsed);
     if (result.ok) {
       setValue('');
       setError(null);

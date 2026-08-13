@@ -5,7 +5,8 @@ import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
   clue1: string;
-  clue2: string;
+  /** Null until the server decides the player has earned it. */
+  clue2: string | null;
   clue2Unlocked: boolean;
 }
 
@@ -26,7 +27,7 @@ export function ClueCard({ clue1, clue2, clue2Unlocked }: Props) {
       <Text style={[styles.label, { color: colors.textMuted }]}>CLUE</Text>
       <Text style={[styles.clueText, { color: colors.text }]}>{clue1}</Text>
 
-      {clue2Unlocked && (
+      {clue2Unlocked && clue2 && (
         <Animated.View
           style={[
             styles.bonusWrap,
