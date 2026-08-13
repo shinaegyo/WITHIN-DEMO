@@ -50,6 +50,8 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
 
   const finished = game.status !== 'playing';
   const inProgress = game.status === 'playing' && game.attemptsUsed > 0;
+  // Separators keep five- and six-figure totals readable rather than a wall of digits.
+  const points = game.stats.totalPoints.toLocaleString();
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
@@ -71,19 +73,19 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
       </View>
 
       <View style={styles.body}>
+        {/* Points sit above the wordmark, where they have the full screen width
+            to grow into — a six-figure total still fits on one line. */}
+        <Text style={[styles.points, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+          {points}
+        </Text>
+        <Text style={[styles.pointsLabel, { color: colors.textMuted }]}>TOTAL POINTS</Text>
+
         <Text style={[styles.logo, { color: colors.text }]}>WITHIN</Text>
         <Text style={[styles.tagline, { color: colors.textMuted }]}>One number. Seven guesses.</Text>
 
-        <View style={[styles.streakCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.streakPill, { borderColor: colors.border, backgroundColor: colors.surface }]}>
           <Text style={[styles.streakValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
-          <Text style={[styles.streakLabel, { color: colors.textMuted }]}>
-            {game.stats.currentStreak === 1 ? 'DAY STREAK' : 'DAY STREAK'}
-          </Text>
-          {game.stats.totalPoints > 0 && (
-            <Text style={[styles.totalPoints, { color: colors.textMuted }]}>
-              {game.stats.totalPoints} total points
-            </Text>
-          )}
+          <Text style={[styles.streakLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
         </View>
 
         {finished ? (
@@ -93,15 +95,6 @@ export function HomeScreen({ onPlay, onPractice, onOpenMenu, practiceEpoch }: Pr
             </Text>
             <Text style={[styles.nextLabel, { color: colors.textMuted }]}>NEXT NUMBER IN</Text>
             <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
-            <Pressable
-              style={({ pressed }) => [
-                styles.secondaryButton,
-                { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-              ]}
-              onPress={onPlay}
-            >
-              <Text style={[styles.secondaryText, { color: colors.text }]}>See today's board</Text>
-            </Pressable>
           </View>
         ) : (
           <Pressable
@@ -165,7 +158,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 28,
-    gap: 6,
+  },
+  points: {
+    fontSize: 40,
+    fontFamily: fonts.extraBold,
+    letterSpacing: -0.5,
+    alignSelf: 'stretch',
+    textAlign: 'center',
+  },
+  pointsLabel: {
+    fontSize: 10,
+    fontFamily: fonts.bold,
+    letterSpacing: 1.4,
+    marginBottom: 22,
   },
   logo: {
     fontSize: 64,
@@ -175,31 +180,21 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 14,
     fontFamily: fonts.medium,
-    marginBottom: 26,
+    marginTop: 2,
   },
-  streakCard: {
-    alignItems: 'center',
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
     borderWidth: 1,
-    borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    marginBottom: 30,
+    borderRadius: 99,
+    paddingVertical: 9,
+    paddingHorizontal: 18,
+    marginTop: 22,
+    marginBottom: 34,
   },
-  streakValue: {
-    fontSize: 46,
-    fontFamily: fonts.logo,
-    letterSpacing: -1,
-  },
-  streakLabel: {
-    fontSize: 10,
-    fontFamily: fonts.bold,
-    letterSpacing: 1.2,
-  },
-  totalPoints: {
-    fontSize: 12,
-    fontFamily: fonts.medium,
-    marginTop: 8,
-  },
+  streakValue: { fontSize: 20, fontFamily: fonts.extraBold },
+  streakLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
   playButton: {
     borderRadius: 16,
     paddingVertical: 18,
@@ -217,7 +212,7 @@ const styles = StyleSheet.create({
   doneTitle: {
     fontSize: 16,
     fontFamily: fonts.semiBold,
-    marginBottom: 18,
+    marginBottom: 16,
     textAlign: 'center',
   },
   nextLabel: {
@@ -232,23 +227,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: feedbackColors.correct,
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 13,
-    paddingHorizontal: 24,
-    marginTop: 24,
-  },
-  secondaryText: {
-    fontSize: 14,
-    fontFamily: fonts.bold,
-  },
   practiceButton: {
     borderWidth: 1,
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 22,
-    marginTop: 14,
+    marginTop: 24,
     alignItems: 'center',
     alignSelf: 'stretch',
   },
