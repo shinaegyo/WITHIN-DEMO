@@ -1,11 +1,13 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
 /** Nothing in the game itself explains the colour system, so this screen does. */
 export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = {}) {
+  const { width } = useWindowDimensions();
+  const [page, setPage] = useState(0);
   const { colors } = useTheme();
 
   // Rendered the same way as a real tile, so the page can't drift from the game.
@@ -38,16 +40,33 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
   };
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
+      >
+          <ScrollView
+            key={0}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
+
       {showTitle && <Text style={[styles.h1, { color: colors.text }]}>How to play</Text>}
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Three numbers between 1 and 1000 are chosen each day. Everyone in the world gets the same
         three — only the order differs — and you play them one round at a time.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={1}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Which way to go</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -79,6 +98,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         The stronger the colour, the closer you are. A faint tile with only a coloured edge means
         you're still a long way off; a fully coloured tile means you're nearly there.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={2}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Clues</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -86,6 +112,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         by 3". Land a guess within 10 and a second, more specific clue unlocks for the rest of that
         round.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={3}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -97,6 +130,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         gives you one attempt fewer still, down to a minimum of five. Solve with even one attempt
         to spare and your limit stays exactly where it is.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={4}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -107,6 +147,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         The number is revealed once the round ends, whether you found it or not.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={5}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -122,6 +169,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         Five runs a day. Every run starts from the first number again, and the week's board keeps
         your deepest — so the five are attempts at one climb, not five separate scores.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={6}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -141,6 +195,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         Duels are separate from your daily: they change no points, no streak and no leaderboard
         place.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={7}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -153,6 +214,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         There are twenty-five of each, and everyone in the world gets the same two on the same
         days.
       </Text>
+          </ScrollView>
+          <ScrollView
+            key={8}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -175,6 +243,13 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
           </View>
         ))}
       </View>
+          </ScrollView>
+          <ScrollView
+            key={9}
+            style={{ width }}
+            contentContainerStyle={styles.page}
+            showsVerticalScrollIndicator={false}
+          >
 
       <Text style={[styles.h2, { color: colors.text }]}>Streaks</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
@@ -182,11 +257,30 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         eliminated, or take a retry, and it starts again from zero — a streak is meant to be earned
         outright. New numbers arrive at midnight, your time.
       </Text>
-    </ScrollView>
+          </ScrollView>
+      </ScrollView>
+
+      {/* One dot per page. A horizontal pager gives no other sign that there is
+          more to come, where a scrollbar would have. */}
+      <View style={styles.dots}>
+        {Array.from({ length: 10 }).map((_, i) => (
+          <View
+            key={i}
+            style={[styles.dot, { backgroundColor: i === page ? colors.text : colors.border }]}
+          />
+        ))}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: { flex: 1 },
+  // Each section owns a screen: centred, padded once, nothing left over. Tall
+  // sections still scroll inside their own page rather than being cut.
+  page: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 20 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingVertical: 14 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
   content: { padding: 24, paddingBottom: 60 },
   h1: { fontSize: 30, fontFamily: fonts.logo, letterSpacing: -0.6, marginBottom: 14 },
   h2: { fontSize: 17, fontFamily: fonts.extraBold, marginTop: 28, marginBottom: 6 },
