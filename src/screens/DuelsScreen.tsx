@@ -66,9 +66,13 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   if (!duels) return <StatusScreen loading />;
 
   const waitingOnYou = duels.filter((d) => d.status === 'pending' && !d.iChallenged);
-  const yourTurn = duels.filter((d) => d.status === 'active' && d.myDone < 3);
+  // A duel wants either a number for the next round or a round played. Anything
+  // else active is waiting on them.
+  const yourTurn = duels.filter((d) => d.status === 'active' && (d.needsNumber || d.needsPlay));
   const waitingOnThem = duels.filter(
-    (d) => (d.status === 'active' && d.myDone === 3) || (d.status === 'pending' && d.iChallenged),
+    (d) =>
+      (d.status === 'active' && !d.needsNumber && !d.needsPlay) ||
+      (d.status === 'pending' && d.iChallenged),
   );
   const settled = duels.filter((d) => d.status === 'complete');
 
@@ -107,9 +111,9 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
       keyboardShouldPersistTaps="handled"
     >
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        Three numbers, seven then six then five attempts, same for both of you. A round goes to
-        whoever needed fewer guesses, and the next opens once you have both played it. Level after
-        three and a fourth number decides it.
+        You pick the number they hunt and they pick yours, a fresh one each round. Seven attempts
+        then six then five. A round goes to whoever needed fewer guesses, and the next opens once
+        you have both played it. Level after three and a fourth number decides it.
       </Text>
 
       <View style={[styles.addRow, { borderColor: colors.border, backgroundColor: colors.surface }]}>
@@ -167,7 +171,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           <Text style={[styles.heading, { color: colors.textMuted }]}>YOUR TURN</Text>
           {yourTurn.map((d) => (
             <Row key={d.id} d={d}>
-              <Action label="Play ›" onPress={() => onPlay(d.id)} />
+              <Action label={d.needsNumber ? 'Set number ›' : 'Play ›'} onPress={() => onPlay(d.id)} />
             </Row>
           ))}
         </>

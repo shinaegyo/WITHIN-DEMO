@@ -27,6 +27,4 @@ export interface GameState {
   guesses: GuessResult[];
   status: GameStatus;
   clue1: string;
-  clue2: string;
-  clue2Unlocked: boolean;
 }

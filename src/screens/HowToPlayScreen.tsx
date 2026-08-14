@@ -93,9 +93,10 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>Clues</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round of the daily challenge starts with one clue about that round's number, such as
-        "the number is divisible by 3". Land a guess within 10 and a second, more specific clue
-        unlocks for the rest of that round.
+        Every round opens with one clue about its number, and one is all you get. They describe the
+        shape of the number rather than its arithmetic — what it starts or ends on, whether its
+        digits climb or fall, whether it reads the same backwards — so you can hold the clue in
+        your head while you guess.
       </Text>
     </>,
 
@@ -170,8 +171,7 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Numbers one after another, up to 100 of them. Six attempts each for the first nineteen, five
-        from the twentieth, four from the fiftieth. One clue each, no bonus clue, and one miss ends
-        the run. Everyone plays the same numbers each week, so how far you got is worth comparing.
+        from the twentieth, four from the fiftieth. One miss ends the run. Everyone plays the same numbers each week, so how far you got is worth comparing.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         It is called Impossible because it is. Four attempts for a number between 1 and 1000 is
@@ -187,16 +187,17 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Add someone as a friend and you can challenge them. Once they accept, you both get the same
-        three numbers and the same seven, six and five attempts. Each round goes to whoever needed
-        fewer guesses. Solve it in the same number and the round is a tie, shown in orange, counting
-        for neither of you.
+        Add someone as a friend and you can challenge them. Once they accept, the duel opens with
+        both of you choosing: you set the number they have to find, they set yours. A fresh number
+        each round, with seven attempts then six then five. Each round goes to whoever needed fewer
+        guesses. Solve it in the same number and the round is a tie, shown in orange, counting for
+        neither of you.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Rounds are played one at a time. When you finish one you wait for them, and the next opens
-        once you have both played it — so you always know how the duel stands before the next
-        number. If all three end level, a fourth number decides it. If that ties too, the duel is
-        drawn.
+        Neither of you can guess until both numbers are in, so nobody starts while the other is
+        still choosing. When you finish a round you wait for them, and the next opens once you have
+        both played it — so you always know how the duel stands before you pick again. If all three
+        end level, a fourth number decides it. If that ties too, the duel is drawn.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         You never play at the same time, and you never see their board until the round is settled.

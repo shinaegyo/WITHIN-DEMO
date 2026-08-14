@@ -1,47 +1,22 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
-interface Props {
-  clue1: string;
-  /** Null until the server decides the player has earned it. */
-  clue2: string | null;
-  clue2Unlocked: boolean;
-}
-
-export function ClueCard({ clue1, clue2, clue2Unlocked }: Props) {
+/**
+ * The round's clue.
+ *
+ * One clue, always. A second used to unlock at WITHIN 10 - the moment a round
+ * is already as good as won - so it arrived where it was least needed and made
+ * the card jump while somebody was reading it.
+ */
+export function ClueCard({ clue }: { clue: string }) {
   const { colors } = useTheme();
-  const reveal = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (!clue2Unlocked) {
-      reveal.setValue(0);
-      return;
-    }
-    Animated.spring(reveal, { toValue: 1, useNativeDriver: true, friction: 7, tension: 60 }).start();
-  }, [clue2Unlocked, reveal]);
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[styles.label, { color: colors.textMuted }]}>CLUE</Text>
-      <Text style={[styles.clueText, { color: colors.text }]}>{clue1}</Text>
-
-      {clue2Unlocked && clue2 && (
-        <Animated.View
-          style={[
-            styles.bonusWrap,
-            {
-              opacity: reveal,
-              transform: [{ translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
-            },
-          ]}
-        >
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <Text style={[styles.label, { color: colors.accent }]}>BONUS CLUE</Text>
-          <Text style={[styles.clueText, { color: colors.text }]}>{clue2}</Text>
-        </Animated.View>
-      )}
+      <Text style={[styles.clueText, { color: colors.text }]}>{clue}</Text>
     </View>
   );
 }
@@ -58,21 +33,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: fonts.bold,
     letterSpacing: 0.8,
-    textAlign: 'center',
-    marginBottom: 3,
+    marginBottom: 4,
   },
-  clueText: {
-    fontSize: 16,
-    fontFamily: fonts.semiBold,
-    textAlign: 'center',
-  },
-  bonusWrap: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-  },
-  divider: {
-    height: 1,
-    alignSelf: 'stretch',
-    marginVertical: 10,
-  },
+  clueText: { fontSize: 15.5, fontFamily: fonts.bold, textAlign: 'center', lineHeight: 21 },
 });

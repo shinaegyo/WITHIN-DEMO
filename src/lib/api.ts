@@ -39,7 +39,6 @@ export interface CurrentRound {
   attemptsAllowed: number;
   score: number;
   clue1: string;
-  clue2: string | null;
   answer: number | null;
   retried: boolean;
   guesses: GuessResult[];
@@ -121,7 +120,6 @@ function toRound(raw: any): CurrentRound {
     attemptsAllowed: raw.attemptsAllowed,
     score: raw.score,
     clue1: raw.clue1,
-    clue2: raw.clue2 ?? null,
     answer: raw.answer ?? null,
     retried: !!raw.retried,
     guesses: (raw.guesses ?? []).map(toGuessResult),
@@ -175,7 +173,6 @@ export interface SubmitResult {
   nextAttemptsAllowed: number | null;
   retried: boolean;
   canRetry: boolean;
-  clue2: string | null;
   answer: number | null;
 }
 
@@ -195,7 +192,6 @@ export async function submitGuess(guess: number): Promise<SubmitResult> {
     nextAttemptsAllowed: raw.nextAttemptsAllowed ?? null,
     retried: !!raw.retried,
     canRetry: !!raw.canRetry,
-    clue2: raw.clue2 ?? null,
     answer: raw.answer ?? null,
   };
 }
@@ -353,6 +349,10 @@ export interface DuelSummary {
   iChallenged: boolean;
   myDone: number;
   theirDone: number;
+  /** A number is owed for the next round. */
+  needsNumber: boolean;
+  /** A round is open and waiting to be played. */
+  needsPlay: boolean;
   outcome: 'won' | 'lost' | 'draw' | null;
   /** Positive for a run of wins against them, negative for losses. */
   streak: number;
@@ -363,7 +363,6 @@ export interface DuelRoundState {
   attemptsUsed: number;
   attemptsAllowed: number;
   clue1: string;
-  clue2: string | null;
   guesses: GuessResult[];
 }
 
@@ -376,6 +375,9 @@ export interface DuelRoundRow {
   mineStatus: 'playing' | 'won' | 'lost' | null;
   theirs: number | null;
   theirStatus: 'playing' | 'won' | 'lost' | null;
+  /** The numbers, once the round is settled: what each of you set. */
+  iSet: number | null;
+  theySet: number | null;
 }
 
 export interface DuelState {
@@ -386,6 +388,10 @@ export interface DuelState {
   round: DuelRoundState | null;
   /** True while the other player still has an earlier round open. */
   waitingForThem: boolean;
+  /** The round wanting a number from you, or null if none is owed. */
+  pickRound: number | null;
+  /** You have set yours and are waiting on theirs. */
+  pickSubmitted: boolean;
   rounds: DuelRoundRow[];
 }
 
@@ -400,6 +406,8 @@ export async function loadDuels(): Promise<DuelSummary[]> {
     iChallenged: !!d.i_challenged,
     myDone: d.my_done ?? 0,
     theirDone: d.their_done ?? 0,
+    needsNumber: !!d.needs_number,
+    needsPlay: !!d.needs_play,
     outcome: d.outcome ?? null,
     streak: d.streak ?? 0,
   }));
@@ -420,6 +428,16 @@ export async function respondToDuel(duelId: string, accept: boolean): Promise<st
   return unwrap<any>(data, error).status;
 }
 
+/** The number your opponent will be hunting this round. */
+export async function setDuelNumber(duelId: string, value: number): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_set_number', {
+    p_duel_id: duelId,
+    p_number: value,
+  });
+  unwrap<any>(data, error);
+}
+
 export async function loadDuel(duelId: string): Promise<DuelState> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('duel_state', { p_duel_id: duelId });
@@ -435,11 +453,12 @@ export async function loadDuel(duelId: string): Promise<DuelState> {
           attemptsUsed: raw.round.attemptsUsed,
           attemptsAllowed: raw.round.attemptsAllowed,
           clue1: raw.round.clue1,
-          clue2: raw.round.clue2 ?? null,
           guesses: (raw.round.guesses ?? []).map(toGuessResult),
         }
       : null,
     waitingForThem: !!raw.waitingForThem,
+    pickRound: raw.pickRound ?? null,
+    pickSubmitted: !!raw.pickSubmitted,
     rounds: raw.rounds ?? [],
   };
 }
@@ -456,7 +475,6 @@ export async function duelGuess(duelId: string, guess: number) {
     attemptsUsed: raw.attemptsUsed as number,
     attemptsAllowed: raw.attemptsAllowed as number,
     result: toGuessResult(raw.guess),
-    clue2: (raw.clue2 ?? null) as string | null,
     answer: (raw.answer ?? null) as number | null,
   };
 }
@@ -466,7 +484,7 @@ export interface EndlessState {
   level: number;
   attemptsUsed: number;
   attemptsAllowed: number;
-  /** One clue only - Impossible has no bonus clue. */
+  /** One clue. There is no bonus clue in any mode. */
   clue1: string;
   guesses: GuessResult[];
   best: number;
@@ -654,6 +672,10 @@ export function messageFor(code: string, guess?: number): string {
       return 'That challenge is no longer waiting.';
     case 'waiting_for_them':
       return 'They still have this round to play.';
+    case 'not_picking':
+      return 'No number to set right now.';
+    case 'already_set':
+      return "You've already set their number for this round.";
     case 'no_run':
       return 'No run in progress. Start a new one.';
     case 'no_runs_left':

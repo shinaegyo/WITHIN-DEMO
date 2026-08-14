@@ -42,7 +42,6 @@ export function PracticeScreen({
 
   const [guesses, setGuesses] = useState<GuessResult[]>([]);
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
-  const [clue2Unlocked, setClue2Unlocked] = useState(false);
   const [trigger, setTrigger] = useState<FeedbackTrigger>(null);
   const [showResult, setShowResult] = useState(false);
 
@@ -82,7 +81,6 @@ export function PracticeScreen({
       const next = [...guesses, result];
       setGuesses(next);
       setLast(result);
-      if (result.isWithin10 || result.isCorrect) setClue2Unlocked(true);
       if (result.isCorrect) setStatus('won');
       else if (next.length >= MAX_ATTEMPTS) setStatus('lost');
 
@@ -121,7 +119,7 @@ export function PracticeScreen({
             </View>
           </View>
 
-          <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={clue2Unlocked} />
+          <ClueCard clue={round.clue1} />
 
           <NumberInput disabled={finished} onSubmit={submit} />
 

@@ -5,7 +5,7 @@ import { ClueCard } from '../components/ClueCard';
 import { GuessBoard } from '../components/GuessBoard';
 import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
-import { ApiError, DuelState, duelGuess, loadDuel, messageFor } from '../lib/api';
+import { ApiError, DuelState, duelGuess, loadDuel, messageFor, setDuelNumber } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
@@ -63,11 +63,31 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
     [busy, duelId, load],
   );
 
+  // The number this player sets for the other. Same input as a guess, so it
+  // reads as the same kind of act - which it is, from the other side.
+  const choose = useCallback(
+    async (value: number) => {
+      if (busy) return { ok: false as const, error: 'One at a time.' };
+      setBusy(true);
+      try {
+        await setDuelNumber(duelId, value);
+        await load();
+        return { ok: true as const };
+      } catch (err) {
+        hapticInvalid();
+        return { ok: false as const, error: messageFor(err instanceof ApiError ? err.code : 'network') };
+      } finally {
+        setBusy(false);
+      }
+    },
+    [busy, duelId, load],
+  );
+
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!duel) return <StatusScreen loading />;
 
+  const picking = duel.pickRound !== null;
   const done = duel.round === null;
-  const waiting = duel.waitingForThem;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
@@ -121,7 +141,33 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
             })}
           </View>
 
-          {done ? (
+          {picking ? (
+            duel.pickSubmitted ? (
+              <View style={styles.result}>
+                <Text style={[styles.resultTitle, { color: colors.text }]}>Number set</Text>
+                <Text style={[styles.resultBody, { color: colors.textMuted }]}>
+                  {duel.opponent} is choosing yours. The round opens for both of you at once, so
+                  neither of you starts guessing while the other is still deciding.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.picker}>
+                <Text style={[styles.resultTitle, { color: colors.text }]}>
+                  {duel.pickRound === 4 ? 'Decider' : `Round ${duel.pickRound}`}
+                </Text>
+                <Text style={[styles.resultBody, { color: colors.textMuted }]}>
+                  Choose the number {duel.opponent} has to find, 1 to 1000. They are choosing yours
+                  at the same time.
+                </Text>
+                <NumberInput
+                  disabled={busy}
+                  onSubmit={choose}
+                  submitLabel="Set"
+                  placeholder="Their number"
+                />
+              </View>
+            )
+          ) : done ? (
             <View style={styles.result}>
               <Text style={[styles.resultTitle, { color: colors.text }]}>
                 {duel.status !== 'complete'
@@ -140,11 +186,7 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
             </View>
           ) : (
             <>
-              <ClueCard
-                clue1={duel.round!.clue1}
-                clue2={duel.round!.clue2}
-                clue2Unlocked={!!duel.round!.clue2}
-              />
+              <ClueCard clue={duel.round!.clue1} />
 
               <NumberInput disabled={busy} onSubmit={submit} />
 
@@ -169,6 +211,7 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.bold },
   vs: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.3 },
+  picker: { flex: 1, justifyContent: 'center', gap: 10, paddingHorizontal: 4 },
   scoreRow: { flexDirection: 'row', gap: 8 },
   scoreCell: { flex: 1, borderWidth: 1, borderRadius: 10, paddingVertical: 7, alignItems: 'center' },
   scoreRound: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1 },

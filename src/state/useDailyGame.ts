@@ -106,7 +106,6 @@ export function useDailyGame(): UseDailyGameResult {
                   status: res.roundStatus,
                   attemptsUsed: res.attemptsUsed,
                   score: res.roundScore,
-                  clue2: res.clue2 ?? prev.round.clue2,
                   answer: res.answer ?? prev.round.answer,
                   guesses: [...prev.round.guesses, res.result],
                 },

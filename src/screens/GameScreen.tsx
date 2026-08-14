@@ -120,7 +120,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             totalScore={game.totalScore}
           />
 
-          <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={!!round.clue2} />
+          <ClueCard clue={round.clue1} />
 
           {/* States the consequence, not the cause. Naming the miss made a bad
               day feel narrated; the player knows what happened. This only needs

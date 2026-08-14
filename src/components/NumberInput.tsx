@@ -9,9 +9,12 @@ interface Props {
   disabled: boolean;
   /** Async now that guesses are validated by the server. */
   onSubmit: (value: number) => Promise<SubmitOutcome>;
+  /** "Guess" everywhere except setting a duel number, which is not one. */
+  submitLabel?: string;
+  placeholder?: string;
 }
 
-export function NumberInput({ disabled, onSubmit }: Props) {
+export function NumberInput({ disabled, onSubmit, submitLabel = 'Guess', placeholder = 'Enter number' }: Props) {
   const { colors } = useTheme();
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +105,7 @@ export function NumberInput({ disabled, onSubmit }: Props) {
 
           {!value && (
             <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.placeholderWrap]}>
-              <Text style={[styles.placeholder, { color: colors.textMuted }]}>Enter number</Text>
+              <Text style={[styles.placeholder, { color: colors.textMuted }]}>{placeholder}</Text>
             </View>
           )}
         </View>
@@ -119,7 +122,7 @@ export function NumberInput({ disabled, onSubmit }: Props) {
           disabled={!ready}
         >
           <Text style={[styles.buttonText, { color: ready ? colors.background : colors.textMuted }]}>
-            Guess
+            {submitLabel}
           </Text>
         </Pressable>
       </Animated.View>

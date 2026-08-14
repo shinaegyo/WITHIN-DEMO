@@ -202,9 +202,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 </Text>
               </View>
 
-              {/* One clue only. The bonus clue lands when the player is closest,
-                  which is exactly where this mode is meant to hold. */}
-              <ClueCard clue1={state.clue1} clue2={null} clue2Unlocked={false} />
+              <ClueCard clue={state.clue1} />
 
               <NumberInput disabled={busy} onSubmit={submit} />
 
