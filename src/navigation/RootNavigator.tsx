@@ -224,25 +224,37 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
         items={[
-          { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
+          // Ordered by what kind of thing each one is, most-used first: play
+          // something, see people, change something, look something up.
           { label: 'Ranked', onPress: () => navRef.isReady() && navRef.navigate('Ranked') },
           { label: 'Duels', onPress: () => navRef.isReady() && navRef.navigate('Duels') },
           { label: 'Practice', onPress: startPractice },
+
           {
             label: 'Friends',
             count: pending,
+            startsGroup: true,
             onPress: () => navRef.isReady() && navRef.navigate('Friends'),
           },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
-          { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
-          { label: 'Privacy', onPress: () => navRef.isReady() && navRef.navigate('Privacy') },
-          // Sharing lives on the home screen, where the result it shares is
-          // already in front of you. A second entry here spent most of the day
-          // greyed out, explaining that it was not available yet.
+
+          {
+            label: 'Profile & Sign In',
+            startsGroup: true,
+            onPress: () => navRef.isReady() && navRef.navigate('Account'),
+          },
           { label: 'Audio', onPress: () => navRef.isReady() && navRef.navigate('Audio') },
+
+          {
+            label: 'How to Play',
+            startsGroup: true,
+            onPress: () => navRef.isReady() && navRef.navigate('HowToPlay'),
+          },
+          { label: 'Privacy', onPress: () => navRef.isReady() && navRef.navigate('Privacy') },
+
           ...(__DEV__
             ? [
-                { label: 'Replay today (dev)', onPress: resetToday },
+                { label: 'Replay today (dev)', startsGroup: true, onPress: resetToday },
                 { label: 'New test player (dev)', onPress: startFreshTestPlayer },
               ]
             : []),

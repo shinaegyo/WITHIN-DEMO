@@ -13,6 +13,10 @@ export interface MenuItem {
   badge?: string;
   /** A count needing attention. Unlike badge, the item stays usable. */
   count?: number;
+  /** Opens a new group: play, people, your setup, reference. Space rather than
+   *  a heading, because four headings on nine items is heavier than the
+   *  problem they would be solving. */
+  startsGroup?: boolean;
 }
 
 const WIDTH = Math.min(320, Dimensions.get('window').width * 0.82);
@@ -76,6 +80,7 @@ export function MenuDrawer({
                 item.onPress?.();
               }}
               style={({ pressed }) => [
+                item.startsGroup && styles.grouped,
                 styles.item,
                 {
                   backgroundColor:
@@ -107,6 +112,7 @@ export function MenuDrawer({
 }
 
 const styles = StyleSheet.create({
+  grouped: { marginTop: 18 },
   fill: { flex: 1 },
   backdrop: { backgroundColor: 'rgba(0,0,0,0.5)' },
   panel: {
