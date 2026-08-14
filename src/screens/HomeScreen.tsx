@@ -8,7 +8,7 @@ import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
-import { practiceRemaining } from '../utils/practiceLimit';
+import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
 import { shareResult } from '../utils/share';
 import { LeaderboardEntry, loadFriendsLeaderboard, loadLeaderboard } from '../lib/api';
 import { MEDALS } from '../theme/medals';
@@ -363,10 +363,33 @@ export function HomeScreen({
             <Text
               style={[
                 styles.practiceText,
-                { color: colors.textMuted, opacity: practiceLeft === 0 ? 0.5 : 1 },
+                { color: practiceLeft > 0 ? colors.text : colors.textMuted },
               ]}
             >
-              {practiceLeft > 0 ? 'Practice' : 'No practice left today'}
+              Practice
+            </Text>
+
+            {/* One pip per round, filled for what is left. The count is
+                readable at a glance without reading it. */}
+            <View style={styles.pips}>
+              {Array.from({ length: PRACTICE_PER_DAY }).map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.pip,
+                    {
+                      backgroundColor: i < practiceLeft ? colors.text : 'transparent',
+                      borderColor: i < practiceLeft ? colors.text : colors.border,
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+
+            <Text style={[styles.practiceMeta, { color: colors.textMuted }]}>
+              {practiceLeft === 0
+                ? '0 practices'
+                : `${practiceLeft} ${practiceLeft === 1 ? 'practice' : 'practices'} remaining`}
             </Text>
           </Pressable>
         )}
@@ -580,12 +603,15 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 19, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
-  practice: { marginTop: 18, paddingVertical: 6 },
+  practice: { marginTop: 18, paddingVertical: 6, alignItems: 'center', gap: 6 },
   rankRow: { alignItems: 'center', marginTop: 10 },
   rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
   rankValue: { fontSize: 22, fontFamily: fonts.extraBold, marginTop: 1 },
   rankOf: { fontSize: 13, fontFamily: fonts.bold },
-  practiceText: { fontSize: 12.5, fontFamily: fonts.bold, textDecorationLine: 'underline' },
+  practiceText: { fontSize: 13, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
+  pips: { flexDirection: 'row', gap: 6 },
+  pip: { width: 9, height: 9, borderRadius: 5, borderWidth: 1.5 },
+  practiceMeta: { fontSize: 11, fontFamily: fonts.medium },
   footer: {
     alignItems: 'center',
     borderTopWidth: 1,
