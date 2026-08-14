@@ -128,7 +128,13 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
               guesses={round.guesses}
               attemptsAllowed={round.attemptsAllowed}
               showRemaining={round.status === 'playing' && game.dayStatus === 'playing'}
-              finalNote="Solving now leaves you one fewer next round."
+              // Only worth saying while there is a next round to lose an
+              // attempt from. On round three the penalty cannot apply.
+              finalNote={
+                round.round < game.totalRounds
+                  ? 'Solving now leaves you one fewer next round.'
+                  : undefined
+              }
             />
           </View>
 
