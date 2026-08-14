@@ -35,12 +35,19 @@ type Flow = 'link' | 'signin';
 
 const RESEND_COOLDOWN = 30;
 
-export function AccountScreen({ onChanged }: { onChanged: () => void }) {
+export function AccountScreen({
+  onChanged,
+  username,
+}: {
+  onChanged: () => void;
+  /** Already known by the app, so the field is filled before any request. */
+  username?: string | null;
+}) {
   const { colors } = useTheme();
 
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [name, setName] = useState('');
-  const [savedName, setSavedName] = useState<string | null>(null);
+  const [name, setName] = useState(username ?? '');
+  const [savedName, setSavedName] = useState<string | null>(username ?? null);
   const [nameNote, setNameNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   const [email, setEmail] = useState('');
@@ -54,6 +61,8 @@ export function AccountScreen({ onChanged }: { onChanged: () => void }) {
 
   const refresh = useCallback(async () => {
     setAccount(await currentAccount());
+    // Confirms what was passed in rather than being the first to know it: the
+    // field is already filled, so this only matters if it changed elsewhere.
     const existing = await currentUsername();
     setSavedName(existing);
     if (existing) setName(existing);

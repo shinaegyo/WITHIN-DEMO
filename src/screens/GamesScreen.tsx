@@ -144,15 +144,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 13,
-    paddingHorizontal: 15,
+    borderRadius: 18,
+    // Twice the height: four rows and a note left most of the screen empty, and
+    // a row you can hit without looking is worth more than the space it saves.
+    paddingVertical: 30,
+    paddingHorizontal: 18,
     gap: 10,
   },
   main: { flex: 1, minWidth: 0 },
-  label: { fontSize: 15.5, fontFamily: fonts.extraBold },
-  sub: { fontSize: 11, fontFamily: fonts.medium, marginTop: 2 },
-  status: { fontSize: 11, fontFamily: fonts.bold, flexShrink: 1, textAlign: 'right' },
+  label: { fontSize: 17, fontFamily: fonts.extraBold },
+  sub: { fontSize: 12, fontFamily: fonts.medium, marginTop: 3 },
+  status: { fontSize: 12, fontFamily: fonts.bold, flexShrink: 1, textAlign: 'right' },
   arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
   note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 12, paddingHorizontal: 2 },
 });
