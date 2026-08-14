@@ -633,8 +633,8 @@ export interface EndlessState {
   level: number;
   attemptsUsed: number;
   attemptsAllowed: number;
-  /** One clue. There is no bonus clue in any mode. */
-  clue1: string;
+  /** Null until the clue is due — Impossible holds it back on deeper levels. */
+  clue1: string | null;
   guesses: GuessResult[];
   best: number;
   runsLeft: number;
@@ -644,6 +644,7 @@ export interface EndlessState {
 export interface EndlessEntry {
   rank: number;
   name: string;
+  avatar: string | null;
   depth: number;
   isMe: boolean;
 }
@@ -657,7 +658,7 @@ export async function loadEndless(): Promise<EndlessState> {
     level: raw.level,
     attemptsUsed: raw.attemptsUsed,
     attemptsAllowed: raw.attemptsAllowed,
-    clue1: raw.clue1,
+    clue1: raw.clue1 ?? null,
     guesses: (raw.guesses ?? []).map(toGuessResult),
     best: raw.best ?? 0,
     runsLeft: raw.runsLeft ?? 0,
@@ -692,6 +693,7 @@ export async function loadEndlessBoard(): Promise<EndlessEntry[]> {
   return (raw.entries ?? []).map((e: any) => ({
     rank: e.rank,
     name: e.name,
+    avatar: e.avatar ?? null,
     depth: e.depth,
     isMe: !!e.is_me,
   }));

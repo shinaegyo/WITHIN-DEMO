@@ -33,6 +33,7 @@ import { Avatar } from '../components/Avatar';
 import { TabIcon, TabName } from '../components/TabIcon';
 import { GamesScreen } from '../screens/GamesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { ImpossibleBoardScreen } from '../screens/ImpossibleBoardScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { AudioScreen } from '../screens/AudioScreen';
@@ -47,6 +48,7 @@ export type RootStackParamList = {
   Friends: undefined;
   Duels: undefined;
   Ranked: undefined;
+  ImpossibleBoard: undefined;
   Privacy: undefined;
   Audio: undefined;
   Avatar: undefined;
@@ -308,8 +310,19 @@ function Screens({
         </Stack.Screen>
 
         <Stack.Screen name="Endless" options={{ headerShown: false }}>
-          {({ navigation }) => <EndlessScreen onExit={() => navigation.navigate('Home')} />}
+          {({ navigation }) => (
+            <EndlessScreen
+              onExit={() => navigation.navigate('Home')}
+              onBoard={() => navigation.navigate('ImpossibleBoard')}
+            />
+          )}
         </Stack.Screen>
+
+        <Stack.Screen
+          name="ImpossibleBoard"
+          options={{ title: 'Impossible · this week', headerBackTitle: 'Back' }}
+          component={ImpossibleBoardScreen}
+        />
 
         <Stack.Screen name="Duels" options={{ title: 'Duels', headerBackTitle: 'Back' }}>
           {({ navigation }) => (

@@ -36,7 +36,7 @@ import { playCorrect, playForTier } from '../utils/sound';
  * be sitting in the bundle for anyone who looked, and a board built on numbers
  * the player already holds would be worthless.
  */
-export function EndlessScreen({ onExit }: { onExit: () => void }) {
+export function EndlessScreen({ onExit, onBoard }: { onExit: () => void; onBoard: () => void }) {
   const { colors } = useTheme();
   const [state, setState] = useState<EndlessState | null>(null);
   const [board, setBoard] = useState<EndlessEntry[]>([]);
@@ -136,10 +136,11 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             <Pressable onPress={onExit} hitSlop={10}>
               <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
             </Pressable>
-            <Text style={[styles.badge, { color: colors.textMuted }]}>
-              THIS WEEK · BEST {state.best}
-              {myRank ? ` · #${myRank.rank}` : ''} · {state.runsLeft} LEFT
-            </Text>
+            <Pressable onPress={onBoard} hitSlop={8}>
+              <Text style={[styles.badge, { color: colors.textMuted }]}>
+                {state.runsLeft} {state.runsLeft === 1 ? 'RUN' : 'RUNS'} LEFT · BOARD ›
+              </Text>
+            </Pressable>
           </View>
 
           {solved ? (
@@ -147,7 +148,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               <Text style={[styles.overTitle, { color: colors.text }]}>Correct</Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
                 {solved.answer !== null ? `It was ${solved.answer}. ` : ''}
-                That's {solved.level} {solved.level === 1 ? 'number' : 'numbers'} deep.
+                That's level {solved.level} cleared.
               </Text>
               {solved.shrankTo !== null ? (
                 <Text style={[styles.overBody, { color: colors.text }]}>
@@ -165,8 +166,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 You cleared {over.depth} {over.depth === 1 ? 'number' : 'numbers'}.
               </Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
-                Everyone plays the same numbers this week, so that depth compares directly. Four
-                attempts from level seven onward — getting far is meant to be hard.
+                Everyone plays the same numbers this week, so how far you got compares directly.
+                The allowance shrinks as you climb — getting deep is meant to be hard.
               </Text>
               {state.runsLeft > 0 ? (
                 <Pressable
@@ -206,12 +207,25 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             <>
               <View style={styles.levelRow}>
                 <Text style={[styles.level, { color: colors.text }]}>{state.level}</Text>
+                {/* "Numbers deep" was jargon. The goal and the ceiling, plainly. */}
                 <Text style={[styles.levelLabel, { color: colors.textMuted }]}>
-                  {state.level === 1 ? 'FIRST NUMBER' : 'NUMBERS DEEP'}
+                  LEVEL {state.level} OF 100
                 </Text>
               </View>
 
-              <ClueCard clue={state.clue1} />
+              {/* Held back until the allowance is nearly gone, and then about
+                  the range they have already narrowed to. */}
+              {state.clue1 ? (
+                <ClueCard clue={state.clue1} />
+              ) : (
+                <View style={[styles.noClue, { borderColor: colors.border }]}>
+                  <Text style={[styles.noClueText, { color: colors.textMuted }]}>
+                    {state.level > 89
+                      ? 'A clue arrives on your last attempt.'
+                      : 'A clue arrives with three attempts left.'}
+                  </Text>
+                </View>
+              )}
 
               <NumberInput disabled={busy} onSubmit={submit} />
 
@@ -237,6 +251,8 @@ const styles = StyleSheet.create({
   badge: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },
+  noClue: { borderWidth: 1, borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
+  noClueText: { fontSize: 12.5, fontFamily: fonts.medium },
   levelLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4, marginTop: -2 },
   boardWrap: { flex: 1 },
   result: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 12 },
