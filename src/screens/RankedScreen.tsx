@@ -89,8 +89,11 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         <View>
           <Text style={[styles.rating, { color: colors.text }]}>{state.rating}</Text>
           <Text style={[styles.ratingLabel, { color: colors.textMuted }]}>
+            {/* A bare "1000" reads as a score somebody earned. Until a match
+                has been played it is a starting line, and the line below says
+                so rather than leaving the number to explain itself. */}
             {state.played === 0
-              ? 'STARTING RATING'
+              ? 'NO MATCHES YET'
               : state.placing
                 ? `PLACING · ${5 - state.played} TO GO`
                 : `#${state.rank} OF ${state.of} · ${record}`}
@@ -154,9 +157,10 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
       {note && <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>}
 
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        A ranked match is a duel: you pick their number, they pick yours, three rounds and a decider
-        if it is level. Winning takes rating off them and adds it to you, so beating someone above
-        you is worth far more than beating someone below.
+        Everyone starts at 1000. A ranked match is a duel — you pick their number, they pick yours,
+        three rounds and a decider if it is level. Winning takes rating off them and adds it to you,
+        so beating someone above you is worth far more than beating someone below, and there is
+        nothing to gain by beating the same person over and over.
       </Text>
 
       {state.board.length > 0 && (
