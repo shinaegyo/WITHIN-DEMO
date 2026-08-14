@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
@@ -31,6 +32,7 @@ export function FriendsScreen({
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [note, setNote] = useState<string | null>(null);
+  const [looking, setLooking] = useState<string | null>(null);
   const [noteBad, setNoteBad] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -94,9 +96,12 @@ export function FriendsScreen({
       {/* Only shown when they are around: an empty slot for everyone else
           would read as a status of its own. */}
       {online && <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />}
-      <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>
-        {label}
-      </Text>
+      {/* The name itself opens their card; the buttons beside it still act. */}
+      <Pressable style={styles.rowMain} onPress={() => setLooking(label)}>
+        <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>
+          {label}
+        </Text>
+      </Pressable>
       <View style={styles.rowActions}>{children}</View>
     </View>
   );
@@ -218,6 +223,13 @@ export function FriendsScreen({
           ))}
         </>
       )}
+      <PlayerCardModal
+        username={looking}
+        onClose={() => {
+          setLooking(null);
+          load();
+        }}
+      />
     </ScrollView>
   );
 }
@@ -267,7 +279,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  rowName: { flex: 1, fontSize: 14.5, fontFamily: fonts.bold },
+  rowMain: { flex: 1, minWidth: 0 },
+  rowName: { fontSize: 14.5, fontFamily: fonts.bold },
   rowActions: { flexDirection: 'row', gap: 16 },
   action: { fontSize: 12.5, fontFamily: fonts.bold },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },

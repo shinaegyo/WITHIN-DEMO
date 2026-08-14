@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
@@ -24,6 +25,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const [name, setName] = useState('');
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [looking, setLooking] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -72,7 +74,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
 
   const Row = ({ d, children }: { d: DuelSummary; children?: React.ReactNode }) => (
     <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-      <View style={styles.rowMain}>
+      <Pressable style={styles.rowMain} onPress={() => setLooking(d.opponent)}>
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
           {d.opponent}
         </Text>
@@ -85,7 +87,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
               ? `${-d.streak} loss${d.streak === -1 ? '' : 'es'} in a row`
               : 'No run either way'}
         </Text>
-      </View>
+      </Pressable>
       {children}
     </View>
   );
@@ -196,6 +198,13 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           No duels yet. Challenge someone you're already friends with.
         </Text>
       )}
+      <PlayerCardModal
+        username={looking}
+        onClose={() => {
+          setLooking(null);
+          load();
+        }}
+      />
     </ScrollView>
   );
 }

@@ -40,12 +40,11 @@ export function HomeScreen({
   username,
 }: Props) {
   const { colors, mode, toggle } = useTheme();
-  const { phase, game, loadError, reload } = useDailyGameContext();
+  const { phase, game, loadError, reload, refresh } = useDailyGameContext();
   const [remaining, setRemaining] = useState(msUntilLocalMidnight());
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
-  const [rank, setRank] = useState<{ place: number; of: number } | null>(null);
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [friendsBoard, setFriendsBoard] = useState<LeaderboardEntry[]>([]);
   // The first screen is sized to the viewport so it keeps the open, centred
@@ -57,14 +56,46 @@ export function HomeScreen({
     practiceRemaining().then(setPracticeLeft);
   }, [practiceEpoch]);
 
+  // The countdown reaching zero has to actually mean something. A timer is set
+  // for midnight itself rather than waiting for the next tick to notice, so the
+  // new day is on screen at 00:00 for anyone with the app open.
+  //
+  // The one-second tick still checks the date as well: a phone asleep through
+  // midnight never fires the timer on time, and it comes back to a stale day.
   useEffect(() => {
-    const id = setInterval(() => setRemaining(msUntilLocalMidnight()), 1000);
-    return () => clearInterval(id);
-  }, []);
+    let cancelled = false;
+    let day = new Date().toDateString();
+    let midnight: ReturnType<typeof setTimeout>;
+
+    const check = () => {
+      setRemaining(msUntilLocalMidnight());
+      const now = new Date().toDateString();
+      if (now === day) return;
+      day = now;
+      // Refetch in place: the new day should appear, not a spinner.
+      void refresh();
+    };
+
+    const armMidnight = () => {
+      if (cancelled) return;
+      // A hair past the hour, so the server agrees the date has turned.
+      midnight = setTimeout(() => {
+        check();
+        armMidnight();
+      }, msUntilLocalMidnight() + 250);
+    };
+
+    armMidnight();
+    const id = setInterval(check, 1000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      clearTimeout(midnight);
+    };
+  }, [refresh]);
 
   // Fetched whether or not the day is done: the standings are worth seeing
-  // before you play as much as after. A rank only appears once the player is
-  // actually on the board.
+  // before you play as much as after.
   const dayOver = !!game && game.dayStatus !== 'playing';
   useEffect(() => {
     let cancelled = false;
@@ -80,8 +111,6 @@ export function HomeScreen({
       .then((res) => {
         if (cancelled) return;
         setBoard(res.entries);
-        const me = res.entries.find((e) => e.isMe);
-        setRank(me ? { place: me.rank, of: res.totalPlayers } : null);
       })
       .catch(() => {
         /* the board is a nicety; a failure here shouldn't disturb the screen */
@@ -236,18 +265,9 @@ export function HomeScreen({
         </Pressable>
       </View>
 
-      {/* Ranked against days that have finished. A live count of who is still
-          mid-game was tried here and cut: it moved on its own between glances
-          and made the line feel like a dashboard rather than a result. */}
-      {rank !== null && (
-        <View style={styles.rankRow}>
-          <Text style={[styles.rankLabel, { color: colors.textMuted }]}>TODAY'S RANK</Text>
-          <Text style={[styles.rankValue, { color: colors.text }]}>
-            #{rank.place}
-            <Text style={[styles.rankOf, { color: colors.textMuted }]}> of {rank.of}</Text>
-          </Text>
-        </View>
-      )}
+      {/* No rank here. With a handful of players a day, "#2 of 4" reads as an
+          empty room rather than a standing, and that is the first thing anyone
+          sees. The leaderboard still has it for whoever goes looking. */}
 
       <ScrollView
         style={styles.scroll}
@@ -607,10 +627,6 @@ const styles = StyleSheet.create({
   modeText: { fontSize: 14, fontFamily: fonts.extraBold },
   modeArrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
   modeSub: { fontSize: 10.5, fontFamily: fonts.medium, marginTop: 1 },
-  rankRow: { alignItems: 'center', marginTop: 10 },
-  rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
-  rankValue: { fontSize: 22, fontFamily: fonts.extraBold, marginTop: 1 },
-  rankOf: { fontSize: 13, fontFamily: fonts.bold },
   practiceText: { fontSize: 13.5, fontFamily: fonts.extraBold },
   practiceCount: { fontFamily: fonts.medium },
   footer: {

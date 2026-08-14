@@ -530,6 +530,56 @@ export async function loadEndlessBoard(): Promise<EndlessEntry[]> {
   }));
 }
 
+/** One player, as seen by someone else: what a name on a board is worth. */
+export interface PlayerCard {
+  name: string;
+  isMe: boolean;
+  friendship: 'none' | 'sent' | 'received' | 'friends';
+  online: boolean;
+  points: number;
+  daysPlayed: number;
+  streak: number;
+  bestStreak: number;
+  rank: number;
+  of: number;
+  lastPlayedAt: string | null;
+  /** Today's score, only once their day is finished. */
+  todayScore: number | null;
+  /** Numbers cleared in this week's Impossible, or null if they haven't run it. */
+  impossible: number | null;
+  /** The head-to-head, from your side. Null when the card is your own. */
+  duels: { won: number; lost: number; drawn: number; streak: number } | null;
+}
+
+export async function loadPlayerCard(username: string): Promise<PlayerCard> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('player_card', { p_username: username });
+  const raw = unwrap<any>(data, error);
+  return {
+    name: raw.name,
+    isMe: !!raw.isMe,
+    friendship: raw.friendship ?? 'none',
+    online: !!raw.online,
+    points: raw.points ?? 0,
+    daysPlayed: raw.daysPlayed ?? 0,
+    streak: raw.streak ?? 0,
+    bestStreak: raw.bestStreak ?? 0,
+    rank: raw.rank ?? 0,
+    of: raw.of ?? 0,
+    lastPlayedAt: raw.lastPlayedAt ?? null,
+    todayScore: raw.today?.score ?? null,
+    impossible: raw.impossible ?? null,
+    duels: raw.duels
+      ? {
+          won: raw.duels.won ?? 0,
+          lost: raw.duels.lost ?? 0,
+          drawn: raw.duels.drawn ?? 0,
+          streak: raw.duels.streak ?? 0,
+        }
+      : null,
+  };
+}
+
 export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });
@@ -588,6 +638,7 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_puzzle_today':
       return 'No puzzle available. Please try again later.';
     case 'no_such_user':
+    case 'no_such_player':
       return "No player with that name. Names are exact, apart from capitals.";
     case 'thats_you':
       return "That's your own name.";

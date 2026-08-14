@@ -33,6 +33,8 @@ export interface UseDailyGameResult {
   /** Stop for the day and reveal the answer. */
   concede: () => Promise<void>;
   reload: () => void;
+  /** Refetch in place, without dropping the screen back to a spinner. */
+  refresh: () => Promise<void>;
   /** Dev only — signs in as a new anonymous player. */
   startFreshTestPlayer: () => Promise<void>;
   /** Dev only — replays today as the same player. */
@@ -203,6 +205,7 @@ export function useDailyGame(): UseDailyGameResult {
     retry,
     concede,
     reload: load,
+    refresh,
     startFreshTestPlayer,
     resetToday,
   };

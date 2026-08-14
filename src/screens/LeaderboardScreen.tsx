@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import { AllTimeEntry, ApiError, loadAllTimeLeaderboard, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
@@ -12,6 +13,8 @@ export function LeaderboardScreen() {
   const [entries, setEntries] = useState<AllTimeEntry[] | null>(null);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // A name on a board was a dead end; tapping one opens who they are.
+  const [looking, setLooking] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -48,12 +51,14 @@ export function LeaderboardScreen() {
         keyExtractor={(item, i) => `${item.rank}-${item.name}-${i}`}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <View
-            style={[
+          <Pressable
+            onPress={() => setLooking(item.name)}
+            style={({ pressed }) => [
               styles.row,
               {
                 backgroundColor: item.isMe ? colors.surfaceAlt : colors.surface,
                 borderColor: item.isMe ? colors.accent : colors.border,
+                opacity: pressed ? 0.7 : 1,
               },
             ]}
           >
@@ -75,9 +80,11 @@ export function LeaderboardScreen() {
               {formatRelative(item.lastPlayedAt)}
             </Text>
             <Text style={[styles.score, { color: colors.text }]}>{item.score}</Text>
-          </View>
+          </Pressable>
         )}
       />
+
+      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
     </View>
   );
 }
