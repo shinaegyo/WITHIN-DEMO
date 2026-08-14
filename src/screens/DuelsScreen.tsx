@@ -101,10 +101,15 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         {/* Only when there is a run to report. "No run either way" announced
             the absence of a statistic nobody had asked for. */}
         {d.streak !== 0 && (
+          {/* One of anything is not a run, so it does not claim to be. */}
           <Text style={[styles.meta, { color: colors.textMuted }]}>
-            {d.streak > 0
-              ? `${d.streak} win${d.streak === 1 ? '' : 's'} in a row`
-              : `${-d.streak} loss${d.streak === -1 ? '' : 'es'} in a row`}
+            {d.streak === 1
+              ? '1 win'
+              : d.streak === -1
+                ? '1 loss'
+                : d.streak > 1
+                  ? `${d.streak} wins in a row`
+                  : `${-d.streak} losses in a row`}
           </Text>
         )}
       </Pressable>

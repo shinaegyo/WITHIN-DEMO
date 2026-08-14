@@ -159,9 +159,13 @@ export function PlayerCardModal({
 
               {card.duels && card.duels.streak !== 0 && (
                 <Text style={[styles.streakNote, { color: colors.textMuted }]}>
-                  {card.duels.streak > 0
-                    ? `You have won your last ${card.duels.streak} against them.`
-                    : `They have won your last ${-card.duels.streak}.`}
+                  {card.duels.streak === 1
+                    ? 'You won the last one.'
+                    : card.duels.streak === -1
+                      ? 'They won the last one.'
+                      : card.duels.streak > 1
+                        ? `You have won your last ${card.duels.streak} against them.`
+                        : `They have won your last ${-card.duels.streak}.`}
                 </Text>
               )}
 
