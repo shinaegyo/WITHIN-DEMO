@@ -124,7 +124,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         <View style={styles.content}>
           <View style={styles.head}>
             <Pressable onPress={onExit} hitSlop={10}>
-              <Text style={[styles.back, { color: colors.text }]}>‹ Home</Text>
+              <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
             </Pressable>
             <Text style={[styles.badge, { color: colors.textMuted }]}>
               THIS WEEK · BEST {state.best}
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 6, gap: 10 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  back: { fontSize: 15, fontFamily: fonts.bold },
+  back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },

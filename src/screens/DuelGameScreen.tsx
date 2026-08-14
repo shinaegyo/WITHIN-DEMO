@@ -1,5 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { GuessBoard } from '../components/GuessBoard';
@@ -80,6 +89,23 @@ export function DuelGameScreen({
   useEffect(() => {
     if (duel?.round && seconds === 0) load();
   }, [duel?.round, seconds, load]);
+
+  // Nothing here is driven by my own taps while I am waiting: the round opens
+  // when they set a number, and settles when they finish. Without polling, both
+  // players sit on a stale screen until somebody thinks to reload - which is
+  // not a thing anybody thinks to do inside a three-minute round.
+  const idle =
+    !!duel &&
+    duel.status !== 'complete' &&
+    (duel.status === 'pending' || duel.pickSubmitted || duel.round === null || duel.waitingForThem);
+
+  useEffect(() => {
+    if (!idle) return;
+    const id = setInterval(() => {
+      if (!busy) load();
+    }, 3000);
+    return () => clearInterval(id);
+  }, [idle, busy, load]);
 
   useEffect(() => {
     if (duel?.status !== 'complete') {
@@ -176,7 +202,7 @@ export function DuelGameScreen({
               onPress={() => (duel.status === 'active' ? setLeaving(true) : onExit())}
               hitSlop={10}
             >
-              <Text style={[styles.back, { color: colors.text }]}>‹ Duels</Text>
+              <Text style={[styles.back, { color: colors.text }]}>‹ DUELS</Text>
             </Pressable>
             <Text style={[styles.vs, { color: colors.textMuted }]}>VS {duel.opponent.toUpperCase()}</Text>
           </View>
@@ -236,9 +262,12 @@ export function DuelGameScreen({
           ) : picking ? (
             duel.pickSubmitted ? (
               <View style={styles.result}>
-                <Text style={[styles.resultTitle, { color: colors.text }]}>Number set</Text>
+                <ActivityIndicator color={colors.textMuted} />
+                <Text style={[styles.resultTitle, { color: colors.text }]}>
+                  Waiting on {duel.opponent}
+                </Text>
                 <Text style={[styles.resultBody, { color: colors.textMuted }]}>
-                  {duel.opponent} is choosing yours. The round opens for both of you at once, so
+                  They are choosing your number. The round opens for both of you at once, so
                   neither of you starts guessing while the other is still deciding.
                 </Text>
               </View>
@@ -261,9 +290,12 @@ export function DuelGameScreen({
             )
           ) : done ? (
             <View style={styles.result}>
+              {/* Finished first. Something has to move, or a screen that is
+                  waiting looks like a screen that has stopped. */}
+              {duel.status !== 'complete' && <ActivityIndicator color={colors.textMuted} />}
               <Text style={[styles.resultTitle, { color: colors.text }]}>
                 {duel.status !== 'complete'
-                  ? 'Their turn'
+                  ? `Waiting on ${duel.opponent}`
                   : duel.outcome === 'won'
                     ? 'You won'
                     : duel.outcome === 'lost'
@@ -272,7 +304,7 @@ export function DuelGameScreen({
               </Text>
               <Text style={[styles.resultBody, { color: colors.textMuted }]}>
                 {duel.status !== 'complete'
-                  ? `${duel.opponent} has this round to play. The next one opens once they're done.`
+                  ? `They have this round to finish. It is settled the moment they do, or when their three minutes are up.`
                   : 'Fewer guesses takes the round. Your counts are above, theirs beneath. Orange is a tie.'}
               </Text>
 
@@ -333,7 +365,7 @@ export function DuelGameScreen({
           )}
           {duel.status === 'active' && (
             <Pressable onPress={() => setLeaving(true)} hitSlop={8} style={styles.leaveWrap}>
-              <Text style={[styles.leave, { color: feedbackColors.oneAway }]}>Leave duel</Text>
+              <Text style={[styles.leave, { color: feedbackColors.oneAway }]}>LEAVE</Text>
             </Pressable>
           )}
         </View>
@@ -394,7 +426,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 6, gap: 10 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  back: { fontSize: 15, fontFamily: fonts.bold },
+  back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   vs: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.3 },
   leaveWrap: { alignSelf: 'center', paddingVertical: 10 },
   askBackdrop: {

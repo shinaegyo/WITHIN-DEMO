@@ -54,6 +54,15 @@ export function FriendsScreen({
     load();
   }, [load]);
 
+  // Presence lapses after two minutes, so who is online has to be re-read or
+  // the challenge button ends up pointed at somebody who has gone.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!busy) load();
+    }, 15000);
+    return () => clearInterval(id);
+  }, [busy, load]);
+
   const say = (message: string, bad = false) => {
     setNote(message);
     setNoteBad(bad);

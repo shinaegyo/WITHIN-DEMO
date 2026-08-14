@@ -112,7 +112,7 @@ export function PracticeScreen({
         <View style={styles.content}>
           <View style={styles.header}>
             <Pressable onPress={onExit} hitSlop={10}>
-              <Text style={[styles.back, { color: colors.text }]}>‹ Home</Text>
+              <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
             </Pressable>
             <View style={[styles.badge, { borderColor: colors.border }]}>
               <Text style={[styles.badgeText, { color: colors.textMuted }]}>PRACTICE · UNRANKED</Text>
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  back: { fontSize: 16, fontFamily: fonts.bold },
+  back: { fontSize: 16, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
   badgeText: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.8 },
   boardWrap: { flex: 1 },

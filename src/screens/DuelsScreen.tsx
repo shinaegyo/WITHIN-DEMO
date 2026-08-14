@@ -40,6 +40,15 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     load();
   }, [load]);
 
+  // A challenge arrives from somebody else's phone, so the list has to look for
+  // it rather than wait to be opened again.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!busy) load();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [busy, load]);
+
   const run = async (action: () => Promise<void>) => {
     if (busy) return;
     setBusy(true);
