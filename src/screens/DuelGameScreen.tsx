@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { GuessBoard } from '../components/GuessBoard';
@@ -29,7 +29,16 @@ import { useTheme } from '../theme/ThemeContext';
  * add up while playing. The opponent's board stays hidden until both have
  * finished — shown here only once the duel is settled.
  */
-export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () => void }) {
+export function DuelGameScreen({
+  duelId,
+  onExit,
+  onLeave,
+}: {
+  duelId: string;
+  onExit: () => void;
+  /** Forfeiting ends the match, so it goes home rather than back to the list. */
+  onLeave: () => void;
+}) {
   const { colors } = useTheme();
   const [duel, setDuel] = useState<DuelState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -162,7 +171,10 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
       >
         <View style={styles.content}>
           <View style={styles.head}>
-            <Pressable onPress={onExit} hitSlop={10}>
+            <Pressable
+              onPress={() => (duel.status === 'active' ? setLeaving(true) : onExit())}
+              hitSlop={10}
+            >
               <Text style={[styles.back, { color: colors.text }]}>‹ Duels</Text>
             </Pressable>
             <Text style={[styles.vs, { color: colors.textMuted }]}>VS {duel.opponent.toUpperCase()}</Text>
@@ -311,25 +323,59 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
             </>
           )}
           {duel.status === 'active' && (
-            <Pressable
-              onPress={async () => {
-                if (!leaving) {
-                  setLeaving(true);
-                  return;
-                }
-                await forfeitDuel(duelId);
-                onExit();
-              }}
-              hitSlop={8}
-              style={styles.leaveWrap}
-            >
-              <Text style={[styles.leave, { color: feedbackColors.oneAway }]}>
-                {leaving ? `Leave, and the duel goes to ${duel.opponent}?` : 'Leave duel'}
-              </Text>
+            <Pressable onPress={() => setLeaving(true)} hitSlop={8} style={styles.leaveWrap}>
+              <Text style={[styles.leave, { color: feedbackColors.oneAway }]}>Leave duel</Text>
             </Pressable>
           )}
         </View>
       </KeyboardAvoidingView>
+
+      {/* There is no leaving a duel quietly: the match ends and the other
+          player takes it, so the question is asked plainly and the answers are
+          the two words somebody actually thinks in. */}
+      <Modal visible={leaving} transparent animationType="fade" onRequestClose={() => setLeaving(false)}>
+        <View style={styles.askBackdrop}>
+          <View style={[styles.ask, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={[styles.askTitle, { color: colors.text }]}>
+              Are you sure you want to leave the match?
+            </Text>
+            <Text style={[styles.askBody, { color: colors.textMuted }]}>
+              The duel ends here and goes to {duel.opponent}.
+            </Text>
+
+            <Pressable
+              onPress={async () => {
+                if (busy) return;
+                setBusy(true);
+                try {
+                  await forfeitDuel(duelId);
+                } finally {
+                  setBusy(false);
+                  setLeaving(false);
+                  onLeave();
+                }
+              }}
+              style={({ pressed }) => [
+                styles.askButton,
+                { backgroundColor: feedbackColors.oneAway, opacity: pressed || busy ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={[styles.askButtonText, { color: '#FFFFFF' }]}>Yes</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setLeaving(false)}
+              style={({ pressed }) => [
+                styles.askButton,
+                styles.askButtonQuiet,
+                { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Text style={[styles.askButtonText, { color: colors.text }]}>No</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -342,6 +388,18 @@ const styles = StyleSheet.create({
   back: { fontSize: 15, fontFamily: fonts.bold },
   vs: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.3 },
   leaveWrap: { alignSelf: 'center', paddingVertical: 10 },
+  askBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    paddingHorizontal: 26,
+  },
+  ask: { borderWidth: 1, borderRadius: 18, padding: 22, gap: 10 },
+  askTitle: { fontSize: 19, fontFamily: fonts.extraBold, lineHeight: 25 },
+  askBody: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19, marginBottom: 6 },
+  askButton: { borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  askButtonQuiet: { backgroundColor: 'transparent', borderWidth: 1.5 },
+  askButtonText: { fontSize: 15.5, fontFamily: fonts.extraBold },
   roundTitle: {
     fontSize: 15,
     fontFamily: fonts.extraBold,

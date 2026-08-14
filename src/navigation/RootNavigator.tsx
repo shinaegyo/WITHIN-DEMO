@@ -184,6 +184,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
             <DuelGameScreen
               duelId={route.params.duelId}
               onExit={() => navigation.goBack()}
+              onLeave={() => navigation.navigate('Home')}
             />
           )}
         </Stack.Screen>
