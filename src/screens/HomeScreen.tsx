@@ -9,7 +9,7 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
-import { shareResult } from '../utils/share';
+import { shareInvite, shareResult } from '../utils/share';
 import { LeaderboardEntry, loadFriendsLeaderboard, loadLeaderboard } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 
@@ -411,13 +411,33 @@ export function HomeScreen({
           renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
 
         {!hasFriendsToday && (
-          <Pressable style={styles.inviteCard} onPress={onOpenFriends}>
-            <Text style={[styles.inviteTitle, { color: colors.text }]}>Play with friends</Text>
-            <Text style={[styles.inviteBody, { color: colors.textMuted }]}>
-              Everyone gets the same three numbers, so adding a friend puts their day beside yours.
-            </Text>
-            <Text style={[styles.inviteLink, { color: colors.textMuted }]}>Add by username ›</Text>
-          </Pressable>
+          <View style={styles.inviteCard}>
+            <Pressable onPress={onOpenFriends}>
+              <Text style={[styles.inviteTitle, { color: colors.text }]}>Play with friends</Text>
+              <Text style={[styles.inviteBody, { color: colors.textMuted }]}>
+                Everyone gets the same three numbers, so adding a friend puts their day beside
+                yours.
+              </Text>
+              <Text style={[styles.inviteLink, { color: colors.textMuted }]}>Add by username ›</Text>
+            </Pressable>
+
+            {/* Adding by username only works for someone who already plays. This
+                is the other half: a link for someone who does not. */}
+            <Pressable
+              onPress={async () => {
+                const res = await shareInvite();
+                setShareNote(res.copied ? 'Invite copied — paste it anywhere.' : null);
+                setShareFailed(!res.ok);
+                if (!res.ok) setShareNote('Could not share the invite.');
+              }}
+              style={({ pressed }) => [
+                styles.inviteButton,
+                { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Text style={[styles.inviteButtonText, { color: colors.text }]}>Invite a friend</Text>
+            </Pressable>
+          </View>
         )}
 
         {board.length > 0 && renderBoard("TODAY'S TOP", 'All time ›', preview, onOpenLeaderboard)}
@@ -521,6 +541,14 @@ const styles = StyleSheet.create({
   },
   inviteTitle: { fontSize: 14.5, fontFamily: fonts.extraBold },
   inviteBody: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
+  inviteButton: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  inviteButtonText: { fontSize: 14, fontFamily: fonts.extraBold },
   inviteLink: { fontSize: 11.5, fontFamily: fonts.bold, marginTop: 4 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {

@@ -14,6 +14,7 @@ import {
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { shareInvite } from '../utils/share';
 
 /**
  * Friendships are mutual, so this screen has three lists rather than one: who
@@ -262,6 +263,14 @@ const styles = StyleSheet.create({
   },
   addText: { fontSize: 14, fontFamily: fonts.extraBold },
   note: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 8 },
+  invite: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  inviteText: { fontSize: 14, fontFamily: fonts.extraBold },
   heading: {
     fontSize: 9.5,
     fontFamily: fonts.bold,

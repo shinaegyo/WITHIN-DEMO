@@ -4,41 +4,32 @@ import { DailyGame } from '../lib/api';
 /**
  * The shareable result.
  *
- * Only direction is encoded — high, low or right — never a number and never
- * how close a guess was. It is safe to post before friends have played for a
- * second reason too: round order is per player, so somebody else's "round 1"
- * is not the same number as yours.
+ * A grid of coloured blocks was the obvious thing to copy from Wordle, and it
+ * does not survive the trip: five rows of squares arrive in a message as a
+ * shape nobody can read, and unlike Wordle's it says almost nothing - round
+ * order is per player, so the columns do not even line up between two people.
+ *
+ * What travels is the score and where to play. Nothing here reveals a number or
+ * how close a guess was, so it is safe to send before friends have played.
  */
 
 const SITE = 'withindemo.vercel.app';
 
-const MARK: Record<string, string> = {
-  below: '🟦',
-  above: '🟥',
-  correct: '🟩',
-};
-
 export function buildShareText(game: DailyGame): string {
-  const solved = game.dayStatus === 'complete';
+  const lines = [`WITHIN #${game.puzzleNumber} — ${game.totalScore}/${game.maxScore}`];
 
-  const grid = game.rounds
-    .filter((r) => r.marks && r.marks.length > 0)
-    .map((r) => r.marks.map((m) => MARK[m] ?? '⬜').join(''))
-    .join('\n');
+  if (game.modifier.kind !== 'standard') lines.push(game.modifier.label);
+  if (game.stats.currentStreak > 0) {
+    lines.push(`🔥 ${game.stats.currentStreak} day streak`);
+  }
 
-  const lines = [
-    `WITHIN #${game.puzzleNumber} · ${game.totalScore}/${game.maxScore}`,
-    '',
-    grid,
-  ];
+  lines.push('', `Play today's: ${SITE}`);
+  return lines.join('\n');
+}
 
-  if (game.modifier.kind !== 'standard') lines.push(game.modifier.label.toLowerCase());
-  if (!solved) lines.push('', 'Knocked out 💀');
-  if (game.retriesUsed > 0) lines.push('(used a retry)');
-  if (game.stats.currentStreak > 0) lines.push('', `🔥 ${game.stats.currentStreak} day streak`);
-
-  lines.push('', SITE);
-  return lines.filter((l) => l !== undefined).join('\n');
+/** Sent to somebody who has never played, so it leads with the invitation. */
+export function buildInviteText(): string {
+  return `Come play WITHIN today!\n\n${SITE}`;
 }
 
 export interface ShareOutcome {
@@ -51,8 +42,14 @@ export interface ShareOutcome {
  * on desktop browsers, which have no share sheet worth using.
  */
 export async function shareResult(game: DailyGame): Promise<ShareOutcome> {
-  const message = buildShareText(game);
+  return shareText(buildShareText(game));
+}
 
+export async function shareInvite(): Promise<ShareOutcome> {
+  return shareText(buildInviteText());
+}
+
+async function shareText(message: string): Promise<ShareOutcome> {
   if (Platform.OS === 'web') {
     const nav = globalThis.navigator as any;
 
