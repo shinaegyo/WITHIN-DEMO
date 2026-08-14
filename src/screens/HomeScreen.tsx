@@ -342,25 +342,6 @@ export function HomeScreen({
           </View>
         )}
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.primary,
-            finished ? styles.primaryHug : styles.primaryWide,
-            { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
-          ]}
-          onPress={onPrimary}
-        >
-          <Text style={[styles.primaryText, { color: colors.background }]}>{primaryLabel}</Text>
-        </Pressable>
-
-        {shareNote && (
-          <Text
-            style={[styles.note, { color: shareFailed ? colors.textMuted : feedbackColors.correct }]}
-          >
-            {shareNote}
-          </Text>
-        )}
-
         <View style={styles.statRow}>
           <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
@@ -373,6 +354,33 @@ export function HomeScreen({
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>ALL TIME</Text>
           </View>
         </View>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.primary,
+            finished ? styles.primaryHug : styles.primaryWide,
+            { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+          ]}
+          onPress={onPrimary}
+        >
+          <Text
+            style={[
+              styles.primaryText,
+              finished && styles.primaryTextHug,
+              { color: colors.background },
+            ]}
+          >
+            {primaryLabel}
+          </Text>
+        </Pressable>
+
+        {shareNote && (
+          <Text
+            style={[styles.note, { color: shareFailed ? colors.textMuted : feedbackColors.correct }]}
+          >
+            {shareNote}
+          </Text>
+        )}
         </View>
 
         {/* Friends first. Beating people you know pulls harder than placing
@@ -561,14 +569,17 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   primaryWide: { alignSelf: 'stretch', paddingVertical: 16 },
-  primaryHug: { alignSelf: 'center', paddingVertical: 13, paddingHorizontal: 30 },
+  // Share is a footnote to the day, not the way out of it: the two mode
+  // buttons above are what someone does next. Sized down to match that.
+  primaryHug: { alignSelf: 'center', paddingVertical: 9, paddingHorizontal: 21 },
   primaryText: { fontSize: 15.5, fontFamily: fonts.extraBold },
+  primaryTextHug: { fontSize: 12.5 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 8 },
   statRow: {
     flexDirection: 'row',
     gap: 10,
     alignSelf: 'stretch',
-    marginTop: 14,
+    marginTop: 20,
   },
   stat: {
     flex: 1,

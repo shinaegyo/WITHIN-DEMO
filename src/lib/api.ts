@@ -442,6 +442,71 @@ export async function duelGuess(duelId: string, guess: number) {
   };
 }
 
+export interface EndlessState {
+  week: string;
+  level: number;
+  attemptsUsed: number;
+  attemptsAllowed: number;
+  clue1: string;
+  clue2: string | null;
+  guesses: GuessResult[];
+  best: number;
+}
+
+export interface EndlessEntry {
+  rank: number;
+  name: string;
+  depth: number;
+  isMe: boolean;
+}
+
+export async function loadEndless(): Promise<EndlessState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('endless_state');
+  const raw = unwrap<any>(data, error);
+  return {
+    week: raw.week,
+    level: raw.level,
+    attemptsUsed: raw.attemptsUsed,
+    attemptsAllowed: raw.attemptsAllowed,
+    clue1: raw.clue1,
+    clue2: raw.clue2 ?? null,
+    guesses: (raw.guesses ?? []).map(toGuessResult),
+    best: raw.best ?? 0,
+  };
+}
+
+export async function endlessGuess(guess: number) {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('endless_guess', { p_guess: guess });
+  const raw = unwrap<any>(data, error);
+  return {
+    solved: !!raw.solved,
+    runOver: !!raw.runOver,
+    level: raw.level as number,
+    result: toGuessResult(raw.guess),
+    answer: (raw.answer ?? null) as number | null,
+  };
+}
+
+export async function endlessRestart(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('endless_restart');
+  unwrap<any>(data, error);
+}
+
+export async function loadEndlessBoard(): Promise<EndlessEntry[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('endless_leaderboard', { p_limit: 50 });
+  const raw = unwrap<any>(data, error);
+  return (raw.entries ?? []).map((e: any) => ({
+    rank: e.rank,
+    name: e.name,
+    depth: e.depth,
+    isMe: !!e.is_me,
+  }));
+}
+
 export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });
@@ -515,6 +580,8 @@ export function messageFor(code: string, guess?: number): string {
       return 'That challenge is no longer waiting.';
     case 'waiting_for_them':
       return 'They still have this round to play.';
+    case 'no_run':
+      return 'No run in progress. Start a new one.';
     default:
       return 'Connection problem. Check your network and try again.';
   }
