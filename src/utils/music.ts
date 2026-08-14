@@ -51,15 +51,19 @@ function player(track: Track): AudioPlayer | null {
  * whatever is playing alone, so moving between the leaderboard and the menu
  * does not restart the music.
  */
+function pauseAll() {
+  Object.values(players).forEach((p) => {
+    try {
+      p?.pause();
+    } catch {}
+  });
+}
+
 export function playTrack(track: Track | null): void {
   if (!musicEnabled()) track = null;
   if (track === current) return;
 
-  if (current) {
-    try {
-      players[current]?.pause();
-    } catch {}
-  }
+  pauseAll();
 
   current = track;
   if (!track) return;
@@ -79,15 +83,22 @@ export function playTrack(track: Track | null): void {
 
 /** Stops everything and forgets where it was, for the settings switch. */
 export function stopMusic(): void {
-  const was = current;
-  playTrack(null);
-  current = was ? null : null;
+  pauseAll();
+  current = null;
 }
 
-/** Resumes whatever the current screen asked for after the setting changes. */
+/**
+ * Resumes whatever the current screen asked for after the setting changes.
+ *
+ * Silence first and unconditionally: nulling `current` and then asking for null
+ * made playTrack think it was already silent, so switching music off left it
+ * playing.
+ */
 export function refreshMusic(track: Track | null): void {
-  const target = musicEnabled() ? track : null;
-  if (target === current) return;
+  if (!musicEnabled()) {
+    stopMusic();
+    return;
+  }
   current = null;
-  playTrack(target);
+  playTrack(track);
 }

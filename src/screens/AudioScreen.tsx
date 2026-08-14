@@ -57,7 +57,9 @@ export function AudioScreen() {
   }) => (
     <Pressable
       onPress={() => {
-        playTap();
+        // Silent when this press is the one turning sound off, which would
+        // otherwise answer "off" with a noise.
+        if (!(label === 'Sound effects' && on)) playTap();
         onToggle();
       }}
       style={({ pressed }) => [

@@ -68,30 +68,39 @@ function start(track: Track) {
   }
 }
 
+function pauseAll() {
+  Object.values(els).forEach((el) => {
+    if (!el) return;
+    el.pause();
+    el.currentTime = 0;
+  });
+}
+
 export function playTrack(track: Track | null): void {
-  if (!musicEnabled()) track = null;
-  if (track === current) return;
-
-  if (current) {
-    const el = els[current];
-    if (el) {
-      el.pause();
-      el.currentTime = 0;
-    }
-  }
-
-  current = track;
-  if (track) start(track);
+  const target = musicEnabled() ? track : null;
+  if (target === current) return;
+  pauseAll();
+  current = target;
+  if (target) start(target);
 }
 
 export function stopMusic(): void {
-  playTrack(null);
+  pauseAll();
+  current = null;
 }
 
-/** Re-evaluates against the setting, for the switch on the audio screen. */
+/**
+ * Re-evaluates against the setting, for the switch on the audio screen.
+ *
+ * Silence is handled first and unconditionally. Nulling `current` and then
+ * asking playTrack for null meant it saw the track it was already "playing" and
+ * returned without pausing anything - so switching music off left it playing.
+ */
 export function refreshMusic(track: Track | null): void {
-  const target = musicEnabled() ? track : null;
-  if (target === current) return;
+  if (!musicEnabled()) {
+    stopMusic();
+    return;
+  }
   current = null;
-  playTrack(target);
+  playTrack(track);
 }
