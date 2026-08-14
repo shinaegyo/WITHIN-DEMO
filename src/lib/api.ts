@@ -233,6 +233,7 @@ export interface AllTimeEntry {
   /** ISO timestamp of the player's most recent guess, or null. */
   lastPlayedAt: string | null;
   isMe: boolean;
+  hasBelt: boolean;
 }
 
 export interface AllTimeLeaderboard {
@@ -646,6 +647,10 @@ export interface PlayerCard {
   bestStreak: number;
   rank: number;
   of: number;
+  /** Holds the one belt in the game. */
+  hasBelt: boolean;
+  /** Null until they have played a ranked match. */
+  ranked: { rating: number; won: number; lost: number } | null;
   lastPlayedAt: string | null;
   /** Today's score, only once their day is finished. */
   todayScore: number | null;
@@ -670,6 +675,8 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
     bestStreak: raw.bestStreak ?? 0,
     rank: raw.rank ?? 0,
     of: raw.of ?? 0,
+    hasBelt: !!raw.hasBelt,
+    ranked: raw.ranked ?? null,
     lastPlayedAt: raw.lastPlayedAt ?? null,
     todayScore: raw.today?.score ?? null,
     impossible: raw.impossible ?? null,
@@ -698,6 +705,7 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
       bestStreak: e.best_streak ?? 0,
       lastPlayedAt: e.last_played_at ?? null,
       isMe: !!e.is_me,
+      hasBelt: !!e.has_belt,
     })),
   };
 }

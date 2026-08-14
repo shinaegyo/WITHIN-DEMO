@@ -110,6 +110,13 @@ export function PlayerCardModal({
                 <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                   {card.name}
                 </Text>
+                {/* One of these exists in the whole game, so it goes next to
+                    the name rather than into a row of statistics. */}
+                {card.hasBelt && (
+                  <View style={[styles.belt, { borderColor: colors.accent }]}>
+                    <Text style={[styles.beltText, { color: colors.accent }]}>BELT</Text>
+                  </View>
+                )}
               </View>
               {/* No "last played" here. Nobody is playing every day yet, and a
                   card that opens with how long someone has been away makes a
@@ -131,6 +138,12 @@ export function PlayerCardModal({
                 <Row label="Daily challenges" value={`${card.daysPlayed}`} />
                 {/* Only ever a finished day - a day in progress stays theirs. */}
                 {card.todayScore !== null && <Row label="Today" value={`${card.todayScore}`} />}
+                {card.ranked && (
+                  <Row
+                    label="Ranked"
+                    value={`${card.ranked.rating} · ${card.ranked.won}W ${card.ranked.lost}L`}
+                  />
+                )}
                 {card.impossible !== null && card.impossible > 0 && (
                   <Row label="Impossible this week" value={`${card.impossible}`} />
                 )}
@@ -221,6 +234,8 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   name: { fontSize: 24, fontFamily: fonts.extraBold, flexShrink: 1 },
+  belt: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3 },
+  beltText: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1.1 },
   sub: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 2 },
   stats: { flexDirection: 'row', marginTop: 18, marginBottom: 4 },
   stat: { flex: 1 },

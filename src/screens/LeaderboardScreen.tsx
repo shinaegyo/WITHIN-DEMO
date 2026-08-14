@@ -72,6 +72,9 @@ export function LeaderboardScreen() {
               {item.name}
               {item.isMe ? '  (you)' : ''}
             </Text>
+            {item.hasBelt && (
+              <Text style={[styles.belt, { color: colors.accent }]}>BELT</Text>
+            )}
             {/* No "3h ago" column. With a handful of players, half of whom
                 play a few times a week, it read as a list of people who had
                 drifted off rather than a board. */}
@@ -95,6 +98,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   list: { padding: 16, gap: 8 },
+  belt: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
