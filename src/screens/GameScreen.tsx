@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
@@ -29,8 +29,16 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
   const [showResult, setShowResult] = useState(false);
 
+  // Only a guess made while this screen is open should play. The last result
+  // stays in shared state after the screen unmounts, so returning from home
+  // replayed the animation, sound and haptic for a guess made minutes ago -
+  // and on the round after, greeted the player with the previous round's
+  // WITHIN 10. Seeding the ref with whatever is already there on mount means
+  // the effect only ever fires for something new.
+  const played = useRef(lastResult);
   useEffect(() => {
-    if (!lastResult) return;
+    if (!lastResult || lastResult === played.current) return;
+    played.current = lastResult;
     if (lastResult.isCorrect) {
       hapticCorrect();
       playCorrect();

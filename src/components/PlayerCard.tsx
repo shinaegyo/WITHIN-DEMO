@@ -12,7 +12,6 @@ import {
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
-import { formatRelative } from '../utils/relativeTime';
 
 /**
  * Who somebody is, from a name on a board.
@@ -112,10 +111,13 @@ export function PlayerCardModal({
                   {card.name}
                 </Text>
               </View>
+              {/* No "last played" here. Nobody is playing every day yet, and a
+                  card that opens with how long someone has been away makes a
+                  quiet week look like a lapsed player. */}
               <Text style={[styles.sub, { color: colors.textMuted }]}>
                 {card.daysPlayed === 0
                   ? 'Has not finished a day yet'
-                  : `#${card.rank} of ${card.of} all time · last played ${formatRelative(card.lastPlayedAt)}`}
+                  : `#${card.rank} of ${card.of} all time`}
               </Text>
 
               <View style={styles.stats}>
