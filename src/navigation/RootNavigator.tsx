@@ -11,7 +11,6 @@ import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
 import { AccountScreen } from '../screens/AccountScreen';
-import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
 import { DuelGameScreen } from '../screens/DuelGameScreen';
@@ -34,6 +33,7 @@ import { TabIcon, TabName } from '../components/TabIcon';
 import { GamesScreen } from '../screens/GamesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ImpossibleBoardScreen } from '../screens/ImpossibleBoardScreen';
+import { BoardsScreen } from '../screens/BoardsScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { AudioScreen } from '../screens/AudioScreen';
@@ -263,7 +263,7 @@ function Screens({
                 )}
               </Tabs.Screen>
 
-              <Tabs.Screen name="Board" component={LeaderboardScreen} />
+              <Tabs.Screen name="Board" component={BoardsScreen} />
 
               <Tabs.Screen name="You">
                 {() => (
@@ -383,8 +383,8 @@ function Screens({
 
         <Stack.Screen
           name="Leaderboard"
-          component={LeaderboardScreen}
-          options={{ title: 'All time', headerBackTitle: 'Back' }}
+          component={BoardsScreen}
+          options={{ title: 'Boards', headerBackTitle: 'Back' }}
         />
 
         <Stack.Screen
