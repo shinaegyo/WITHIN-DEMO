@@ -22,9 +22,13 @@ export function AvatarScreen({
   current,
   onDone,
   onSkip,
+  step,
+  total,
 }: {
   username: string;
   current?: string | null;
+  step?: number;
+  total?: number;
   onDone: (value: string) => void;
   /** Only offered during the tutorial, where the game has not started yet. */
   onSkip?: () => void;
@@ -53,6 +57,11 @@ export function AvatarScreen({
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      {!!step && (
+        <Text style={[styles.step, { color: colors.textMuted }]}>
+          STEP {step} OF {total}
+        </Text>
+      )}
       <View style={styles.head}>
         <Avatar value={value} size={78} />
         <View style={styles.headText}>
@@ -129,6 +138,7 @@ export function AvatarScreen({
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  step: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, paddingHorizontal: 22, paddingBottom: 6 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 22, paddingTop: 10 },
   headText: { flex: 1, minWidth: 0 },
   name: { fontSize: 22, fontFamily: fonts.extraBold },

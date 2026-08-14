@@ -26,10 +26,28 @@ import { useTheme } from '../theme/ThemeContext';
 type Step = 'account' | 'code' | 'username';
 const RESEND_COOLDOWN = 30;
 
-export function OnboardingScreen({ onDone }: { onDone: () => Promise<void> | void }) {
+export function OnboardingScreen({
+  onDone,
+  mode = 'name',
+  step: stepOf = 1,
+  total = 4,
+  onSkip,
+}: {
+  onDone: () => Promise<void> | void;
+  /**
+   * The name comes first because it is required and it is the fun one; the
+   * email comes last, once there is a streak worth protecting. Asking for an
+   * address on the first screen guards the whole game behind the least
+   * appealing thing in it.
+   */
+  mode?: 'name' | 'account';
+  step?: number;
+  total?: number;
+  onSkip?: () => void;
+}) {
   const { colors } = useTheme();
 
-  const [step, setStep] = useState<Step>('account');
+  const [step, setStep] = useState<Step>(mode === 'name' ? 'username' : 'account');
   const [flow, setFlow] = useState<'link' | 'signin'>('link');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -39,8 +57,7 @@ export function OnboardingScreen({ onDone }: { onDone: () => Promise<void> | voi
   const [cooldown, setCooldown] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // The code screen is part of step 1, so the indicator stays at 2 steps.
-  const stepNumber = step === 'username' ? 2 : 1;
+  const stepNumber = stepOf;
 
   const startCooldown = () => {
     setCooldown(RESEND_COOLDOWN);
@@ -96,9 +113,11 @@ export function OnboardingScreen({ onDone }: { onDone: () => Promise<void> | voi
           </View>
 
           {/* Progress */}
-          <Text style={[styles.stepLabel, { color: colors.textMuted }]}>STEP {stepNumber} OF 2</Text>
+          <Text style={[styles.stepLabel, { color: colors.textMuted }]}>
+            STEP {stepNumber} OF {total}
+          </Text>
           <View style={styles.bar}>
-            {[1, 2].map((n) => (
+            {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
               <View
                 key={n}
                 style={[
@@ -111,10 +130,13 @@ export function OnboardingScreen({ onDone }: { onDone: () => Promise<void> | voi
 
           {step === 'account' && (
             <>
-              <Text style={[styles.h1, { color: colors.text }]}>Save your streak</Text>
+              <Text style={[styles.h1, { color: colors.text }]}>
+                {onSkip ? 'Keep your progress' : 'Save your streak'}
+              </Text>
               <Text style={[styles.body, { color: colors.textMuted }]}>
-                Add an email so your streak and points follow you to a new phone. We'll send a code —
-                no password to remember.
+                {onSkip
+                  ? "Your streak starts with today's numbers. Add an email and it follows you to a new phone — a code, no password."
+                  : "Add an email so your streak and points follow you to a new phone. We'll send a code — no password to remember."}
               </Text>
 
               <TextInput
@@ -155,10 +177,12 @@ export function OnboardingScreen({ onDone }: { onDone: () => Promise<void> | voi
                   email requirement would lock out everyone but the developer. */}
               <Pressable
                 disabled={busy}
-                onPress={() => setStep('username')}
+                onPress={() => (onSkip ? onSkip() : setStep('username'))}
                 style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
               >
-                <Text style={[styles.linkText, { color: colors.textMuted }]}>Continue without an account</Text>
+                <Text style={[styles.linkText, { color: colors.textMuted }]}>
+                  {onSkip ? 'Skip for now' : 'Continue without an account'}
+                </Text>
               </Pressable>
             </>
           )}

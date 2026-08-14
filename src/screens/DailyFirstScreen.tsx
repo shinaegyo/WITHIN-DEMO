@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar } from '../components/Avatar';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -12,7 +13,15 @@ import { useTheme } from '../theme/ThemeContext';
  * Said once, here, it reads as the shape of the game instead - the daily is the
  * game, and the rest is what the day opens into.
  */
-export function DailyFirstScreen({ onStart }: { onStart: () => void }) {
+export function DailyFirstScreen({
+  onStart,
+  username,
+  avatar,
+}: {
+  onStart: () => void;
+  username?: string;
+  avatar?: string | null;
+}) {
   const { colors } = useTheme();
 
   const modes = [
@@ -24,6 +33,16 @@ export function DailyFirstScreen({ onStart }: { onStart: () => void }) {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.body}>
+        {/* Their character, the moment before their first real round - the end
+            of setting up and the start of playing, not a farewell. */}
+        {!!username && (
+          <View style={styles.who}>
+            <Avatar value={avatar} size={44} />
+            <Text style={[styles.whoText, { color: colors.text }]} numberOfLines={1}>
+              You're set, {username}
+            </Text>
+          </View>
+        )}
         <Text style={[styles.title, { color: colors.text }]}>The daily comes first</Text>
         <Text style={[styles.lede, { color: colors.textMuted }]}>
           Every day gives you three numbers. Finish all three rounds and the rest of the game opens
@@ -40,7 +59,8 @@ export function DailyFirstScreen({ onStart }: { onStart: () => void }) {
         </View>
 
         <Text style={[styles.foot, { color: colors.textMuted }]}>
-          Locked until today’s three rounds are done — every day, not just the first.
+          Locked until today’s three rounds are done — every day, not just the first. Today’s three
+          numbers are waiting.
         </Text>
       </View>
 
@@ -62,6 +82,8 @@ export function DailyFirstScreen({ onStart }: { onStart: () => void }) {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   body: { flex: 1, justifyContent: 'center', paddingHorizontal: 26 },
+  who: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 18 },
+  whoText: { fontSize: 17, fontFamily: fonts.extraBold, flexShrink: 1 },
   title: { fontSize: 30, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
   lede: { fontSize: 15, fontFamily: fonts.medium, lineHeight: 22, marginTop: 8 },
   list: { marginTop: 26, gap: 8 },

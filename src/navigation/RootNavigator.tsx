@@ -377,7 +377,7 @@ export function RootNavigator() {
   // null until the flag has been read, so the tutorial never flashes up in
   // front of someone who has already done it.
   const [introSeen, setIntroSeen] = useState<boolean | null>(null);
-  const [introStep, setIntroStep] = useState<'rules' | 'practice' | 'avatar' | 'daily'>('rules');
+  const [introStep, setIntroStep] = useState<'avatar' | 'rules' | 'practice' | 'account' | 'daily'>('avatar');
 
   useEffect(() => {
     hasSeenIntro().then(setIntroSeen);
@@ -393,11 +393,28 @@ export function RootNavigator() {
   // Name first, then the tutorial. The rules land better once the app knows who
   // it is talking to, and a stranger who has been through sign-in has already
   // decided to be here.
+  // 1 name · 2 avatar · 3 the game itself · 4 an email, once there is something
+  // to protect. The email used to be first, which guarded everything behind the
+  // least appealing thing in the app.
   if (!profile.username) {
-    return <OnboardingScreen onDone={profile.refresh} />;
+    return <OnboardingScreen mode="name" step={1} total={4} onDone={profile.refresh} />;
   }
 
   if (!introSeen) {
+    if (introStep === 'avatar') {
+      return (
+        <AvatarScreen
+          username={profile.username}
+          step={2}
+          total={4}
+          onDone={() => {
+            profile.refresh();
+            setIntroStep('rules');
+          }}
+          onSkip={() => setIntroStep('rules')}
+        />
+      );
+    }
     if (introStep === 'rules') {
       return <IntroScreen username={profile.username} onNext={() => setIntroStep('practice')} />;
     }
@@ -406,26 +423,32 @@ export function RootNavigator() {
         <PracticeScreen
           introMode
           remainingAfterThis={0}
-          onExit={() => setIntroStep('avatar')}
-          onPlayAnother={() => setIntroStep('avatar')}
+          onExit={() => setIntroStep('account')}
+          onPlayAnother={() => setIntroStep('account')}
         />
       );
     }
-    // A face before the first real day: they have played a round by now, so
-    // they know what they are dressing up for.
-    if (introStep === 'avatar') {
+    if (introStep === 'account') {
       return (
-        <AvatarScreen
-          username={profile.username}
-          onDone={() => {
-            profile.refresh();
+        <OnboardingScreen
+          mode="account"
+          step={4}
+          total={4}
+          onDone={async () => {
+            await profile.refresh();
             setIntroStep('daily');
           }}
           onSkip={() => setIntroStep('daily')}
         />
       );
     }
-    return <DailyFirstScreen onStart={finishIntro} />;
+    return (
+      <DailyFirstScreen
+        onStart={finishIntro}
+        username={profile.username}
+        avatar={profile.avatar}
+      />
+    );
   }
 
   return (
