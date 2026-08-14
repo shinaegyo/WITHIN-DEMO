@@ -96,12 +96,10 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
           {d.opponent}
         </Text>
-        {/* The head-to-head, not progress through this duel — the heading
-            above already says whose turn it is. */}
-        {/* Only when there is a run to report. "No run either way" announced
-            the absence of a statistic nobody had asked for. */}
+        {/* The head-to-head, and only when there is one: "No run either way"
+            announced the absence of a statistic nobody had asked for, and one
+            of anything is a result rather than a run. */}
         {d.streak !== 0 && (
-          {/* One of anything is not a run, so it does not claim to be. */}
           <Text style={[styles.meta, { color: colors.textMuted }]}>
             {d.streak === 1
               ? '1 win'
