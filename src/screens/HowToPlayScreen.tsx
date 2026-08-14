@@ -39,8 +39,21 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     );
   };
 
+  const Page = ({ children }: { children: React.ReactNode }) => (
+    <ScrollView
+      style={{ width }}
+      contentContainerStyle={styles.page}
+      showsVerticalScrollIndicator={false}
+    >
+      {children}
+    </ScrollView>
+  );
+
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      {/* Sections are packed rather than given a page each: one section to a
+          screen left most pages mostly empty. A page breaks where the next
+          section would not fit, and tall pages still scroll on their own. */}
       <ScrollView
         horizontal
         pagingEnabled
@@ -48,222 +61,170 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         scrollEventThrottle={16}
         onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
       >
-          <ScrollView
-            key={0}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
+        <Page>
+          {showTitle && <Text style={[styles.h1, { color: colors.text }]}>How to play</Text>}
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Three numbers between 1 and 1000 are chosen each day. Everyone in the world gets the
+            same three — only the order differs — and you play them one round at a time.
+          </Text>
 
-      {showTitle && <Text style={[styles.h1, { color: colors.text }]}>How to play</Text>}
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Three numbers between 1 and 1000 are chosen each day. Everyone in the world gets the same
-        three — only the order differs — and you play them one round at a time.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={1}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
+          <Text style={[styles.h2, { color: colors.text }]}>Which way to go</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Blue means the answer is higher than your guess — aim up. Red means it's lower — aim
+            down. The arrow says the same thing, so you can play by colour or by arrow.
+          </Text>
 
-      <Text style={[styles.h2, { color: colors.text }]}>Which way to go</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Blue means the answer is higher than your guess — aim up. Red means it's lower — aim down. The
-        arrow says the same thing, so you can play by colour or by arrow.
-      </Text>
-
-      <View style={styles.group}>
-        <Text style={[styles.groupLabel, { color: colors.textMuted }]}>TOO LOW — GO HIGHER</Text>
-        <Tile direction="below" tier="vast" guess={200} band="500+ AWAY" />
-        <Tile direction="below" tier="distant" guess={400} band="250–499 AWAY" />
-        <Tile direction="below" tier="light" guess={650} band="100–249 AWAY" />
-        <Tile direction="below" tier="medium" guess={750} band="25–99 AWAY" />
-        <Tile direction="below" tier="dark" guess={785} band="11–24 AWAY" />
-        <Tile direction="below" tier="intense" guess={795} band="WITHIN 10" />
-      </View>
-
-      <View style={styles.group}>
-        <Text style={[styles.groupLabel, { color: colors.textMuted }]}>TOO HIGH — GO LOWER</Text>
-        <Tile direction="above" tier="vast" guess={900} band="500+ AWAY" />
-        <Tile direction="above" tier="distant" guess={600} band="250–499 AWAY" />
-        <Tile direction="above" tier="light" guess={350} band="100–249 AWAY" />
-        <Tile direction="above" tier="medium" guess={250} band="25–99 AWAY" />
-        <Tile direction="above" tier="dark" guess={215} band="11–24 AWAY" />
-        <Tile direction="above" tier="intense" guess={205} band="WITHIN 10" />
-      </View>
-
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 14 }]}>
-        The stronger the colour, the closer you are. A faint tile with only a coloured edge means
-        you're still a long way off; a fully coloured tile means you're nearly there.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={2}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>Clues</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round starts with one clue about that round's number, such as "the number is divisible
-        by 3". Land a guess within 10 and a second, more specific clue unlocks for the rest of that
-        round.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={3}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round is tighter than the last: seven attempts in round 1, six in round 2, five in
-        round 3.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Cut it fine and it costs you. Solve a round on your very last attempt and the next round
-        gives you one attempt fewer still, down to a minimum of five. Solve with even one attempt
-        to spare and your limit stays exactly where it is.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={4}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        The round is over and it scores nothing, and no more points can be added for the rest of the
-        day. You still play the rounds that are left and still see every number. Points are only
-        collected while your day is unbroken.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        The number is revealed once the round ends, whether you found it or not.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={5}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Numbers one after another. Six attempts each for the first nineteen, five from the
-        twentieth, four from the fiftieth. One miss ends the run. Everyone plays the same numbers
-        each week, so how far you got is worth comparing.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        It is called Impossible because it is. Four attempts for a number between 1 and 1000 is
-        close to a coin toss, so a run ending at six or seven is a good one, not a failure.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Five runs a day. Every run starts from the first number again, and the week's board keeps
-        your deepest — so the five are attempts at one climb, not five separate scores.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={6}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Add someone as a friend and you can challenge them. Once they accept, you both get the same
-        three numbers and the same seven, six and five attempts. Each round goes to whoever needed
-        fewer guesses. Solve it in the same number and the round is a tie, shown in orange, counting
-        for neither of you.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Rounds are played one at a time. When you finish one you wait for them, and the next opens
-        once you have both played it — so you always know how the duel stands before the next
-        number. If all three end level, a fourth number decides it. If that ties too, the duel is
-        drawn.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        You never play at the same time, and you never see their board until the round is settled.
-        Duels are separate from your daily: they change no points, no streak and no leaderboard
-        place.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={7}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Five days a week play by the rules above. The other two are marked, and the home screen
-        says which is which. The Twist of the Week makes the day harder — fewer attempts, a clue
-        withheld, or no clues at all. The Bonus of the Week does the opposite — extra attempts,
-        clues opened early, or points multiplied.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        There are twenty-five of each, and everyone in the world gets the same two on the same
-        days.
-      </Text>
-          </ScrollView>
-          <ScrollView
-            key={8}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
-
-      <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round is worth up to 100, so a perfect day is 300.
-      </Text>
-      <View style={[styles.scoreBox, { borderColor: colors.border }]}>
-        {([
-          ['1st attempt', 100],
-          ['2nd attempt', 90],
-          ['3rd attempt', 80],
-          ['4th attempt', 70],
-          ['5th attempt', 60],
-          ['6th attempt', 50],
-          ['7th attempt', 40],
-          ['Out of attempts', 0],
-        ] as const).map(([label, points]) => (
-          <View key={label} style={styles.scoreRow}>
-            <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>{label}</Text>
-            <Text style={[styles.scoreValue, { color: colors.text }]}>{points}</Text>
+          <View style={styles.group}>
+            <Text style={[styles.groupLabel, { color: colors.textMuted }]}>TOO LOW — GO HIGHER</Text>
+            <Tile direction="below" tier="vast" guess={200} band="500+ AWAY" />
+            <Tile direction="below" tier="distant" guess={400} band="250–499 AWAY" />
+            <Tile direction="below" tier="light" guess={650} band="100–249 AWAY" />
+            <Tile direction="below" tier="medium" guess={750} band="25–99 AWAY" />
+            <Tile direction="below" tier="dark" guess={785} band="11–24 AWAY" />
+            <Tile direction="below" tier="intense" guess={795} band="WITHIN 10" />
           </View>
-        ))}
-      </View>
-          </ScrollView>
-          <ScrollView
-            key={9}
-            style={{ width }}
-            contentContainerStyle={styles.page}
-            showsVerticalScrollIndicator={false}
-          >
 
-      <Text style={[styles.h2, { color: colors.text }]}>Streaks</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Finish all three rounds without using a retry and your streak grows. Miss a day, get
-        eliminated, or take a retry, and it starts again from zero — a streak is meant to be earned
-        outright. New numbers arrive at midnight, your time.
-      </Text>
-          </ScrollView>
+          <View style={styles.group}>
+            <Text style={[styles.groupLabel, { color: colors.textMuted }]}>TOO HIGH — GO LOWER</Text>
+            <Tile direction="above" tier="vast" guess={900} band="500+ AWAY" />
+            <Tile direction="above" tier="distant" guess={600} band="250–499 AWAY" />
+            <Tile direction="above" tier="light" guess={350} band="100–249 AWAY" />
+            <Tile direction="above" tier="medium" guess={250} band="25–99 AWAY" />
+            <Tile direction="above" tier="dark" guess={215} band="11–24 AWAY" />
+            <Tile direction="above" tier="intense" guess={205} band="WITHIN 10" />
+          </View>
+
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 14 }]}>
+            The stronger the colour, the closer you are. A faint tile with only a coloured edge
+            means you're still a long way off; a fully coloured tile means you're nearly there.
+          </Text>
+        </Page>
+
+        <Page>
+          <Text style={[styles.h2, { color: colors.text, marginTop: 0 }]}>Clues</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Each round starts with one clue about that round's number, such as "the number is
+            divisible by 3". Land a guess within 10 and a second, more specific clue unlocks for the
+            rest of that round.
+          </Text>
+
+          <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Each round is tighter than the last: seven attempts in round 1, six in round 2, five in
+            round 3.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            Cut it fine and it costs you. Solve a round on your very last attempt and the next round
+            gives you one attempt fewer still, down to a minimum of five. Solve with even one
+            attempt to spare and your limit stays exactly where it is.
+          </Text>
+
+          <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            The round is over and it scores nothing, and no more points can be added for the rest of
+            the day. You still play the rounds that are left and still see every number. Points are
+            only collected while your day is unbroken.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            The number is revealed once the round ends, whether you found it or not.
+          </Text>
+        </Page>
+
+        <Page>
+          <Text style={[styles.h2, { color: colors.text, marginTop: 0 }]}>Scoring</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Each round is worth up to 100, so a perfect day is 300.
+          </Text>
+          <View style={[styles.scoreBox, { borderColor: colors.border }]}>
+            {([
+              ['1st attempt', 100],
+              ['2nd attempt', 90],
+              ['3rd attempt', 80],
+              ['4th attempt', 70],
+              ['5th attempt', 60],
+              ['6th attempt', 50],
+              ['7th attempt', 40],
+              ['Out of attempts', 0],
+            ] as const).map(([label, points]) => (
+              <View key={label} style={styles.scoreRow}>
+                <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>{label}</Text>
+                <Text style={[styles.scoreValue, { color: colors.text }]}>{points}</Text>
+              </View>
+            ))}
+          </View>
+
+          <Text style={[styles.h2, { color: colors.text }]}>Streaks</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Finish all three rounds without using a retry and your streak grows. Miss a round, miss
+            a day, or take a retry, and it starts again from zero — a streak is meant to be earned
+            outright. New numbers arrive at midnight, your time.
+          </Text>
+        </Page>
+
+        <Page>
+          {/* The three modes, after the rules they all build on. */}
+          <Text style={[styles.h2, { color: colors.text, marginTop: 0 }]}>The daily challenge</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Everything above. Three rounds, once a day, the same numbers for everyone — this is the
+            game, and the only mode that scores points, keeps a streak and places you on the
+            leaderboard. The two modes below are played for their own sake.
+          </Text>
+
+          <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Numbers one after another, up to 100 of them. Six attempts each for the first nineteen,
+            five from the twentieth, four from the fiftieth. One miss ends the run. Everyone plays
+            the same numbers each week, so how far you got is worth comparing.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            It is called Impossible because it is. Four attempts for a number between 1 and 1000 is
+            close to a coin toss, so a run ending at six or seven is a good one, not a failure — the
+            hundredth number is there to be unreachable.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            Five runs a day. Every run starts from the first number again, and the week's board
+            keeps your deepest — so the five are attempts at one climb, not five separate scores.
+          </Text>
+        </Page>
+
+        <Page>
+          <Text style={[styles.h2, { color: colors.text, marginTop: 0 }]}>Duelling a friend</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Add someone as a friend and you can challenge them. Once they accept, you both get the
+            same three numbers and the same seven, six and five attempts. Each round goes to whoever
+            needed fewer guesses. Solve it in the same number and the round is a tie, shown in
+            orange, counting for neither of you.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            Rounds are played one at a time. When you finish one you wait for them, and the next
+            opens once you have both played it — so you always know how the duel stands before the
+            next number. If all three end level, a fourth number decides it. If that ties too, the
+            duel is drawn.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            You never play at the same time, and you never see their board until the round is
+            settled. Duels are separate from your daily: they change no points, no streak and no
+            leaderboard place.
+          </Text>
+
+          <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>
+            Five days a week play by the rules above. The other two are marked, and the home screen
+            says which is which. The Twist of the Week makes the day harder — fewer attempts, a clue
+            withheld, or no clues at all. The Bonus of the Week does the opposite — extra attempts,
+            clues opened early, or points multiplied.
+          </Text>
+          <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+            There are twenty-five of each, and everyone in the world gets the same two on the same
+            days.
+          </Text>
+        </Page>
       </ScrollView>
 
       {/* One dot per page. A horizontal pager gives no other sign that there is
           more to come, where a scrollbar would have. */}
       <View style={styles.dots}>
-        {Array.from({ length: 10 }).map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <View
             key={i}
             style={[styles.dot, { backgroundColor: i === page ? colors.text : colors.border }]}
@@ -278,7 +239,9 @@ const styles = StyleSheet.create({
   wrap: { flex: 1 },
   // Each section owns a screen: centred, padded once, nothing left over. Tall
   // sections still scroll inside their own page rather than being cut.
-  page: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 22, paddingVertical: 20 },
+  // Packed from the top, not centred: sections are grouped so a page is full,
+  // and centring what is left over just reintroduces the gap.
+  page: { flexGrow: 1, paddingHorizontal: 22, paddingTop: 16, paddingBottom: 24 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingVertical: 14 },
   dot: { width: 6, height: 6, borderRadius: 3 },
   content: { padding: 24, paddingBottom: 60 },
