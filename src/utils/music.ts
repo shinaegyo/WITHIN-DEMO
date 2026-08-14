@@ -15,7 +15,7 @@ import { musicEnabled } from './soundSettings';
  */
 
 const SOURCES = {
-  home: require('../../assets/music/home.wav'),
+  home: require('../../assets/music/home.mp3'),
   game: require('../../assets/music/game.wav'),
   duel: require('../../assets/music/duel.wav'),
 } as const;

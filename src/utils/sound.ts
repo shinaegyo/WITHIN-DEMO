@@ -22,6 +22,10 @@ const SOURCES = {
   // Every press answers back. Silence on a tap reads as a tap that missed.
   tap: require('../../assets/sounds/tap.wav'),
   back: require('../../assets/sounds/back.wav'),
+  // A result deserves more than the tile that produced it: a rising arpeggio
+  // for a round found, two notes falling for one that ran out.
+  win: require('../../assets/sounds/win.wav'),
+  lose: require('../../assets/sounds/lose.wav'),
 } as const;
 
 type SoundName = keyof typeof SOURCES;
@@ -78,4 +82,14 @@ export function playTap(): void {
 /** Going back, closing, cancelling: the same click, pitched down. */
 export function playBack(): void {
   play('back');
+}
+
+/** A round, day, run or duel that went your way. */
+export function playWin(): void {
+  play('win');
+}
+
+/** Out of attempts, out of time, or beaten. Not a buzzer - it is already lost. */
+export function playLose(): void {
+  play('lose');
 }

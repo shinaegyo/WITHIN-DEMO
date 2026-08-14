@@ -18,6 +18,7 @@ import {
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playLose, playWin } from '../utils/sound';
 import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
@@ -75,6 +76,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         if (res.result.isCorrect) {
           hapticCorrect();
           playCorrect();
+          playWin();
           if (!res.runOver) {
             // Three seconds to register that it was right. Advancing the moment
             // the guess lands makes a solve feel like nothing happened.
@@ -99,7 +101,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           hapticForTier(res.result.tier);
           playForTier(res.result.tier);
         }
-        if (res.runOver) setOver({ answer: res.answer, depth: res.level - 1 });
+        if (res.runOver) {
+          playLose();
+          setOver({ answer: res.answer, depth: res.level - 1 });
+        }
         await load();
         return { ok: true as const };
       } catch (err) {

@@ -13,6 +13,7 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playLose, playWin } from '../utils/sound';
 import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
@@ -47,6 +48,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     if (lastResult.isCorrect) {
       hapticCorrect();
       playCorrect();
+      playWin();
     } else if (lastResult.isOneAway) {
       setFeedbackTrigger({ type: 'oneAway', key: Date.now() });
       hapticOneAway();
@@ -64,6 +66,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
   // Held back so the tile, sound and haptic land before a card covers them.
   const roundOver = !!game && game.round.status !== 'playing';
+  // A round that ran out says so out loud; a solved one already has its sound.
+  useEffect(() => {
+    if (game?.round.status === 'lost') playLose();
+  }, [game?.round.status, game?.round.round]);
   useEffect(() => {
     if (!roundOver) {
       setShowResult(false);

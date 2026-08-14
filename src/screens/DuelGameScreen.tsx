@@ -30,6 +30,7 @@ import { fonts } from '../theme/fonts';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
 import { useTheme } from '../theme/ThemeContext';
+import { playLose, playWin } from '../utils/sound';
 import { playTrack } from '../utils/music';
 
 /**
@@ -117,6 +118,8 @@ export function DuelGameScreen({
       setOfferRematch(false);
       return;
     }
+    if (duel.outcome === 'won') playWin();
+    else if (duel.outcome === 'lost') playLose();
     const id = setTimeout(() => setOfferRematch(true), 5000);
     return () => clearTimeout(id);
   }, [duel?.status]);
