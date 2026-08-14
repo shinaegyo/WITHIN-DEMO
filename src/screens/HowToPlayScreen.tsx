@@ -163,7 +163,11 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Everything above. Three rounds, once a day, the same numbers for everyone — this is the
         game, and the only mode that scores points, keeps a streak and places you on the
-        leaderboard. The two modes below are played for their own sake.
+        leaderboard.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        It also comes first. The modes below stay shut until today's three rounds are done, every
+        day — they are what the day opens into, not an alternative to it.
       </Text>
     </>,
 

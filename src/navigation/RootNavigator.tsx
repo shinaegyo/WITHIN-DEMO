@@ -27,6 +27,7 @@ import { consumePracticeRound } from '../utils/practiceLimit';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
 import { loadSoundSetting, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
 import { IntroScreen } from '../screens/IntroScreen';
+import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
@@ -240,7 +241,7 @@ export function RootNavigator() {
   // null until the flag has been read, so the tutorial never flashes up in
   // front of someone who has already done it.
   const [introSeen, setIntroSeen] = useState<boolean | null>(null);
-  const [introStep, setIntroStep] = useState<'rules' | 'practice'>('rules');
+  const [introStep, setIntroStep] = useState<'rules' | 'practice' | 'daily'>('rules');
 
   useEffect(() => {
     hasSeenIntro().then(setIntroSeen);
@@ -261,16 +262,20 @@ export function RootNavigator() {
   }
 
   if (!introSeen) {
-    return introStep === 'rules' ? (
-      <IntroScreen username={profile.username} onNext={() => setIntroStep('practice')} />
-    ) : (
-      <PracticeScreen
-        introMode
-        remainingAfterThis={0}
-        onExit={finishIntro}
-        onPlayAnother={finishIntro}
-      />
-    );
+    if (introStep === 'rules') {
+      return <IntroScreen username={profile.username} onNext={() => setIntroStep('practice')} />;
+    }
+    if (introStep === 'practice') {
+      return (
+        <PracticeScreen
+          introMode
+          remainingAfterThis={0}
+          onExit={() => setIntroStep('daily')}
+          onPlayAnother={() => setIntroStep('daily')}
+        />
+      );
+    }
+    return <DailyFirstScreen onStart={finishIntro} />;
   }
 
   return (
