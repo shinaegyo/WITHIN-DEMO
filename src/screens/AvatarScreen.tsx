@@ -145,8 +145,8 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 2, lineHeight: 17 },
   body: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 20 },
   label: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
-  colors: { flexDirection: 'row', gap: 10, marginBottom: 22 },
-  swatch: { flex: 1, height: 34, borderRadius: 10, borderWidth: 3, borderColor: 'transparent' },
+  colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
+  swatch: { width: '18%', height: 32, borderRadius: 10, borderWidth: 3, borderColor: 'transparent' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   cell: {
     width: '18%',
