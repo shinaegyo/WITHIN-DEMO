@@ -1,0 +1,158 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { HomeStatus, loadHomeStatus } from '../lib/api';
+import { feedbackColors } from '../theme/colors';
+import { fonts } from '../theme/fonts';
+import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
+
+/**
+ * Everything that is not the daily.
+ *
+ * Each row says what is true right now rather than only what it is - whose turn
+ * it is, how many runs are left, who holds the crown. That status is the reason
+ * to open one of these, and it was the one thing a list of names could not say.
+ */
+export function GamesScreen({
+  onRanked,
+  onDuels,
+  onImpossible,
+  onPractice,
+  practiceLeft,
+}: {
+  onRanked: () => void;
+  onDuels: () => void;
+  onImpossible: () => void;
+  onPractice: () => void;
+  practiceLeft: number | null;
+}) {
+  const { colors } = useTheme();
+  const [status, setStatus] = useState<HomeStatus | null>(null);
+
+  const load = useCallback(() => {
+    loadHomeStatus()
+      .then(setStatus)
+      .catch(() => {
+        /* the rows still work without their status lines */
+      });
+  }, []);
+
+  useEffect(() => {
+    load();
+    const id = setInterval(load, 20000);
+    return () => clearInterval(id);
+  }, [load]);
+
+  const rows = [
+    {
+      label: 'Ranked',
+      sub: 'Play strangers for a rating and the crown',
+      status: status?.ranked.needsMe
+        ? 'Your turn'
+        : status?.ranked.inMatch
+          ? 'Waiting on them'
+          : status?.ranked.queued
+            ? 'Looking for an opponent'
+            : status?.ranked.iHoldBelt
+              ? 'You hold the crown'
+              : status?.ranked.beltHolder
+                ? `${status.ranked.beltHolder} holds the crown`
+                : 'The crown is going spare',
+      urgent: !!status?.ranked.needsMe,
+      onPress: onRanked,
+    },
+    {
+      label: 'Challenge',
+      sub: 'Duel a friend, picking each other’s numbers',
+      status: status && status.duelsWaiting > 0 ? `${status.duelsWaiting} waiting on you` : 'Start one',
+      urgent: !!status && status.duelsWaiting > 0,
+      onPress: onDuels,
+    },
+    {
+      label: 'Impossible',
+      sub: 'Numbers one after another until you miss',
+      status: status
+        ? status.impossible.runsLeft === 0
+          ? 'No runs left today'
+          : `${status.impossible.runsLeft} ${status.impossible.runsLeft === 1 ? 'run' : 'runs'} left${
+              status.impossible.best > 0 ? ` · best ${status.impossible.best}` : ''
+            }`
+        : '',
+      urgent: false,
+      onPress: onImpossible,
+    },
+    {
+      label: 'Practice',
+      sub: 'Unranked, unscored, as many as you have left',
+      status:
+        practiceLeft === null
+          ? ''
+          : practiceLeft === 0
+            ? 'None left today'
+            : `${practiceLeft} left today`,
+      urgent: false,
+      onPress: onPractice,
+    },
+  ];
+
+  return (
+    <ScrollView
+      style={[styles.wrap, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.content}
+    >
+      {rows.map((r) => (
+        <Pressable
+          key={r.label}
+          onPress={() => {
+            playTap();
+            r.onPress();
+          }}
+          style={({ pressed }) => [
+            styles.row,
+            {
+              backgroundColor: pressed ? colors.surfaceAlt : colors.surface,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <View style={styles.main}>
+            <Text style={[styles.label, { color: colors.text }]}>{r.label}</Text>
+            <Text style={[styles.sub, { color: colors.textMuted }]}>{r.sub}</Text>
+          </View>
+          <Text
+            style={[styles.status, { color: r.urgent ? feedbackColors.correct : colors.textMuted }]}
+            numberOfLines={1}
+          >
+            {r.status}
+          </Text>
+          <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>
+        </Pressable>
+      ))}
+
+      <Text style={[styles.note, { color: colors.textMuted }]}>
+        None of these touch your points, streak or place on the leaderboard. That is the daily, and
+        it is the only thing that counts.
+      </Text>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: { flex: 1 },
+  content: { padding: 18, gap: 9 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 15,
+    gap: 10,
+  },
+  main: { flex: 1, minWidth: 0 },
+  label: { fontSize: 15.5, fontFamily: fonts.extraBold },
+  sub: { fontSize: 11, fontFamily: fonts.medium, marginTop: 2 },
+  status: { fontSize: 11, fontFamily: fonts.bold, flexShrink: 1, textAlign: 'right' },
+  arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
+  note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 12, paddingHorizontal: 2 },
+});

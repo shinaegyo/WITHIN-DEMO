@@ -6,7 +6,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { MenuDrawer } from '../components/MenuDrawer';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
@@ -22,12 +22,17 @@ import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
 import { loadFriends, touchPresence } from '../lib/api';
-import { warmSounds } from '../utils/sound';
+import { playTap, warmSounds } from '../utils/sound';
 import { fonts } from '../theme/fonts';
-import { consumePracticeRound } from '../utils/practiceLimit';
+import { practiceRemaining, consumePracticeRound } from '../utils/practiceLimit';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
 import { loadSoundSetting, loadVolumes, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
 import { IntroScreen } from '../screens/IntroScreen';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Avatar } from '../components/Avatar';
+import { TabIcon, TabName } from '../components/TabIcon';
+import { GamesScreen } from '../screens/GamesScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { AudioScreen } from '../screens/AudioScreen';
@@ -57,6 +62,53 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 // navigation prop. Capturing it via state meant setting state during another
 // component's render, which React rightly complains about.
 const navRef = createNavigationContainerRef<RootStackParamList>();
+const Tabs = createMaterialTopTabNavigator();
+
+/**
+ * Five tabs, swipeable and tappable.
+ *
+ * Drawn rather than configured, because the profile tab is the player's own
+ * avatar rather than an icon - which is the point of having thirty of them, and
+ * something a stock tab bar cannot express.
+ */
+function TabBar({ state, navigation, avatar, pending, colors }: any) {
+  return (
+    <View style={[styles.tabBar, { backgroundColor: colors.background, borderColor: colors.border }]}>
+      {state.routes.map((route: any, index: number) => {
+        const focused = state.index === index;
+        const tint = focused ? colors.text : colors.textMuted;
+        return (
+          <Pressable
+            key={route.key}
+            style={styles.tab}
+            onPress={() => {
+              playTap();
+              if (!focused) navigation.navigate(route.name);
+            }}
+          >
+            {route.name === 'You' ? (
+              <View style={[styles.tabAvatar, focused && { borderColor: colors.text }]}>
+                <Avatar value={avatar} size={24} />
+              </View>
+            ) : (
+              <TabIcon name={route.name.toLowerCase() as TabName} color={tint} active={focused} />
+            )}
+
+            {/* A waiting request is the one thing worth showing without being
+                opened, which is the only real advantage a bar has over a menu. */}
+            {route.name === 'Friends' && pending > 0 && (
+              <View style={[styles.tabDot, { backgroundColor: colors.accent }]}>
+                <Text style={styles.tabDotText}>{pending}</Text>
+              </View>
+            )}
+
+            {focused && <Text style={[styles.tabLabel, { color: colors.text }]}>{route.name}</Text>}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
 function Screens({
   username,
@@ -69,7 +121,6 @@ function Screens({
 }) {
   const { colors, mode } = useTheme();
   const { startFreshTestPlayer, resetToday, reload, game, phase } = useDailyGameContext();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [sound, setSound] = useState(true);
   // Nobody is going to open a Friends screen on the off chance. A waiting
   // request has to announce itself, or it sits there until the sender gives up.
@@ -113,6 +164,11 @@ function Screens({
   }, []);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);
+  const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    practiceRemaining().then(setPracticeLeft);
+  }, [practiceEpoch]);
 
   const startPractice = async () => {
     const left = await consumePracticeRound();
@@ -144,18 +200,69 @@ function Screens({
       >
         <Stack.Screen name="Home" options={{ headerShown: false }}>
           {({ navigation }) => (
-            <HomeScreen
-              onPlay={() => navigation.navigate('Game')}
-              onEndless={() => navigation.navigate('Endless')}
-              onOpenMenu={() => setMenuOpen(true)}
-              menuAlert={pending > 0}
-              onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
-              onOpenFriends={() => navigation.navigate('Friends')}
-              onOpenDuels={() => navigation.navigate('Duels')}
-              onOpenRanked={() => navigation.navigate('Ranked')}
-              practiceEpoch={practiceEpoch}
-              username={username}
-            />
+            <Tabs.Navigator
+              tabBarPosition="bottom"
+              initialRouteName="Home"
+              // Swipe or tap, and no top bar: the bar at the bottom is drawn by
+              // hand because one of its five is the player's own avatar.
+              tabBar={(props) => (
+                <TabBar {...props} avatar={avatar} pending={pending} colors={colors} />
+              )}
+              screenOptions={{ swipeEnabled: true, lazy: true }}
+            >
+              <Tabs.Screen name="Games">
+                {() => (
+                  <GamesScreen
+                    onRanked={() => navigation.navigate('Ranked')}
+                    onDuels={() => navigation.navigate('Duels')}
+                    onImpossible={() => navigation.navigate('Endless')}
+                    onPractice={startPractice}
+                    practiceLeft={practiceLeft}
+                  />
+                )}
+              </Tabs.Screen>
+
+              <Tabs.Screen name="Friends">
+                {() => (
+                  <FriendsScreen
+                    username={username}
+                    onChanged={() => setFriendsEpoch((n) => n + 1)}
+                    onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })}
+                  />
+                )}
+              </Tabs.Screen>
+
+              <Tabs.Screen name="Home">
+                {() => (
+                  <HomeScreen
+                    onPlay={() => navigation.navigate('Game')}
+                    onEndless={() => navigation.navigate('Endless')}
+                    onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
+                    onOpenFriends={() => navigation.navigate('Friends')}
+                    onOpenDuels={() => navigation.navigate('Duels')}
+                    onOpenRanked={() => navigation.navigate('Ranked')}
+                    practiceEpoch={practiceEpoch}
+                    username={username}
+                  />
+                )}
+              </Tabs.Screen>
+
+              <Tabs.Screen name="Board" component={LeaderboardScreen} />
+
+              <Tabs.Screen name="You">
+                {() => (
+                  <ProfileScreen
+                    username={username}
+                    avatar={avatar}
+                    onAvatar={() => navigation.navigate('Avatar')}
+                    onAccount={() => navigation.navigate('Account')}
+                    onAudio={() => navigation.navigate('Audio')}
+                    onHowToPlay={() => navigation.navigate('HowToPlay')}
+                    onPrivacy={() => navigation.navigate('Privacy')}
+                  />
+                )}
+              </Tabs.Screen>
+            </Tabs.Navigator>
           )}
         </Stack.Screen>
 
@@ -260,50 +367,6 @@ function Screens({
         />
       </Stack.Navigator>
 
-      <MenuDrawer
-        visible={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        items={[
-          // Ordered by what kind of thing each one is, most-used first: play
-          // something, see people, change something, look something up.
-          { label: 'Ranked', onPress: () => navRef.isReady() && navRef.navigate('Ranked') },
-          { label: 'Duels', onPress: () => navRef.isReady() && navRef.navigate('Duels') },
-          { label: 'Practice', onPress: startPractice },
-
-          {
-            label: 'Friends',
-            count: pending,
-            startsGroup: true,
-            onPress: () => navRef.isReady() && navRef.navigate('Friends'),
-          },
-          { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
-
-          {
-            label: 'Avatar',
-            startsGroup: true,
-            // Anybody who played before avatars existed has none, and a menu
-            // item that says so is how they find out they can have one.
-            tag: avatar ? undefined : 'NEW',
-            onPress: () => navRef.isReady() && navRef.navigate('Avatar'),
-          },
-          { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
-          { label: 'Audio', onPress: () => navRef.isReady() && navRef.navigate('Audio') },
-
-          {
-            label: 'How to Play',
-            startsGroup: true,
-            onPress: () => navRef.isReady() && navRef.navigate('HowToPlay'),
-          },
-          { label: 'Privacy', onPress: () => navRef.isReady() && navRef.navigate('Privacy') },
-
-          ...(__DEV__
-            ? [
-                { label: 'Replay today (dev)', startsGroup: true, onPress: resetToday },
-                { label: 'New test player (dev)', onPress: startFreshTestPlayer },
-              ]
-            : []),
-        ]}
-      />
 
     </NavigationContainer>
   );
@@ -375,3 +438,27 @@ export function RootNavigator() {
     </DailyGameProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    paddingTop: 8,
+    paddingBottom: 10,
+  },
+  tab: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 2 },
+  tabLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.9 },
+  tabAvatar: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
+  tabDot: {
+    position: 'absolute',
+    top: -2,
+    right: '24%',
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  tabDotText: { color: '#FFFFFF', fontSize: 10, fontFamily: fonts.extraBold },
+});

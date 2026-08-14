@@ -27,13 +27,10 @@ import { PlayerCardModal } from '../components/PlayerCard';
 interface Props {
   onPlay: () => void;
   onEndless: () => void;
-  onOpenMenu: () => void;
   onOpenLeaderboard: () => void;
   onOpenFriends: () => void;
   onOpenDuels: () => void;
   onOpenRanked: () => void;
-  /** A friend request is waiting, so the menu button carries a dot. */
-  menuAlert?: boolean;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
   username: string;
@@ -42,12 +39,10 @@ interface Props {
 export function HomeScreen({
   onPlay,
   onEndless,
-  onOpenMenu,
   onOpenLeaderboard,
   onOpenFriends,
   onOpenDuels,
   onOpenRanked,
-  menuAlert = false,
   practiceEpoch,
   username,
 }: Props) {
@@ -272,16 +267,9 @@ export function HomeScreen({
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <Pressable
-          style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
-          onPress={onOpenMenu}
-          accessibilityLabel={menuAlert ? 'Open menu, friend request waiting' : 'Open menu'}
-        >
-          <Text style={[styles.menuIcon, { color: colors.text }]}>☰</Text>
-          {menuAlert && (
-            <View style={[styles.dot, { backgroundColor: colors.accent, borderColor: colors.background }]} />
-          )}
-        </Pressable>
+        {/* The menu is gone: everything it held is a tab now, and two
+            navigations that disagree is worse than either alone. */}
+        <View style={styles.iconButton} />
 
         {started ? <Wordmark size={24} /> : <View />}
 
@@ -362,85 +350,6 @@ export function HomeScreen({
             there as a door with a name on it. Whether a friend is waiting on
             your number is the reason to open one of these, and it was the one
             thing the screen would not tell you. */}
-        {finished && (
-          <View style={styles.modes}>
-            {[
-              {
-                label: 'Ranked',
-                sub: 'Play for rating and the crown',
-                status: modes?.ranked.needsMe
-                  ? 'Your turn'
-                  : modes?.ranked.inMatch
-                    ? 'Waiting on them'
-                    : modes?.ranked.queued
-                      ? 'Looking for an opponent'
-                      : modes?.ranked.iHoldBelt
-                        ? 'You hold the crown'
-                        : modes?.ranked.beltHolder
-                          ? `${modes.ranked.beltHolder} holds the crown`
-                          : 'The crown is going spare',
-                urgent: !!modes?.ranked.needsMe,
-                onPress: onOpenRanked,
-              },
-              {
-                label: 'Challenge',
-                sub: 'Duel a friend',
-                // "Nothing waiting" described an absence nobody had asked
-                // about. With no duels open the useful thing to say is what
-                // you can do.
-                status:
-                  modes && modes.duelsWaiting > 0
-                    ? `${modes.duelsWaiting} waiting on you`
-                    : 'Start one',
-                urgent: !!modes && modes.duelsWaiting > 0,
-                onPress: onOpenDuels,
-              },
-              {
-                label: 'Impossible',
-                sub: 'How far can you get',
-                status: modes
-                  ? modes.impossible.runsLeft === 0
-                    ? 'No runs left today'
-                    : `${modes.impossible.runsLeft} ${
-                        modes.impossible.runsLeft === 1 ? 'run' : 'runs'
-                      } left${modes.impossible.best > 0 ? ` · best ${modes.impossible.best}` : ''}`
-                  : '',
-                urgent: false,
-                onPress: onEndless,
-              },
-            ].map((m) => (
-              <Pressable
-                key={m.label}
-                onPress={() => {
-                  playTap();
-                  m.onPress();
-                }}
-                style={({ pressed }) => [
-                  styles.mode,
-                  {
-                    backgroundColor: pressed ? colors.surfaceAlt : colors.surface,
-                    borderColor: colors.border,
-                  },
-                ]}
-              >
-                <View style={styles.modeMain}>
-                  <Text style={[styles.modeText, { color: colors.text }]}>{m.label}</Text>
-                  <Text style={[styles.modeSub, { color: colors.textMuted }]}>{m.sub}</Text>
-                </View>
-                <Text
-                  style={[
-                    styles.modeStatus,
-                    { color: m.urgent ? feedbackColors.correct : colors.textMuted },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {m.status}
-                </Text>
-                <Text style={[styles.modeArrow, { color: colors.textMuted }]}>›</Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
 
         <View style={styles.statRow}>
           <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
