@@ -5,7 +5,6 @@ import { StatusScreen } from '../components/StatusScreen';
 import { AllTimeEntry, ApiError, loadAllTimeLeaderboard, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
-import { formatRelative } from '../utils/relativeTime';
 import { useTheme } from '../theme/ThemeContext';
 
 export function LeaderboardScreen() {
@@ -73,12 +72,9 @@ export function LeaderboardScreen() {
               {item.name}
               {item.isMe ? '  (you)' : ''}
             </Text>
-            {/* When they were last seen, rather than how many days they have
-                played: a day count only moves once every twenty-four hours, so
-                the board looked frozen. */}
-            <Text style={[styles.meta, { color: colors.textMuted }]}>
-              {formatRelative(item.lastPlayedAt)}
-            </Text>
+            {/* No "3h ago" column. With a handful of players, half of whom
+                play a few times a week, it read as a list of people who had
+                drifted off rather than a board. */}
             <Text style={[styles.score, { color: colors.text }]}>{item.score}</Text>
           </Pressable>
         )}
@@ -108,7 +104,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   rank: { width: 30, fontSize: 14, fontFamily: fonts.extraBold },
-  meta: { fontSize: 10, fontFamily: fonts.bold, marginRight: 10 },
   medal: {
     width: 26,
     height: 26,
