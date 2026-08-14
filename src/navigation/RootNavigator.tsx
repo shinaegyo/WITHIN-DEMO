@@ -231,7 +231,7 @@ function Screens({
                   <GamesScreen
                     onRanked={() => navigation.navigate('Ranked')}
                     onDuels={() => navigation.navigate('Duels')}
-                    onImpossible={() => navigation.navigate('Endless')}
+                    onImpossible={() => navigation.navigate('ImpossibleBoard')}
                     onPractice={startPractice}
                     practiceLeft={practiceLeft}
                   />
@@ -311,18 +311,18 @@ function Screens({
 
         <Stack.Screen name="Endless" options={{ headerShown: false }}>
           {({ navigation }) => (
-            <EndlessScreen
-              onExit={() => navigation.navigate('Home')}
-              onBoard={() => navigation.navigate('ImpossibleBoard')}
-            />
+            <EndlessScreen onExit={() => navigation.navigate('Home')} />
           )}
         </Stack.Screen>
 
         <Stack.Screen
           name="ImpossibleBoard"
           options={{ title: 'Impossible · this week', headerBackTitle: 'Back' }}
-          component={ImpossibleBoardScreen}
-        />
+        >
+          {({ navigation }) => (
+            <ImpossibleBoardScreen onPlay={() => navigation.replace('Endless')} />
+          )}
+        </Stack.Screen>
 
         <Stack.Screen name="Duels" options={{ title: 'Duels', headerBackTitle: 'Back' }}>
           {({ navigation }) => (

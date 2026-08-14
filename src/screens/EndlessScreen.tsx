@@ -36,7 +36,7 @@ import { playCorrect, playForTier } from '../utils/sound';
  * be sitting in the bundle for anyone who looked, and a board built on numbers
  * the player already holds would be worthless.
  */
-export function EndlessScreen({ onExit, onBoard }: { onExit: () => void; onBoard: () => void }) {
+export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const { colors } = useTheme();
   const [state, setState] = useState<EndlessState | null>(null);
   const [board, setBoard] = useState<EndlessEntry[]>([]);
@@ -136,11 +136,9 @@ export function EndlessScreen({ onExit, onBoard }: { onExit: () => void; onBoard
             <Pressable onPress={onExit} hitSlop={10}>
               <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
             </Pressable>
-            <Pressable onPress={onBoard} hitSlop={8}>
-              <Text style={[styles.badge, { color: colors.textMuted }]}>
-                {state.runsLeft} {state.runsLeft === 1 ? 'RUN' : 'RUNS'} LEFT · BOARD ›
-              </Text>
-            </Pressable>
+            <Text style={[styles.badge, { color: colors.textMuted }]}>
+              {state.runsLeft} {state.runsLeft === 1 ? 'RUN' : 'RUNS'} LEFT
+            </Text>
           </View>
 
           {solved ? (

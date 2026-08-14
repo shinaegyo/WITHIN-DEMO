@@ -1,28 +1,38 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/Avatar';
 import { StatusScreen } from '../components/StatusScreen';
-import { ApiError, EndlessEntry, loadEndlessBoard, messageFor } from '../lib/api';
+import { ApiError, EndlessEntry, HomeStatus, loadEndlessBoard, loadHomeStatus, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 
 /**
- * How far everybody got this week.
+ * Where Impossible starts: how far everybody got, and then the button.
+ *
+ * The board is the reason to play - you are chasing somebody's number, and
+ * seeing it before you begin is what makes the run mean anything. It also has
+ * to be reachable without spending a run, so nothing here calls endless_state,
+ * which would open one.
  *
  * Weekly rather than all-time, because the sequence changes each week: depth is
  * only comparable between people who were hunting the same numbers, and a
  * lifetime record would quietly compare two different games.
  */
-export function ImpossibleBoardScreen() {
+export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
   const { colors } = useTheme();
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
+  const [status, setStatus] = useState<HomeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
     try {
       setRows(await loadEndlessBoard());
+      // Runs left comes from the status call, which has no side effects; asking
+      // the game itself would start a run just by looking at the screen.
+      loadHomeStatus().then(setStatus).catch(() => {});
     } catch (err) {
       setError(messageFor(err instanceof ApiError ? err.code : 'network'));
     }
@@ -34,21 +44,25 @@ export function ImpossibleBoardScreen() {
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!rows) return <StatusScreen loading />;
-  if (rows.length === 0) {
-    return <StatusScreen message="Nobody has cleared a number this week. Be the first." />;
-  }
+
+  const left = status?.impossible.runsLeft ?? null;
+  const best = status?.impossible.best ?? 0;
 
   return (
-    <ScrollView
-      style={[styles.wrap, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-    >
-      <Text style={[styles.caption, { color: colors.textMuted }]}>
-        Everyone plays the same numbers this week, so how far you got compares directly. It resets
-        on Monday.
-      </Text>
+    <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          Everyone plays the same numbers this week, so how far you got compares directly. It resets
+          on Monday.
+        </Text>
 
-      {rows.map((e) => (
+        {rows.length === 0 && (
+          <Text style={[styles.caption, { color: colors.textMuted }]}>
+            Nobody has cleared a number this week. Be the first.
+          </Text>
+        )}
+
+        {rows.map((e) => (
         <View
           key={`${e.rank}-${e.name}`}
           style={[
@@ -80,14 +94,52 @@ export function ImpossibleBoardScreen() {
             {e.depth === 1 ? 'number' : 'numbers'}
           </Text>
         </View>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
+
+      {/* The way in sits under the standings rather than replacing them. */}
+      <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
+        {best > 0 && (
+          <Text style={[styles.best, { color: colors.textMuted }]}>
+            Your best this week: {best} {best === 1 ? 'number' : 'numbers'}
+          </Text>
+        )}
+        <Pressable
+          onPress={() => {
+            playTap();
+            onPlay();
+          }}
+          disabled={left === 0}
+          style={({ pressed }) => [
+            styles.play,
+            {
+              backgroundColor: left === 0 ? colors.border : colors.text,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}
+        >
+          <Text
+            style={[styles.playText, { color: left === 0 ? colors.textMuted : colors.background }]}
+          >
+            {left === 0
+              ? 'No runs left today'
+              : left === null
+                ? 'Start a run'
+                : `Start a run · ${left} left today`}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
-  content: { padding: 16, gap: 8 },
+  content: { padding: 16, gap: 8, paddingBottom: 20 },
+  foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 8 },
+  best: { fontSize: 12, fontFamily: fonts.medium, textAlign: 'center' },
+  play: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
+  playText: { fontSize: 16, fontFamily: fonts.extraBold },
   caption: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 6 },
   row: {
     flexDirection: 'row',
