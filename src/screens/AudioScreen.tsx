@@ -4,6 +4,7 @@ import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { refreshMusic } from '../utils/music';
+import { playTap } from '../utils/sound';
 import {
   loadMusicSetting,
   loadSoundSetting,
@@ -43,7 +44,10 @@ export function AudioScreen() {
     onToggle: () => void;
   }) => (
     <Pressable
-      onPress={onToggle}
+      onPress={() => {
+        playTap();
+        onToggle();
+      }}
       style={({ pressed }) => [
         styles.row,
         { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.8 : 1 },
@@ -88,8 +92,11 @@ export function AudioScreen() {
           const next = !music;
           setMusic(next);
           setMusicEnabled(next);
-          // Starts or stops where you are, rather than at the next screen.
-          refreshMusic(next ? 'home' : null);
+          // Deferred by a frame. Creating a player decodes the whole loop, and
+          // doing that inside the press handler meant the switch itself did not
+          // repaint until the audio was ready - which read as a lag on a
+          // control that had, in fact, already changed.
+          setTimeout(() => refreshMusic(next ? 'home' : null), 0);
         }}
       />
 

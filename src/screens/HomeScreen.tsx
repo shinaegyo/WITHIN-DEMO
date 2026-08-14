@@ -7,6 +7,7 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 import { playTrack } from '../utils/music';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
@@ -213,7 +214,10 @@ export function HomeScreen({
       {rows.map((item, i) => (
         <Pressable
           key={`${item.rank}-${item.name}`}
-          onPress={() => setLooking(item.name)}
+          onPress={() => {
+            playTap();
+            setLooking(item.name);
+          }}
           style={[
             styles.boardRow,
             {
@@ -251,6 +255,7 @@ export function HomeScreen({
 
   const onPrimary = finished
     ? async () => {
+        playTap();
         const res = await shareResult(game);
         setShareFailed(!res.ok);
         if (res.copied) setShareNote('Copied — paste it anywhere.');
@@ -400,7 +405,10 @@ export function HomeScreen({
             ].map((m) => (
               <Pressable
                 key={m.label}
-                onPress={m.onPress}
+                onPress={() => {
+                  playTap();
+                  m.onPress();
+                }}
                 style={({ pressed }) => [
                   styles.mode,
                   {

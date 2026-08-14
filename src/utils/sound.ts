@@ -19,6 +19,9 @@ const SOURCES = {
   within10: require('../../assets/sounds/within-10.wav'),
   oneAway: require('../../assets/sounds/one-away.wav'),
   correct: require('../../assets/sounds/correct.wav'),
+  // Every press answers back. Silence on a tap reads as a tap that missed.
+  tap: require('../../assets/sounds/tap.wav'),
+  back: require('../../assets/sounds/back.wav'),
 } as const;
 
 type SoundName = keyof typeof SOURCES;
@@ -65,4 +68,14 @@ export function playForTier(tier: string) {
   if (tier === 'vast' || tier === 'distant' || tier === 'light') play('far');
   else if (tier === 'medium') play('medium');
   else if (tier === 'dark') play('near');
+}
+
+/** A press. Short enough to sit under a screen change without smearing into it. */
+export function playTap(): void {
+  play('tap');
+}
+
+/** Going back, closing, cancelling: the same click, pitched down. */
+export function playBack(): void {
+  play('back');
 }

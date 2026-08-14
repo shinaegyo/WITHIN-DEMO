@@ -64,12 +64,17 @@ export function playTrack(track: Track | null): void {
   current = track;
   if (!track) return;
 
-  const p = player(track);
-  if (!p) return;
-  try {
-    p.seekTo(0);
-    p.play();
-  } catch {}
+  // Off the interaction that asked for it: the first play of a track decodes
+  // it, and a screen should never wait on that.
+  setTimeout(() => {
+    if (current !== track) return;
+    const p = player(track);
+    if (!p) return;
+    try {
+      p.seekTo(0);
+      p.play();
+    } catch {}
+  }, 0);
 }
 
 /** Stops everything and forgets where it was, for the settings switch. */

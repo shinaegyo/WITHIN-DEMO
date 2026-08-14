@@ -3,6 +3,7 @@ import { Animated, Dimensions, Easing, Modal, Pressable, StyleSheet, Text, View 
 import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 
 export interface MenuItem {
   label: string;
@@ -76,6 +77,7 @@ export function MenuDrawer({
               key={item.label}
               disabled={item.soon || !!item.badge}
               onPress={() => {
+                playTap();
                 onClose();
                 item.onPress?.();
               }}

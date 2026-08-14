@@ -12,6 +12,7 @@ import {
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 
 /**
  * Ranked.
@@ -45,6 +46,7 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   }, [load]);
 
   const find = async () => {
+    playTap();
     if (busy) return;
     setBusy(true);
     setNote(null);
@@ -64,6 +66,7 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   };
 
   const leave = async () => {
+    playTap();
     if (busy) return;
     setBusy(true);
     try {

@@ -13,6 +13,7 @@ import {
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 
 /**
  * Duels are asynchronous, so this screen is mostly about whose turn it is.
@@ -124,7 +125,14 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     onPress: () => void;
     tone?: 'good' | 'warn';
   }) => (
-    <Pressable onPress={onPress} disabled={busy} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}>
+    <Pressable
+      onPress={() => {
+        playTap();
+        onPress();
+      }}
+      disabled={busy}
+      style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+    >
       <Text
         style={[
           styles.action,

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 
 type SubmitOutcome = { ok: true } | { ok: false; error: string };
 
@@ -118,7 +119,10 @@ export function NumberInput({ disabled, onSubmit, submitLabel = 'Guess', placeho
               opacity: pressed ? 0.85 : 1,
             },
           ]}
-          onPress={handleSubmit}
+          onPress={() => {
+            playTap();
+            handleSubmit();
+          }}
           disabled={!ready}
         >
           <Text style={[styles.buttonText, { color: ready ? colors.background : colors.textMuted }]}>

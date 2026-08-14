@@ -15,6 +15,7 @@ import {
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 import { shareInvite } from '../utils/share';
 
 /**
@@ -132,7 +133,14 @@ export function FriendsScreen({
     onPress: () => void;
     tone?: 'good' | 'bad';
   }) => (
-    <Pressable onPress={onPress} disabled={busy} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}>
+    <Pressable
+      onPress={() => {
+        playTap();
+        onPress();
+      }}
+      disabled={busy}
+      style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+    >
       <Text
         style={[
           styles.action,
