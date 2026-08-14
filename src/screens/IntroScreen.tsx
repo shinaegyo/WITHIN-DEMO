@@ -8,6 +8,11 @@ import { useTheme } from '../theme/ThemeContext';
 /**
  * The rules, shown once, before a new player's first round.
  *
+ * All of them, not a trimmed version. The pages read quickly one at a time, and
+ * a first player who never learns that a missed round stops the day scoring, or
+ * that there is a mode where one miss ends the run, meets those rules by losing
+ * to them.
+ *
  * Wraps the How to Play screen rather than restating it. Two copies of the
  * rules would drift the first time one of them changed, and this one would be
  * the copy nobody remembered to update.
@@ -20,12 +25,12 @@ export function IntroScreen({ onNext }: { onNext: () => void }) {
       <View style={styles.head}>
         <Text style={[styles.title, { color: colors.text }]}>How it works</Text>
         <Text style={[styles.sub, { color: colors.textMuted }]}>
-          Two screens, then a round that costs you nothing.
+          Swipe through all of it, then a round that costs you nothing.
         </Text>
       </View>
 
       <View style={styles.body}>
-        <HowToPlayScreen showTitle={false} compact />
+        <HowToPlayScreen showTitle={false} />
       </View>
 
       <View style={[styles.foot, { borderColor: colors.border }]}>
