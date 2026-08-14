@@ -150,6 +150,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
               onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
               onOpenFriends={() => navigation.navigate('Friends')}
               onOpenDuels={() => navigation.navigate('Duels')}
+              onOpenRanked={() => navigation.navigate('Ranked')}
               practiceEpoch={practiceEpoch}
               username={username}
             />

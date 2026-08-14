@@ -10,7 +10,13 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
 import { shareInvite, shareResult } from '../utils/share';
-import { LeaderboardEntry, loadFriendsLeaderboard, loadLeaderboard } from '../lib/api';
+import {
+  HomeStatus,
+  LeaderboardEntry,
+  loadFriendsLeaderboard,
+  loadHomeStatus,
+  loadLeaderboard,
+} from '../lib/api';
 import { MEDALS } from '../theme/medals';
 
 
@@ -21,6 +27,7 @@ interface Props {
   onOpenLeaderboard: () => void;
   onOpenFriends: () => void;
   onOpenDuels: () => void;
+  onOpenRanked: () => void;
   /** A friend request is waiting, so the menu button carries a dot. */
   menuAlert?: boolean;
   /** Bumped by the navigator so the count refreshes on return from practice. */
@@ -35,6 +42,7 @@ export function HomeScreen({
   onOpenLeaderboard,
   onOpenFriends,
   onOpenDuels,
+  onOpenRanked,
   menuAlert = false,
   practiceEpoch,
   username,
@@ -47,6 +55,7 @@ export function HomeScreen({
   const [shareFailed, setShareFailed] = useState(false);
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [friendsBoard, setFriendsBoard] = useState<LeaderboardEntry[]>([]);
+  const [modes, setModes] = useState<HomeStatus | null>(null);
   // The first screen is sized to the viewport so it keeps the open, centred
   // layout it had before anything sat below it. Everything else scrolls in
   // underneath rather than crowding it.
@@ -105,6 +114,14 @@ export function HomeScreen({
       })
       .catch(() => {
         /* a missing friends board shouldn't take the screen down */
+      });
+
+    loadHomeStatus()
+      .then((s2) => {
+        if (!cancelled) setModes(s2);
+      })
+      .catch(() => {
+        /* the modes still work without their status lines */
       });
 
     loadLeaderboard()
@@ -334,14 +351,53 @@ export function HomeScreen({
           </>
         )}
 
-        {/* The two ways to keep playing, side by side under the day's result.
-            Share moves below them: it is what you do once, where these are what
-            you do next. */}
+        {/* Three modes, each saying what is true right now rather than sitting
+            there as a door with a name on it. Whether a friend is waiting on
+            your number is the reason to open one of these, and it was the one
+            thing the screen would not tell you. */}
         {finished && (
           <View style={styles.modes}>
             {[
-              { label: 'Impossible', sub: 'How far can you get', onPress: onEndless },
-              { label: 'Challenge', sub: 'Duel a friend', onPress: onOpenDuels },
+              {
+                label: 'Ranked',
+                sub: 'Play for rating and the belt',
+                status: modes?.ranked.needsMe
+                  ? 'Your turn'
+                  : modes?.ranked.inMatch
+                    ? 'Waiting on them'
+                    : modes?.ranked.queued
+                      ? 'Looking for an opponent'
+                      : modes?.ranked.iHoldBelt
+                        ? 'You hold the belt'
+                        : modes?.ranked.beltHolder
+                          ? `${modes.ranked.beltHolder} holds the belt`
+                          : 'The belt is going spare',
+                urgent: !!modes?.ranked.needsMe,
+                onPress: onOpenRanked,
+              },
+              {
+                label: 'Challenge',
+                sub: 'Duel a friend',
+                status:
+                  modes && modes.duelsWaiting > 0
+                    ? `${modes.duelsWaiting} waiting on you`
+                    : 'Nothing waiting',
+                urgent: !!modes && modes.duelsWaiting > 0,
+                onPress: onOpenDuels,
+              },
+              {
+                label: 'Impossible',
+                sub: 'How far can you get',
+                status: modes
+                  ? modes.impossible.runsLeft === 0
+                    ? 'No runs left today'
+                    : `${modes.impossible.runsLeft} ${
+                        modes.impossible.runsLeft === 1 ? 'run' : 'runs'
+                      } left${modes.impossible.best > 0 ? ` · best ${modes.impossible.best}` : ''}`
+                  : '',
+                urgent: false,
+                onPress: onEndless,
+              },
             ].map((m) => (
               <Pressable
                 key={m.label}
@@ -354,11 +410,20 @@ export function HomeScreen({
                   },
                 ]}
               >
-                <View style={styles.modeTop}>
+                <View style={styles.modeMain}>
                   <Text style={[styles.modeText, { color: colors.text }]}>{m.label}</Text>
-                  <Text style={[styles.modeArrow, { color: colors.textMuted }]}>›</Text>
+                  <Text style={[styles.modeSub, { color: colors.textMuted }]}>{m.sub}</Text>
                 </View>
-                <Text style={[styles.modeSub, { color: colors.textMuted }]}>{m.sub}</Text>
+                <Text
+                  style={[
+                    styles.modeStatus,
+                    { color: m.urgent ? feedbackColors.correct : colors.textMuted },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {m.status}
+                </Text>
+                <Text style={[styles.modeArrow, { color: colors.textMuted }]}>›</Text>
               </Pressable>
             ))}
           </View>
@@ -640,21 +705,24 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 19, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
-  modes: { flexDirection: 'row', gap: 10, alignSelf: 'stretch', marginTop: 20 },
-  // Same card language as the stats below, rather than two bright outlines
-  // shouting at each other above them. Left-aligned with a chevron so they read
-  // as somewhere to go, not as buttons stamped on the page.
+  modes: { gap: 8, alignSelf: 'stretch', marginTop: 20 },
+  // Full width, one per row. Three abreast left each about a hundred points
+  // wide, which is enough for a name and nothing else - and the status line is
+  // the only reason to look at these at all.
   mode: {
-    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 14,
     paddingVertical: 11,
-    paddingHorizontal: 13,
+    paddingHorizontal: 14,
+    gap: 10,
   },
-  modeTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  modeText: { fontSize: 14, fontFamily: fonts.extraBold },
+  modeMain: { flex: 1, minWidth: 0 },
+  modeText: { fontSize: 14.5, fontFamily: fonts.extraBold },
   modeArrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
   modeSub: { fontSize: 10.5, fontFamily: fonts.medium, marginTop: 1 },
+  modeStatus: { fontSize: 11, fontFamily: fonts.bold, flexShrink: 1, textAlign: 'right' },
   practiceText: { fontSize: 13.5, fontFamily: fonts.extraBold },
   practiceCount: { fontFamily: fonts.medium },
   footer: {

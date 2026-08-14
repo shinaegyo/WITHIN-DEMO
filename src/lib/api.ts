@@ -432,6 +432,43 @@ export async function respondToDuel(duelId: string, accept: boolean): Promise<st
   return unwrap<any>(data, error).status;
 }
 
+/** What each mode is worth opening for, gathered in one call. */
+export interface HomeStatus {
+  duelsWaiting: number;
+  ranked: {
+    rating: number | null;
+    played: number;
+    queued: boolean;
+    inMatch: boolean;
+    needsMe: boolean;
+    beltHolder: string | null;
+    iHoldBelt: boolean;
+  };
+  impossible: { runsLeft: number; best: number };
+}
+
+export async function loadHomeStatus(): Promise<HomeStatus> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('home_status');
+  const raw = unwrap<any>(data, error);
+  return {
+    duelsWaiting: raw.duelsWaiting ?? 0,
+    ranked: {
+      rating: raw.ranked?.rating ?? null,
+      played: raw.ranked?.played ?? 0,
+      queued: !!raw.ranked?.queued,
+      inMatch: !!raw.ranked?.inMatch,
+      needsMe: !!raw.ranked?.needsMe,
+      beltHolder: raw.ranked?.beltHolder ?? null,
+      iHoldBelt: !!raw.ranked?.iHoldBelt,
+    },
+    impossible: {
+      runsLeft: raw.impossible?.runsLeft ?? 0,
+      best: raw.impossible?.best ?? 0,
+    },
+  };
+}
+
 export interface RankedEntry {
   rank: number;
   name: string;
