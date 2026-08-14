@@ -33,6 +33,17 @@ export function hapticForTier(tier: string) {
   }
 }
 
+/**
+ * The light tick as a wheel passes a digit, the same feel the clock app uses
+ * for its pickers. Fires per digit, so it must stay the cheapest one available.
+ *
+ * No-op on the web build, like the rest of this file — expo-haptics has no
+ * browser implementation, so this only reaches a native build.
+ */
+export function hapticTick() {
+  Haptics.selectionAsync().catch(() => {});
+}
+
 export function hapticInvalid() {
   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
 }

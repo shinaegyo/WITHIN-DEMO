@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
-import { NumberInput } from '../components/NumberInput';
+import { NumberWheels } from '../components/NumberWheels';
 import { MAX_ATTEMPTS, MAX_NUMBER, MIN_NUMBER } from '../game/constants';
 import { createPracticeRound, PracticeRound } from '../game/practiceClues';
 import { evaluateGuess } from '../game/proximity';
@@ -123,7 +123,7 @@ export function PracticeScreen({
 
           <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={clue2Unlocked} />
 
-          <NumberInput disabled={finished} onSubmit={submit} />
+          <NumberWheels disabled={finished} onSubmit={submit} />
 
           <View style={styles.boardWrap}>
             <GuessBoard

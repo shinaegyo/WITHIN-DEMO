@@ -5,7 +5,7 @@ import { ClueCard } from '../components/ClueCard';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
 import { Header } from '../components/Header';
-import { NumberInput } from '../components/NumberInput';
+import { NumberWheels } from '../components/NumberWheels';
 import { RoundOverlay } from '../components/RoundOverlay';
 import { RoundProgress } from '../components/RoundProgress';
 import { StatusScreen } from '../components/StatusScreen';
@@ -123,7 +123,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             </Text>
           )}
 
-          <NumberInput
+          <NumberWheels
             disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
             onSubmit={handleSubmit}
           />
