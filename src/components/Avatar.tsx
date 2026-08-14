@@ -53,8 +53,11 @@ export const CHARACTERS: Character[] = [
     </>) },
   { key: 'bunny', name: 'Bunny', eyes: 'happy', mouth: 'smile',
     body: (c) => (<>
-      <Rect x="32" y="4" width="11" height="30" rx="5.5" fill={c} />
-      <Rect x="57" y="4" width="11" height="30" rx="5.5" fill={c} />{head(c)}
+      <Path d="M38 4c7 0 11 12 9 24-2 9-8 12-13 7-5-6-5-31 4-31Z" fill={c} />
+      <Path d="M62 4c-7 0-11 12-9 24 2 9 8 12 13 7 5-6 5-31-4-31Z" fill={c} />
+      <Path d="M38 12c3 0 5 8 4 15-1 5-4 6-6 3-3-4-3-18 2-18Z" fill="#fff" opacity={0.4} />
+      <Path d="M62 12c-3 0-5 8-4 15 1 5 4 6 6 3 3-4 3-18-2-18Z" fill="#fff" opacity={0.4} />
+      <Ellipse cx="50" cy="58" rx="31" ry="29" fill={c} />
     </>) },
   { key: 'bear', name: 'Bear', eyes: 'round', mouth: 'smile',
     body: (c) => (<>
@@ -64,7 +67,9 @@ export const CHARACTERS: Character[] = [
       <Ellipse cx="50" cy="60" rx="16" ry="12" fill="#fff" opacity={0.25} />
     </>) },
   { key: 'ghost', name: 'Ghost', eyes: 'round', mouth: 'o',
-    body: (c) => <Path d="M16 54a34 34 0 0 1 68 0v34l-11-9-11 9-11-9-11 9-11-9-13 9Z" fill={c} /> },
+    body: (c) => (<>
+      <Path d="M14 52a36 36 0 0 1 72 0v30c0 6-6 8-10 4l-6-6-7 7c-3 3-7 3-10 0l-7-7-6 6c-4 4-10 2-10-4Z" fill={c} />
+    </>) },
   { key: 'frog', name: 'Frog', eyes: 'round', mouth: 'tongue',
     body: (c) => (<>
       <Circle cx="30" cy="22" r="15" fill={c} /><Circle cx="70" cy="22" r="15" fill={c} />
@@ -178,7 +183,12 @@ export const CHARACTERS: Character[] = [
       <Rect x="18" y="26" width="64" height="58" rx="16" fill={c} />
     </>) },
   { key: 'cloud', name: 'Cloud', eyes: 'happy', mouth: 'smile',
-    body: (c) => <Path d="M28 70a18 18 0 0 1 2 -36 22 22 0 0 1 42 4 16 16 0 0 1 0 32Z" fill={c} /> },
+    body: (c) => (<>
+      <Circle cx="30" cy="52" r="19" fill={c} />
+      <Circle cx="52" cy="40" r="25" fill={c} />
+      <Circle cx="73" cy="54" r="18" fill={c} />
+      <Rect x="12" y="50" width="76" height="28" rx="14" fill={c} />
+    </>) },
   { key: 'moon', name: 'Moon', eyes: 'happy', mouth: 'smile',
     body: (c) => <Path d="M62 14a38 38 0 1 0 0 76 32 32 0 0 1 0 -76Z" fill={c} /> },
   { key: 'cactus', name: 'Cactus', eyes: 'happy', mouth: 'smile',
@@ -263,8 +273,9 @@ export const CHARACTERS: Character[] = [
     </>) },
   { key: 'snake', name: 'Snake', eyes: 'round', mouth: 'tongue',
     body: (c) => (<>
-      <Path d="M78 84c-18 8-40 0-40-16s26-12 26-26-16-18-30-10" stroke={c} strokeWidth="14" fill="none" strokeLinecap="round" />
-      <Ellipse cx="42" cy="46" rx="26" ry="24" fill={c} />
+      <Path d="M80 88C54 94 30 84 33 70c2-11 18-12 23-4" stroke={c} strokeWidth="13"
+        fill="none" strokeLinecap="round" />
+      <Ellipse cx="50" cy="46" rx="28" ry="26" fill={c} />
     </>) },
   { key: 'unicorn', name: 'Unicorn', eyes: 'happy', mouth: 'smile',
     body: (c) => (<>
