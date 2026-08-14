@@ -18,6 +18,7 @@ import {
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
 
@@ -55,6 +56,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
     } catch (err) {
       setError(messageFor(err instanceof ApiError ? err.code : 'network'));
     }
+  }, []);
+
+  useEffect(() => {
+    playTrack('game');
   }, []);
 
   useEffect(() => {

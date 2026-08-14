@@ -12,6 +12,7 @@ import { GuessResult } from '../game/types';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
 
@@ -46,6 +47,10 @@ export function PracticeScreen({
   const [showResult, setShowResult] = useState(false);
 
   const [last, setLast] = useState<GuessResult | null>(null);
+  useEffect(() => {
+    playTrack('game');
+  }, []);
+
   useEffect(() => {
     if (!last) return;
     if (last.isCorrect) {

@@ -700,6 +700,8 @@ export interface PlayerCard {
   lastPlayedAt: string | null;
   /** Today's score, only once their day is finished. */
   todayScore: number | null;
+  /** How each round of that day went. Empty until the day is finished. */
+  todayRounds: { round: number; status: 'won' | 'lost'; score: number }[];
   /** Numbers cleared in this week's Impossible, or null if they haven't run it. */
   impossible: number | null;
   /** The head-to-head, from your side. Null when the card is your own. */
@@ -725,6 +727,7 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
     ranked: raw.ranked ?? null,
     lastPlayedAt: raw.lastPlayedAt ?? null,
     todayScore: raw.today?.score ?? null,
+    todayRounds: raw.todayRounds ?? [],
     impossible: raw.impossible ?? null,
     duels: raw.duels
       ? {

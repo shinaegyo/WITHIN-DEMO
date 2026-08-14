@@ -134,6 +134,29 @@ export function PlayerCardModal({
                 <Stat label="BEST" value={`${card.bestStreak}`} />
               </View>
 
+              {/* The day itself: one bar per round, green for found and red for
+                  not, with what it paid. Tapping a name on today's board is a
+                  question about today, and the lifetime total does not answer
+                  it. */}
+              {card.todayRounds.length > 0 && (
+                <View style={styles.today}>
+                  {card.todayRounds.map((r) => (
+                    <View
+                      key={r.round}
+                      style={[
+                        styles.todayBar,
+                        {
+                          backgroundColor:
+                            r.status === 'won' ? feedbackColors.correct : feedbackColors.oneAway,
+                        },
+                      ]}
+                    >
+                      <Text style={styles.todayScore}>{r.status === 'won' ? r.score : ''}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
               <View style={[styles.rows, { borderColor: colors.border }]}>
                 <Row label="Daily challenges" value={`${card.daysPlayed}`} />
                 {/* Only ever a finished day - a day in progress stays theirs. */}
@@ -245,6 +268,9 @@ const styles = StyleSheet.create({
   stat: { flex: 1 },
   statValue: { fontSize: 26, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.3, marginTop: -1 },
+  today: { flexDirection: 'row', gap: 6, marginTop: 16 },
+  todayBar: { flex: 1, height: 40, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  todayScore: { color: '#FFFFFF', fontSize: 13, fontFamily: fonts.extraBold },
   rows: { borderTopWidth: 1, marginTop: 14, paddingTop: 6 },
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
   rowLabel: { fontSize: 13, fontFamily: fonts.medium },

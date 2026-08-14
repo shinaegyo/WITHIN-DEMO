@@ -7,6 +7,7 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTrack } from '../utils/music';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
 import { shareInvite, shareResult } from '../utils/share';
@@ -18,6 +19,7 @@ import {
   loadLeaderboard,
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
+import { PlayerCardModal } from '../components/PlayerCard';
 
 
 interface Props {
@@ -56,10 +58,15 @@ export function HomeScreen({
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [friendsBoard, setFriendsBoard] = useState<LeaderboardEntry[]>([]);
   const [modes, setModes] = useState<HomeStatus | null>(null);
+  const [looking, setLooking] = useState<string | null>(null);
   // The first screen is sized to the viewport so it keeps the open, centred
   // layout it had before anything sat below it. Everything else scrolls in
   // underneath rather than crowding it.
   const [viewport, setViewport] = useState(0);
+
+  useEffect(() => {
+    playTrack('home');
+  }, []);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -204,8 +211,9 @@ export function HomeScreen({
       </View>
 
       {rows.map((item, i) => (
-        <View
+        <Pressable
           key={`${item.rank}-${item.name}`}
+          onPress={() => setLooking(item.name)}
           style={[
             styles.boardRow,
             {
@@ -236,7 +244,7 @@ export function HomeScreen({
             <Text style={[styles.boardOut, { color: colors.textMuted }]}>OUT</Text>
           )}
           <Text style={[styles.boardScore, { color: colors.text }]}>{item.score}</Text>
-        </View>
+        </Pressable>
       ))}
     </Pressable>
   );
@@ -498,6 +506,8 @@ export function HomeScreen({
 
         {board.length > 0 && renderBoard("TODAY'S TOP", 'All time ›', preview, onOpenLeaderboard)}
       </ScrollView>
+
+      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
 
       {/* Pinned rather than scrolled. The clock is the reason to come back, so
           it should be readable wherever the player happens to be on the page,

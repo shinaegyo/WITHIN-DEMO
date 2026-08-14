@@ -30,6 +30,7 @@ import { fonts } from '../theme/fonts';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
 import { useTheme } from '../theme/ThemeContext';
+import { playTrack } from '../utils/music';
 
 /**
  * A duel round, played the same way as a daily one.
@@ -69,6 +70,10 @@ export function DuelGameScreen({
       setError(messageFor(err instanceof ApiError ? err.code : 'network'));
     }
   }, [duelId]);
+
+  useEffect(() => {
+    playTrack('duel');
+  }, []);
 
   useEffect(() => {
     load();

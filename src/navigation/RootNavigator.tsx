@@ -29,6 +29,7 @@ import { loadSoundSetting, setSoundEnabled, soundEnabled } from '../utils/soundS
 import { IntroScreen } from '../screens/IntroScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
+import { AudioScreen } from '../screens/AudioScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
@@ -40,6 +41,7 @@ export type RootStackParamList = {
   Duels: undefined;
   Ranked: undefined;
   Privacy: undefined;
+  Audio: undefined;
   Endless: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
@@ -173,6 +175,12 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           component={PrivacyScreen}
         />
 
+        <Stack.Screen
+          name="Audio"
+          options={{ title: 'Audio', headerBackTitle: 'Back' }}
+          component={AudioScreen}
+        />
+
         <Stack.Screen name="Ranked" options={{ title: 'Ranked', headerBackTitle: 'Back' }}>
           {({ navigation }) => (
             <RankedScreen onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })} />
@@ -231,14 +239,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           // Sharing lives on the home screen, where the result it shares is
           // already in front of you. A second entry here spent most of the day
           // greyed out, explaining that it was not available yet.
-          {
-            label: sound ? 'Sound on' : 'Sound off',
-            onPress: () => {
-              const next = !soundEnabled();
-              setSoundEnabled(next);
-              setSound(next);
-            },
-          },
+          { label: 'Audio', onPress: () => navRef.isReady() && navRef.navigate('Audio') },
           ...(__DEV__
             ? [
                 { label: 'Replay today (dev)', onPress: resetToday },

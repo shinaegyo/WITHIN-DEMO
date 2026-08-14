@@ -13,6 +13,7 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
 
@@ -36,6 +37,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   // WITHIN 10. Seeding the ref with whatever is already there on mount means
   // the effect only ever fires for something new.
   const played = useRef(lastResult);
+  useEffect(() => {
+    playTrack('game');
+  }, []);
+
   useEffect(() => {
     if (!lastResult || lastResult === played.current) return;
     played.current = lastResult;
