@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { GuessBoard } from '../components/GuessBoard';
-import { NumberWheels } from '../components/NumberWheels';
+import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
 import { ApiError, DuelState, duelGuess, loadDuel, messageFor } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
@@ -67,6 +67,7 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
   if (!duel) return <StatusScreen loading />;
 
   const done = duel.round === null;
+  const waiting = duel.waitingForThem;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
@@ -82,23 +83,38 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
             <Text style={[styles.vs, { color: colors.textMuted }]}>VS {duel.opponent.toUpperCase()}</Text>
           </View>
 
-          {/* Rounds so far. The opponent's column stays blank until the duel is
-              settled, so nobody plays against a running commentary. */}
+          {/* One cell per round drawn so far. A settled round shows both
+              counts and takes its colour from the outcome; an unsettled one
+              shows nothing of theirs, so nobody plays against a running
+              commentary. */}
           <View style={styles.scoreRow}>
-            {[1, 2, 3].map((r) => {
-              const mine = duel.mine.find((m) => m.round === r);
-              const theirs = duel.theirs.find((t) => t.round === r);
-              const label = (row?: { status: string; attemptsUsed: number }) =>
-                !row || row.status === 'playing' ? '–' : row.status === 'won' ? `${row.attemptsUsed}` : '✕';
+            {duel.rounds.map((r) => {
+              const tone =
+                !r.settled
+                  ? colors.border
+                  : r.result === 'won'
+                    ? feedbackColors.correct
+                    : r.result === 'tie'
+                      ? feedbackColors.within10
+                      : feedbackColors.oneAway;
+              const count = (n: number | null, status: string | null) =>
+                status === 'won' ? String(n) : status === 'lost' ? '✕' : '–';
               return (
                 <View
-                  key={r}
-                  style={[styles.scoreCell, { borderColor: colors.border, backgroundColor: colors.surface }]}
+                  key={r.round}
+                  style={[
+                    styles.scoreCell,
+                    { borderColor: tone, backgroundColor: colors.surface },
+                  ]}
                 >
-                  <Text style={[styles.scoreRound, { color: colors.textMuted }]}>R{r}</Text>
-                  <Text style={[styles.scoreMine, { color: colors.text }]}>{label(mine)}</Text>
+                  <Text style={[styles.scoreRound, { color: colors.textMuted }]}>
+                    {r.round === 4 ? 'DECIDER' : `R${r.round}`}
+                  </Text>
+                  <Text style={[styles.scoreMine, { color: colors.text }]}>
+                    {count(r.mine, r.mineStatus)}
+                  </Text>
                   <Text style={[styles.scoreTheirs, { color: colors.textMuted }]}>
-                    {duel.status === 'complete' ? label(theirs) : '·'}
+                    {r.settled ? count(r.theirs, r.theirStatus) : '·'}
                   </Text>
                 </View>
               );
@@ -109,7 +125,7 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
             <View style={styles.result}>
               <Text style={[styles.resultTitle, { color: colors.text }]}>
                 {duel.status !== 'complete'
-                  ? 'Waiting for them'
+                  ? 'Their turn'
                   : duel.outcome === 'won'
                     ? 'You won'
                     : duel.outcome === 'lost'
@@ -118,8 +134,8 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
               </Text>
               <Text style={[styles.resultBody, { color: colors.textMuted }]}>
                 {duel.status !== 'complete'
-                  ? `${duel.opponent} hasn't finished yet. The result appears once they do.`
-                  : 'Fewer guesses takes the round. Your numbers are above, theirs beneath.'}
+                  ? `${duel.opponent} has this round to play. The next one opens once they're done.`
+                  : 'Fewer guesses takes the round. Your counts are above, theirs beneath. Orange is a tie.'}
               </Text>
             </View>
           ) : (
@@ -130,7 +146,7 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
                 clue2Unlocked={!!duel.round!.clue2}
               />
 
-              <NumberWheels disabled={busy} onSubmit={submit} />
+              <NumberInput disabled={busy} onSubmit={submit} />
 
               <View style={styles.boardWrap}>
                 <GuessBoard

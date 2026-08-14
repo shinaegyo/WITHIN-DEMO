@@ -112,13 +112,19 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Add someone as a friend and you can challenge them. Once they accept, you both get the same
         three numbers and the same seven, six and five attempts. Each round goes to whoever needed
-        fewer guesses; equal counts settle nothing. Win more rounds and you win the duel — level on
-        rounds is decided by fewer guesses overall.
+        fewer guesses. Solve it in the same number and the round is a tie, shown in orange, counting
+        for neither of you.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        You play whenever you like, not at the same time. Neither of you sees the other's board
-        until you have both finished. Duels are separate from your daily: they change no points,
-        no streak and no leaderboard place.
+        Rounds are played one at a time. When you finish one you wait for them, and the next opens
+        once you have both played it — so you always know how the duel stands before the next
+        number. If all three end level, a fourth number decides it. If that ties too, the duel is
+        drawn.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        You never play at the same time, and you never see their board until the round is settled.
+        Duels are separate from your daily: they change no points, no streak and no leaderboard
+        place.
       </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>

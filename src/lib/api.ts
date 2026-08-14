@@ -349,10 +349,15 @@ export interface DuelRoundState {
   guesses: GuessResult[];
 }
 
-export interface DuelProgressRow {
+export interface DuelRoundRow {
   round: number;
-  status: 'playing' | 'won' | 'lost';
-  attemptsUsed: number;
+  settled: boolean;
+  /** Who took it, once both have finished. */
+  result: 'won' | 'lost' | 'tie' | null;
+  mine: number | null;
+  mineStatus: 'playing' | 'won' | 'lost' | null;
+  theirs: number | null;
+  theirStatus: 'playing' | 'won' | 'lost' | null;
 }
 
 export interface DuelState {
@@ -361,8 +366,9 @@ export interface DuelState {
   opponent: string;
   outcome: 'won' | 'lost' | 'draw' | null;
   round: DuelRoundState | null;
-  mine: DuelProgressRow[];
-  theirs: DuelProgressRow[];
+  /** True while the other player still has an earlier round open. */
+  waitingForThem: boolean;
+  rounds: DuelRoundRow[];
 }
 
 export async function loadDuels(): Promise<DuelSummary[]> {
@@ -414,8 +420,8 @@ export async function loadDuel(duelId: string): Promise<DuelState> {
           guesses: (raw.round.guesses ?? []).map(toGuessResult),
         }
       : null,
-    mine: raw.mine ?? [],
-    theirs: raw.theirs ?? [],
+    waitingForThem: !!raw.waitingForThem,
+    rounds: raw.rounds ?? [],
   };
 }
 
@@ -507,6 +513,8 @@ export function messageFor(code: string, guess?: number): string {
       return 'That duel is no longer available.';
     case 'no_such_challenge':
       return 'That challenge is no longer waiting.';
+    case 'waiting_for_them':
+      return 'They still have this round to play.';
     default:
       return 'Connection problem. Check your network and try again.';
   }
