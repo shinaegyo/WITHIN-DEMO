@@ -57,6 +57,7 @@ export function LeaderboardScreen() {
               {
                 backgroundColor: item.isMe ? colors.surfaceAlt : colors.surface,
                 borderColor: item.isMe ? colors.accent : colors.border,
+                borderWidth: item.isMe ? 2 : 1,
                 opacity: pressed ? 0.7 : 1,
               },
             ]}
@@ -68,9 +69,11 @@ export function LeaderboardScreen() {
             ) : (
               <Text style={[styles.rank, { color: colors.textMuted }]}>{item.rank}</Text>
             )}
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.name, { color: colors.text }, item.isMe && styles.nameMe]}
+              numberOfLines={1}
+            >
               {item.name}
-              {item.isMe ? '  (you)' : ''}
             </Text>
             {item.hasBelt && (
               <Text style={[styles.belt, { color: colors.accent }]}>CROWN</Text>
@@ -118,5 +121,6 @@ const styles = StyleSheet.create({
   },
   medalText: { fontSize: 13, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 15, fontFamily: fonts.semiBold },
+  nameMe: { fontFamily: fonts.extraBold },
   score: { fontSize: 18, fontFamily: fonts.extraBold, minWidth: 38, textAlign: 'right' },
 });

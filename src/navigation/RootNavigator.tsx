@@ -22,10 +22,11 @@ import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
 import { loadFriends, touchPresence } from '../lib/api';
+import { warmSounds } from '../utils/sound';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
-import { loadSoundSetting, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
+import { loadSoundSetting, loadVolumes, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
 import { IntroScreen } from '../screens/IntroScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
@@ -73,16 +74,32 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
     return () => clearInterval(id);
   }, []);
 
+  // A request arrives from somebody else's phone, so the badge has to look for
+  // it. Without this it appeared only after a reload, which is exactly when
+  // nobody is looking for a reason to open Friends.
   useEffect(() => {
-    loadFriends()
-      .then((f) => setPending(f.incoming.length))
-      .catch(() => {
-        /* a badge is not worth disturbing the screen for */
-      });
+    let stopped = false;
+    const read = () =>
+      loadFriends()
+        .then((f) => {
+          if (!stopped) setPending(f.incoming.length);
+        })
+        .catch(() => {
+          /* a badge is not worth disturbing the screen for */
+        });
+
+    read();
+    const id = setInterval(read, 30_000);
+    return () => {
+      stopped = true;
+      clearInterval(id);
+    };
   }, [friendsEpoch]);
 
   useEffect(() => {
     loadSoundSetting().then(setSound);
+    loadVolumes();
+    warmSounds();
   }, []);
   // Nudged whenever a round is consumed so Home refetches how many are left.
   const [practiceEpoch, setPracticeEpoch] = useState(0);

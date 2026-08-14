@@ -67,3 +67,57 @@ export function setMusicEnabled(on: boolean): void {
   music = on;
   AsyncStorage.setItem(MUSIC_KEY, on ? 'on' : 'off').catch(() => {});
 }
+
+/**
+ * How loud each of them is.
+ *
+ * Two numbers rather than one, for the same reason there are two switches: the
+ * effects carry information and the music does not, so the useful setting is
+ * usually "effects as they are, music quieter" rather than everything down.
+ */
+
+const SFX_VOL_KEY = 'within.sfxVolume';
+const MUSIC_VOL_KEY = 'within.musicVolume';
+
+let sfxVol = 0.9;
+let musicVol = 0.4;
+const volumeListeners = new Set<() => void>();
+
+export function sfxVolume(): number {
+  return sfxVol;
+}
+
+export function musicVolume(): number {
+  return musicVol;
+}
+
+export async function loadVolumes(): Promise<{ sfx: number; music: number }> {
+  try {
+    const [a, b] = await Promise.all([
+      AsyncStorage.getItem(SFX_VOL_KEY),
+      AsyncStorage.getItem(MUSIC_VOL_KEY),
+    ]);
+    if (a !== null) sfxVol = Math.min(1, Math.max(0, Number(a)));
+    if (b !== null) musicVol = Math.min(1, Math.max(0, Number(b)));
+  } catch {
+    /* the defaults are fine */
+  }
+  return { sfx: sfxVol, music: musicVol };
+}
+
+export function setSfxVolume(v: number): void {
+  sfxVol = Math.min(1, Math.max(0, v));
+  AsyncStorage.setItem(SFX_VOL_KEY, String(sfxVol)).catch(() => {});
+  volumeListeners.forEach((l) => l());
+}
+
+export function setMusicVolume(v: number): void {
+  musicVol = Math.min(1, Math.max(0, v));
+  AsyncStorage.setItem(MUSIC_VOL_KEY, String(musicVol)).catch(() => {});
+  volumeListeners.forEach((l) => l());
+}
+
+export function onVolumeChange(listener: () => void): () => void {
+  volumeListeners.add(listener);
+  return () => volumeListeners.delete(listener);
+}

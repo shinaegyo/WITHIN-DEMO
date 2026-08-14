@@ -3,14 +3,20 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { VolumeSlider } from '../components/VolumeSlider';
 import { refreshMusic } from '../utils/music';
 import { playTap } from '../utils/sound';
 import {
   loadMusicSetting,
   loadSoundSetting,
+  loadVolumes,
   musicEnabled,
+  musicVolume,
   setMusicEnabled,
+  setMusicVolume,
+  setSfxVolume,
   setSoundEnabled,
+  sfxVolume,
   soundEnabled,
 } from '../utils/soundSettings';
 
@@ -26,10 +32,16 @@ export function AudioScreen() {
   const { colors } = useTheme();
   const [sfx, setSfx] = useState(soundEnabled());
   const [music, setMusic] = useState(musicEnabled());
+  const [sfxVol, setSfxVol] = useState(sfxVolume());
+  const [musicVol, setMusicVol] = useState(musicVolume());
 
   useEffect(() => {
     loadSoundSetting().then(setSfx);
     loadMusicSetting().then(setMusic);
+    loadVolumes().then((v) => {
+      setSfxVol(v.sfx);
+      setMusicVol(v.music);
+    });
   }, []);
 
   const Row = ({
@@ -84,6 +96,16 @@ export function AudioScreen() {
         }}
       />
 
+      <VolumeSlider
+        label="EFFECTS VOLUME"
+        value={sfxVol}
+        disabled={!sfx}
+        onChange={(v) => {
+          setSfxVol(v);
+          setSfxVolume(v);
+        }}
+      />
+
       <Row
         label="Music"
         detail="A quiet loop behind the game. Off unless you want it."
@@ -97,6 +119,18 @@ export function AudioScreen() {
           // repaint until the audio was ready - which read as a lag on a
           // control that had, in fact, already changed.
           setTimeout(() => refreshMusic(next ? 'home' : null), 0);
+        }}
+      />
+
+      {/* Continuous, so the music follows the finger: a volume you can only
+          judge after letting go is impossible to set by ear. */}
+      <VolumeSlider
+        label="MUSIC VOLUME"
+        value={musicVol}
+        disabled={!music}
+        onChange={(v) => {
+          setMusicVol(v);
+          setMusicVolume(v);
         }}
       />
 

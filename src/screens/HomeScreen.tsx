@@ -220,10 +220,12 @@ export function HomeScreen({
           }}
           style={[
             styles.boardRow,
-            {
-              borderColor: colors.border,
-              backgroundColor: item.isMe ? colors.surfaceAlt : colors.surface,
-            },
+            // Your own row is the one you look for first, so it is drawn
+            // differently rather than labelled. A name followed by "(you)"
+            // reads as part of the name.
+            item.isMe
+              ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
+              : { borderColor: colors.border, backgroundColor: colors.surface },
             // A gap in the numbering means the player's own row was pulled up
             // from further down; say so with space.
             i > 0 && rows[i - 1].rank < item.rank - 1 && styles.boardGap,
@@ -239,9 +241,11 @@ export function HomeScreen({
             <Text style={[styles.boardRank, { color: colors.textMuted }]}>{item.rank}</Text>
           )}
 
-          <Text style={[styles.boardName, { color: colors.text }]} numberOfLines={1}>
+          <Text
+            style={[styles.boardName, { color: colors.text }, item.isMe && styles.boardNameMe]}
+            numberOfLines={1}
+          >
             {item.name}
-            {item.isMe ? '  (you)' : ''}
           </Text>
 
           {!item.isComplete && (
@@ -634,6 +638,7 @@ const styles = StyleSheet.create({
   },
   boardMedalText: { fontSize: 10, fontFamily: fonts.extraBold },
   boardName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
+  boardNameMe: { fontFamily: fonts.extraBold },
   boardOut: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.8 },
   boardScore: { fontSize: 14, fontFamily: fonts.extraBold },
   status: {

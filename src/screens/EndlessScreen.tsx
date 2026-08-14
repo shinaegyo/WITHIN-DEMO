@@ -195,7 +195,6 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                       <Text style={[styles.boardRank, { color: colors.textMuted }]}>{e.rank}</Text>
                       <Text style={[styles.boardName, { color: colors.text }]} numberOfLines={1}>
                         {e.name}
-                        {e.isMe ? '  (you)' : ''}
                       </Text>
                       <Text style={[styles.boardDepth, { color: colors.text }]}>{e.depth}</Text>
                     </View>

@@ -178,14 +178,17 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
                 {
                   backgroundColor: e.isMe ? colors.surfaceAlt : colors.surface,
                   borderColor: e.isMe ? colors.accent : colors.border,
+                  borderWidth: e.isMe ? 2 : 1,
                   opacity: pressed ? 0.7 : 1,
                 },
               ]}
             >
               <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
-              <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+              <Text
+                style={[styles.name, { color: colors.text }, e.isMe && styles.nameMe]}
+                numberOfLines={1}
+              >
                 {e.name}
-                {e.isMe ? '  (you)' : ''}
               </Text>
               {e.hasBelt && (
                 <Text style={[styles.rowBelt, { color: colors.accent }]}>CROWN</Text>
@@ -235,6 +238,7 @@ const styles = StyleSheet.create({
   },
   rank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 14.5, fontFamily: fonts.bold },
+  nameMe: { fontFamily: fonts.extraBold },
   rowBelt: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1 },
   record: { fontSize: 11.5, fontFamily: fonts.medium },
   score: { fontSize: 15, fontFamily: fonts.extraBold },

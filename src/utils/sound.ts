@@ -1,5 +1,5 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import { soundEnabled } from './soundSettings';
+import { sfxVolume, soundEnabled } from './soundSettings';
 
 /**
  * Sound effects for the three feedback moments.
@@ -54,6 +54,7 @@ function play(name: SoundName) {
       player = createAudioPlayer(SOURCES[name]);
       players[name] = player;
     }
+    player.volume = sfxVolume();
     // Rewind so rapid repeat guesses always retrigger from the top.
     player.seekTo(0);
     player.play();
@@ -93,3 +94,6 @@ export function playWin(): void {
 export function playLose(): void {
   play('lose');
 }
+
+/** Web decodes everything up front; native has nothing to warm. */
+export function warmSounds(): void {}
