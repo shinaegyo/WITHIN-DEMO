@@ -16,10 +16,15 @@ interface Props {
 }
 
 /**
- * Only the guesses actually made. Laying out every empty slot in advance turned
- * the board into a countdown of everything still to lose, and left the real
- * guesses squeezed into a strip at the top. The board now grows with the round,
- * and how many guesses remain is stated in words underneath instead.
+ * Only the guesses actually made, newest at the top.
+ *
+ * The input sits above this, so the most recent guess is the one directly under
+ * the field the player is typing in — they read the answer to what they just
+ * did without moving their eyes down the list. Older guesses fall away beneath.
+ *
+ * Laying out every empty slot in advance, as this once did, turned the board
+ * into a countdown of everything still to lose; the count is stated in words
+ * instead.
  */
 export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, finalNote }: Props) {
   const { colors } = useTheme();
@@ -27,12 +32,8 @@ export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, fin
 
   return (
     <View style={styles.board}>
-      {guesses.map((result, index) => (
-        <FilledSlot key={index} result={result} attemptNumber={index + 1} />
-      ))}
-
       {showRemaining && remaining > 0 && (
-        <View style={styles.footer}>
+        <View style={styles.header}>
           {remaining === 1 ? (
             <>
               <Text style={[styles.count, { color: colors.text }]}>LAST GUESS</Text>
@@ -45,6 +46,13 @@ export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, fin
           )}
         </View>
       )}
+
+      {guesses
+        .map((result, index) => ({ result, attemptNumber: index + 1 }))
+        .reverse()
+        .map(({ result, attemptNumber }) => (
+          <FilledSlot key={attemptNumber} result={result} attemptNumber={attemptNumber} />
+        ))}
     </View>
   );
 }
@@ -53,15 +61,10 @@ const styles = StyleSheet.create({
   board: {
     flex: 1,
     gap: 8,
-    // Guesses stack upward from the input rather than down from the clue.
-    // With rounds as short as five attempts, top-aligning left a wide gap
-    // between the last guess and the field, and put the newest guess furthest
-    // from where the player is typing.
-    justifyContent: 'flex-end',
   },
-  footer: {
+  header: {
     alignItems: 'center',
-    paddingTop: 4,
+    paddingBottom: 2,
   },
   count: {
     fontSize: 11,

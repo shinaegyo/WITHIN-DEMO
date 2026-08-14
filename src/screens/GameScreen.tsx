@@ -123,6 +123,11 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             </Text>
           )}
 
+          <NumberInput
+            disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
+            onSubmit={handleSubmit}
+          />
+
           <View style={styles.boardWrap}>
             <GuessBoard
               guesses={round.guesses}
@@ -138,10 +143,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             />
           </View>
 
-          <NumberInput
-            disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
-            onSubmit={handleSubmit}
-          />
         </View>
       </KeyboardAvoidingView>
     );

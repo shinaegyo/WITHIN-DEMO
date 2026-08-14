@@ -123,6 +123,8 @@ export function PracticeScreen({
 
           <ClueCard clue1={round.clue1} clue2={round.clue2} clue2Unlocked={clue2Unlocked} />
 
+          <NumberInput disabled={finished} onSubmit={submit} />
+
           <View style={styles.boardWrap}>
             <GuessBoard
               guesses={guesses}
@@ -131,7 +133,6 @@ export function PracticeScreen({
             />
           </View>
 
-          <NumberInput disabled={finished} onSubmit={submit} />
         </View>
       </KeyboardAvoidingView>
 

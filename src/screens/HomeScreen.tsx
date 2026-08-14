@@ -360,36 +360,19 @@ export function HomeScreen({
             than replacing the thing people came for. */}
         {finished && practiceLeft !== null && (
           <Pressable disabled={practiceLeft === 0} onPress={onPractice} style={styles.practice}>
+            {/* One line, no underline and no pips. Three dots in a row is the
+                visual language of a passcode field, and it competed with the
+                score above it. */}
             <Text
               style={[
                 styles.practiceText,
                 { color: practiceLeft > 0 ? colors.text : colors.textMuted },
               ]}
             >
-              Practice
-            </Text>
-
-            {/* One pip per round, filled for what is left. The count is
-                readable at a glance without reading it. */}
-            <View style={styles.pips}>
-              {Array.from({ length: PRACTICE_PER_DAY }).map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.pip,
-                    {
-                      backgroundColor: i < practiceLeft ? colors.text : 'transparent',
-                      borderColor: i < practiceLeft ? colors.text : colors.border,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-
-            <Text style={[styles.practiceMeta, { color: colors.textMuted }]}>
-              {practiceLeft === 0
-                ? '0 practices'
-                : `${practiceLeft} ${practiceLeft === 1 ? 'practice' : 'practices'} remaining`}
+              Practice{' '}
+              <Text style={[styles.practiceCount, { color: colors.textMuted }]}>
+                {practiceLeft > 0 ? `· ${practiceLeft} left` : '· none left today'}
+              </Text>
             </Text>
           </Pressable>
         )}
@@ -603,15 +586,13 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 19, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
-  practice: { marginTop: 18, paddingVertical: 6, alignItems: 'center', gap: 6 },
+  practice: { marginTop: 18, paddingVertical: 6, alignItems: 'center' },
   rankRow: { alignItems: 'center', marginTop: 10 },
   rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
   rankValue: { fontSize: 22, fontFamily: fonts.extraBold, marginTop: 1 },
   rankOf: { fontSize: 13, fontFamily: fonts.bold },
-  practiceText: { fontSize: 13, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
-  pips: { flexDirection: 'row', gap: 6 },
-  pip: { width: 9, height: 9, borderRadius: 5, borderWidth: 1.5 },
-  practiceMeta: { fontSize: 11, fontFamily: fonts.medium },
+  practiceText: { fontSize: 13.5, fontFamily: fonts.extraBold },
+  practiceCount: { fontFamily: fonts.medium },
   footer: {
     alignItems: 'center',
     borderTopWidth: 1,
