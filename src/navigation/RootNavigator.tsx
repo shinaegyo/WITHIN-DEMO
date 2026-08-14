@@ -28,6 +28,7 @@ import { hasSeenIntro, markIntroSeen } from '../utils/intro';
 import { loadSoundSetting, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
 import { IntroScreen } from '../screens/IntroScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
+import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
@@ -38,6 +39,7 @@ export type RootStackParamList = {
   Friends: undefined;
   Duels: undefined;
   Ranked: undefined;
+  Privacy: undefined;
   Endless: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
@@ -165,6 +167,12 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           )}
         </Stack.Screen>
 
+        <Stack.Screen
+          name="Privacy"
+          options={{ title: 'Privacy', headerBackTitle: 'Back' }}
+          component={PrivacyScreen}
+        />
+
         <Stack.Screen name="Ranked" options={{ title: 'Ranked', headerBackTitle: 'Back' }}>
           {({ navigation }) => (
             <RankedScreen onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })} />
@@ -212,6 +220,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           },
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
           { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
+          { label: 'Privacy', onPress: () => navRef.isReady() && navRef.navigate('Privacy') },
           // Sharing lives on the home screen, where the result it shares is
           // already in front of you. A second entry here spent most of the day
           // greyed out, explaining that it was not available yet.
