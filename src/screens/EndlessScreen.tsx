@@ -79,9 +79,12 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             const shrankTo =
               state && res.attemptsAllowed < state.attemptsAllowed ? res.attemptsAllowed : null;
             setSolved({ answer: res.answer, level: res.level - 1, shrankTo });
-            setTimeout(() => {
+            setTimeout(async () => {
+              // Fetch the next number behind the notice, then clear it. Clearing
+              // first put the number just solved back on screen for however long
+              // the round trip took.
+              await load();
               setSolved(null);
-              load();
             }, 3000);
             return { ok: true as const };
           }
@@ -199,7 +202,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 </Text>
               </View>
 
-              <ClueCard clue1={state.clue1} clue2={state.clue2} clue2Unlocked={!!state.clue2} />
+              {/* One clue only. The bonus clue lands when the player is closest,
+                  which is exactly where this mode is meant to hold. */}
+              <ClueCard clue1={state.clue1} clue2={null} clue2Unlocked={false} />
 
               <NumberInput disabled={busy} onSubmit={submit} />
 

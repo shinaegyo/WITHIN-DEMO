@@ -466,8 +466,8 @@ export interface EndlessState {
   level: number;
   attemptsUsed: number;
   attemptsAllowed: number;
+  /** One clue only - Impossible has no bonus clue. */
   clue1: string;
-  clue2: string | null;
   guesses: GuessResult[];
   best: number;
   runsLeft: number;
@@ -491,7 +491,6 @@ export async function loadEndless(): Promise<EndlessState> {
     attemptsUsed: raw.attemptsUsed,
     attemptsAllowed: raw.attemptsAllowed,
     clue1: raw.clue1,
-    clue2: raw.clue2 ?? null,
     guesses: (raw.guesses ?? []).map(toGuessResult),
     best: raw.best ?? 0,
     runsLeft: raw.runsLeft ?? 0,
