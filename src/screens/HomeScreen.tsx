@@ -43,7 +43,9 @@ export function HomeScreen({
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
-  const [rank, setRank] = useState<{ place: number; of: number } | null>(null);
+  const [rank, setRank] = useState<{ place: number; of: number; stillPlaying: number } | null>(
+    null,
+  );
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [friendsBoard, setFriendsBoard] = useState<LeaderboardEntry[]>([]);
   // The first screen is sized to the viewport so it keeps the open, centred
@@ -79,7 +81,9 @@ export function HomeScreen({
         if (cancelled) return;
         setBoard(res.entries);
         const me = res.entries.find((e) => e.isMe);
-        setRank(me ? { place: me.rank, of: res.totalPlayers } : null);
+        setRank(
+          me ? { place: me.rank, of: res.totalPlayers, stillPlaying: res.stillPlaying } : null,
+        );
       })
       .catch(() => {
         /* the board is a nicety; a failure here shouldn't disturb the screen */
@@ -234,15 +238,19 @@ export function HomeScreen({
         </Pressable>
       </View>
 
-      {/* The field grows through the day as more people finish, so a bare
-          position appears to slide backwards for no reason. Naming the field
-          size makes the movement legible. */}
+      {/* The board only ranks days that have finished, so the count read as
+          "only two people played" when it meant "two have got through all
+          three rounds". Naming how many are still mid-day explains the figure
+          without changing what is ranked. */}
       {rank !== null && (
         <View style={styles.rankRow}>
           <Text style={[styles.rankLabel, { color: colors.textMuted }]}>TODAY'S RANK</Text>
           <Text style={[styles.rankValue, { color: colors.text }]}>
             #{rank.place}
-            <Text style={[styles.rankOf, { color: colors.textMuted }]}> of {rank.of}</Text>
+            <Text style={[styles.rankOf, { color: colors.textMuted }]}>
+              {' '}of {rank.of}
+              {rank.stillPlaying > 0 ? ` · ${rank.stillPlaying} still playing` : ''}
+            </Text>
           </Text>
         </View>
       )}

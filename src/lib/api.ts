@@ -245,6 +245,8 @@ export interface AllTimeLeaderboard {
 }
 
 export interface Leaderboard {
+  /** People part-way through today, so the finished count can explain itself. */
+  stillPlaying: number;
   puzzleDate: string;
   entries: LeaderboardEntry[];
   totalPlayers: number;
@@ -353,6 +355,7 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
   return {
     puzzleDate: raw.puzzleDate,
     totalPlayers: raw.totalPlayers ?? 0,
+    stillPlaying: raw.stillPlaying ?? 0,
     entries: (raw.entries ?? []).map((e: any) => ({
       rank: e.rank,
       name: e.name,
