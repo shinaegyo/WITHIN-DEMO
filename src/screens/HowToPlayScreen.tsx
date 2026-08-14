@@ -110,9 +110,9 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
 
       <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Numbers one after another, with fewer attempts as you go: seven at first, then six, then
-        five, and four from the seventh onward. One miss ends the run. Everyone plays the same
-        numbers each week, so how far you got is worth comparing.
+        Numbers one after another. Six attempts each for the first nineteen, five from the
+        twentieth, four from the fiftieth. One miss ends the run. Everyone plays the same numbers
+        each week, so how far you got is worth comparing.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         It is called Impossible because it is. Four attempts for a number between 1 and 1000 is

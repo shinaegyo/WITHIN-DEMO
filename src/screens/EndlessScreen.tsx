@@ -43,7 +43,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [trigger, setTrigger] = useState<FeedbackTrigger | null>(null);
   const [busy, setBusy] = useState(false);
   // Held between solving a number and the next one appearing.
-  const [solved, setSolved] = useState<{ answer: number | null; level: number } | null>(null);
+  const [solved, setSolved] = useState<
+    { answer: number | null; level: number; shrankTo: number | null } | null
+  >(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -71,7 +73,12 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           if (!res.runOver) {
             // Three seconds to register that it was right. Advancing the moment
             // the guess lands makes a solve feel like nothing happened.
-            setSolved({ answer: res.answer, level: res.level - 1 });
+            // The allowance holds for long stretches and then steps down, so
+            // the two moments it does are worth announcing rather than letting
+            // someone notice a guess missing.
+            const shrankTo =
+              state && res.attemptsAllowed < state.attemptsAllowed ? res.attemptsAllowed : null;
+            setSolved({ answer: res.answer, level: res.level - 1, shrankTo });
             setTimeout(() => {
               setSolved(null);
               load();
@@ -94,7 +101,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         setBusy(false);
       }
     },
-    [busy, load, over],
+    [busy, load, over, state],
   );
 
   const again = async () => {
@@ -129,7 +136,13 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 {solved.answer !== null ? `It was ${solved.answer}. ` : ''}
                 That's {solved.level} {solved.level === 1 ? 'number' : 'numbers'} deep.
               </Text>
-              <Text style={[styles.overBody, { color: colors.textMuted }]}>Next one coming…</Text>
+              {solved.shrankTo !== null ? (
+                <Text style={[styles.overBody, { color: colors.text }]}>
+                  Attempts drop to {solved.shrankTo} from here.
+                </Text>
+              ) : (
+                <Text style={[styles.overBody, { color: colors.textMuted }]}>Next one coming…</Text>
+              )}
             </View>
           ) : over ? (
             <View style={styles.result}>

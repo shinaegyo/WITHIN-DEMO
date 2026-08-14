@@ -504,6 +504,7 @@ export async function endlessGuess(guess: number) {
     solved: !!raw.solved,
     runOver: !!raw.runOver,
     level: raw.level as number,
+    attemptsAllowed: raw.attemptsAllowed as number,
     result: toGuessResult(raw.guess),
     answer: (raw.answer ?? null) as number | null,
   };
