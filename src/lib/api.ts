@@ -428,6 +428,16 @@ export async function respondToDuel(duelId: string, accept: boolean): Promise<st
   return unwrap<any>(data, error).status;
 }
 
+/**
+ * Leave a duel. An accepted one goes to the other player; a challenge nobody
+ * has answered is simply withdrawn.
+ */
+export async function forfeitDuel(duelId: string): Promise<'forfeited' | 'withdrawn'> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_forfeit', { p_duel_id: duelId });
+  return unwrap<any>(data, error).status;
+}
+
 /** The number your opponent will be hunting this round. */
 export async function setDuelNumber(duelId: string, value: number): Promise<void> {
   await ensureSignedIn();

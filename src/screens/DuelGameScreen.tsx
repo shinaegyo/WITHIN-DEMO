@@ -5,7 +5,15 @@ import { ClueCard } from '../components/ClueCard';
 import { GuessBoard } from '../components/GuessBoard';
 import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
-import { ApiError, DuelState, duelGuess, loadDuel, messageFor, setDuelNumber } from '../lib/api';
+import {
+  ApiError,
+  DuelState,
+  duelGuess,
+  forfeitDuel,
+  loadDuel,
+  messageFor,
+  setDuelNumber,
+} from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
@@ -24,6 +32,9 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
   const [duel, setDuel] = useState<DuelState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Asks once. Leaving hands them the duel, which is not a thing to do by
+  // brushing a word at the top of the screen.
+  const [leaving, setLeaving] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -102,6 +113,30 @@ export function DuelGameScreen({ duelId, onExit }: { duelId: string; onExit: () 
             </Pressable>
             <Text style={[styles.vs, { color: colors.textMuted }]}>VS {duel.opponent.toUpperCase()}</Text>
           </View>
+
+          {duel.status === 'active' && (
+            <Pressable
+              onPress={async () => {
+                if (!leaving) {
+                  setLeaving(true);
+                  return;
+                }
+                await forfeitDuel(duelId);
+                onExit();
+              }}
+              hitSlop={8}
+              style={styles.leaveWrap}
+            >
+              <Text
+                style={[
+                  styles.leave,
+                  { color: leaving ? feedbackColors.oneAway : colors.textMuted },
+                ]}
+              >
+                {leaving ? `Leave, and the duel goes to ${duel.opponent}?` : 'Leave duel'}
+              </Text>
+            </Pressable>
+          )}
 
           {/* One cell per round drawn so far. A settled round shows both
               counts and takes its colour from the outcome; an unsettled one
@@ -211,6 +246,8 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.bold },
   vs: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.3 },
+  leaveWrap: { alignSelf: 'center' },
+  leave: { fontSize: 11, fontFamily: fonts.bold },
   picker: { flex: 1, justifyContent: 'center', gap: 10, paddingHorizontal: 4 },
   scoreRow: { flexDirection: 'row', gap: 8 },
   scoreCell: { flex: 1, borderWidth: 1, borderRadius: 10, paddingVertical: 7, alignItems: 'center' },

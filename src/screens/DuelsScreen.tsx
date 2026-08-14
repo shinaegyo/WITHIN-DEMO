@@ -6,6 +6,7 @@ import {
   ApiError,
   DuelSummary,
   challengeFriend,
+  forfeitDuel,
   loadDuels,
   messageFor,
   respondToDuel,
@@ -26,6 +27,8 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
+  // Leaving hands them the win, so it asks once rather than acting on a tap.
+  const [leaving, setLeaving] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -96,9 +99,50 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     </View>
   );
 
-  const Action = ({ label, onPress, tone }: { label: string; onPress: () => void; tone?: 'good' }) => (
+  const Leave = ({ d }: { d: DuelSummary }) =>
+    leaving === d.id ? (
+      <Action
+        label={d.status === 'pending' ? 'Withdraw?' : 'Give them the win?'}
+        tone="warn"
+        onPress={() =>
+          run(async () => {
+            setLeaving(null);
+            await forfeitDuel(d.id);
+            setNote(
+              d.status === 'pending'
+                ? 'Challenge withdrawn.'
+                : `You left. The duel goes to ${d.opponent}.`,
+            );
+          })
+        }
+      />
+    ) : (
+      <Action label="Leave" onPress={() => setLeaving(d.id)} />
+    );
+
+  const Action = ({
+    label,
+    onPress,
+    tone,
+  }: {
+    label: string;
+    onPress: () => void;
+    tone?: 'good' | 'warn';
+  }) => (
     <Pressable onPress={onPress} disabled={busy} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}>
-      <Text style={[styles.action, { color: tone === 'good' ? feedbackColors.correct : colors.textMuted }]}>
+      <Text
+        style={[
+          styles.action,
+          {
+            color:
+              tone === 'good'
+                ? feedbackColors.correct
+                : tone === 'warn'
+                  ? feedbackColors.oneAway
+                  : colors.textMuted,
+          },
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -171,7 +215,13 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           <Text style={[styles.heading, { color: colors.textMuted }]}>YOUR TURN</Text>
           {yourTurn.map((d) => (
             <Row key={d.id} d={d}>
-              <Action label={d.needsNumber ? 'Set number ›' : 'Play ›'} onPress={() => onPlay(d.id)} />
+              <View style={styles.rowActions}>
+                <Leave d={d} />
+                <Action
+                  label={d.needsNumber ? 'Set number ›' : 'Play ›'}
+                  onPress={() => onPlay(d.id)}
+                />
+              </View>
             </Row>
           ))}
         </>
@@ -181,7 +231,9 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON THEM</Text>
           {waitingOnThem.map((d) => (
-            <Row key={d.id} d={d} />
+            <Row key={d.id} d={d}>
+              <Leave d={d} />
+            </Row>
           ))}
         </>
       )}
