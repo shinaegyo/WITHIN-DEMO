@@ -684,7 +684,7 @@ export interface PlayerCard {
   bestStreak: number;
   rank: number;
   of: number;
-  /** Holds the one belt in the game. */
+  /** Holds the one crown in the game. */
   hasBelt: boolean;
   /** Null until they have played a ranked match. */
   ranked: { rating: number; won: number; lost: number } | null;

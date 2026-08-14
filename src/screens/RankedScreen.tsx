@@ -17,7 +17,7 @@ import { useTheme } from '../theme/ThemeContext';
  * Ranked.
  *
  * The match itself is a duel and is played on the duel screen — this is the
- * front door: your rating, who holds the belt, and one button to get a game.
+ * front door: your rating, who holds the crown, and one button to get a game.
  *
  * There is no live queue because there is never a crowd. Joining means willing,
  * not present: you wait until somebody else asks, which with nine players is a
@@ -101,19 +101,19 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         </View>
         {state.iHoldBelt && (
           <View style={[styles.belt, { borderColor: colors.accent }]}>
-            <Text style={[styles.beltText, { color: colors.accent }]}>THE BELT</Text>
+            <Text style={[styles.beltText, { color: colors.accent }]}>THE CROWN</Text>
           </View>
         )}
       </View>
 
-      {/* The belt is the only thing here that can be taken from a person, so it
-          says who has it rather than sitting in a rules page. */}
+      {/* The crown is the only thing here that can be taken from a person, so
+          it says who has it rather than sitting in a rules page. */}
       <Text style={[styles.beltLine, { color: colors.textMuted }]}>
         {state.iHoldBelt
-          ? 'You hold the belt. It goes to the next person who beats you in ranked.'
+          ? 'You hold the crown. It goes to the next person who beats you in ranked.'
           : state.beltHolder
-            ? `${state.beltHolder} holds the belt. Beat them in ranked and it is yours.`
-            : 'Nobody holds the belt. The next ranked winner takes it.'}
+            ? `${state.beltHolder} holds the crown. Beat them in ranked and it is yours.`
+            : 'Nobody holds the crown. The next ranked winner takes it.'}
       </Text>
 
       {state.match ? (
@@ -185,7 +185,7 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
                 {e.isMe ? '  (you)' : ''}
               </Text>
               {e.hasBelt && (
-                <Text style={[styles.rowBelt, { color: colors.accent }]}>BELT</Text>
+                <Text style={[styles.rowBelt, { color: colors.accent }]}>CROWN</Text>
               )}
               <Text style={[styles.record, { color: colors.textMuted }]}>
                 {e.won}–{e.lost}

@@ -185,6 +185,24 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     </>,
 
     <>
+      <Text style={[styles.h2, { color: colors.text }]}>Ranked</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        The same match, against whoever else is looking for one rather than someone you know. You
+        pick their number, they pick yours, three rounds and a decider if it is level.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        What changes is the end. Everyone starts on a rating of 1000, and the winner takes rating
+        off the loser — so beating someone above you is worth far more than beating someone below,
+        and there is nothing to gain from beating the same person over and over. Leaving a ranked
+        match hands it to your opponent and costs rating.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        One person in the whole game holds the crown. The only way to get it is to beat whoever has
+        it, and if nobody does, the next ranked winner takes it. It cannot be earned any other way.
+      </Text>
+    </>,
+
+    <>
       <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Add someone as a friend and you can challenge them. Once they accept, the duel opens with

@@ -346,7 +346,7 @@ export function HomeScreen({
             {[
               {
                 label: 'Ranked',
-                sub: 'Play for rating and the belt',
+                sub: 'Play for rating and the crown',
                 status: modes?.ranked.needsMe
                   ? 'Your turn'
                   : modes?.ranked.inMatch
@@ -354,20 +354,23 @@ export function HomeScreen({
                     : modes?.ranked.queued
                       ? 'Looking for an opponent'
                       : modes?.ranked.iHoldBelt
-                        ? 'You hold the belt'
+                        ? 'You hold the crown'
                         : modes?.ranked.beltHolder
-                          ? `${modes.ranked.beltHolder} holds the belt`
-                          : 'The belt is going spare',
+                          ? `${modes.ranked.beltHolder} holds the crown`
+                          : 'The crown is going spare',
                 urgent: !!modes?.ranked.needsMe,
                 onPress: onOpenRanked,
               },
               {
                 label: 'Challenge',
                 sub: 'Duel a friend',
+                // "Nothing waiting" described an absence nobody had asked
+                // about. With no duels open the useful thing to say is what
+                // you can do.
                 status:
                   modes && modes.duelsWaiting > 0
                     ? `${modes.duelsWaiting} waiting on you`
-                    : 'Nothing waiting',
+                    : 'Start one',
                 urgent: !!modes && modes.duelsWaiting > 0,
                 onPress: onOpenDuels,
               },

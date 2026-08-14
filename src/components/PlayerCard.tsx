@@ -114,7 +114,7 @@ export function PlayerCardModal({
                     the name rather than into a row of statistics. */}
                 {card.hasBelt && (
                   <View style={[styles.belt, { borderColor: colors.accent }]}>
-                    <Text style={[styles.beltText, { color: colors.accent }]}>BELT</Text>
+                    <Text style={[styles.beltText, { color: colors.accent }]}>CROWN</Text>
                   </View>
                 )}
               </View>

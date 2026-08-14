@@ -73,7 +73,7 @@ export function LeaderboardScreen() {
               {item.isMe ? '  (you)' : ''}
             </Text>
             {item.hasBelt && (
-              <Text style={[styles.belt, { color: colors.accent }]}>BELT</Text>
+              <Text style={[styles.belt, { color: colors.accent }]}>CROWN</Text>
             )}
             {/* No "3h ago" column. With a handful of players, half of whom
                 play a few times a week, it read as a list of people who had
