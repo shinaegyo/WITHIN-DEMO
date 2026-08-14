@@ -113,12 +113,13 @@ export function PlayerCardModal({
               </View>
               {/* No "last played" here. Nobody is playing every day yet, and a
                   card that opens with how long someone has been away makes a
-                  quiet week look like a lapsed player. */}
-              <Text style={[styles.sub, { color: colors.textMuted }]}>
-                {card.daysPlayed === 0
-                  ? 'Has not finished a day yet'
-                  : `#${card.rank} of ${card.of} all time`}
-              </Text>
+                  quiet week look like a lapsed player. Someone with nothing yet
+                  gets no line at all rather than a sentence about it. */}
+              {card.daysPlayed > 0 && (
+                <Text style={[styles.sub, { color: colors.textMuted }]}>
+                  #{card.rank} of {card.of} all time
+                </Text>
+              )}
 
               <View style={styles.stats}>
                 <Stat label="POINTS" value={`${card.points}`} />
@@ -127,7 +128,7 @@ export function PlayerCardModal({
               </View>
 
               <View style={[styles.rows, { borderColor: colors.border }]}>
-                <Row label="Days played" value={`${card.daysPlayed}`} />
+                <Row label="Daily challenges" value={`${card.daysPlayed}`} />
                 {/* Only ever a finished day - a day in progress stays theirs. */}
                 {card.todayScore !== null && <Row label="Today" value={`${card.todayScore}`} />}
                 {card.impossible !== null && card.impossible > 0 && (

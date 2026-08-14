@@ -43,7 +43,7 @@ export function LeaderboardScreen() {
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        Points from every day played · {total} {total === 1 ? 'player' : 'players'}
+        Points from every daily challenge · {total} {total === 1 ? 'player' : 'players'}
       </Text>
 
       <FlatList
