@@ -42,6 +42,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [over, setOver] = useState<{ answer: number | null; depth: number } | null>(null);
   const [trigger, setTrigger] = useState<FeedbackTrigger | null>(null);
   const [busy, setBusy] = useState(false);
+  // Held between solving a number and the next one appearing.
+  const [solved, setSolved] = useState<{ answer: number | null; level: number } | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -66,6 +68,16 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         if (res.result.isCorrect) {
           hapticCorrect();
           playCorrect();
+          if (!res.runOver) {
+            // Three seconds to register that it was right. Advancing the moment
+            // the guess lands makes a solve feel like nothing happened.
+            setSolved({ answer: res.answer, level: res.level - 1 });
+            setTimeout(() => {
+              setSolved(null);
+              load();
+            }, 3000);
+            return { ok: true as const };
+          }
         } else {
           if (res.result.isOneAway) setTrigger({ type: 'oneAway', key: Date.now() });
           else if (res.result.isWithin10) setTrigger({ type: 'within10', key: Date.now() });
@@ -106,11 +118,20 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             </Pressable>
             <Text style={[styles.badge, { color: colors.textMuted }]}>
               THIS WEEK · BEST {state.best}
-              {myRank ? ` · #${myRank.rank}` : ''}
+              {myRank ? ` · #${myRank.rank}` : ''} · {state.runsLeft} LEFT
             </Text>
           </View>
 
-          {over ? (
+          {solved ? (
+            <View style={styles.result}>
+              <Text style={[styles.overTitle, { color: colors.text }]}>Correct</Text>
+              <Text style={[styles.overBody, { color: colors.textMuted }]}>
+                {solved.answer !== null ? `It was ${solved.answer}. ` : ''}
+                That's {solved.level} {solved.level === 1 ? 'number' : 'numbers'} deep.
+              </Text>
+              <Text style={[styles.overBody, { color: colors.textMuted }]}>Next one coming…</Text>
+            </View>
+          ) : over ? (
             <View style={styles.result}>
               <Text style={[styles.overTitle, { color: colors.text }]}>Run over</Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
@@ -121,15 +142,24 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 Everyone plays the same numbers this week, so that depth compares directly. Four
                 attempts from level seven onward — getting far is meant to be hard.
               </Text>
-              <Pressable
-                onPress={again}
-                style={({ pressed }) => [
-                  styles.again,
-                  { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
-                ]}
-              >
-                <Text style={[styles.againText, { color: colors.background }]}>Run again</Text>
-              </Pressable>
+              {state.runsLeft > 0 ? (
+                <Pressable
+                  onPress={again}
+                  style={({ pressed }) => [
+                    styles.again,
+                    { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+                  ]}
+                >
+                  <Text style={[styles.againText, { color: colors.background }]}>
+                    Run again · {state.runsLeft} left today
+                  </Text>
+                </Pressable>
+              ) : (
+                <Text style={[styles.overBody, { color: colors.textMuted }]}>
+                  That's all five runs for today. The numbers stay the same all week, so tomorrow
+                  you pick up where your best left off.
+                </Text>
+              )}
 
               {board.length > 0 && (
                 <View style={styles.boardList}>

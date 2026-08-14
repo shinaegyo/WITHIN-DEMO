@@ -451,6 +451,8 @@ export interface EndlessState {
   clue2: string | null;
   guesses: GuessResult[];
   best: number;
+  runsLeft: number;
+  hasRun: boolean;
 }
 
 export interface EndlessEntry {
@@ -473,6 +475,8 @@ export async function loadEndless(): Promise<EndlessState> {
     clue2: raw.clue2 ?? null,
     guesses: (raw.guesses ?? []).map(toGuessResult),
     best: raw.best ?? 0,
+    runsLeft: raw.runsLeft ?? 0,
+    hasRun: !!raw.hasRun,
   };
 }
 
@@ -582,6 +586,8 @@ export function messageFor(code: string, guess?: number): string {
       return 'They still have this round to play.';
     case 'no_run':
       return 'No run in progress. Start a new one.';
+    case 'no_runs_left':
+      return "That's all five runs for today. More tomorrow.";
     default:
       return 'Connection problem. Check your network and try again.';
   }

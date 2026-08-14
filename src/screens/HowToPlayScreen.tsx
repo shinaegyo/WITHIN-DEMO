@@ -118,6 +118,10 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         It is called Impossible because it is. Four attempts for a number between 1 and 1000 is
         close to a coin toss, so a run ending at six or seven is a good one, not a failure.
       </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        Five runs a day. Every run starts from the first number again, and the week's board keeps
+        your deepest — so the five are attempts at one climb, not five separate scores.
+      </Text>
 
       <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
