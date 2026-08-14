@@ -76,18 +76,14 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
           {d.opponent}
         </Text>
+        {/* The head-to-head, not progress through this duel — the heading
+            above already says whose turn it is. */}
         <Text style={[styles.meta, { color: colors.textMuted }]}>
-          {d.status === 'complete'
-            ? d.outcome === 'won'
-              ? 'You won'
-              : d.outcome === 'lost'
-                ? 'You lost'
-                : 'Drawn'
-            : d.status === 'pending'
-              ? d.iChallenged
-                ? 'Waiting for them to accept'
-                : 'Challenged you'
-              : `You ${d.myDone}/3 · them ${d.theirDone}/3`}
+          {d.streak > 0
+            ? `${d.streak} win${d.streak === 1 ? '' : 's'} in a row`
+            : d.streak < 0
+              ? `${-d.streak} loss${d.streak === -1 ? '' : 'es'} in a row`
+              : 'No run either way'}
         </Text>
       </View>
       {children}
@@ -109,9 +105,9 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
       keyboardShouldPersistTaps="handled"
     >
       <Text style={[styles.caption, { color: colors.textMuted }]}>
-        Three numbers, seven then six then five attempts, same for both of you. Each round goes to
-        whoever needed fewer guesses. Play whenever you like — the result appears once you have both
-        finished.
+        Three numbers, seven then six then five attempts, same for both of you. A round goes to
+        whoever needed fewer guesses, and the next opens once you have both played it. Level after
+        three and a fourth number decides it.
       </Text>
 
       <View style={[styles.addRow, { borderColor: colors.border, backgroundColor: colors.surface }]}>

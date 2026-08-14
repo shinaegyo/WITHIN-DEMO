@@ -354,6 +354,8 @@ export interface DuelSummary {
   myDone: number;
   theirDone: number;
   outcome: 'won' | 'lost' | 'draw' | null;
+  /** Positive for a run of wins against them, negative for losses. */
+  streak: number;
 }
 
 export interface DuelRoundState {
@@ -399,6 +401,7 @@ export async function loadDuels(): Promise<DuelSummary[]> {
     myDone: d.my_done ?? 0,
     theirDone: d.their_done ?? 0,
     outcome: d.outcome ?? null,
+    streak: d.streak ?? 0,
   }));
 }
 
