@@ -65,6 +65,20 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 const Tabs = createMaterialTopTabNavigator();
 
 /**
+ * Route name to icon, written out rather than derived.
+ *
+ * Lower-casing the route name to find an icon looked tidy and silently drew
+ * nothing the moment a tab was called Board and the icon was called
+ * leaderboard - a missing tab with no error anywhere.
+ */
+const ICONS: Record<string, TabName> = {
+  Games: 'games',
+  Friends: 'friends',
+  Home: 'home',
+  Board: 'leaderboard',
+};
+
+/**
  * Five tabs, swipeable and tappable.
  *
  * Drawn rather than configured, because the profile tab is the player's own
@@ -91,7 +105,7 @@ function TabBar({ state, navigation, avatar, pending, colors }: any) {
                 <Avatar value={avatar} size={24} />
               </View>
             ) : (
-              <TabIcon name={route.name.toLowerCase() as TabName} color={tint} active={focused} />
+              <TabIcon name={ICONS[route.name]} color={tint} active={focused} />
             )}
 
             {/* A waiting request is the one thing worth showing without being
