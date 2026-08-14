@@ -326,8 +326,8 @@ export function HomeScreen({
                 { borderColor: colors.text, opacity: pressed ? 0.85 : 1 },
               ]}
             >
-              <Text style={[styles.modeText, { color: colors.text }]}>Endless</Text>
-              <Text style={[styles.modeSub, { color: colors.textMuted }]}>until you miss</Text>
+              <Text style={[styles.modeText, { color: colors.text }]}>Impossible mode</Text>
+              <Text style={[styles.modeSub, { color: colors.textMuted }]}>how far can you get</Text>
             </Pressable>
             <Pressable
               onPress={onOpenDuels}
@@ -336,8 +336,8 @@ export function HomeScreen({
                 { borderColor: colors.text, opacity: pressed ? 0.85 : 1 },
               ]}
             >
-              <Text style={[styles.modeText, { color: colors.text }]}>Challenge</Text>
-              <Text style={[styles.modeSub, { color: colors.textMuted }]}>a friend</Text>
+              <Text style={[styles.modeText, { color: colors.text }]}>Challenge mode</Text>
+              <Text style={[styles.modeSub, { color: colors.textMuted }]}>duel a friend</Text>
             </Pressable>
           </View>
         )}
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
   },
-  modeText: { fontSize: 14.5, fontFamily: fonts.extraBold },
+  modeText: { fontSize: 13.5, fontFamily: fonts.extraBold },
   modeSub: { fontSize: 10.5, fontFamily: fonts.medium, marginTop: 1 },
   rankRow: { alignItems: 'center', marginTop: 10 },
   rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },

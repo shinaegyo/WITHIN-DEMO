@@ -108,6 +108,17 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         The number is revealed once the round ends, whether you found it or not.
       </Text>
 
+      <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        Numbers one after another, with fewer attempts as you go: seven at first, then six, then
+        five, and four from the seventh onward. One miss ends the run. Everyone plays the same
+        numbers each week, so how far you got is worth comparing.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        It is called Impossible because it is. Four attempts for a number between 1 and 1000 is
+        close to a coin toss, so a run ending at six or seven is a good one, not a failure.
+      </Text>
+
       <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Add someone as a friend and you can challenge them. Once they accept, you both get the same

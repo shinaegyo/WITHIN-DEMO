@@ -118,7 +118,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 You cleared {over.depth} {over.depth === 1 ? 'number' : 'numbers'}.
               </Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
-                Everyone plays the same sequence this week, so that depth is a fair comparison.
+                Everyone plays the same numbers this week, so that depth compares directly. Four
+                attempts from level seven onward — getting far is meant to be hard.
               </Text>
               <Pressable
                 onPress={again}
@@ -132,7 +133,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
 
               {board.length > 0 && (
                 <View style={styles.boardList}>
-                  <Text style={[styles.boardTitle, { color: colors.textMuted }]}>DEEPEST THIS WEEK</Text>
+                  <Text style={[styles.boardTitle, { color: colors.textMuted }]}>FURTHEST THIS WEEK</Text>
                   {board.slice(0, 5).map((e) => (
                     <View key={`${e.rank}-${e.name}`} style={styles.boardRow}>
                       <Text style={[styles.boardRank, { color: colors.textMuted }]}>{e.rank}</Text>
