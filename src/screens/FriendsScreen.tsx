@@ -81,8 +81,19 @@ export function FriendsScreen({
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!state) return <StatusScreen loading />;
 
-  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  const Row = ({
+    label,
+    children,
+    online,
+  }: {
+    label: string;
+    children: React.ReactNode;
+    online?: boolean;
+  }) => (
     <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+      {/* Only shown when they are around: an empty slot for everyone else
+          would read as a status of its own. */}
+      {online && <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />}
       <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>
         {label}
       </Text>
@@ -190,9 +201,9 @@ export function FriendsScreen({
           once they accept.
         </Text>
       ) : (
-        state.friends.map((n) => (
-          <Row key={n} label={n}>
-            <Action label="Remove" onPress={() => run(async () => { await removeFriend(n); })} />
+        state.friends.map((f) => (
+          <Row key={f.name} label={f.name} online={f.online}>
+            <Action label="Remove" onPress={() => run(async () => { await removeFriend(f.name); })} />
           </Row>
         ))
       )}
@@ -255,6 +266,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginBottom: 8,
   },
+  dot: { width: 8, height: 8, borderRadius: 4 },
   rowName: { flex: 1, fontSize: 14.5, fontFamily: fonts.bold },
   rowActions: { flexDirection: 'row', gap: 16 },
   action: { fontSize: 12.5, fontFamily: fonts.bold },

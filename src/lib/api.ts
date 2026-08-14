@@ -253,8 +253,14 @@ export interface Leaderboard {
 }
 
 /** The long game: cumulative points across every day played. */
+export interface Friend {
+  name: string;
+  /** Checked in within the last couple of minutes. */
+  online: boolean;
+}
+
 export interface FriendsState {
-  friends: string[];
+  friends: Friend[];
   /** Requests waiting on you. */
   incoming: string[];
   /** Requests you are waiting on. */
@@ -275,10 +281,20 @@ export async function loadFriends(): Promise<FriendsState> {
   const raw = unwrap<any>(data, error);
   const names = (list: any) => (list ?? []).map((e: any) => e.name as string);
   return {
-    friends: names(raw.friends),
+    friends: (raw.friends ?? []).map((e: any) => ({ name: e.name, online: !!e.online })),
     incoming: names(raw.incoming),
     outgoing: names(raw.outgoing),
   };
+}
+
+/** Heartbeat, so friends can see you are around. */
+export async function touchPresence(): Promise<void> {
+  try {
+    await ensureSignedIn();
+    await supabase.rpc('touch_presence');
+  } catch {
+    /* presence is a nicety; never let it surface */
+  }
 }
 
 export async function sendFriendRequest(username: string): Promise<FriendAction> {

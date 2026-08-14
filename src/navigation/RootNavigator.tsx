@@ -22,7 +22,7 @@ import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
 import { shareResult } from '../utils/share';
-import { loadFriends } from '../lib/api';
+import { loadFriends, touchPresence } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { consumePracticeRound } from '../utils/practiceLimit';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
@@ -64,6 +64,14 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
   // request has to announce itself, or it sits there until the sender gives up.
   const [pending, setPending] = useState(0);
   const [friendsEpoch, setFriendsEpoch] = useState(0);
+
+  // Checks in while the app is open, so friends see a live dot rather than a
+  // stale one. Stops as soon as the screen goes away.
+  useEffect(() => {
+    touchPresence();
+    const id = setInterval(touchPresence, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     loadFriends()
