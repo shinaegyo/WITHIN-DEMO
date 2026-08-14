@@ -319,26 +319,28 @@ export function HomeScreen({
             you do next. */}
         {finished && (
           <View style={styles.modes}>
-            <Pressable
-              onPress={onEndless}
-              style={({ pressed }) => [
-                styles.mode,
-                { borderColor: colors.text, opacity: pressed ? 0.85 : 1 },
-              ]}
-            >
-              <Text style={[styles.modeText, { color: colors.text }]}>Impossible mode</Text>
-              <Text style={[styles.modeSub, { color: colors.textMuted }]}>how far can you get</Text>
-            </Pressable>
-            <Pressable
-              onPress={onOpenDuels}
-              style={({ pressed }) => [
-                styles.mode,
-                { borderColor: colors.text, opacity: pressed ? 0.85 : 1 },
-              ]}
-            >
-              <Text style={[styles.modeText, { color: colors.text }]}>Challenge mode</Text>
-              <Text style={[styles.modeSub, { color: colors.textMuted }]}>duel a friend</Text>
-            </Pressable>
+            {[
+              { label: 'Impossible', sub: 'How far can you get', onPress: onEndless },
+              { label: 'Challenge', sub: 'Duel a friend', onPress: onOpenDuels },
+            ].map((m) => (
+              <Pressable
+                key={m.label}
+                onPress={m.onPress}
+                style={({ pressed }) => [
+                  styles.mode,
+                  {
+                    backgroundColor: pressed ? colors.surfaceAlt : colors.surface,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <View style={styles.modeTop}>
+                  <Text style={[styles.modeText, { color: colors.text }]}>{m.label}</Text>
+                  <Text style={[styles.modeArrow, { color: colors.textMuted }]}>›</Text>
+                </View>
+                <Text style={[styles.modeSub, { color: colors.textMuted }]}>{m.sub}</Text>
+              </Pressable>
+            ))}
           </View>
         )}
 
@@ -591,14 +593,19 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 19, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
   modes: { flexDirection: 'row', gap: 10, alignSelf: 'stretch', marginTop: 20 },
+  // Same card language as the stats below, rather than two bright outlines
+  // shouting at each other above them. Left-aligned with a chevron so they read
+  // as somewhere to go, not as buttons stamped on the page.
   mode: {
     flex: 1,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderRadius: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
+    paddingVertical: 11,
+    paddingHorizontal: 13,
   },
-  modeText: { fontSize: 13.5, fontFamily: fonts.extraBold },
+  modeTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  modeText: { fontSize: 14, fontFamily: fonts.extraBold },
+  modeArrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
   modeSub: { fontSize: 10.5, fontFamily: fonts.medium, marginTop: 1 },
   rankRow: { alignItems: 'center', marginTop: 10 },
   rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
