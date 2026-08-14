@@ -27,6 +27,10 @@ export function getBandLabel(result: GuessResult): string {
   if (result.isCorrect) return 'CORRECT';
   if (result.isOneAway) return 'ONE AWAY';
   if (result.isWithin10) return 'WITHIN 10';
+  // Falls back to the tier when the flags are absent. Without this an
+  // 'intense' guess whose isWithin10 never arrived dropped through every case
+  // and printed the furthest band of all.
+  if (result.tier === 'intense') return 'WITHIN 10';
   if (result.tier === 'dark') return '11–24 AWAY';
   if (result.tier === 'medium') return '25–99 AWAY';
   if (result.tier === 'light') return '100–249 AWAY';

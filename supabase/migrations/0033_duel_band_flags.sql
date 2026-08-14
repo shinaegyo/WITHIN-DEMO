@@ -1,0 +1,95 @@
+-- Duel guesses were losing their proximity flags on reload.
+--
+-- duel_state returned isWithin10 and isOneAway as constant false, so a guess
+-- inside ten had no band the label logic recognised and fell through to the
+-- last case: "500+ AWAY". The closest guess in a round displayed as the
+-- furthest, and only after a reload, because the response to the guess itself
+-- carried the right flags.
+--
+-- Computed from the answer now, the same way the daily does it.
+
+create or replace function public.duel_state(p_duel_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid    uuid := auth.uid();
+  v_duel   public.duels%rowtype;
+  v_round  int;
+  v_prog   public.duel_progress%rowtype;
+  v_other  uuid;
+  v_answer smallint;
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  select * into v_duel from public.duels
+  where id = p_duel_id and v_uid in (challenger_id, opponent_id);
+
+  if v_duel.id is null then
+    return jsonb_build_object('error', 'no_such_duel');
+  end if;
+
+  v_other := case when v_duel.challenger_id = v_uid then v_duel.opponent_id
+                  else v_duel.challenger_id end;
+
+  select min(round) into v_round from public.duel_progress
+  where duel_id = p_duel_id and user_id = v_uid and status = 'playing';
+
+  if v_round is not null then
+    select * into v_prog from public.duel_progress
+    where duel_id = p_duel_id and user_id = v_uid and round = v_round;
+    select answer into v_answer from public.duel_rounds
+    where duel_id = p_duel_id and round = v_round;
+  end if;
+
+  return jsonb_build_object(
+    'id', v_duel.id,
+    'status', v_duel.status,
+    'opponent', (select coalesce(username, 'Player') from public.profiles where id = v_other),
+    'outcome', case
+      when v_duel.status <> 'complete' then null
+      when v_duel.winner_id is null then 'draw'
+      when v_duel.winner_id = v_uid then 'won'
+      else 'lost'
+    end,
+    'round', case when v_round is null then null else jsonb_build_object(
+      'round', v_round,
+      'attemptsUsed', v_prog.attempts_used,
+      'attemptsAllowed', v_prog.attempts_allowed,
+      'clue1', (select clue1 from public.duel_rounds where duel_id = p_duel_id and round = v_round),
+      'clue2', case when v_prog.clue2_unlocked
+                    then (select clue2 from public.duel_rounds
+                          where duel_id = p_duel_id and round = v_round) end,
+      'guesses', coalesce((
+        select jsonb_agg(jsonb_build_object(
+                 'guess', g.guess, 'direction', g.direction, 'tier', g.tier,
+                 'isCorrect',  g.direction = 'correct',
+                 'isWithin10', g.guess <> v_answer and abs(g.guess - v_answer) <= 10,
+                 'isOneAway',  abs(g.guess - v_answer) = 1
+               ) order by g.guess_index)
+        from public.duel_guesses g
+        where g.duel_id = p_duel_id and g.user_id = v_uid and g.round = v_round
+      ), '[]'::jsonb)
+    ) end,
+    'mine', coalesce((
+      select jsonb_agg(jsonb_build_object(
+               'round', g.round, 'status', g.status, 'attemptsUsed', g.attempts_used)
+             order by g.round)
+      from public.duel_progress g where g.duel_id = p_duel_id and g.user_id = v_uid
+    ), '[]'::jsonb),
+    'theirs', case when v_duel.status = 'complete' then coalesce((
+      select jsonb_agg(jsonb_build_object(
+               'round', g.round, 'status', g.status, 'attemptsUsed', g.attempts_used)
+             order by g.round)
+      from public.duel_progress g where g.duel_id = p_duel_id and g.user_id = v_other
+    ), '[]'::jsonb) else '[]'::jsonb end
+  );
+end;
+$$;
+
+revoke execute on function public.duel_state(uuid) from public, anon;
+grant execute on function public.duel_state(uuid) to authenticated;
