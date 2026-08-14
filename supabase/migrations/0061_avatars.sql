@@ -1,0 +1,361 @@
+-- An avatar, chosen from a set rather than uploaded.
+--
+-- Stored as one short string - "cat-blue" - because the picture is drawn on the
+-- device from that. Nothing is uploaded, so there is no bucket to pay for, no
+-- resizing, and nothing for a stranger to put on a public leaderboard that
+-- somebody then has to take down.
+--
+-- Anyone who has been playing since before this has no avatar, which the client
+-- treats as "not chosen yet" rather than as a blank: it is the difference
+-- between offering them the picker and pretending they made a choice.
+
+alter table public.profiles add column if not exists avatar text;
+
+create or replace function public.set_avatar(p_avatar text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  -- Shape only: a character and a colour, both lower case letters. The client
+  -- owns the list, and a name it does not know renders as the default rather
+  -- than as an error - so a new character added later cannot break an old app.
+  if p_avatar is null or p_avatar !~ '^[a-z]{2,12}-[a-z]{3,8}$' then
+    return jsonb_build_object('error', 'bad_avatar');
+  end if;
+
+  insert into public.profiles (id, avatar) values (v_uid, p_avatar)
+  on conflict (id) do update set avatar = excluded.avatar;
+
+  return jsonb_build_object('avatar', p_avatar);
+end;
+$$;
+
+revoke execute on function public.set_avatar(text) from public, anon;
+grant execute on function public.set_avatar(text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Everywhere a name appears, the face appears with it.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.alltime_leaderboard(p_limit integer default 100)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid    uuid := auth.uid();
+  v_holder uuid;
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  v_holder := public.belt_holder();
+
+  return jsonb_build_object(
+    'entries', coalesce((
+      select jsonb_agg(e order by e.rank, e.name)
+      from (
+        select
+          rank() over (order by s.total_points desc) as rank,
+          coalesce(p.username, 'Player ' || upper(right(s.user_id::text, 4))) as name,
+          p.avatar,
+          s.total_points as score,
+          s.games_played as days_played,
+          s.max_streak   as best_streak,
+          s.user_id = v_uid as is_me,
+          s.user_id = v_holder as has_belt,
+          (select max(gu.created_at)
+             from public.guesses gu
+             join public.games g2 on g2.id = gu.game_id
+            where g2.user_id = s.user_id) as last_played_at
+        from public.stats s
+        join public.profiles p on p.id = s.user_id
+        where s.games_played > 0
+        order by s.total_points desc, s.games_played asc
+        limit greatest(1, least(p_limit, 200))
+      ) e
+    ), '[]'::jsonb),
+    'beltHolder', (select username from public.profiles where id = v_holder),
+    'totalPlayers', (select count(*) from public.stats where games_played > 0)
+  );
+end;
+$$;
+
+create or replace function public.daily_leaderboard(p_limit integer default 50)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid  uuid := auth.uid();
+  v_date date;
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  v_date := public.current_puzzle_date(v_uid);
+
+  return jsonb_build_object(
+    'puzzleDate', v_date,
+    'entries', coalesce((
+      select jsonb_agg(e order by e.rank, e.name)
+      from (
+        select
+          rank() over (order by g.total_score desc) as rank,
+          coalesce(p.username, 'Player ' || upper(right(g.user_id::text, 4))) as name,
+          p.avatar,
+          g.total_score as score,
+          g.user_id = v_uid as is_me,
+          g.status = 'complete' as is_complete,
+          (select count(*) from public.round_results r
+            where r.game_id = g.id and r.status = 'won')::int as rounds_won
+        from public.games g
+        join public.profiles p on p.id = g.user_id
+        where g.puzzle_date = v_date
+          and g.status in ('complete', 'eliminated')
+        order by g.total_score desc, (g.status = 'complete') desc, g.finished_at asc
+        limit greatest(1, least(p_limit, 200))
+      ) e
+    ), '[]'::jsonb),
+    'totalPlayers', (select count(*) from public.games
+                     where puzzle_date = v_date
+                       and status in ('complete', 'eliminated')),
+    'stillPlaying', (select count(*) from public.games g
+                     where g.puzzle_date = v_date
+                       and g.status = 'playing'
+                       and exists (select 1 from public.guesses gu where gu.game_id = g.id))
+  );
+end;
+$$;
+
+create or replace function public.friends_leaderboard()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid  uuid := auth.uid();
+  v_date date;
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  v_date := public.current_puzzle_date(v_uid);
+
+  return jsonb_build_object(
+    'puzzleDate', v_date,
+    'entries', coalesce((
+      select jsonb_agg(e order by e.rank, e.name)
+      from (
+        select
+          rank() over (order by g.total_score desc) as rank,
+          coalesce(p.username, 'Player ' || upper(right(g.user_id::text, 4))) as name,
+          p.avatar,
+          g.total_score as score,
+          g.user_id = v_uid as is_me,
+          g.status = 'complete' as is_complete,
+          (select count(*) from public.round_results r
+            where r.game_id = g.id and r.status = 'won')::int as rounds_won
+        from public.games g
+        join public.profiles p on p.id = g.user_id
+        where g.puzzle_date = v_date
+          and g.status in ('complete', 'eliminated')
+          and (
+            g.user_id = v_uid
+            or exists (
+              select 1 from public.friendships f
+              where f.status = 'accepted'
+                and (   (f.requester_id = v_uid and f.addressee_id = g.user_id)
+                     or (f.addressee_id = v_uid and f.requester_id = g.user_id))
+            )
+          )
+        order by g.total_score desc, (g.status = 'complete') desc, g.finished_at asc
+      ) e
+    ), '[]'::jsonb)
+  );
+end;
+$$;
+
+/** Friends carry theirs too, so the list is faces rather than a column of text. */
+create or replace function public.friends_state()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  return jsonb_build_object(
+    'friends', coalesce((
+      select jsonb_agg(jsonb_build_object('name', name, 'online', online, 'avatar', avatar)
+                       order by lower(name))
+      from (
+        select p.username as name,
+               p.avatar,
+               p.last_seen_at > now() - interval '2 minutes' as online
+        from public.friendships f
+        join public.profiles p
+          on p.id = case when f.requester_id = v_uid then f.addressee_id else f.requester_id end
+        where f.status = 'accepted' and v_uid in (f.requester_id, f.addressee_id)
+      ) x
+    ), '[]'::jsonb),
+    'incoming', coalesce((
+      select jsonb_agg(jsonb_build_object('name', p.username, 'avatar', p.avatar)
+                       order by lower(p.username))
+      from public.friendships f
+      join public.profiles p on p.id = f.requester_id
+      where f.addressee_id = v_uid and f.status = 'pending'
+    ), '[]'::jsonb),
+    'outgoing', coalesce((
+      select jsonb_agg(jsonb_build_object('name', p.username, 'avatar', p.avatar)
+                       order by lower(p.username))
+      from public.friendships f
+      join public.profiles p on p.id = f.addressee_id
+      where f.requester_id = v_uid and f.status = 'pending'
+    ), '[]'::jsonb)
+  );
+end;
+$$;
+
+revoke execute on function public.alltime_leaderboard(integer) from public, anon;
+revoke execute on function public.daily_leaderboard(integer)   from public, anon;
+revoke execute on function public.friends_leaderboard()        from public, anon;
+revoke execute on function public.friends_state()              from public, anon;
+grant execute on function public.alltime_leaderboard(integer) to authenticated;
+grant execute on function public.daily_leaderboard(integer)   to authenticated;
+grant execute on function public.friends_leaderboard()        to authenticated;
+grant execute on function public.friends_state()              to authenticated;
+
+/** The card, with the face on it. */
+create or replace function public.player_card(p_username text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid    uuid := auth.uid();
+  v_target uuid;
+  v_stats  public.stats%rowtype;
+  v_rank   public.ranked_stats%rowtype;
+  v_game   public.games%rowtype;
+  v_today  date;
+  v_friend text;
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  select id into v_target from public.profiles
+  where lower(username) = lower(trim(p_username));
+
+  if v_target is null then
+    return jsonb_build_object('error', 'no_such_player');
+  end if;
+
+  select * into v_stats from public.stats where user_id = v_target;
+  select * into v_rank  from public.ranked_stats where user_id = v_target;
+  v_today := public.current_puzzle_date(v_uid);
+
+  select * into v_game from public.games
+  where user_id = v_target and puzzle_date = v_today and status <> 'playing';
+
+  select case
+           when f.status = 'accepted' then 'friends'
+           when f.requester_id = v_uid then 'sent'
+           else 'received'
+         end into v_friend
+  from public.friendships f
+  where (f.requester_id = v_uid and f.addressee_id = v_target)
+     or (f.requester_id = v_target and f.addressee_id = v_uid);
+
+  return jsonb_build_object(
+    'name', (select username from public.profiles where id = v_target),
+    'avatar', (select avatar from public.profiles where id = v_target),
+    'isMe', v_target = v_uid,
+    'friendship', coalesce(v_friend, 'none'),
+    'online', (select last_seen_at > now() - interval '2 minutes'
+                 from public.profiles where id = v_target),
+    'hasBelt', public.belt_holder() = v_target,
+
+    'points', coalesce(v_stats.total_points, 0),
+    'daysPlayed', coalesce(v_stats.games_played, 0),
+    'streak', coalesce(v_stats.current_streak, 0),
+    'bestStreak', coalesce(v_stats.max_streak, 0),
+
+    'ranked', case when v_rank.played > 0 then jsonb_build_object(
+      'rating', v_rank.rating,
+      'won', v_rank.won,
+      'lost', v_rank.lost
+    ) end,
+
+    'rank', (
+      select count(*) + 1 from public.stats s
+      where s.games_played > 0
+        and s.total_points > coalesce(v_stats.total_points, 0)
+    ),
+    'of', (select count(*) from public.stats where games_played > 0),
+
+    'lastPlayedAt', (
+      select max(gu.created_at) from public.guesses gu
+      join public.games g2 on g2.id = gu.game_id
+      where g2.user_id = v_target
+    ),
+
+    'today', case when v_game.id is not null
+                  then jsonb_build_object('score', v_game.total_score) end,
+
+    -- One entry per round of a finished day: whether they got it, and what it
+    -- paid. Never the number, and never a round still being played.
+    'todayRounds', case when v_game.id is not null then coalesce((
+      select jsonb_agg(jsonb_build_object(
+               'round', r.round,
+               'status', r.status,
+               'score', r.score
+             ) order by r.round)
+      from public.round_results r
+      where r.game_id = v_game.id and r.status <> 'playing'
+    ), '[]'::jsonb) end,
+
+    'impossible', (
+      select max(rr.level - 1) from public.endless_runs rr
+      where rr.user_id = v_target and rr.week_start = public.endless_week(v_uid)
+    ),
+
+    'duels', case when v_target = v_uid then null else jsonb_build_object(
+      'won',   (select count(*) from public.duels d
+                 where d.status = 'complete' and d.winner_id = v_uid
+                   and (d.challenger_id, d.opponent_id) in ((v_uid, v_target), (v_target, v_uid))),
+      'lost',  (select count(*) from public.duels d
+                 where d.status = 'complete' and d.winner_id = v_target
+                   and (d.challenger_id, d.opponent_id) in ((v_uid, v_target), (v_target, v_uid))),
+      'drawn', (select count(*) from public.duels d
+                 where d.status = 'complete' and d.winner_id is null
+                   and (d.challenger_id, d.opponent_id) in ((v_uid, v_target), (v_target, v_uid))),
+      'streak', public.duel_streak(v_uid, v_target)
+    ) end
+  );
+end;
+$$;
+
+revoke execute on function public.player_card(text) from public, anon;
+grant execute on function public.player_card(text) to authenticated;

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
@@ -105,14 +106,17 @@ export function FriendsScreen({
     label,
     children,
     online,
+    avatar,
   }: {
     label: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     online?: boolean;
+    avatar?: string | null;
   }) => (
     <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       {/* Only shown when they are around: an empty slot for everyone else
           would read as a status of its own. */}
+      <Avatar value={avatar} size={30} />
       {online && <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />}
       {/* The name itself opens their card; the buttons beside it still act. */}
       <Pressable style={styles.rowMain} onPress={() => setLooking(label)}>
@@ -214,9 +218,9 @@ export function FriendsScreen({
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON YOU</Text>
           {state.incoming.map((n) => (
-            <Row key={n} label={n}>
-              <Action label="Accept" tone="good" onPress={() => run(async () => { await respondToFriendRequest(n, true); })} />
-              <Action label="Decline" onPress={() => run(async () => { await respondToFriendRequest(n, false); })} />
+            <Row key={n.name} label={n.name} avatar={n.avatar}>
+              <Action label="Accept" tone="good" onPress={() => run(async () => { await respondToFriendRequest(n.name, true); })} />
+              <Action label="Decline" onPress={() => run(async () => { await respondToFriendRequest(n.name, false); })} />
             </Row>
           ))}
         </>
@@ -231,7 +235,7 @@ export function FriendsScreen({
             ONLINE NOW · {online.length}
           </Text>
           {online.map((f) => (
-            <Row key={`on-${f.name}`} label={f.name} online>
+            <Row key={`on-${f.name}`} label={f.name} avatar={f.avatar} online>
               <Action
                 label="Challenge"
                 tone="good"
@@ -260,7 +264,7 @@ export function FriendsScreen({
         </Text>
       ) : (
         offline.map((f) => (
-          <Row key={f.name} label={f.name} online={f.online}>
+          <Row key={f.name} label={f.name} avatar={f.avatar} online={f.online}>
             <Action label="Remove" onPress={() => run(async () => { await removeFriend(f.name); })} />
           </Row>
         ))
@@ -270,8 +274,8 @@ export function FriendsScreen({
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON THEM</Text>
           {state.outgoing.map((n) => (
-            <Row key={n} label={n}>
-              <Action label="Cancel" onPress={() => run(async () => { await removeFriend(n); })} />
+            <Row key={n.name} label={n.name} avatar={n.avatar}>
+              <Action label="Cancel" onPress={() => run(async () => { await removeFriend(n.name); })} />
             </Row>
           ))}
         </>

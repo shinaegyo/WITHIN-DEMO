@@ -20,6 +20,7 @@ import {
   loadLeaderboard,
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
+import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
 
 
@@ -241,6 +242,7 @@ export function HomeScreen({
             <Text style={[styles.boardRank, { color: colors.textMuted }]}>{item.rank}</Text>
           )}
 
+          <Avatar value={item.avatar} size={24} />
           <Text
             style={[styles.boardName, { color: colors.text }, item.isMe && styles.boardNameMe]}
             numberOfLines={1}

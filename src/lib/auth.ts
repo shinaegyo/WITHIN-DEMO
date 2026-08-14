@@ -115,12 +115,17 @@ export async function setUsername(name: string): Promise<{ ok: true } | { ok: fa
 }
 
 export async function currentUsername(): Promise<string | null> {
+  return (await currentProfile())?.username ?? null;
+}
+
+/** Name and avatar in one read, since every caller wants both. */
+export async function currentProfile(): Promise<{ username: string | null; avatar: string | null } | null> {
   const { data } = await supabase.auth.getUser();
   if (!data.user) return null;
   const { data: rows } = await supabase
     .from('profiles')
-    .select('username')
+    .select('username, avatar')
     .eq('id', data.user.id)
     .maybeSingle();
-  return rows?.username ?? null;
+  return { username: rows?.username ?? null, avatar: rows?.avatar ?? null };
 }

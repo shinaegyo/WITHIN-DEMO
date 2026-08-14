@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import { AllTimeEntry, ApiError, loadAllTimeLeaderboard, messageFor } from '../lib/api';
@@ -69,6 +70,7 @@ export function LeaderboardScreen() {
             ) : (
               <Text style={[styles.rank, { color: colors.textMuted }]}>{item.rank}</Text>
             )}
+            <Avatar value={item.avatar} size={30} />
             <Text
               style={[styles.name, { color: colors.text }, item.isMe && styles.nameMe]}
               numberOfLines={1}

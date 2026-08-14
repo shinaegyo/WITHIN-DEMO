@@ -14,6 +14,8 @@ export interface MenuItem {
   badge?: string;
   /** A count needing attention. Unlike badge, the item stays usable. */
   count?: number;
+  /** A word beside the label — NEW and the like. Also leaves the item usable. */
+  tag?: string;
   /** Opens a new group: play, people, your setup, reference. Space rather than
    *  a heading, because four headings on nine items is heavier than the
    *  problem they would be solving. */
@@ -95,6 +97,9 @@ export function MenuDrawer({
               >
                 {item.label}
               </Text>
+              {!!item.tag && (
+                <Text style={[styles.tag, { color: colors.accent }]}>{item.tag}</Text>
+              )}
               {!!item.count && item.count > 0 && (
                 <View style={[styles.count, { backgroundColor: colors.accent }]}>
                   <Text style={styles.countText}>{item.count}</Text>
@@ -145,6 +150,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   itemLabel: { flex: 1, fontSize: 16, fontFamily: fonts.semiBold },
+  tag: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 1.1, marginRight: 8 },
   count: {
     minWidth: 20,
     height: 20,

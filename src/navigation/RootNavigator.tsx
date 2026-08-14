@@ -31,6 +31,7 @@ import { IntroScreen } from '../screens/IntroScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { AudioScreen } from '../screens/AudioScreen';
+import { AvatarScreen } from '../screens/AvatarScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 export type RootStackParamList = {
@@ -43,6 +44,7 @@ export type RootStackParamList = {
   Ranked: undefined;
   Privacy: undefined;
   Audio: undefined;
+  Avatar: undefined;
   Endless: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
@@ -56,7 +58,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 // component's render, which React rightly complains about.
 const navRef = createNavigationContainerRef<RootStackParamList>();
 
-function Screens({ username, onProfileChanged }: { username: string; onProfileChanged: () => void }) {
+function Screens({
+  username,
+  avatar,
+  onProfileChanged,
+}: {
+  username: string;
+  avatar: string | null;
+  onProfileChanged: () => void;
+}) {
   const { colors, mode } = useTheme();
   const { startFreshTestPlayer, resetToday, reload, game, phase } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -192,6 +202,19 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           component={PrivacyScreen}
         />
 
+        <Stack.Screen name="Avatar" options={{ title: 'Avatar', headerBackTitle: 'Back' }}>
+          {({ navigation }) => (
+            <AvatarScreen
+              username={username}
+              current={avatar}
+              onDone={() => {
+                onProfileChanged();
+                navigation.goBack();
+              }}
+            />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen
           name="Audio"
           options={{ title: 'Audio', headerBackTitle: 'Back' }}
@@ -256,10 +279,14 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           { label: 'Leaderboard', onPress: () => navRef.isReady() && navRef.navigate('Leaderboard') },
 
           {
-            label: 'Profile & Sign In',
+            label: 'Avatar',
             startsGroup: true,
-            onPress: () => navRef.isReady() && navRef.navigate('Account'),
+            // Anybody who played before avatars existed has none, and a menu
+            // item that says so is how they find out they can have one.
+            tag: avatar ? undefined : 'NEW',
+            onPress: () => navRef.isReady() && navRef.navigate('Avatar'),
           },
+          { label: 'Profile & Sign In', onPress: () => navRef.isReady() && navRef.navigate('Account') },
           { label: 'Audio', onPress: () => navRef.isReady() && navRef.navigate('Audio') },
 
           {
@@ -287,7 +314,7 @@ export function RootNavigator() {
   // null until the flag has been read, so the tutorial never flashes up in
   // front of someone who has already done it.
   const [introSeen, setIntroSeen] = useState<boolean | null>(null);
-  const [introStep, setIntroStep] = useState<'rules' | 'practice' | 'daily'>('rules');
+  const [introStep, setIntroStep] = useState<'rules' | 'practice' | 'avatar' | 'daily'>('rules');
 
   useEffect(() => {
     hasSeenIntro().then(setIntroSeen);
@@ -316,8 +343,22 @@ export function RootNavigator() {
         <PracticeScreen
           introMode
           remainingAfterThis={0}
-          onExit={() => setIntroStep('daily')}
-          onPlayAnother={() => setIntroStep('daily')}
+          onExit={() => setIntroStep('avatar')}
+          onPlayAnother={() => setIntroStep('avatar')}
+        />
+      );
+    }
+    // A face before the first real day: they have played a round by now, so
+    // they know what they are dressing up for.
+    if (introStep === 'avatar') {
+      return (
+        <AvatarScreen
+          username={profile.username}
+          onDone={() => {
+            profile.refresh();
+            setIntroStep('daily');
+          }}
+          onSkip={() => setIntroStep('daily')}
         />
       );
     }
@@ -326,7 +367,11 @@ export function RootNavigator() {
 
   return (
     <DailyGameProvider>
-      <Screens username={profile.username} onProfileChanged={profile.refresh} />
+      <Screens
+        username={profile.username}
+        avatar={profile.avatar}
+        onProfileChanged={profile.refresh}
+      />
     </DailyGameProvider>
   );
 }

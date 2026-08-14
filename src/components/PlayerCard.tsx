@@ -9,6 +9,7 @@ import {
   respondToFriendRequest,
   sendFriendRequest,
 } from '../lib/api';
+import { Avatar } from './Avatar';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
@@ -104,6 +105,7 @@ export function PlayerCardModal({
           ) : (
             <>
               <View style={styles.nameRow}>
+                <Avatar value={card.avatar} size={40} />
                 {card.online && (
                   <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />
                 )}

@@ -217,6 +217,8 @@ export async function retryRound(): Promise<boolean> {
 export interface LeaderboardEntry {
   rank: number;
   name: string;
+  /** "cat-blue", or null for anyone who has not chosen yet. */
+  avatar: string | null;
   score: number;
   isMe: boolean;
   /** False for a day that ended in elimination rather than all three rounds. */
@@ -227,6 +229,7 @@ export interface LeaderboardEntry {
 export interface AllTimeEntry {
   rank: number;
   name: string;
+  avatar: string | null;
   score: number;
   daysPlayed: number;
   bestStreak: number;
@@ -252,16 +255,17 @@ export interface Leaderboard {
 /** The long game: cumulative points across every day played. */
 export interface Friend {
   name: string;
-  /** Checked in within the last couple of minutes. */
+  avatar: string | null;
+  /** Checked in within the last couple of minutes. Always false for requests. */
   online: boolean;
 }
 
 export interface FriendsState {
   friends: Friend[];
   /** Requests waiting on you. */
-  incoming: string[];
+  incoming: Friend[];
   /** Requests you are waiting on. */
-  outgoing: string[];
+  outgoing: Friend[];
 }
 
 export type FriendAction =
@@ -276,11 +280,16 @@ export async function loadFriends(): Promise<FriendsState> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('friends_state');
   const raw = unwrap<any>(data, error);
-  const names = (list: any) => (list ?? []).map((e: any) => e.name as string);
+  const people = (list: any): Friend[] =>
+    (list ?? []).map((e: any) => ({
+      name: e.name,
+      avatar: e.avatar ?? null,
+      online: !!e.online,
+    }));
   return {
-    friends: (raw.friends ?? []).map((e: any) => ({ name: e.name, online: !!e.online })),
-    incoming: names(raw.incoming),
-    outgoing: names(raw.outgoing),
+    friends: people(raw.friends),
+    incoming: people(raw.incoming),
+    outgoing: people(raw.outgoing),
   };
 }
 
@@ -559,6 +568,13 @@ export async function forfeitDuel(duelId: string): Promise<'forfeited' | 'withdr
 }
 
 /** The number your opponent will be hunting this round. */
+/** The character and colour a player picked, as one string. */
+export async function setAvatar(value: string): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('set_avatar', { p_avatar: value });
+  unwrap<any>(data, error);
+}
+
 export async function setDuelNumber(duelId: string, value: number): Promise<void> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('duel_set_number', {
@@ -684,6 +700,7 @@ export async function loadEndlessBoard(): Promise<EndlessEntry[]> {
 /** One player, as seen by someone else: what a name on a board is worth. */
 export interface PlayerCard {
   name: string;
+  avatar: string | null;
   isMe: boolean;
   friendship: 'none' | 'sent' | 'received' | 'friends';
   online: boolean;
@@ -714,6 +731,7 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
   const raw = unwrap<any>(data, error);
   return {
     name: raw.name,
+    avatar: raw.avatar ?? null,
     isMe: !!raw.isMe,
     friendship: raw.friendship ?? 'none',
     online: !!raw.online,
@@ -749,6 +767,7 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
     entries: (raw.entries ?? []).map((e: any) => ({
       rank: e.rank,
       name: e.name,
+      avatar: e.avatar ?? null,
       score: e.score,
       daysPlayed: e.days_played ?? 0,
       bestStreak: e.best_streak ?? 0,
@@ -770,6 +789,7 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
     entries: (raw.entries ?? []).map((e: any) => ({
       rank: e.rank,
       name: e.name,
+      avatar: e.avatar ?? null,
       score: e.score,
       isMe: !!e.is_me,
       isComplete: !!e.is_complete,
@@ -801,6 +821,8 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_such_user':
     case 'no_such_player':
       return "No player with that name. Names are exact, apart from capitals.";
+    case 'bad_avatar':
+      return 'Pick a character and a colour.';
     case 'thats_you':
       return "That's your own name.";
     case 'no_such_request':
