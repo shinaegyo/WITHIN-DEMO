@@ -25,9 +25,12 @@ import { shareInvite } from '../utils/share';
 export function FriendsScreen({
   username,
   onChanged,
+  onPlay,
 }: {
   username: string;
   onChanged?: () => void;
+  /** Challenging someone opens the duel rather than sending a message. */
+  onPlay: (duelId: string) => void;
 }) {
   const { colors } = useTheme();
   const [state, setState] = useState<FriendsState | null>(null);
@@ -217,8 +220,10 @@ export function FriendsScreen({
                 tone="good"
                 onPress={() =>
                   run(async () => {
-                    await challengeFriend(f.name);
-                    setNote(`Challenge sent to ${f.name}.`);
+                    // Straight into the duel: a challenge you cannot follow is
+                    // a message, and this is meant to be a game starting.
+                    const id = await challengeFriend(f.name);
+                    if (id) onPlay(id);
                   })
                 }
               />
@@ -317,7 +322,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginBottom: 8,
   },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  dot: {
+    marginRight: 4, width: 8, height: 8, borderRadius: 4 },
   rowMain: { flex: 1, minWidth: 0 },
   rowName: { fontSize: 14.5, fontFamily: fonts.bold },
   rowActions: { flexDirection: 'row', gap: 16 },

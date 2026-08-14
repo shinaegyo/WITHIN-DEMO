@@ -422,10 +422,11 @@ export async function loadDuels(): Promise<DuelSummary[]> {
   }));
 }
 
-export async function challengeFriend(username: string): Promise<string> {
+/** Returns the duel it created, so the caller can open it. */
+export async function challengeFriend(username: string): Promise<string | null> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('challenge_friend', { p_username: username });
-  return unwrap<any>(data, error).status;
+  return unwrap<any>(data, error).duelId ?? null;
 }
 
 export async function respondToDuel(duelId: string, accept: boolean): Promise<string> {

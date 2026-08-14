@@ -6,7 +6,6 @@ import {
   ApiError,
   DuelSummary,
   challengeFriend,
-  forfeitDuel,
   loadDuels,
   messageFor,
   respondToDuel,
@@ -27,8 +26,6 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
-  // Leaving hands them the win, so it asks once rather than acting on a tap.
-  const [leaving, setLeaving] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -92,38 +89,19 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         </Text>
         {/* The head-to-head, not progress through this duel — the heading
             above already says whose turn it is. */}
-        <Text style={[styles.meta, { color: colors.textMuted }]}>
-          {d.streak > 0
-            ? `${d.streak} win${d.streak === 1 ? '' : 's'} in a row`
-            : d.streak < 0
-              ? `${-d.streak} loss${d.streak === -1 ? '' : 'es'} in a row`
-              : 'No run either way'}
-        </Text>
+        {/* Only when there is a run to report. "No run either way" announced
+            the absence of a statistic nobody had asked for. */}
+        {d.streak !== 0 && (
+          <Text style={[styles.meta, { color: colors.textMuted }]}>
+            {d.streak > 0
+              ? `${d.streak} win${d.streak === 1 ? '' : 's'} in a row`
+              : `${-d.streak} loss${d.streak === -1 ? '' : 'es'} in a row`}
+          </Text>
+        )}
       </Pressable>
       {children}
     </View>
   );
-
-  const Leave = ({ d }: { d: DuelSummary }) =>
-    leaving === d.id ? (
-      <Action
-        label={d.status === 'pending' ? 'Withdraw?' : 'Give them the win?'}
-        tone="warn"
-        onPress={() =>
-          run(async () => {
-            setLeaving(null);
-            await forfeitDuel(d.id);
-            setNote(
-              d.status === 'pending'
-                ? 'Challenge withdrawn.'
-                : `You left. The duel goes to ${d.opponent}.`,
-            );
-          })
-        }
-      />
-    ) : (
-      <Action label="Leave" onPress={() => setLeaving(d.id)} />
-    );
 
   const Action = ({
     label,
@@ -218,15 +196,11 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
       {yourTurn.length > 0 && (
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>YOUR TURN</Text>
+          {/* One way in. Leaving belongs inside the duel, where the question
+              can be asked properly, not beside a duel nobody has entered. */}
           {yourTurn.map((d) => (
             <Row key={d.id} d={d}>
-              <View style={styles.rowActions}>
-                <Leave d={d} />
-                <Action
-                  label={d.needsNumber ? 'Set number ›' : 'Play ›'}
-                  onPress={() => onPlay(d.id)}
-                />
-              </View>
+              <Action label="Play ›" onPress={() => onPlay(d.id)} />
             </Row>
           ))}
         </>
@@ -236,9 +210,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON THEM</Text>
           {waitingOnThem.map((d) => (
-            <Row key={d.id} d={d}>
-              <Leave d={d} />
-            </Row>
+            <Row key={d.id} d={d} />
           ))}
         </>
       )}

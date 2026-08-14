@@ -160,7 +160,8 @@ export function DuelGameScreen({
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!duel) return <StatusScreen loading />;
 
-  const picking = duel.pickRound !== null;
+  const pending = duel.status === 'pending';
+  const picking = !pending && duel.pickRound !== null;
   const done = duel.round === null;
 
   return (
@@ -224,7 +225,15 @@ export function DuelGameScreen({
             })}
           </View>
 
-          {picking ? (
+          {pending ? (
+            <View style={styles.result}>
+              <Text style={[styles.resultTitle, { color: colors.text }]}>Challenge sent</Text>
+              <Text style={[styles.resultBody, { color: colors.textMuted }]}>
+                Waiting for {duel.opponent} to accept. Once they do, you both choose a number and
+                the round opens for the two of you at the same moment.
+              </Text>
+            </View>
+          ) : picking ? (
             duel.pickSubmitted ? (
               <View style={styles.result}>
                 <Text style={[styles.resultTitle, { color: colors.text }]}>Number set</Text>

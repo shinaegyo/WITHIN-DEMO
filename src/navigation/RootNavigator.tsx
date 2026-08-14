@@ -190,7 +190,13 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         </Stack.Screen>
 
         <Stack.Screen name="Friends" options={{ title: 'Friends', headerBackTitle: 'Back' }}>
-          {() => <FriendsScreen username={username} onChanged={() => setFriendsEpoch((n) => n + 1)} />}
+          {({ navigation }) => (
+            <FriendsScreen
+              username={username}
+              onChanged={() => setFriendsEpoch((n) => n + 1)}
+              onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })}
+            />
+          )}
         </Stack.Screen>
 
         <Stack.Screen
