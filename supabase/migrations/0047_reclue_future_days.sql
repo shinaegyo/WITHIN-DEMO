@@ -66,9 +66,5 @@ $$;
 
 revoke execute on function public.pick_clue1(integer) from public, anon, authenticated;
 
-update public.puzzle_rounds pr
-set clue1 = public.pick_clue1(s.answer)
-from public.puzzle_round_secrets s
-where s.puzzle_date = pr.puzzle_date
-  and s.round = pr.round
-  and pr.puzzle_date > current_date;
+-- The rewrite of the existing schedule is 0048, kept separate because it is the
+-- only slow part and the only part worth retrying on its own.
