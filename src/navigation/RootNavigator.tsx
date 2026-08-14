@@ -253,12 +253,16 @@ export function RootNavigator() {
 
   if (profile.loading || introSeen === null) return null;
 
-  // Rules, then a round, then a name. Asking a stranger to invent a username
-  // before they have seen the game is a form standing where a game should be,
-  // and the answer to "is this worth signing up for" is the practice round.
+  // Name first, then the tutorial. The rules land better once the app knows who
+  // it is talking to, and a stranger who has been through sign-in has already
+  // decided to be here.
+  if (!profile.username) {
+    return <OnboardingScreen onDone={profile.refresh} />;
+  }
+
   if (!introSeen) {
     return introStep === 'rules' ? (
-      <IntroScreen onNext={() => setIntroStep('practice')} />
+      <IntroScreen username={profile.username} onNext={() => setIntroStep('practice')} />
     ) : (
       <PracticeScreen
         introMode
@@ -267,13 +271,6 @@ export function RootNavigator() {
         onPlayAnother={finishIntro}
       />
     );
-  }
-
-  // A username is what gates the app: it's required to appear on the
-  // leaderboard, and unlike an email it can be claimed without waiting for a
-  // code to arrive.
-  if (!profile.username) {
-    return <OnboardingScreen onDone={profile.refresh} />;
   }
 
   return (

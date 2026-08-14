@@ -17,15 +17,18 @@ import { useTheme } from '../theme/ThemeContext';
  * rules would drift the first time one of them changed, and this one would be
  * the copy nobody remembered to update.
  */
-export function IntroScreen({ onNext }: { onNext: () => void }) {
+export function IntroScreen({ username, onNext }: { username: string; onNext: () => void }) {
   const { colors } = useTheme();
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.head}>
-        <Text style={[styles.title, { color: colors.text }]}>How it works</Text>
+        {/* By name, because the app has just been told it. A tutorial that
+            opens with "How it works" is a manual; one that opens with your name
+            is somebody talking to you. */}
+        <Text style={[styles.title, { color: colors.text }]}>Welcome, {username}</Text>
         <Text style={[styles.sub, { color: colors.textMuted }]}>
-          Swipe through all of it, then a round that costs you nothing.
+          Here is how it works. Swipe through all of it, then a round that costs you nothing.
         </Text>
       </View>
 
