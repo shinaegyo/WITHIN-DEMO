@@ -15,6 +15,7 @@ import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
 import { DuelGameScreen } from '../screens/DuelGameScreen';
+import { RankedScreen } from '../screens/RankedScreen';
 import { EndlessScreen } from '../screens/EndlessScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
@@ -35,6 +36,7 @@ export type RootStackParamList = {
   Leaderboard: undefined;
   Friends: undefined;
   Duels: undefined;
+  Ranked: undefined;
   Endless: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
@@ -191,9 +193,18 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           )}
         </Stack.Screen>
 
+        <Stack.Screen name="Ranked" options={{ title: 'Ranked', headerBackTitle: 'Back' }}>
+          {({ navigation }) => (
+            <RankedScreen onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })} />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen name="DuelGame" options={{ headerShown: false }}>
           {({ navigation, route }) => (
-            <DuelGameScreen duelId={route.params.duelId} onExit={() => navigation.navigate('Duels')} />
+            <DuelGameScreen
+              duelId={route.params.duelId}
+              onExit={() => navigation.goBack()}
+            />
           )}
         </Stack.Screen>
 
@@ -219,6 +230,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         onClose={() => setMenuOpen(false)}
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
+          { label: 'Ranked', onPress: () => navRef.isReady() && navRef.navigate('Ranked') },
           { label: 'Duels', onPress: () => navRef.isReady() && navRef.navigate('Duels') },
           { label: 'Practice', onPress: startPractice },
           {

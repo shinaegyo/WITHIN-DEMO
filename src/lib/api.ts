@@ -349,6 +349,8 @@ export interface DuelSummary {
   iChallenged: boolean;
   myDone: number;
   theirDone: number;
+  /** A ranked match rather than a friendly. */
+  ranked: boolean;
   /** A number is owed for the next round. */
   needsNumber: boolean;
   /** A round is open and waiting to be played. */
@@ -406,6 +408,7 @@ export async function loadDuels(): Promise<DuelSummary[]> {
     iChallenged: !!d.i_challenged,
     myDone: d.my_done ?? 0,
     theirDone: d.their_done ?? 0,
+    ranked: !!d.ranked,
     needsNumber: !!d.needs_number,
     needsPlay: !!d.needs_play,
     outcome: d.outcome ?? null,
@@ -426,6 +429,79 @@ export async function respondToDuel(duelId: string, accept: boolean): Promise<st
     p_accept: accept,
   });
   return unwrap<any>(data, error).status;
+}
+
+export interface RankedEntry {
+  rank: number;
+  name: string;
+  rating: number;
+  won: number;
+  lost: number;
+  isMe: boolean;
+  hasBelt: boolean;
+}
+
+export interface RankedState {
+  rating: number;
+  played: number;
+  won: number;
+  lost: number;
+  drawn: number;
+  /** Still in placement matches, where the rating swings hardest. */
+  placing: boolean;
+  rank: number;
+  of: number;
+  queued: boolean;
+  /** Others waiting, so an empty queue can say so. */
+  waiting: number;
+  beltHolder: string | null;
+  iHoldBelt: boolean;
+  match: { id: string; opponent: string } | null;
+  board: RankedEntry[];
+}
+
+export async function loadRanked(): Promise<RankedState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('ranked_state');
+  const raw = unwrap<any>(data, error);
+  return {
+    rating: raw.rating ?? 1000,
+    played: raw.played ?? 0,
+    won: raw.won ?? 0,
+    lost: raw.lost ?? 0,
+    drawn: raw.drawn ?? 0,
+    placing: !!raw.placing,
+    rank: raw.rank ?? 0,
+    of: raw.of ?? 0,
+    queued: !!raw.queued,
+    waiting: raw.waiting ?? 0,
+    beltHolder: raw.beltHolder ?? null,
+    iHoldBelt: !!raw.iHoldBelt,
+    match: raw.match ?? null,
+    board: (raw.board ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      rating: e.rating,
+      won: e.won ?? 0,
+      lost: e.lost ?? 0,
+      isMe: !!e.is_me,
+      hasBelt: !!e.has_belt,
+    })),
+  };
+}
+
+/** Queue for a match, or take one if somebody is already waiting. */
+export async function findRankedMatch(): Promise<{ status: 'queued' | 'matched'; duelId?: string }> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('ranked_find');
+  const raw = unwrap<any>(data, error);
+  return { status: raw.status, duelId: raw.duelId };
+}
+
+export async function leaveRankedQueue(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('ranked_leave_queue');
+  unwrap<any>(data, error);
 }
 
 /**
@@ -678,6 +754,8 @@ export function messageFor(code: string, guess?: number): string {
       return 'You already have a duel going with them.';
     case 'no_such_duel':
       return 'That duel is no longer available.';
+    case 'ranked_already_open':
+      return 'Finish your ranked match first.';
     case 'no_such_challenge':
       return 'That challenge is no longer waiting.';
     case 'waiting_for_them':

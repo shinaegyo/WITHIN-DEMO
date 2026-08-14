@@ -21,7 +21,7 @@ import { useTheme } from '../theme/ThemeContext';
  */
 export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const { colors } = useTheme();
-  const [duels, setDuels] = useState<DuelSummary[] | null>(null);
+  const [all, setAll] = useState<DuelSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [note, setNote] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const load = useCallback(async () => {
     setError(null);
     try {
-      setDuels(await loadDuels());
+      setAll(await loadDuels());
     } catch (err) {
       setError(messageFor(err instanceof ApiError ? err.code : 'network'));
     }
@@ -66,7 +66,10 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     });
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
-  if (!duels) return <StatusScreen loading />;
+  if (!all) return <StatusScreen loading />;
+
+  // Ranked matches have their own screen; this list is friends only.
+  const duels = all.filter((d) => !d.ranked);
 
   const waitingOnYou = duels.filter((d) => d.status === 'pending' && !d.iChallenged);
   // A duel wants either a number for the next round or a round played. Anything
@@ -77,7 +80,9 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
       (d.status === 'active' && !d.needsNumber && !d.needsPlay) ||
       (d.status === 'pending' && d.iChallenged),
   );
-  const settled = duels.filter((d) => d.status === 'complete');
+  // The three most recent. Every duel you have ever played is a history, not a
+  // list of things to do, and it pushed the live ones off the screen.
+  const settled = duels.filter((d) => d.status === 'complete').slice(0, 3);
 
   const Row = ({ d, children }: { d: DuelSummary; children?: React.ReactNode }) => (
     <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
