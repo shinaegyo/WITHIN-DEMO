@@ -18,7 +18,6 @@ const SITE = 'withindemo.vercel.app';
 export function buildShareText(game: DailyGame): string {
   const lines = [`WITHIN #${game.puzzleNumber} — ${game.totalScore}/${game.maxScore}`];
 
-  if (game.modifier.kind !== 'standard') lines.push(game.modifier.label);
   if (game.stats.currentStreak > 0) {
     lines.push(`🔥 ${game.stats.currentStreak} day streak`);
   }

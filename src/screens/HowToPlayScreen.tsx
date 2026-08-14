@@ -206,18 +206,6 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       </Text>
     </>,
 
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Five days a week play by the rules above. The other two are marked, and the home screen says
-        which is which. The Twist of the Week makes the day harder — fewer attempts, a clue
-        withheld, or no clues at all. The Bonus of the Week does the opposite — extra attempts,
-        clues opened early, or points multiplied.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        There are twenty-five of each, and everyone in the world gets the same two on the same days.
-      </Text>
-    </>,
   ];
 
   const count = sections.length;

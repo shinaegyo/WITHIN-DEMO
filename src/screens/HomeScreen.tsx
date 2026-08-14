@@ -186,16 +186,9 @@ export function HomeScreen({
   const me = board.find((e) => e.isMe);
   const preview = me && !top.some((e) => e.isMe) ? [...top, me] : top;
 
-  // Two marked days a week: one harder, one kinder. The other five are plain,
-  // which is what gives these any weight.
   // The board always includes the player, so a single row means no friends.
   const hasFriendsToday = friendsBoard.some((e) => !e.isMe);
 
-  const mod = game.modifier;
-  const twist =
-    mod.kind === 'twist' || mod.kind === 'bonus'
-      ? { heading: mod.kind === 'twist' ? 'TWIST OF THE WEEK' : 'BONUS OF THE WEEK', ...mod }
-      : null;
   const lastHour = !finished && remaining < 60 * 60 * 1000;
 
   const renderBoard = (
@@ -293,13 +286,6 @@ export function HomeScreen({
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
         <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
-        {twist && (
-          <View style={[styles.twist, { borderColor: colors.text }]}>
-            <Text style={[styles.twistHeading, { color: colors.textMuted }]}>{twist.heading}</Text>
-            <Text style={[styles.twistLabel, { color: colors.text }]}>{twist.label}</Text>
-            <Text style={[styles.twistDetail, { color: colors.textMuted }]}>{twist.detail}</Text>
-          </View>
-        )}
 
         {started ? (
           <>
@@ -627,19 +613,6 @@ const styles = StyleSheet.create({
   boardName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
   boardOut: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.8 },
   boardScore: { fontSize: 14, fontFamily: fonts.extraBold },
-  twist: {
-    alignSelf: 'stretch',
-    borderWidth: 1.5,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    marginBottom: 22,
-    gap: 2,
-  },
-  twistHeading: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.5 },
-  twistLabel: { fontSize: 14, fontFamily: fonts.extraBold },
-  twistDetail: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
   status: {
     fontSize: 10.5,
     fontFamily: fonts.bold,
