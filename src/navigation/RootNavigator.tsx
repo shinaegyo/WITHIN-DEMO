@@ -16,6 +16,7 @@ import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
 import { DuelGameScreen } from '../screens/DuelGameScreen';
+import { EndlessScreen } from '../screens/EndlessScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
@@ -36,6 +37,7 @@ export type RootStackParamList = {
   Leaderboard: undefined;
   Friends: undefined;
   Duels: undefined;
+  Endless: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
   HowToPlay: undefined;
@@ -144,11 +146,12 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           {({ navigation }) => (
             <HomeScreen
               onPlay={() => navigation.navigate('Game')}
-              onPractice={startPractice}
+              onEndless={() => navigation.navigate('Endless')}
               onOpenMenu={() => setMenuOpen(true)}
               menuAlert={pending > 0}
               onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
               onOpenFriends={() => navigation.navigate('Friends')}
+              onOpenDuels={() => navigation.navigate('Duels')}
               practiceEpoch={practiceEpoch}
               username={username}
             />
@@ -180,6 +183,10 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
 
         <Stack.Screen name="Account" options={{ title: 'Profile', headerBackTitle: 'Back' }}>
           {() => <AccountScreen onChanged={() => { reload(); onProfileChanged(); }} />}
+        </Stack.Screen>
+
+        <Stack.Screen name="Endless" options={{ headerShown: false }}>
+          {({ navigation }) => <EndlessScreen onExit={() => navigation.navigate('Home')} />}
         </Stack.Screen>
 
         <Stack.Screen name="Duels" options={{ title: 'Duels', headerBackTitle: 'Back' }}>
@@ -217,6 +224,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
           { label: 'Duels', onPress: () => navRef.isReady() && navRef.navigate('Duels') },
+          { label: 'Practice', onPress: startPractice },
           {
             label: 'Friends',
             count: pending,

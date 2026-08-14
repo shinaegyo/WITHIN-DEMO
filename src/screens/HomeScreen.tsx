@@ -16,10 +16,11 @@ import { MEDALS } from '../theme/medals';
 
 interface Props {
   onPlay: () => void;
-  onPractice: () => void;
+  onEndless: () => void;
   onOpenMenu: () => void;
   onOpenLeaderboard: () => void;
   onOpenFriends: () => void;
+  onOpenDuels: () => void;
   /** A friend request is waiting, so the menu button carries a dot. */
   menuAlert?: boolean;
   /** Bumped by the navigator so the count refreshes on return from practice. */
@@ -29,10 +30,11 @@ interface Props {
 
 export function HomeScreen({
   onPlay,
-  onPractice,
+  onEndless,
   onOpenMenu,
   onOpenLeaderboard,
   onOpenFriends,
+  onOpenDuels,
   menuAlert = false,
   practiceEpoch,
   username,
@@ -312,10 +314,34 @@ export function HomeScreen({
           </>
         )}
 
-        {/* Share is sized to its words. Stretched across the screen it left a
-            wide gap either side of two short words, which read as an empty bar
-            rather than a button. Play still spans, because starting the day is
-            the one thing the screen is for. */}
+        {/* The two ways to keep playing, side by side under the day's result.
+            Share moves below them: it is what you do once, where these are what
+            you do next. */}
+        {finished && (
+          <View style={styles.modes}>
+            <Pressable
+              onPress={onEndless}
+              style={({ pressed }) => [
+                styles.mode,
+                { borderColor: colors.text, opacity: pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={[styles.modeText, { color: colors.text }]}>Endless</Text>
+              <Text style={[styles.modeSub, { color: colors.textMuted }]}>until you miss</Text>
+            </Pressable>
+            <Pressable
+              onPress={onOpenDuels}
+              style={({ pressed }) => [
+                styles.mode,
+                { borderColor: colors.text, opacity: pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={[styles.modeText, { color: colors.text }]}>Challenge</Text>
+              <Text style={[styles.modeSub, { color: colors.textMuted }]}>a friend</Text>
+            </Pressable>
+          </View>
+        )}
+
         <Pressable
           style={({ pressed }) => [
             styles.primary,
@@ -347,31 +373,10 @@ export function HomeScreen({
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>ALL TIME</Text>
           </View>
         </View>
-
-        {/* Practice unlocks after the daily, so it tops up a session rather
-            than replacing the thing people came for. */}
-        {finished && practiceLeft !== null && (
-          <Pressable disabled={practiceLeft === 0} onPress={onPractice} style={styles.practice}>
-            {/* One line, no underline and no pips. Three dots in a row is the
-                visual language of a passcode field, and it competed with the
-                score above it. */}
-            <Text
-              style={[
-                styles.practiceText,
-                { color: practiceLeft > 0 ? colors.text : colors.textMuted },
-              ]}
-            >
-              Practice{' '}
-              <Text style={[styles.practiceCount, { color: colors.textMuted }]}>
-                {practiceLeft > 0 ? `· ${practiceLeft} left` : '· none left today'}
-              </Text>
-            </Text>
-          </Pressable>
-        )}
         </View>
-        {/* Friends first. Beating eight people you know is a stronger pull
-            than placing fortieth among strangers, so the wider board sits
-            underneath rather than on top. */}
+
+        {/* Friends first. Beating people you know pulls harder than placing
+            among strangers, so the wider board sits underneath. */}
         {hasFriendsToday &&
           renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
 
@@ -385,11 +390,7 @@ export function HomeScreen({
           </Pressable>
         )}
 
-        {/* Today's standings, in reach without leaving the screen. They move
-            through the day, which is the point: a reason to look again this
-            evening rather than only tomorrow. */}
         {board.length > 0 && renderBoard("TODAY'S TOP", 'All time ›', preview, onOpenLeaderboard)}
-
       </ScrollView>
 
       {/* Pinned rather than scrolled. The clock is the reason to come back, so
@@ -578,7 +579,16 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 19, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
-  practice: { marginTop: 18, paddingVertical: 6, alignItems: 'center' },
+  modes: { flexDirection: 'row', gap: 10, alignSelf: 'stretch', marginTop: 20 },
+  mode: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modeText: { fontSize: 14.5, fontFamily: fonts.extraBold },
+  modeSub: { fontSize: 10.5, fontFamily: fonts.medium, marginTop: 1 },
   rankRow: { alignItems: 'center', marginTop: 10 },
   rankLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4 },
   rankValue: { fontSize: 22, fontFamily: fonts.extraBold, marginTop: 1 },
