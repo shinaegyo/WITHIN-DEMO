@@ -14,6 +14,8 @@ import { HowToPlayScreen } from '../screens/HowToPlayScreen';
 import { AccountScreen } from '../screens/AccountScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
+import { DuelsScreen } from '../screens/DuelsScreen';
+import { DuelGameScreen } from '../screens/DuelGameScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
@@ -33,6 +35,8 @@ export type RootStackParamList = {
   Practice: { remainingAfterThis: number };
   Leaderboard: undefined;
   Friends: undefined;
+  Duels: undefined;
+  DuelGame: { duelId: string };
   Account: undefined;
   HowToPlay: undefined;
 };
@@ -178,6 +182,18 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
           {() => <AccountScreen onChanged={() => { reload(); onProfileChanged(); }} />}
         </Stack.Screen>
 
+        <Stack.Screen name="Duels" options={{ title: 'Duels', headerBackTitle: 'Back' }}>
+          {({ navigation }) => (
+            <DuelsScreen onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })} />
+          )}
+        </Stack.Screen>
+
+        <Stack.Screen name="DuelGame" options={{ headerShown: false }}>
+          {({ navigation, route }) => (
+            <DuelGameScreen duelId={route.params.duelId} onExit={() => navigation.navigate('Duels')} />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen name="Friends" options={{ title: 'Friends', headerBackTitle: 'Back' }}>
           {() => <FriendsScreen username={username} onChanged={() => setFriendsEpoch((n) => n + 1)} />}
         </Stack.Screen>
@@ -200,6 +216,7 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
         onClose={() => setMenuOpen(false)}
         items={[
           { label: 'How to Play', onPress: () => navRef.isReady() && navRef.navigate('HowToPlay') },
+          { label: 'Duels', onPress: () => navRef.isReady() && navRef.navigate('Duels') },
           {
             label: 'Friends',
             count: pending,

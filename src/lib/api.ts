@@ -330,6 +330,112 @@ export async function markOnboarded(): Promise<void> {
   unwrap<any>(data, error);
 }
 
+export interface DuelSummary {
+  id: string;
+  status: 'pending' | 'active' | 'complete';
+  opponent: string;
+  iChallenged: boolean;
+  myDone: number;
+  theirDone: number;
+  outcome: 'won' | 'lost' | 'draw' | null;
+}
+
+export interface DuelRoundState {
+  round: number;
+  attemptsUsed: number;
+  attemptsAllowed: number;
+  clue1: string;
+  clue2: string | null;
+  guesses: GuessResult[];
+}
+
+export interface DuelProgressRow {
+  round: number;
+  status: 'playing' | 'won' | 'lost';
+  attemptsUsed: number;
+}
+
+export interface DuelState {
+  id: string;
+  status: 'pending' | 'active' | 'complete' | 'declined';
+  opponent: string;
+  outcome: 'won' | 'lost' | 'draw' | null;
+  round: DuelRoundState | null;
+  mine: DuelProgressRow[];
+  theirs: DuelProgressRow[];
+}
+
+export async function loadDuels(): Promise<DuelSummary[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_list');
+  const raw = unwrap<any>(data, error);
+  return (raw.duels ?? []).map((d: any) => ({
+    id: d.id,
+    status: d.status,
+    opponent: d.opponent,
+    iChallenged: !!d.i_challenged,
+    myDone: d.my_done ?? 0,
+    theirDone: d.their_done ?? 0,
+    outcome: d.outcome ?? null,
+  }));
+}
+
+export async function challengeFriend(username: string): Promise<string> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('challenge_friend', { p_username: username });
+  return unwrap<any>(data, error).status;
+}
+
+export async function respondToDuel(duelId: string, accept: boolean): Promise<string> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('respond_duel', {
+    p_duel_id: duelId,
+    p_accept: accept,
+  });
+  return unwrap<any>(data, error).status;
+}
+
+export async function loadDuel(duelId: string): Promise<DuelState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_state', { p_duel_id: duelId });
+  const raw = unwrap<any>(data, error);
+  return {
+    id: raw.id,
+    status: raw.status,
+    opponent: raw.opponent,
+    outcome: raw.outcome ?? null,
+    round: raw.round
+      ? {
+          round: raw.round.round,
+          attemptsUsed: raw.round.attemptsUsed,
+          attemptsAllowed: raw.round.attemptsAllowed,
+          clue1: raw.round.clue1,
+          clue2: raw.round.clue2 ?? null,
+          guesses: (raw.round.guesses ?? []).map(toGuessResult),
+        }
+      : null,
+    mine: raw.mine ?? [],
+    theirs: raw.theirs ?? [],
+  };
+}
+
+export async function duelGuess(duelId: string, guess: number) {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_guess', {
+    p_duel_id: duelId,
+    p_guess: guess,
+  });
+  const raw = unwrap<any>(data, error);
+  return {
+    roundStatus: raw.roundStatus as 'playing' | 'won' | 'lost',
+    attemptsUsed: raw.attemptsUsed as number,
+    attemptsAllowed: raw.attemptsAllowed as number,
+    result: toGuessResult(raw.guess),
+    clue2: (raw.clue2 ?? null) as string | null,
+    answer: (raw.answer ?? null) as number | null,
+  };
+}
+
 export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });
@@ -393,6 +499,14 @@ export function messageFor(code: string, guess?: number): string {
       return "That's your own name.";
     case 'no_such_request':
       return 'That request is no longer waiting.';
+    case 'not_friends':
+      return 'You can only challenge someone you are friends with.';
+    case 'duel_already_open':
+      return 'You already have a duel going with them.';
+    case 'no_such_duel':
+      return 'That duel is no longer available.';
+    case 'no_such_challenge':
+      return 'That challenge is no longer waiting.';
     default:
       return 'Connection problem. Check your network and try again.';
   }

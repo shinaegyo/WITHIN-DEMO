@@ -108,6 +108,19 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         The number is revealed once the round ends, whether you found it or not.
       </Text>
 
+      <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        Add someone as a friend and you can challenge them. Once they accept, you both get the same
+        three numbers and the same seven, six and five attempts. Each round goes to whoever needed
+        fewer guesses; equal counts settle nothing. Win more rounds and you win the duel — level on
+        rounds is decided by fewer guesses overall.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        You play whenever you like, not at the same time. Neither of you sees the other's board
+        until you have both finished. Duels are separate from your daily: they change no points,
+        no streak and no leaderboard place.
+      </Text>
+
       <Text style={[styles.h2, { color: colors.text }]}>Twist and Bonus days</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Five days a week play by the rules above. The other two are marked, and the home screen
