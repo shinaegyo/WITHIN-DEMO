@@ -20,12 +20,12 @@ export function IntroScreen({ onNext }: { onNext: () => void }) {
       <View style={styles.head}>
         <Text style={[styles.title, { color: colors.text }]}>How it works</Text>
         <Text style={[styles.sub, { color: colors.textMuted }]}>
-          A minute now, then a practice round before anything counts.
+          Two screens, then a round that costs you nothing.
         </Text>
       </View>
 
       <View style={styles.body}>
-        <HowToPlayScreen showTitle={false} />
+        <HowToPlayScreen showTitle={false} compact />
       </View>
 
       <View style={[styles.foot, { borderColor: colors.border }]}>

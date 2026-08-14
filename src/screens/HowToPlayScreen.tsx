@@ -10,7 +10,15 @@ const GAP = 26;
 const PAGE_PADDING = 40;
 
 /** Nothing in the game itself explains the colour system, so this screen does. */
-export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = {}) {
+export function HowToPlayScreen({
+  showTitle = true,
+  /**
+   * Before a first round, only what you need to make a guess: what the game is
+   * and what the colours mean. Five pages of rules in front of somebody who has
+   * not played yet is a manual, and it is read the way manuals are read.
+   */
+  compact = false,
+}: { showTitle?: boolean; compact?: boolean } = {}) {
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(0);
   const [heights, setHeights] = useState<number[]>([]);
@@ -226,7 +234,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
 
   ];
 
-  const count = sections.length;
+  const shown = compact ? sections.slice(0, 2) : sections;
+  const count = shown.length;
   const measured = viewport > 0 && heights.length === count && heights.every((h) => h > 0);
 
   /**
@@ -271,7 +280,7 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
           // The measuring pass: laid out at the real page width so the text
           // wraps exactly as it will, then dropped once the heights are in.
           <View style={[styles.measure, { width }]} pointerEvents="none">
-            {sections.map((section, i) => (
+            {shown.map((section, i) => (
               <View
                 key={i}
                 onLayout={(e) => {
@@ -309,7 +318,7 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
               >
                 {group.map((i, n) => (
                   <View key={i} style={n === 0 ? undefined : { marginTop: GAP }}>
-                    {sections[i]}
+                    {shown[i]}
                   </View>
                 ))}
               </ScrollView>

@@ -54,11 +54,6 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
   const { colors, mode } = useTheme();
   const { startFreshTestPlayer, resetToday, reload, game, phase } = useDailyGameContext();
   const [menuOpen, setMenuOpen] = useState(false);
-  // null until the device flag has been read, so the tutorial never flashes up
-  // in front of someone who has already done it.
-  const [introSeen, setIntroSeen] = useState<boolean | null>(null);
-  const [introStep, setIntroStep] = useState<'rules' | 'practice'>('rules');
-
   const [sound, setSound] = useState(true);
   // Nobody is going to open a Friends screen on the off chance. A waiting
   // request has to announce itself, or it sits there until the sender gives up.
@@ -82,7 +77,6 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
   }, [friendsEpoch]);
 
   useEffect(() => {
-    hasSeenIntro().then(setIntroSeen);
     loadSoundSetting().then(setSound);
   }, []);
   // Nudged whenever a round is consumed so Home refetches how many are left.
@@ -95,30 +89,6 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
     if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left });
   };
 
-  // The account records whether these rules have been shown, so no guessing
-  // from how much someone has played — that heuristic sent players who had
-  // never seen the rules straight past them.
-  const needsIntro = introSeen === false;
-
-  const finishIntro = () => {
-    markIntroSeen();
-    setIntroSeen(true);
-  };
-
-  if (introSeen === null || (needsIntro && phase === 'loading')) return null;
-
-  if (needsIntro) {
-    return introStep === 'rules' ? (
-      <IntroScreen onNext={() => setIntroStep('practice')} />
-    ) : (
-      <PracticeScreen
-        introMode
-        remainingAfterThis={0}
-        onExit={finishIntro}
-        onPlayAnother={finishIntro}
-      />
-    );
-  }
 
   const navTheme = {
     ...(mode === 'dark' ? DarkTheme : DefaultTheme),
@@ -267,8 +237,37 @@ function Screens({ username, onProfileChanged }: { username: string; onProfileCh
 
 export function RootNavigator() {
   const profile = useProfile();
+  // null until the flag has been read, so the tutorial never flashes up in
+  // front of someone who has already done it.
+  const [introSeen, setIntroSeen] = useState<boolean | null>(null);
+  const [introStep, setIntroStep] = useState<'rules' | 'practice'>('rules');
 
-  if (profile.loading) return null;
+  useEffect(() => {
+    hasSeenIntro().then(setIntroSeen);
+  }, []);
+
+  const finishIntro = () => {
+    markIntroSeen();
+    setIntroSeen(true);
+  };
+
+  if (profile.loading || introSeen === null) return null;
+
+  // Rules, then a round, then a name. Asking a stranger to invent a username
+  // before they have seen the game is a form standing where a game should be,
+  // and the answer to "is this worth signing up for" is the practice round.
+  if (!introSeen) {
+    return introStep === 'rules' ? (
+      <IntroScreen onNext={() => setIntroStep('practice')} />
+    ) : (
+      <PracticeScreen
+        introMode
+        remainingAfterThis={0}
+        onExit={finishIntro}
+        onPlayAnother={finishIntro}
+      />
+    );
+  }
 
   // A username is what gates the app: it's required to appear on the
   // leaderboard, and unlike an email it can be claimed without waiting for a

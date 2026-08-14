@@ -121,6 +121,21 @@ export function PracticeScreen({
 
           <ClueCard clue={round.clue1} />
 
+          {/* A first-timer is looking at a number box with no idea what to put
+              in it, and then at a coloured tile with no idea what it means. One
+              line, changing with the last guess, teaches both without a tour. */}
+          {introMode && !finished && (
+            <Text style={[styles.coach, { color: colors.textMuted }]}>
+              {guesses.length === 0
+                ? 'Type any number between 1 and 1000 and press Guess.'
+                : last?.isWithin10
+                  ? 'Within 10 — the tile is as strong as it gets. Nudge it.'
+                  : last?.direction === 'below'
+                    ? 'Blue and pointing up: the answer is higher than that. Go up.'
+                    : 'Red and pointing down: the answer is lower than that. Go down.'}
+            </Text>
+          )}
+
           <NumberInput disabled={finished} onSubmit={submit} />
 
           <View style={styles.boardWrap}>
@@ -188,6 +203,7 @@ export function PracticeScreen({
 }
 
 const styles = StyleSheet.create({
+  coach: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center', lineHeight: 18 },
   safe: { flex: 1 },
   flex: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 12, gap: 16 },
