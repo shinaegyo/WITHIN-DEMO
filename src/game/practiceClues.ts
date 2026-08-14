@@ -41,33 +41,33 @@ const CLUES: Clue[] = [
   })),
 
   {
-    text: 'Its digits climb as you read them.',
+    text: 'Each digit is bigger than the one before it, like 245.',
     holds: (n) => digits(n).length > 1 && digits(n).every((d, i, a) => i === 0 || a[i - 1] < d),
   },
   {
-    text: 'Its digits fall as you read them.',
+    text: 'Each digit is smaller than the one before it, like 852.',
     holds: (n) => digits(n).length > 1 && digits(n).every((d, i, a) => i === 0 || a[i - 1] > d),
   },
   {
-    text: 'It reads the same backwards.',
+    text: 'It reads the same backwards, like 262.',
     holds: (n) => String(n) === String(n).split('').reverse().join(''),
   },
-  { text: 'Two of its digits are the same.', holds: (n) => new Set(digits(n)).size !== digits(n).length },
-  { text: 'Every digit is different.', holds: (n) => new Set(digits(n)).size === digits(n).length },
+  { text: 'Two of its digits are the same, like 447.', holds: (n) => new Set(digits(n)).size !== digits(n).length },
+  { text: 'No digit appears twice.', holds: (n) => new Set(digits(n)).size === digits(n).length },
   { text: 'There is a 0 in it.', holds: (n) => digits(n).includes(0) },
 
-  { text: 'The first and last digits are both even.', holds: (n) => first(n) % 2 === 0 && last(n) % 2 === 0 },
-  { text: 'The first and last digits are both odd.', holds: (n) => first(n) % 2 === 1 && last(n) % 2 === 1 },
-  { text: 'It starts on a bigger digit than it ends on.', holds: (n) => first(n) > last(n) },
-  { text: 'It ends on a bigger digit than it starts on.', holds: (n) => last(n) > first(n) },
-  { text: 'It starts and ends on the same digit.', holds: (n) => digits(n).length > 1 && first(n) === last(n) },
+  { text: 'The first digit and the last digit are both even.', holds: (n) => first(n) % 2 === 0 && last(n) % 2 === 0 },
+  { text: 'The first digit and the last digit are both odd.', holds: (n) => first(n) % 2 === 1 && last(n) % 2 === 1 },
+  { text: 'The first digit is bigger than the last digit.', holds: (n) => first(n) > last(n) },
+  { text: 'The last digit is bigger than the first digit.', holds: (n) => last(n) > first(n) },
+  { text: 'It starts and ends on the same digit, like 727.', holds: (n) => digits(n).length > 1 && first(n) === last(n) },
 
   {
-    text: 'Its middle digit is the biggest of the three.',
+    text: 'The middle digit is the biggest of the three, like 391.',
     holds: (n) => digits(n).length === 3 && digits(n)[1] > digits(n)[0] && digits(n)[1] > digits(n)[2],
   },
   {
-    text: 'Its middle digit is the smallest of the three.',
+    text: 'The middle digit is the smallest of the three, like 715.',
     holds: (n) => digits(n).length === 3 && digits(n)[1] < digits(n)[0] && digits(n)[1] < digits(n)[2],
   },
 
