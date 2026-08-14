@@ -4,6 +4,7 @@ import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
+  challengeFriend,
   FriendsState,
   loadFriends,
   messageFor,
@@ -83,6 +84,9 @@ export function FriendsScreen({
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!state) return <StatusScreen loading />;
+
+  const online = state ? state.friends.filter((f) => f.online) : [];
+  const offline = state ? state.friends.filter((f) => !f.online) : [];
 
   const Row = ({
     label,
@@ -198,8 +202,34 @@ export function FriendsScreen({
         </>
       )}
 
+      {/* Online first, and with the only button that matters while they are.
+          Duel rounds are three minutes long, so a challenge is worth sending to
+          somebody who is here and worth nothing to anybody else. */}
+      {online.length > 0 && (
+        <>
+          <Text style={[styles.heading, { color: feedbackColors.correct }]}>
+            ONLINE NOW · {online.length}
+          </Text>
+          {online.map((f) => (
+            <Row key={`on-${f.name}`} label={f.name} online>
+              <Action
+                label="Challenge"
+                tone="good"
+                onPress={() =>
+                  run(async () => {
+                    await challengeFriend(f.name);
+                    setNote(`Challenge sent to ${f.name}.`);
+                  })
+                }
+              />
+            </Row>
+          ))}
+        </>
+      )}
+
       <Text style={[styles.heading, { color: colors.textMuted }]}>
-        FRIENDS{state.friends.length > 0 ? ` · ${state.friends.length}` : ''}
+        {online.length > 0 ? 'EVERYONE ELSE' : 'FRIENDS'}
+        {offline.length > 0 ? ` · ${offline.length}` : ''}
       </Text>
       {state.friends.length === 0 ? (
         <Text style={[styles.empty, { color: colors.textMuted }]}>
@@ -207,7 +237,7 @@ export function FriendsScreen({
           once they accept.
         </Text>
       ) : (
-        state.friends.map((f) => (
+        offline.map((f) => (
           <Row key={f.name} label={f.name} online={f.online}>
             <Action label="Remove" onPress={() => run(async () => { await removeFriend(f.name); })} />
           </Row>

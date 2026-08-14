@@ -324,7 +324,9 @@ export function HomeScreen({
                       },
                     ]}
                   >
-                    <Text style={styles.chipText}>{won ? r?.score : lost ? '✕' : ''}</Text>
+                    {/* A lost round is a red bar and nothing else. The cross
+                        said the same thing twice, in the harsher voice. */}
+                    <Text style={styles.chipText}>{won ? r?.score : ''}</Text>
                   </View>
                 );
               })}
@@ -643,7 +645,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     flex: 1,
-    height: 22,
+    height: 44,
     borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',

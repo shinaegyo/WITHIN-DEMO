@@ -42,7 +42,7 @@ export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, fin
               )}
             </>
           ) : (
-            <Text style={[styles.count, { color: colors.textMuted }]}>{remaining} GUESSES LEFT</Text>
+            <Text style={[styles.count, { color: colors.text }]}>{remaining} GUESSES LEFT</Text>
           )}
         </View>
       )}
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   count: {
-    fontSize: 11,
-    fontFamily: fonts.bold,
+    fontSize: 14,
+    fontFamily: fonts.extraBold,
     letterSpacing: 1.4,
   },
   note: {

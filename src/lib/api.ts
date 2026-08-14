@@ -366,6 +366,8 @@ export interface DuelRoundState {
   attemptsUsed: number;
   attemptsAllowed: number;
   clue1: string;
+  /** Of the round's three minutes. The server owns this clock. */
+  secondsLeft: number;
   guesses: GuessResult[];
 }
 
@@ -387,6 +389,9 @@ export interface DuelState {
   id: string;
   status: 'pending' | 'active' | 'complete' | 'declined';
   opponent: string;
+  /** A rematch is a fresh challenge for a friendly, or the queue for ranked. */
+  ranked: boolean;
+  opponentOnline: boolean;
   outcome: 'won' | 'lost' | 'draw' | null;
   round: DuelRoundState | null;
   /** True while the other player still has an earlier round open. */
@@ -570,6 +575,8 @@ export async function loadDuel(duelId: string): Promise<DuelState> {
     id: raw.id,
     status: raw.status,
     opponent: raw.opponent,
+    ranked: !!raw.ranked,
+    opponentOnline: !!raw.opponentOnline,
     outcome: raw.outcome ?? null,
     round: raw.round
       ? {
@@ -577,6 +584,7 @@ export async function loadDuel(duelId: string): Promise<DuelState> {
           attemptsUsed: raw.round.attemptsUsed,
           attemptsAllowed: raw.round.attemptsAllowed,
           clue1: raw.round.clue1,
+          secondsLeft: raw.round.secondsLeft ?? 0,
           guesses: (raw.round.guesses ?? []).map(toGuessResult),
         }
       : null,
@@ -795,6 +803,10 @@ export function messageFor(code: string, guess?: number): string {
       return 'That request is no longer waiting.';
     case 'not_friends':
       return 'You can only challenge someone you are friends with.';
+    case 'not_online':
+      return 'They are not online. Rounds are timed, so both of you need to be here.';
+    case 'time_up':
+      return 'Time ran out on that round.';
     case 'duel_already_open':
       return 'You already have a duel going with them.';
     case 'no_such_duel':
