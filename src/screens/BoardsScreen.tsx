@@ -153,10 +153,15 @@ export function BoardsScreen() {
               ? `TOP ${today.me.topPercent}% TODAY`
               : `${today.me.rank} OF ${today.totalPlayers} TODAY`}
           </Text>
-          <Text style={[styles.mineScore, { color: colors.text }]}>{today.me.score}</Text>
-          <Text style={[styles.mineUnit, { color: colors.textMuted }]}>
-            {today.me.score === 1 ? 'POINT' : 'POINTS'}
-          </Text>
+          {/* One line. Stacked, the unit read as a third label in a card that
+              already had two, and put a line break between a number and the
+              word that says what it is. */}
+          <View style={styles.mineLine}>
+            <Text style={[styles.mineScore, { color: colors.text }]}>{today.me.score}</Text>
+            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>
+              {today.me.score === 1 ? 'point' : 'points'}
+            </Text>
+          </View>
           {/* The explanation is unconditional. It used to ride along with the
               tie - "4 players on this score, the closer guesses rank higher" -
               so on any day you were alone on your score, nothing on the screen
@@ -266,7 +271,8 @@ const styles = StyleSheet.create({
   },
   mineLead: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 1.8 },
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
-  mineUnit: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8, marginTop: -2 },
+  mineLine: { flexDirection: 'row', alignItems: 'baseline', gap: 7 },
+  mineUnit: { fontSize: 15, fontFamily: fonts.bold },
   head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
   headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
   headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
