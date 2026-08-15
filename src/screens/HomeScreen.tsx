@@ -19,14 +19,11 @@ import {
   loadFriendsLeaderboard,
   loadHomeStatus,
   loadLeaderboard,
-  loadRecentDays,
   loadXp,
-  RecentDay,
   XpState,
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
-import { LevelBar } from '../components/LevelBar';
 import { PlayerCardModal } from '../components/PlayerCard';
 
 
@@ -69,7 +66,6 @@ export function HomeScreen({
   // underneath rather than crowding it.
   const [viewport, setViewport] = useState(0);
   const [xp, setXp] = useState<XpState | null>(null);
-  const [week, setWeek] = useState<RecentDay[]>([]);
 
   useEffect(() => {
     playTrack('home');
@@ -140,11 +136,6 @@ export function HomeScreen({
 
     // Refetched when the day's score moves, because finishing the day is the
     // most likely moment for the level to have changed underneath.
-    loadRecentDays(7)
-      .then((d) => {
-        if (!cancelled) setWeek(d);
-      })
-      .catch(() => {});
 
     loadXp()
       .then((x) => {
@@ -334,7 +325,7 @@ export function HomeScreen({
         showsVerticalScrollIndicator={false}
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
-        <View style={[styles.hero, viewport ? { minHeight: Math.round(viewport * 0.62) } : null]}>
+        <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
 
         {started ? (
           <>
@@ -472,108 +463,11 @@ export function HomeScreen({
           </View>
         )}
 
-        {/* The level, with the sentence that gives the other modes a reason to
-            exist once the daily is done. */}
-        {xp && (
-          <View style={[styles.card, { borderColor: colors.border }]}>
-            <LevelBar xp={xp} />
-            <Text style={[styles.cardBody, { color: colors.textMuted }]}>
-              {xp.needed - xp.into} XP to level {xp.level + 1} — every mode pays into it.
-            </Text>
-          </View>
-        )}
-
-        {/* Only when there is something to do. A block that says "nothing is
-            waiting" is worse than no block. */}
-        {(!!modes?.duelsWaiting || (modes?.impossible.lives ?? 0) > 0 ||
-          (modes?.impossible.sessionsLeft ?? 0) > 0) && (
-          <View style={[styles.card, { borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>WAITING FOR YOU</Text>
-
-            {!!modes?.duelsWaiting && (
-              <Pressable
-                style={styles.liveRow}
-                onPress={() => {
-                  playTap();
-                  onOpenDuels();
-                }}
-              >
-                <Text style={[styles.liveLabel, { color: colors.text }]}>
-                  {modes.duelsWaiting === 1 ? 'A duel needs you' : `${modes.duelsWaiting} duels need you`}
-                </Text>
-                <Text style={[styles.liveGo, { color: feedbackColors.correct }]}>Play ›</Text>
-              </Pressable>
-            )}
-
-            {((modes?.impossible.sessionsLeft ?? 0) > 0 || (modes?.impossible.lives ?? 0) > 0) && (
-              <Pressable
-                style={styles.liveRow}
-                onPress={() => {
-                  playTap();
-                  onEndless();
-                }}
-              >
-                <Text style={[styles.liveLabel, { color: colors.text }]}>
-                  Impossible · level {modes?.impossible.level ?? 1}
-                </Text>
-                <Text style={[styles.liveGo, { color: colors.textMuted }]}>
-                  {(modes?.impossible.sessionsLeft ?? 0) > 0
-                    ? 'Climb ›'
-                    : `${modes?.impossible.lives} ${modes?.impossible.lives === 1 ? 'life' : 'lives'} ›`}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-        )}
-
         {/* People you know, not the world. At this size a global top ten reads
             as an empty room; four friends' scores read as a race. */}
         {hasFriendsToday &&
           renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
 
-        {/* Monday to Sunday. A rolling window moved today to the right-hand
-            end every day, so the row never looked like the same thing twice and
-            no dot said which day it was. */}
-        {week.length > 0 && (
-          <View style={[styles.card, { borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>THIS WEEK</Text>
-            <View style={styles.dots}>
-              {week.map((d, i) => {
-                const done = d.status === 'complete';
-                const ahead = d.status === 'future';
-                return (
-                  <View key={d.date} style={styles.dayCol}>
-                    <View
-                      style={[
-                        styles.dayDot,
-                        {
-                          backgroundColor: done ? feedbackColors.correct : 'transparent',
-                          borderColor: d.isToday ? colors.text : colors.border,
-                          borderWidth: d.isToday ? 2 : 1.5,
-                          // A day that has not happened is not a day you missed.
-                          opacity: ahead ? 0.4 : 1,
-                        },
-                      ]}
-                    />
-                    <Text
-                      style={[
-                        styles.dayLetter,
-                        { color: d.isToday ? colors.text : colors.textMuted, opacity: ahead ? 0.5 : 1 },
-                      ]}
-                    >
-                      {'MTWTFSS'[i]}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-            <Text style={[styles.cardBody, { color: colors.textMuted }]}>
-              {game.stats.currentStreak > 0
-                ? `${game.stats.currentStreak} day streak — finish today to keep it.`
-                : 'Finish all three rounds to start a streak.'}
-            </Text>
-          </View>
-        )}
       </ScrollView>
 
       <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
@@ -686,13 +580,6 @@ const styles = StyleSheet.create({
   roundFill: { height: 6, borderRadius: 3, alignSelf: 'stretch' },
   roundScore: { fontSize: 17, fontFamily: fonts.extraBold },
   roundLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1 },
-  liveRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  liveLabel: { fontSize: 14, fontFamily: fonts.bold, flexShrink: 1 },
-  liveGo: { fontSize: 12.5, fontFamily: fonts.extraBold },
-  dots: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  dayCol: { flex: 1, alignItems: 'center', gap: 5 },
-  dayDot: { width: 14, height: 14, borderRadius: 7 },
-  dayLetter: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.6 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {
     width: 18,

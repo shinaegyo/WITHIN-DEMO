@@ -249,7 +249,10 @@ function Screens({
               </Tabs.Screen>
 
               <Tabs.Screen name="Home">
-                {() => (
+                {/* The tab screen's own navigation, not the stack's: only this
+                    one can move between tabs, and navigate('You') on the stack
+                    matched no route and did nothing at all. */}
+                {(tab) => (
                   <HomeScreen
                     onPlay={() => navigation.navigate('Game')}
                     onEndless={() => navigation.navigate('Endless')}
@@ -257,7 +260,7 @@ function Screens({
                     onOpenFriends={() => navigation.navigate('Friends')}
                     onOpenDuels={() => navigation.navigate('Duels')}
                     onOpenRanked={() => navigation.navigate('Ranked')}
-                    onOpenProfile={() => navigation.navigate('You')}
+                    onOpenProfile={() => tab.navigation.navigate('You')}
                     practiceEpoch={practiceEpoch}
                     username={username}
                   />
