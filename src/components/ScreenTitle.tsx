@@ -26,18 +26,28 @@ export function ScreenTitle({
   title,
   subtitle,
   onBack,
+  action,
 }: {
   title: string;
   subtitle?: string;
   /** Omitted on the tabs, which have nowhere to go back to. */
   onBack?: () => void;
+  /**
+   * Sits on the title's own line, right-aligned. For a control that governs
+   * the whole screen rather than any one thing on it - a title bar is where
+   * something applying to everything below belongs, and it costs no row.
+   */
+  action?: React.ReactNode;
 }) {
   const { colors } = useTheme();
 
   return (
     <View style={styles.wrap}>
       {onBack ? <BackButton color={colors.text} onPress={onBack} /> : <View style={styles.gap} />}
-      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+      <View style={styles.titleRow}>
+        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+        {action}
+      </View>
       {!!subtitle && (
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>{subtitle}</Text>
       )}
@@ -48,6 +58,7 @@ export function ScreenTitle({
 const styles = StyleSheet.create({
   wrap: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 10 },
   gap: { height: 8 },
-  title: { fontSize: 38, fontFamily: fonts.extraBold, letterSpacing: -1, marginTop: 2 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  title: { flexShrink: 1, fontSize: 38, fontFamily: fonts.extraBold, letterSpacing: -1, marginTop: 2 },
   subtitle: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, marginTop: 6 },
 });

@@ -187,7 +187,50 @@ export function BoardsScreen() {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
-      <ScreenTitle title="Leaderboard" />
+      {/* One control over three boards, in the title bar because it governs
+          everything below it - including your own card, which would otherwise
+          state a standing before the screen had said which field it was
+          against. A Friends tab would have been a fourth timescale standing
+          beside three real ones. */}
+      <ScreenTitle
+        // "Rank", not "Leaderboard": the tab that opens this screen has said
+        // Rank since it stopped colliding with the guess board, so the screen
+        // agreeing with it costs nothing - and eleven letters at 38pt left no
+        // room on the line for anything else.
+        title="Rank"
+        action={
+          <View style={[styles.filter, { backgroundColor: colors.surfaceAlt }]}>
+            {([false, true] as const).map((f) => (
+              <Pressable
+                key={String(f)}
+                onPress={() => {
+                  if (f === friends) return;
+                  playTap();
+                  setFriends(f);
+                  // Everything on screen belongs to the other field.
+                  setRows({});
+                  setToday(null);
+                  setSeason(null);
+                  setAllTime(null);
+                }}
+                style={[
+                  styles.filterTab,
+                  f === friends && { backgroundColor: colors.background },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    { color: f === friends ? colors.text : colors.textMuted },
+                  ]}
+                >
+                  {f ? 'Friends' : 'Everyone'}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        }
+      />
       <View style={styles.segments}>
         {TABS.map((t) => (
           <Pressable
@@ -211,43 +254,6 @@ export function BoardsScreen() {
             >
               {t.label}
             </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* One control over three boards. A friends tab would have been a fourth
-          timescale sitting beside three real ones; this asks the same question
-          of whichever window you are looking at. */}
-      <View style={styles.filter}>
-        {([false, true] as const).map((f) => (
-          <Pressable
-            key={String(f)}
-            onPress={() => {
-              if (f === friends) return;
-              playTap();
-              setFriends(f);
-              // Everything on screen belongs to the other field.
-              setRows({});
-              setToday(null);
-              setSeason(null);
-              setAllTime(null);
-            }}
-            style={styles.filterTab}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                { color: f === friends ? colors.text : colors.textMuted },
-              ]}
-            >
-              {f ? 'Friends' : 'Everyone'}
-            </Text>
-            <View
-              style={[
-                styles.filterRule,
-                { backgroundColor: f === friends ? colors.text : 'transparent' },
-              ]}
-            />
           </Pressable>
         ))}
       </View>
@@ -489,10 +495,9 @@ const styles = StyleSheet.create({
   // taller glyph than any letter beside it, so the cell containing it built a
   // taller line box - and with nothing saying how to align them vertically,
   // the two labels sat at different heights.
-  filter: { flexDirection: 'row', justifyContent: 'center', gap: 26, paddingTop: 12, paddingBottom: 2 },
-  filterTab: { alignItems: 'center', gap: 5, paddingHorizontal: 6 },
-  filterText: { fontSize: 13, fontFamily: fonts.extraBold },
-  filterRule: { height: 2, width: 22, borderRadius: 1 },
+  filter: { flexShrink: 0, flexDirection: 'row', borderRadius: 999, padding: 3 },
+  filterTab: { borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6 },
+  filterText: { fontSize: 11.5, fontFamily: fonts.extraBold },
   head: {
     flexDirection: 'row',
     alignItems: 'center',
