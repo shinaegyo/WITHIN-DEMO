@@ -272,13 +272,21 @@ language sql
 immutable
 as $$ select 99::smallint $$;
 
-create or replace function public.pick_clue1(p_answer integer)
+-- Dropped rather than replaced: the original calls its argument n, and a
+-- parameter cannot be renamed in place. Nothing breaks in the meantime, because
+-- a function body resolves its calls when it runs rather than when it is
+-- defined.
+drop function if exists public.pick_clue1(integer);
+
+create or replace function public.pick_clue1(n integer)
 returns text
 language sql
 volatile
 as $$
-  select (public.clue_at_strength(p_answer, 1, 1000, 0.5, null))[1];
+  select (public.clue_at_strength(n, 1, 1000, 0.5, null))[1];
 $$;
+
+revoke execute on function public.pick_clue1(integer) from public, anon, authenticated;
 
 /** Kept for the callers that still ask for a window-aware clue. */
 create or replace function public.live_clue(p_answer integer, p_lo integer, p_hi integer)
