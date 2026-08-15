@@ -132,6 +132,7 @@ export function PlayerCardModal({
               )}
 
               <View style={styles.stats}>
+                <Stat label="LEVEL" value={`${card.level}`} />
                 <Stat label="POINTS" value={`${card.points}`} />
                 <Stat label="STREAK" value={`${card.streak}`} />
                 <Stat label="BEST" value={`${card.bestStreak}`} />

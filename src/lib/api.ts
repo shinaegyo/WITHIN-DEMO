@@ -807,6 +807,8 @@ export interface PlayerCard {
   isMe: boolean;
   friendship: 'none' | 'sent' | 'received' | 'friends';
   online: boolean;
+  /** Everything they have played, in one number. */
+  level: number;
   points: number;
   daysPlayed: number;
   streak: number;
@@ -838,6 +840,7 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
     isMe: !!raw.isMe,
     friendship: raw.friendship ?? 'none',
     online: !!raw.online,
+    level: raw.level ?? 1,
     points: raw.points ?? 0,
     daysPlayed: raw.daysPlayed ?? 0,
     streak: raw.streak ?? 0,

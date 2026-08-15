@@ -12,6 +12,7 @@ import {
   messageFor,
   startEndlessSession,
 } from '../lib/api';
+import { ARENAS } from '../theme/arenas';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
@@ -28,6 +29,11 @@ import { playTap } from '../utils/sound';
  * Weekly rather than all-time, because the sequence changes each week: depth is
  * only comparable between people who were hunting the same numbers, and a
  * lifetime record would quietly compare two different games.
+ *
+ * The rules sit underneath it. Impossible has more of them than the daily -
+ * lives, tiers, a clue that arrives late, one climb a day - and the only place
+ * they were written down was How to Play, five taps away on another tab. Under
+ * the board is where somebody is already standing when they wonder.
  */
 export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
   const { colors } = useTheme();
@@ -116,6 +122,45 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
           </Text>
         </View>
         ))}
+
+        <Text style={[styles.rulesHead, { color: colors.text }]}>How Impossible works</Text>
+
+        <Text style={[styles.rule, { color: colors.textMuted }]}>
+          Numbers one after another, up to 100 of them, and everyone plays the same sequence this
+          week. One clue per number, held back until only a few attempts remain.
+        </Text>
+        <Text style={[styles.rule, { color: colors.textMuted }]}>
+          Running out of attempts costs a life, not the climb — you have five, and the same number
+          is waiting. Lose all five and you drop to the start of the deepest tier you reached, so
+          you never replay ground you have already won.
+        </Text>
+        <Text style={[styles.rule, { color: colors.textMuted }]}>
+          One climb a day, spent on your first guess rather than by opening it. Your level carries
+          from day to day, and the board keeps the deepest you have ever been this week.
+        </Text>
+
+        {/* Straight from the table the game reads, so it cannot drift. */}
+        <View style={[styles.tiers, { borderColor: colors.border }]}>
+          {ARENAS.map((a, i) => {
+            const last = ARENAS[i + 1];
+            return (
+              <View key={a.key} style={styles.tierRow}>
+                <View style={[styles.swatch, { backgroundColor: a.background }]} />
+                <Text style={[styles.tierName, { color: colors.text }]}>{a.name}</Text>
+                <Text style={[styles.tierRange, { color: colors.textMuted }]}>
+                  {a.from}–{last ? last.from - 1 : 100}
+                </Text>
+                <Text style={[styles.tierAttempts, { color: colors.textMuted }]}>
+                  {a.attempts} attempts
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+
+        <Text style={[styles.rule, { color: colors.textMuted }]}>
+          Every number cleared pays 20 XP toward your level, and reaching a new tier pays 50.
+        </Text>
       </ScrollView>
 
       {/* The way in sits under the standings rather than replacing them. */}
@@ -170,6 +215,14 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 16, gap: 8, paddingBottom: 20 },
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 8 },
+  rule: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 10 },
+  tiers: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 2, marginBottom: 12 },
+  tierRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 12, gap: 10 },
+  swatch: { width: 12, height: 12, borderRadius: 3 },
+  tierName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
+  tierRange: { fontSize: 11.5, fontFamily: fonts.bold, width: 46, textAlign: 'right' },
+  tierAttempts: { fontSize: 11.5, fontFamily: fonts.medium, width: 74, textAlign: 'right' },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 8 },
   best: { fontSize: 12, fontFamily: fonts.medium, textAlign: 'center' },
   play: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
