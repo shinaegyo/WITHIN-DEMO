@@ -115,9 +115,12 @@ export function RoundOverlay({
 
         <View style={[styles.totalRow, { borderColor: colors.border }]}>
           <Text style={[styles.totalLabel, { color: colors.textMuted }]}>TODAY'S SCORE</Text>
+          {/* No denominator. 140 is a good day; 140 / 300 reads as a shortfall
+              against a maximum almost nobody reaches, and the same change was
+              made on the home screen for the same reason. */}
           <Text style={[styles.totalValue, { color: colors.text }]}>
             {game.totalScore}
-            <Text style={[styles.totalMax, { color: colors.textMuted }]}> / {game.maxScore}</Text>
+            <Text style={[styles.totalMax, { color: colors.textMuted }]}> points</Text>
           </Text>
         </View>
 

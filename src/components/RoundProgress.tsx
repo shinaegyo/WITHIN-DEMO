@@ -80,9 +80,11 @@ export function RoundProgress({ activeRound, totalRounds, rounds, totalScore }: 
         <Text style={[styles.label, { color: colors.textMuted }]}>
           ROUND {activeRound} OF {totalRounds}
         </Text>
+        {/* The number alone. A total shown against 300 turns a good day into a
+            percentage of a maximum almost nobody reaches. */}
         <Text style={[styles.score, { color: colors.text }]}>
           {totalScore}
-          <Text style={[styles.scoreMax, { color: colors.textMuted }]}> / 300</Text>
+          <Text style={[styles.scoreMax, { color: colors.textMuted }]}> PTS</Text>
         </Text>
       </View>
 
