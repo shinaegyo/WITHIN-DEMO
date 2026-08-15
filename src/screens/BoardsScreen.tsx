@@ -47,6 +47,20 @@ import { playTap } from '../utils/sound';
  */
 type Board = 'today' | 'season' | 'alltime';
 
+/** "today" | "this season" | "all time" — the window, said in a sentence. */
+const WHEN: Record<Board, string> = {
+  today: 'today',
+  season: 'this season',
+  alltime: 'all time',
+};
+
+/** 7th, not 7 — a bare number beside a field size reads as a score. */
+function ordinalRank(n: number): string {
+  const rest = n % 100;
+  if (rest >= 11 && rest <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+
 
 /**
  * Where you came, said the way that suits the size of the crowd.
@@ -198,14 +212,22 @@ export function BoardsScreen() {
   };
 
   /** Centre the list on somebody: you, or whoever was searched for. */
-  const centreOn = async (id: string, label: string | null) => {
+  const centreOn = async (id: string, name: string) => {
     setBusy(true);
     try {
       const w = await loadBoardWindow(tab, friends, { around: id, limit: 7 });
       setMore(w.entries.map(toRow));
       setNextFrom(w.from + w.entries.length - 1);
       setEnded(false);
-      setFound(label);
+      // The answer, not the mechanism. "Around sarah" described what the list
+      // was doing; this is what you searched to find out, and the numbers are
+      // already in the window that was just loaded.
+      const them = w.entries.find((e) => e.rank !== undefined && e.name === name);
+      setFound(
+        them
+          ? `${name} is ${ordinalRank(them.rank)} of ${w.totalPlayers.toLocaleString()} ${WHEN[tab]}`
+          : `${name} ${WHEN[tab]}`,
+      );
     } catch {
       setFound('Not on this board.');
     } finally {
@@ -227,7 +249,7 @@ export function BoardsScreen() {
         // note below says whose window this is.
         setQuery('');
         setHints([]);
-        await centreOn(r.userId, `Around ${r.name}`);
+        await centreOn(r.userId, r.name!);
       }
     } catch {
       setFound('Could not search just now.');
@@ -508,7 +530,7 @@ export function BoardsScreen() {
                     setQuery('');
                     setHints([]);
                     if (h.rank === null) setFound(`${h.name} has not played this one.`);
-                    else centreOn(h.userId, `Around ${h.name}`);
+                    else centreOn(h.userId, h.name);
                   }}
                   style={({ pressed }) => [styles.hintRow, { opacity: pressed ? 0.6 : 1 }]}
                 >
@@ -535,7 +557,9 @@ export function BoardsScreen() {
                 }}
                 hitSlop={8}
               >
-                <Text style={[styles.foundClear, { color: colors.text }]}>Back to the top</Text>
+                <Text style={[styles.foundClear, { color: colors.text }]}>
+                  {friends ? 'Show all friends' : 'Show everyone'}
+                </Text>
               </Pressable>
             </View>
           )}
