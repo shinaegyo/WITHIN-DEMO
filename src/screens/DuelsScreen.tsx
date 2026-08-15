@@ -42,10 +42,10 @@ export function DuelsScreen({
   onPlay: (duelId: string) => void;
   onBack: () => void;
 }) {
-  // Silent. Music belongs to playing, not to the rooms around it - and it has
-  // to be asked for, because a screen that says nothing keeps whatever the
-  // last one started, so this kept a mode's track playing over a list.
-  useTrack(null);
+  // Reached from the Games tab, which is the game section, so the track
+  // carries through rather than cutting out on the way to a duel. It is a
+  // lobby, but it is a lobby inside a mode.
+  useTrack('game');
   const { colors } = useTheme();
   const [all, setAll] = useState<DuelSummary[] | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
