@@ -461,7 +461,19 @@ export function BoardsScreen() {
           </View>
 
           {!!found && (
-            <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
+            <View style={styles.foundRow}>
+              <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
+              <Pressable
+                onPress={() => {
+                  playTap();
+                  setQuery('');
+                  resetBrowse();
+                }}
+                hitSlop={8}
+              >
+                <Text style={[styles.foundClear, { color: colors.text }]}>Back to the top</Text>
+              </Pressable>
+            </View>
           )}
 
           {/* Today and the season carry two columns; all time carries one.
@@ -481,7 +493,7 @@ export function BoardsScreen() {
               </Pressable>
             )}
           </View>
-          {list.map((e) => (
+          {!found && list.map((e) => (
             <Pressable
               key={`${e.rank}-${e.name}`}
               onPress={() => {
@@ -544,8 +556,11 @@ export function BoardsScreen() {
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                 {e.name}
               </Text>
-              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
+              {/* Points then precision, the same way round as the podium. This
+                  block was written separately and inherited the order the
+                  podium had before it was swapped. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
+              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
             </Pressable>
           ))}
 
@@ -668,7 +683,9 @@ const styles = StyleSheet.create({
   },
   searchBtn: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
   searchBtnText: { fontSize: 13, fontFamily: fonts.extraBold },
-  foundNote: { fontSize: 12, fontFamily: fonts.bold, paddingBottom: 8 },
+  foundRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8 },
+  foundClear: { fontSize: 12, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
+  foundNote: { flex: 1, fontSize: 12, fontFamily: fonts.bold },
   showMore: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   showMoreText: { fontSize: 13, fontFamily: fonts.extraBold },
   head: {
