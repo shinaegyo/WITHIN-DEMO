@@ -2,7 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/Avatar';
 import { StatusScreen } from '../components/StatusScreen';
-import { ApiError, EndlessEntry, HomeStatus, loadEndlessBoard, loadHomeStatus, messageFor } from '../lib/api';
+import {
+  ApiError,
+  EndlessEntry,
+  HomeStatus,
+  loadEndlessBoard,
+  loadHomeStatus,
+  messageFor,
+  startEndlessSession,
+} from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
@@ -45,8 +53,10 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!rows) return <StatusScreen loading />;
 
-  const left = status?.impossible.runsLeft ?? null;
+  const left = status?.impossible.sessionsLeft ?? null;
   const best = status?.impossible.best ?? 0;
+  const level = status?.impossible.level ?? 1;
+  const lives = status?.impossible.lives ?? 0;
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
@@ -99,14 +109,22 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
 
       {/* The way in sits under the standings rather than replacing them. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
-        {best > 0 && (
-          <Text style={[styles.best, { color: colors.textMuted }]}>
-            Your best this week: {best} {best === 1 ? 'number' : 'numbers'}
-          </Text>
-        )}
+        <Text style={[styles.best, { color: colors.textMuted }]}>
+          {best > 0
+            ? `You are on level ${level}, ${best} cleared this week`
+            : 'Your climb starts at level 1'}
+          {left !== 0 && lives > 0 ? ` · ${lives} ${lives === 1 ? 'life' : 'lives'} left` : ''}
+        </Text>
         <Pressable
-          onPress={() => {
+          onPress={async () => {
             playTap();
+            // Spending a session is deliberate and explicit: looking at this
+            // screen must never cost one.
+            try {
+              await startEndlessSession();
+            } catch {
+              return;
+            }
             onPlay();
           }}
           disabled={left === 0}
@@ -122,10 +140,10 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
             style={[styles.playText, { color: left === 0 ? colors.textMuted : colors.background }]}
           >
             {left === 0
-              ? 'No runs left today'
+              ? 'Both sessions used — back tomorrow'
               : left === null
-                ? 'Start a run'
-                : `Start a run · ${left} left today`}
+                ? 'Climb'
+                : `Climb · ${left} ${left === 1 ? 'session' : 'sessions'} left today`}
           </Text>
         </Pressable>
       </View>

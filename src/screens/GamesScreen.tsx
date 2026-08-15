@@ -51,13 +51,13 @@ export function GamesScreen({
     },
     {
       label: 'Impossible',
-      sub: 'Numbers one after another until you miss',
+      sub: 'A climb that keeps your place all week',
       status: status
-        ? status.impossible.runsLeft === 0
-          ? 'No runs left today'
-          : `${status.impossible.runsLeft} ${status.impossible.runsLeft === 1 ? 'run' : 'runs'} left${
-              status.impossible.best > 0 ? ` · best ${status.impossible.best}` : ''
-            }`
+        ? status.impossible.sessionsLeft === 0
+          ? `Level ${status.impossible.level} · back tomorrow`
+          : `Level ${status.impossible.level} · ${status.impossible.sessionsLeft} ${
+              status.impossible.sessionsLeft === 1 ? 'session' : 'sessions'
+            } left`
         : '',
       urgent: false,
       onPress: onImpossible,

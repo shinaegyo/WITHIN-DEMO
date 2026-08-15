@@ -11,7 +11,6 @@ import {
   EndlessEntry,
   EndlessState,
   endlessGuess,
-  endlessRestart,
   loadEndless,
   loadEndlessBoard,
   messageFor,
@@ -41,7 +40,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [state, setState] = useState<EndlessState | null>(null);
   const [board, setBoard] = useState<EndlessEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [over, setOver] = useState<{ answer: number | null; depth: number } | null>(null);
+  const [over, setOver] = useState<
+    { answer: number | null; depth: number; sessionOver: boolean } | null
+  >(null);
   const [trigger, setTrigger] = useState<FeedbackTrigger | null>(null);
   const [busy, setBusy] = useState(false);
   // Held between solving a number and the next one appearing.
@@ -77,7 +78,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           hapticCorrect();
           playCorrect();
           playWin();
-          if (!res.runOver) {
+          if (true) {
             // Three seconds to register that it was right. Advancing the moment
             // the guess lands makes a solve feel like nothing happened.
             // The allowance holds for long stretches and then steps down, so
@@ -101,9 +102,11 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           hapticForTier(res.result.tier);
           playForTier(res.result.tier);
         }
-        if (res.runOver) {
+        // A miss costs a life and leaves you on the same number; the climb
+        // only pauses when the lives run out.
+        if (res.lostLife) {
           playLose();
-          setOver({ answer: res.answer, depth: res.level - 1 });
+          setOver({ answer: res.answer, depth: res.lives, sessionOver: res.sessionOver });
         }
         await load();
         return { ok: true as const };
@@ -119,7 +122,6 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
 
   const again = async () => {
     setOver(null);
-    await endlessRestart();
     await load();
   };
 
@@ -137,7 +139,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
             </Pressable>
             <Text style={[styles.badge, { color: colors.textMuted }]}>
-              {state.runsLeft} {state.runsLeft === 1 ? 'RUN' : 'RUNS'} LEFT
+              {'♥'.repeat(Math.max(0, state.lives))} {state.lives}{' '}
+              {state.lives === 1 ? 'LIFE' : 'LIVES'}
             </Text>
           </View>
 
@@ -158,16 +161,19 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             </View>
           ) : over ? (
             <View style={styles.result}>
-              <Text style={[styles.overTitle, { color: colors.text }]}>Run over</Text>
+              <Text style={[styles.overTitle, { color: colors.text }]}>
+                {over.sessionOver ? 'Session over' : 'Life lost'}
+              </Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
                 {over.answer !== null ? `The number was ${over.answer}. ` : ''}
-                You cleared {over.depth} {over.depth === 1 ? 'number' : 'numbers'}.
+                {over.sessionOver
+                  ? 'Your climb keeps its place. Come back for the next session.'
+                  : `${over.depth} ${over.depth === 1 ? 'life' : 'lives'} left. The same number is waiting.`}
               </Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
                 Everyone plays the same numbers this week, so how far you got compares directly.
-                The allowance shrinks as you climb — getting deep is meant to be hard.
               </Text>
-              {state.runsLeft > 0 ? (
+              {!over.sessionOver ? (
                 <Pressable
                   onPress={again}
                   style={({ pressed }) => [
@@ -176,13 +182,14 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   ]}
                 >
                   <Text style={[styles.againText, { color: colors.background }]}>
-                    Run again · {state.runsLeft} left today
+                    Keep climbing
                   </Text>
                 </Pressable>
               ) : (
                 <Text style={[styles.overBody, { color: colors.textMuted }]}>
-                  That's all five runs for today. The numbers stay the same all week, so tomorrow
-                  you pick up where your best left off.
+                  {state.sessionsLeft > 0
+                    ? 'One more session today, whenever you want it.'
+                    : "That's both sessions for today. Tomorrow you pick up exactly here."}
                 </Text>
               )}
 

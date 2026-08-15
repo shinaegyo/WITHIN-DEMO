@@ -459,7 +459,7 @@ export interface HomeStatus {
     beltHolder: string | null;
     iHoldBelt: boolean;
   };
-  impossible: { runsLeft: number; best: number };
+  impossible: { sessionsLeft: number; lives: number; level: number; best: number };
 }
 
 export async function loadHomeStatus(): Promise<HomeStatus> {
@@ -478,7 +478,9 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
       iHoldBelt: !!raw.ranked?.iHoldBelt,
     },
     impossible: {
-      runsLeft: raw.impossible?.runsLeft ?? 0,
+      sessionsLeft: raw.impossible?.sessionsLeft ?? 0,
+      lives: raw.impossible?.lives ?? 0,
+      level: raw.impossible?.level ?? 1,
       best: raw.impossible?.best ?? 0,
     },
   };
@@ -631,14 +633,16 @@ export async function duelGuess(duelId: string, guess: number) {
 export interface EndlessState {
   week: string;
   level: number;
+  /** Lives left in this session; a miss costs one and keeps your level. */
+  lives: number;
+  sessionsLeft: number;
+  inSession: boolean;
   attemptsUsed: number;
   attemptsAllowed: number;
   /** Null until the clue is due — Impossible holds it back on deeper levels. */
   clue1: string | null;
   guesses: GuessResult[];
   best: number;
-  runsLeft: number;
-  hasRun: boolean;
 }
 
 export interface EndlessEntry {
@@ -656,13 +660,14 @@ export async function loadEndless(): Promise<EndlessState> {
   return {
     week: raw.week,
     level: raw.level,
+    lives: raw.lives ?? 0,
+    sessionsLeft: raw.sessionsLeft ?? 0,
+    inSession: !!raw.inSession,
     attemptsUsed: raw.attemptsUsed,
     attemptsAllowed: raw.attemptsAllowed,
     clue1: raw.clue1 ?? null,
     guesses: (raw.guesses ?? []).map(toGuessResult),
     best: raw.best ?? 0,
-    runsLeft: raw.runsLeft ?? 0,
-    hasRun: !!raw.hasRun,
   };
 }
 
@@ -672,12 +677,21 @@ export async function endlessGuess(guess: number) {
   const raw = unwrap<any>(data, error);
   return {
     solved: !!raw.solved,
-    runOver: !!raw.runOver,
+    lostLife: !!raw.lostLife,
+    lives: raw.lives ?? 0,
+    sessionOver: !!raw.sessionOver,
     level: raw.level as number,
     attemptsAllowed: raw.attemptsAllowed as number,
     result: toGuessResult(raw.guess),
     answer: (raw.answer ?? null) as number | null,
   };
+}
+
+/** Spend one of the day's sessions, or resume the one already open. */
+export async function startEndlessSession(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('endless_start_session');
+  unwrap<any>(data, error);
 }
 
 export async function endlessRestart(): Promise<void> {
@@ -852,7 +866,10 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_run':
       return 'No run in progress. Start a new one.';
     case 'no_runs_left':
-      return "That's all five runs for today. More tomorrow.";
+    case 'no_sessions_left':
+      return "That's both sessions for today. The climb keeps your place — come back tomorrow.";
+    case 'no_session':
+      return 'Start a session first.';
     default:
       return 'Connection problem. Check your network and try again.';
   }
