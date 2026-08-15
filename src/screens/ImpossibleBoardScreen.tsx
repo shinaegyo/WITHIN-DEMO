@@ -64,6 +64,10 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
   // alone would lock a player out of the run they are in the middle of. A day
   // is only over when the sessions and the lives are both gone.
   const canClimb = left === null || left > 0 || lives > 0;
+  // Leaving mid-climb costs nothing, so the button has to say which of the two
+  // it is about to do. "Climb" on a session already open reads as though it
+  // might spend something, and nobody should have to press it to find out.
+  const resuming = left === 0 && lives > 0;
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
@@ -146,7 +150,11 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
           <Text
             style={[styles.playText, { color: canClimb ? colors.background : colors.textMuted }]}
           >
-            {canClimb ? 'Climb' : "Today's climb is done — back tomorrow"}
+            {!canClimb
+              ? "Today's climb is done — back tomorrow"
+              : resuming
+                ? `Resume · ${lives} ${lives === 1 ? 'life' : 'lives'} left`
+                : 'Climb'}
           </Text>
         </Pressable>
       </View>

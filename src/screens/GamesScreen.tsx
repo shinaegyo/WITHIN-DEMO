@@ -56,7 +56,11 @@ export function GamesScreen({
       status: status
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
           ? `Level ${status.impossible.level} · back tomorrow`
-          : `Level ${status.impossible.level} · today's climb is waiting`
+          : status.impossible.sessionsLeft === 0
+            ? `Level ${status.impossible.level} · climb in progress, ${
+                status.impossible.lives
+              } ${status.impossible.lives === 1 ? 'life' : 'lives'} left`
+            : `Level ${status.impossible.level} · today's climb is waiting`
         : '',
       urgent: false,
       onPress: onImpossible,
