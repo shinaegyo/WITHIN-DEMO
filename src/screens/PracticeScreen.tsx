@@ -116,7 +116,13 @@ export function PracticeScreen({
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <BackButton color={colors.text} onPress={onExit} />
+            {/* No way out during the tutorial. The practice round is where
+                somebody learns the colours, and a back arrow beside it is an
+                invitation to skip the only teaching the game does and meet the
+                real numbers cold. */}
+            {introMode ? <View style={styles.noBack} /> : (
+              <BackButton color={colors.text} onPress={onExit} />
+            )}
             <View style={[styles.badge, { borderColor: colors.border }]}>
               <Text style={[styles.badgeText, { color: colors.textMuted }]}>PRACTICE · UNRANKED</Text>
             </View>
@@ -211,6 +217,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  noBack: { width: 40, height: 40 },
   back: { fontSize: 16, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
   badgeText: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.8 },
