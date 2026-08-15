@@ -127,6 +127,9 @@ export function BoardsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
   const [explain, setExplain] = useState<Board | null>(null);
+  // Not a fourth tab: friends is a filter on all three windows, not a window of
+  // its own. Today among friends is the one people check every morning.
+  const [friends, setFriends] = useState(false);
   // Today's board carries more than a list: where you came as a share of the
   // field, how many people are level with you, and the shape of the day.
   const [today, setToday] = useState<Leaderboard | null>(null);
@@ -138,7 +141,7 @@ export function BoardsScreen() {
       setError(null);
       try {
         if (which === 'today') {
-          const b = await loadLeaderboard();
+          const b = await loadLeaderboard(friends);
           setToday(b);
           setRows((r) => ({
             ...r,
@@ -148,7 +151,7 @@ export function BoardsScreen() {
             })),
           }));
         } else if (which === 'season') {
-          const b = await loadSeasonLeaderboard();
+          const b = await loadSeasonLeaderboard(friends);
           setSeason(b);
           setRows((r) => ({
             ...r,
@@ -158,7 +161,7 @@ export function BoardsScreen() {
             })),
           }));
         } else if (which === 'alltime') {
-          const b = await loadAllTimeLeaderboard();
+          const b = await loadAllTimeLeaderboard(friends);
           setAllTime(b);
           setRows((r) => ({
             ...r,
@@ -172,7 +175,7 @@ export function BoardsScreen() {
         setError(messageFor(err instanceof ApiError ? err.code : 'network'));
       }
     },
-    [],
+    [friends],
   );
 
   useEffect(() => {
@@ -208,6 +211,43 @@ export function BoardsScreen() {
             >
               {t.label}
             </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* One control over three boards. A friends tab would have been a fourth
+          timescale sitting beside three real ones; this asks the same question
+          of whichever window you are looking at. */}
+      <View style={styles.filter}>
+        {([false, true] as const).map((f) => (
+          <Pressable
+            key={String(f)}
+            onPress={() => {
+              if (f === friends) return;
+              playTap();
+              setFriends(f);
+              // Everything on screen belongs to the other field.
+              setRows({});
+              setToday(null);
+              setSeason(null);
+              setAllTime(null);
+            }}
+            style={styles.filterTab}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                { color: f === friends ? colors.text : colors.textMuted },
+              ]}
+            >
+              {f ? 'Friends' : 'Everyone'}
+            </Text>
+            <View
+              style={[
+                styles.filterRule,
+                { backgroundColor: f === friends ? colors.text : 'transparent' },
+              ]}
+            />
           </Pressable>
         ))}
       </View>
@@ -293,7 +333,9 @@ export function BoardsScreen() {
         <StatusScreen loading />
       ) : list.length === 0 ? (
         <Text style={[styles.empty, { color: colors.textMuted }]}>
-          Nobody is on this board yet. Be the first.
+          {friends
+            ? 'None of your friends has finished this one. Add a few, or be the one they are chasing.'
+            : 'Nobody is on this board yet. Be the first.'}
         </Text>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
@@ -447,6 +489,10 @@ const styles = StyleSheet.create({
   // taller glyph than any letter beside it, so the cell containing it built a
   // taller line box - and with nothing saying how to align them vertically,
   // the two labels sat at different heights.
+  filter: { flexDirection: 'row', justifyContent: 'center', gap: 26, paddingTop: 12, paddingBottom: 2 },
+  filterTab: { alignItems: 'center', gap: 5, paddingHorizontal: 6 },
+  filterText: { fontSize: 13, fontFamily: fonts.extraBold },
+  filterRule: { height: 2, width: 22, borderRadius: 1 },
   head: {
     flexDirection: 'row',
     alignItems: 'center',

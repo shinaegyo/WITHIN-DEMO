@@ -1147,9 +1147,9 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
   };
 }
 
-export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
+export async function loadAllTimeLeaderboard(friends = false): Promise<AllTimeLeaderboard> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100 });
+  const { data, error } = await supabase.rpc('alltime_leaderboard', { p_limit: 100, p_friends: friends });
   const raw = unwrap<any>(data, error);
   return {
     totalPlayers: raw.totalPlayers ?? 0,
@@ -1177,9 +1177,9 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   };
 }
 
-export async function loadSeasonLeaderboard(): Promise<SeasonLeaderboard> {
+export async function loadSeasonLeaderboard(friends = false): Promise<SeasonLeaderboard> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('season_leaderboard', { p_limit: 10 });
+  const { data, error } = await supabase.rpc('season_leaderboard', { p_limit: 10, p_friends: friends });
   const raw = unwrap<any>(data, error);
   return {
     season: raw.season,
@@ -1206,11 +1206,11 @@ export async function loadSeasonLeaderboard(): Promise<SeasonLeaderboard> {
   };
 }
 
-export async function loadLeaderboard(): Promise<Leaderboard> {
+export async function loadLeaderboard(friends = false): Promise<Leaderboard> {
   await ensureSignedIn();
   // Ten, not fifty. The list is a podium now; everyone else is answered by the
   // percentile and the distribution rather than by a position in a long column.
-  const { data, error } = await supabase.rpc('daily_leaderboard', { p_limit: 10 });
+  const { data, error } = await supabase.rpc('daily_leaderboard', { p_limit: 10, p_friends: friends });
   const raw = unwrap<any>(data, error);
   return {
     puzzleDate: raw.puzzleDate,
