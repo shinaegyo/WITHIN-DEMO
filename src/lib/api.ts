@@ -819,6 +819,10 @@ export interface RushBoard {
     rank: number;
     /** Null until there are enough runs for a percentage to mean anything. */
     topPercent: number | null;
+    /** The most you ever found before today. Null on a first run. */
+    best: number | null;
+    /** Other people on your exact score today. Ties break on guesses used. */
+    tied: number;
   } | null;
   /** How many players found each score today. */
   distribution: { found: number; players: number }[];
@@ -897,6 +901,8 @@ export async function loadRushBoard(): Promise<RushBoard> {
           attempts: raw.me.attempts ?? 0,
           rank: raw.me.rank ?? 0,
           topPercent: raw.me.topPercent ?? null,
+          best: raw.me.best ?? null,
+          tied: raw.me.tied ?? 0,
         }
       : null,
     distribution: (raw.distribution ?? []).map((d: any) => ({

@@ -378,10 +378,27 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                   : "Time's up. One run a day — new numbers at midnight."}
               </Text>
 
+              {/* Your own record first, because it is the only line here that
+                  works at any size. One run a day makes every run a direct
+                  comparison with every run you have made, and that is true of
+                  eighteen players and of ten thousand. */}
+              {board?.me?.best != null && (
+                <Text style={[styles.standing, { color: colors.text }]}>
+                  {state.found > board.me.best
+                    ? `Your best yet — you had ${board.me.best}`
+                    : state.found === board.me.best
+                      ? 'Matched your best'
+                      : `Your best is ${board.me.best}`}
+                </Text>
+              )}
+
               {/* Where that sits among everyone who ran today. A position is
                   worth reading among a few dozen people and worth nothing among
-                  ten thousand, so past twenty runs it becomes a percentage. */}
-              {board?.me && (board.me.topPercent !== null || board.total >= 5) && (
+                  ten thousand, so past twenty runs it becomes a percentage -
+                  and under ten runs it is not worth reading either, because
+                  "2nd of 5" describes the size of the room rather than the run.
+                  Below that the standings underneath say it honestly. */}
+              {board?.me && (board.me.topPercent !== null || board.total >= 10) && (
                 <Text style={[styles.standing, { color: colors.text }]}>
                   {board.me.topPercent !== null
                     ? `Top ${board.me.topPercent}% today`
@@ -391,14 +408,30 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
 
               {board?.me && board.me.found > 0 && (
                 <Text style={[styles.body, { color: colors.textMuted }]}>
-                  {board.me.attempts} guesses, {(board.me.attempts / board.me.found).toFixed(1)} a
-                  number. Equal scores are ranked by that.
+                  {board.me.attempts} guesses · {(board.me.attempts / board.me.found).toFixed(1)} a
+                  number
+                </Text>
+              )}
+
+              {/* The tiebreak rule, only when a tie exists to explain. It used
+                  to print on every run, as a trailing clause on the line above
+                  that wrapped "by that" onto a line of its own. */}
+              {board?.me && board.me.found > 0 && board.me.tied > 0 && (
+                <Text style={[styles.footnote, { color: colors.textMuted }]}>
+                  {board.me.tied === 1 ? 'One other player' : `${board.me.tied} others`} found{' '}
+                  {state.found} today — fewer guesses ranks higher.
                 </Text>
               )}
 
               {/* Nobody is ranked in a distribution, which is why it survives
-                  any number of players sharing a score. */}
-              {board && board.distribution.length > 1 && (
+                  any number of players sharing a score - but it needs a crowd
+                  to have a shape. At five runs it draws four rows, three of
+                  them one player, every bar the same length, with the scores
+                  down the side spaced evenly however far apart they are: a
+                  chart that says nothing and misreads the gaps while it does
+                  it. It waits for a dozen runs, and the standings underneath
+                  cover the days it does not appear. */}
+              {board && board.total >= 12 && board.distribution.length > 1 && (
                 <View style={styles.dist}>
                   {board.distribution.map((d) => {
                     const most = Math.max(...board.distribution.map((x) => x.players));
@@ -531,7 +564,10 @@ const styles = StyleSheet.create({
     width: 42,
     textAlign: 'right',
   },
-  standing: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 2 },
+  standing: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 2, textAlign: 'center' },
+  // Quieter than the run's own numbers: it explains the ranking, it is not a
+  // fact about the run.
+  footnote: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 17, textAlign: 'center' },
   dist: { alignSelf: 'stretch', marginTop: 14, gap: 4 },
   distRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   distFound: { width: 16, fontSize: 11, fontFamily: fonts.extraBold, textAlign: 'right' },
