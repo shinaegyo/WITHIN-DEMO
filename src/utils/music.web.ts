@@ -18,11 +18,10 @@ import { musicEnabled, musicVolume, onVolumeChange } from './soundSettings';
  */
 
 const SOURCES = {
-  home: require('../../assets/music/home.mp3'),
   game: require('../../assets/music/game.mp3'),
-  // duel.mp3 and impossible.mp3 were dropped here rather than deleted: eleven
+  // duel, impossible and home were dropped here rather than deleted: fifteen
   // megabytes of audio no screen could reach any more, downloaded by everyone.
-  // Both are still in git if a mode ever wants its own room back.
+  // All three are still in git if a screen ever wants its own room back.
 } as const;
 
 export type Track = keyof typeof SOURCES;

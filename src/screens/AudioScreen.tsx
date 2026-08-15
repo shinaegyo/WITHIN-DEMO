@@ -121,7 +121,8 @@ export function AudioScreen() {
           // doing that inside the press handler meant the switch itself did not
           // repaint until the audio was ready - which read as a lag on a
           // control that had, in fact, already changed.
-          setTimeout(() => refreshMusic(next ? 'home' : null), 0);
+          // game.mp3 is the only track now, so it is also the preview.
+          setTimeout(() => refreshMusic(next ? 'game' : null), 0);
         }}
       />
 
