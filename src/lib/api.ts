@@ -906,6 +906,81 @@ export async function loadRushBoard(): Promise<RushBoard> {
   };
 }
 
+export interface WindowEntry {
+  rank: number;
+  name: string;
+  avatar: string | null;
+  score: number;
+  width: number;
+  isMe: boolean;
+}
+
+export interface WindowState {
+  started: boolean;
+  submitted: boolean;
+  probesLeft: number;
+  maxWidth: number;
+  probes: GuessResult[];
+  lo: number | null;
+  hi: number | null;
+  width: number | null;
+  score: number;
+  answer: number | null;
+}
+
+export async function loadWindow(): Promise<WindowState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('window_state');
+  const raw = unwrap<any>(data, error);
+  return {
+    started: !!raw.started,
+    submitted: !!raw.submitted,
+    probesLeft: raw.probesLeft ?? 3,
+    maxWidth: raw.maxWidth ?? 100,
+    probes: (raw.probes ?? []).map(toGuessResult),
+    lo: raw.lo ?? null,
+    hi: raw.hi ?? null,
+    width: raw.width ?? null,
+    score: raw.score ?? 0,
+    answer: raw.answer ?? null,
+  };
+}
+
+export async function windowProbe(guess: number) {
+  await ensureSignedIn();
+  const raw = await onceMore(async () => {
+    const { data, error } = await supabase.rpc('window_probe', { p_guess: guess });
+    return unwrap<any>(data, error);
+  });
+  return { probesLeft: raw.probesLeft as number, result: toGuessResult(raw.guess) };
+}
+
+export async function windowSubmit(lo: number, hi: number) {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('window_submit', { p_lo: lo, p_hi: hi });
+  const raw = unwrap<any>(data, error);
+  return {
+    inside: !!raw.inside,
+    width: raw.width as number,
+    score: raw.score as number,
+    answer: raw.answer as number,
+  };
+}
+
+export async function loadWindowBoard(): Promise<WindowEntry[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('window_leaderboard', { p_limit: 20 });
+  const raw = unwrap<any>(data, error);
+  return (raw.entries ?? []).map((e: any) => ({
+    rank: e.rank,
+    name: e.name,
+    avatar: e.avatar ?? null,
+    score: e.score ?? 0,
+    width: e.width ?? 0,
+    isMe: !!e.is_me,
+  }));
+}
+
 export interface XpState {
   xp: number;
   level: number;
@@ -1085,6 +1160,10 @@ export function messageFor(code: string, guess?: number): string {
       return 'They are not online. Rounds are timed, so both of you need to be here.';
     case 'name_locked':
       return 'Your name can be changed once a year. This one is set for now.';
+    case 'no_probes_left':
+      return 'No probes left — commit to a window.';
+    case 'too_wide':
+      return 'A window can be 100 wide at most.';
     case 'paused':
       return 'The clock is stopped.';
     case 'time_up':
@@ -1108,6 +1187,10 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_runs_left':
     case 'no_sessions_left':
       return "That's today's climb. Your place is kept — come back tomorrow.";
+    case 'no_probes_left':
+      return 'No probes left — commit to a window.';
+    case 'too_wide':
+      return 'A window can be 100 wide at most.';
     case 'paused':
       return 'The clock is stopped.';
     case 'time_up':

@@ -19,12 +19,14 @@ export function GamesScreen({
   onDuels,
   onImpossible,
   onRush,
+  onWindow,
   onPractice,
   practiceLeft,
 }: {
   onDuels: () => void;
   onImpossible: () => void;
   onRush: () => void;
+  onWindow: () => void;
   onPractice: () => void;
   practiceLeft: number | null;
 }) {
@@ -77,6 +79,13 @@ export function GamesScreen({
         : '',
       urgent: false,
       onPress: onImpossible,
+    },
+    {
+      label: 'Window',
+      sub: 'Three probes, then how sure are you?',
+      status: 'One a day',
+      urgent: false,
+      onPress: onWindow,
     },
     {
       label: 'Rush',
