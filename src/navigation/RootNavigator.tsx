@@ -148,6 +148,7 @@ function Screens({
   // request has to announce itself, or it sits there until the sender gives up.
   const [pending, setPending] = useState(0);
   const [friendsEpoch, setFriendsEpoch] = useState(0);
+  const [practiceNote, setPracticeNote] = useState<string | null>(null);
 
   // Checks in while the app is in front of the player, and stands down the
   // moment it is not.
@@ -218,11 +219,23 @@ function Screens({
     practiceRemaining().then(setPracticeLeft);
   }, [practiceEpoch]);
 
+  // Opening a practice round costs nothing; playing one costs a round. Spending
+  // it on the way in charged people for a screen they had only looked at, which
+  // is the same mistake Impossible made with its sessions.
   const startPractice = async () => {
-    const left = await consumePracticeRound();
+    const left = await practiceRemaining();
     setPracticeEpoch((n) => n + 1);
-    if (left === null) return; // cap already reached
-    if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left });
+    if (left <= 0) {
+      setPracticeNote("That's all three practice rounds for today. New numbers at midnight.");
+      return;
+    }
+    if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left - 1 });
+  };
+
+  /** Charged by the round itself, on the first guess. */
+  const spendPractice = async () => {
+    await consumePracticeRound();
+    setPracticeEpoch((n) => n + 1);
   };
 
 
@@ -275,6 +288,7 @@ function Screens({
                     onWindow={() => navigation.navigate('Window')}
                     onPractice={startPractice}
                     practiceLeft={practiceLeft}
+                    practiceNote={practiceNote}
                   />
                 )}
               </Tabs.Screen>
@@ -344,6 +358,7 @@ function Screens({
               // Remounts for a fresh number each round.
               key={route.params.remainingAfterThis}
               remainingAfterThis={route.params.remainingAfterThis}
+              onSpend={spendPractice}
               onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
               onPlayAnother={startPractice}
             />

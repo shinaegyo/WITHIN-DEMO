@@ -22,6 +22,7 @@ export function GamesScreen({
   onWindow,
   onPractice,
   practiceLeft,
+  practiceNote,
 }: {
   onDuels: () => void;
   onImpossible: () => void;
@@ -29,6 +30,8 @@ export function GamesScreen({
   onWindow: () => void;
   onPractice: () => void;
   practiceLeft: number | null;
+  /** Said when there is nothing left to spend. */
+  practiceNote?: string | null;
 }) {
   const { colors } = useTheme();
   const [status, setStatus] = useState<HomeStatus | null>(null);
@@ -153,7 +156,14 @@ export function GamesScreen({
           Practice the Daily
         </Text>
       </Pressable>
-      <Text style={[styles.practiceSub, { color: colors.textMuted }]}>{practiceLabel}</Text>
+      <Text
+        style={[
+          styles.practiceSub,
+          { color: practiceNote ? feedbackColors.oneAway : colors.textMuted },
+        ]}
+      >
+        {practiceNote ?? practiceLabel}
+      </Text>
 
       <Text style={[styles.note, { color: colors.textMuted }]}>
         None of these touch your points, streak or place on the leaderboard. That is the daily, and

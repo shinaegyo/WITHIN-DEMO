@@ -24,6 +24,8 @@ const RESULT_DELAY_MS = 3000;
 interface Props {
   remainingAfterThis: number;
   onExit: () => void;
+  /** Called once, on the first guess: the round is spent by playing it. */
+  onSpend?: () => void;
   onPlayAnother: () => void;
   /** First run, before the player has seen the real game. */
   introMode?: boolean;
@@ -37,6 +39,7 @@ interface Props {
 export function PracticeScreen({
   remainingAfterThis,
   onExit,
+  onSpend,
   onPlayAnother,
   introMode = false,
 }: Props) {
@@ -81,6 +84,9 @@ export function PracticeScreen({
         hapticInvalid();
         return { ok: false as const, error: `You already guessed ${value}.` };
       }
+
+      // The round is spent by playing it, once, on the first guess that counts.
+      if (guesses.length === 0) onSpend?.();
 
       const result = evaluateGuess(value, round.answer);
       const next = [...guesses, result];
