@@ -17,6 +17,7 @@ import {
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { arenaFor } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
 import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
@@ -49,6 +50,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [solved, setSolved] = useState<
     { answer: number | null; level: number; shrankTo: number | null } | null
   >(null);
+  // Held when a solve crosses into a new arena, so the change gets a moment of
+  // its own rather than the screen simply going dark mid-guess.
+  const [arrived, setArrived] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -86,6 +90,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             // someone notice a guess missing.
             const shrankTo =
               state && res.attemptsAllowed < state.attemptsAllowed ? res.attemptsAllowed : null;
+            const before = arenaFor(res.level - 1);
+            const now = arenaFor(res.level);
+            if (now.key !== before.key) setArrived(now.key);
             setSolved({ answer: res.answer, level: res.level - 1, shrankTo });
             setTimeout(async () => {
               // Fetch the next number behind the notice, then clear it. Clearing
@@ -93,7 +100,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               // the round trip took.
               await load();
               setSolved(null);
-            }, 3000);
+              setArrived(null);
+            }, arrived ? 4200 : 3000);
             return { ok: true as const };
           }
         } else {
@@ -129,24 +137,37 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   if (!state) return <StatusScreen loading />;
 
   const myRank = board.find((e) => e.isMe);
+  const arena = arenaFor(state.level);
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: arena.background }]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
           <View style={styles.head}>
             <Pressable onPress={onExit} hitSlop={10}>
-              <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
+              <Text style={[styles.back, { color: arena.text }]}>‹ HOME</Text>
             </Pressable>
-            <Text style={[styles.badge, { color: colors.textMuted }]}>
+            <Text style={[styles.badge, { color: arena.muted }]}>
               {'♥'.repeat(Math.max(0, state.lives))} {state.lives}{' '}
               {state.lives === 1 ? 'LIFE' : 'LIVES'}
             </Text>
           </View>
 
-          {solved ? (
+          {solved && arrived ? (
             <View style={styles.result}>
-              <Text style={[styles.overTitle, { color: colors.text }]}>Correct</Text>
+              <Text style={[styles.arenaName, { color: arena.accent }]}>
+                {arenaFor(state.level).name.toUpperCase()}
+              </Text>
+              <Text style={[styles.overTitle, { color: arena.text }]}>
+                {solved.shrankTo ?? state.attemptsAllowed} attempts from here
+              </Text>
+              <Text style={[styles.overBody, { color: arena.muted }]}>
+                It gets darker and it gets tighter. See you on the other side.
+              </Text>
+            </View>
+          ) : solved ? (
+            <View style={styles.result}>
+              <Text style={[styles.overTitle, { color: arena.text }]}>Correct</Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
                 {solved.answer !== null ? `It was ${solved.answer}. ` : ''}
                 That's level {solved.level} cleared.
@@ -211,10 +232,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           ) : (
             <>
               <View style={styles.levelRow}>
-                <Text style={[styles.level, { color: colors.text }]}>{state.level}</Text>
+                <Text style={[styles.level, { color: arena.text }]}>{state.level}</Text>
                 {/* "Numbers deep" was jargon. The goal and the ceiling, plainly. */}
-                <Text style={[styles.levelLabel, { color: colors.textMuted }]}>
-                  LEVEL {state.level} OF 100
+                <Text style={[styles.levelLabel, { color: arena.muted }]}>
+                  {arena.name.toUpperCase()} · LEVEL {state.level} OF 100
                 </Text>
               </View>
 
@@ -254,6 +275,7 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
+  arenaName: { fontSize: 12, fontFamily: fonts.extraBold, letterSpacing: 2.4, marginBottom: 4 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },
   noClue: { borderWidth: 1, borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
