@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { feedbackColors } from '../theme/colors';
+import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { VolumeSlider } from '../components/VolumeSlider';
@@ -30,6 +31,7 @@ import {
  * impossible.
  */
 export function AudioScreen() {
+  useTrack(null);
   const { colors } = useTheme();
   const [sfx, setSfx] = useState(soundEnabled());
   const [music, setMusic] = useState(musicEnabled());
@@ -117,12 +119,15 @@ export function AudioScreen() {
           const next = !music;
           setMusic(next);
           setMusicEnabled(next);
-          // Deferred by a frame. Creating a player decodes the whole loop, and
-          // doing that inside the press handler meant the switch itself did not
-          // repaint until the audio was ready - which read as a lag on a
-          // control that had, in fact, already changed.
-          // game.mp3 is the only track now, so it is also the preview.
-          setTimeout(() => refreshMusic(next ? 'game' : null), 0);
+          // The switch is a setting, not a preview. Turning music on used to
+          // start it playing right here, on a settings page inside the profile
+          // - one of the screens that is meant to be quiet - and then it
+          // stopped again the moment you left, which read as broken. It takes
+          // effect where music belongs: the next game screen you open.
+          //
+          // Silence is still applied immediately, because switching music off
+          // has to stop anything already playing.
+          refreshMusic(null);
         }}
       />
 
