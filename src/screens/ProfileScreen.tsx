@@ -7,7 +7,20 @@ import { AllTimeEntry, XpState, loadAllTimeLeaderboard, loadRanked, loadXp } fro
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
+import { loadSeasonHistory, SeasonHistory } from '../lib/api';
 import { useTheme } from '../theme/ThemeContext';
+
+/** 1st, 2nd, 3rd — a bare "3" beside a field size reads as a score. */
+function ordinalRank(n: number): string {
+  const rest = n % 100;
+  if (rest >= 11 && rest <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+
+function monthName(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+}
 import { playTap } from '../utils/sound';
 
 /**
@@ -39,6 +52,19 @@ export function ProfileScreen({
   // to be asked for, because a screen that says nothing keeps whatever the
   // last one started, so this kept a mode's track playing over a list.
   useTrack(null);
+  const [history, setHistory] = useState<SeasonHistory | null>(null);
+
+  // Nothing on the profile survived a season ending, which made winning one
+  // worth exactly as much on the 1st as losing it. This is the line that keeps
+  // it: the best month you have ever had, and how big the field was.
+  useEffect(() => {
+    loadSeasonHistory()
+      .then(setHistory)
+      .catch(() => {
+        /* the profile reads fine without it */
+      });
+  }, []);
+
   const { colors, mode, toggle } = useTheme();
   const { game } = useDailyGameContext();
   const [rank, setRank] = useState<AllTimeEntry | null>(null);
@@ -129,6 +155,14 @@ export function ProfileScreen({
         {rating !== null ? ` · ${rating} ranked` : ''}
       </Text>
 
+      {!!history?.best && (
+        <Text style={[styles.seasonBest, { color: colors.text }]}>
+          Best season: {ordinalRank(history.best.rank)} of {history.best.players} in{' '}
+          {monthName(history.best.season)}
+          {history.seasonsPlayed > 1 ? ` · ${history.seasonsPlayed} seasons played` : ''}
+        </Text>
+      )}
+
       {/* Ordered by how much each one changes your experience, and grouped so
           the order reads as deliberate rather than as the sequence they
           happened to be built in.
@@ -194,6 +228,7 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 20, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
   line: { fontSize: 12, fontFamily: fonts.medium, marginTop: 10, textAlign: 'center' },
+  seasonBest: { fontSize: 13, fontFamily: fonts.extraBold, textAlign: 'center', marginTop: 6 },
   rows: { marginTop: 20, gap: 8 },
   row: {
     flexDirection: 'row',

@@ -1422,3 +1422,45 @@ export async function findPlayer(
     isMe: !!raw.isMe,
   };
 }
+
+/** A finished month, and how you placed in it. */
+export interface SeasonFinish {
+  season: string;
+  rank: number;
+  players: number;
+  points: number;
+  days: number;
+  avgOff: number;
+}
+
+export interface SeasonHistory {
+  seasons: SeasonFinish[];
+  /** The best you have ever finished, or null before your first month ends. */
+  best: { season: string; rank: number; players: number; points: number } | null;
+  seasonsPlayed: number;
+}
+
+export async function loadSeasonHistory(): Promise<SeasonHistory> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('season_history', { p_limit: 12 });
+  const raw = unwrap<any>(data, error);
+  return {
+    seasons: (raw.seasons ?? []).map((s: any) => ({
+      season: s.season,
+      rank: s.rank,
+      players: s.players,
+      points: s.points ?? 0,
+      days: s.days ?? 0,
+      avgOff: s.avgOff ?? 0,
+    })),
+    best: raw.best
+      ? {
+          season: raw.best.season,
+          rank: raw.best.rank,
+          players: raw.best.players,
+          points: raw.best.points ?? 0,
+        }
+      : null,
+    seasonsPlayed: raw.seasonsPlayed ?? 0,
+  };
+}
