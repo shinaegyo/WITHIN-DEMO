@@ -257,8 +257,10 @@ export interface LeaderboardEntry {
   /** "cat-blue", or null for anyone who has not chosen yet. */
   avatar: string | null;
   score: number;
-  /** Every guess summed against its answer. Lower is better play. */
+  /** Every guess summed against its answer. Orders the podium. */
   distance: number;
+  /** How far a typical guess landed. What the row actually shows. */
+  avgOff: number;
   isMe: boolean;
   /** False for a day that ended in elimination rather than all three rounds. */
   isComplete: boolean;
@@ -297,6 +299,8 @@ export interface Leaderboard {
   me: {
     score: number;
     distance: number;
+    avgOff: number;
+    guesses: number;
     rank: number;
     /** Null until there are enough players for a percentage to mean anything. */
     topPercent: number | null;
@@ -1145,6 +1149,7 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
       avatar: e.avatar ?? null,
       score: e.score,
       distance: e.distance ?? 0,
+      avgOff: e.avg_off ?? 0,
       isMe: !!e.is_me,
       isComplete: !!e.is_complete,
       roundsWon: e.rounds_won ?? 0,
@@ -1153,6 +1158,8 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
       ? {
           score: raw.me.score ?? 0,
           distance: raw.me.distance ?? 0,
+          avgOff: raw.me.avgOff ?? 0,
+          guesses: raw.me.guesses ?? 0,
           rank: raw.me.rank ?? 0,
           topPercent: raw.me.topPercent ?? null,
           playersOnScore: raw.me.playersOnScore ?? 0,

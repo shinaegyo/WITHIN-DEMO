@@ -82,7 +82,7 @@ export function BoardsScreen() {
             ...r,
             today: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, sub: `${e.distance}`, isMe: e.isMe,
+              value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
             })),
           }));
         } else if (which === 'alltime') {
@@ -154,13 +154,53 @@ export function BoardsScreen() {
               : `${today.me.rank} OF ${today.totalPlayers} TODAY`}
           </Text>
           <Text style={[styles.mineScore, { color: colors.text }]}>{today.me.score}</Text>
-          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {today.me.playersOnScore === 1
-              ? 'nobody else finished on this score'
-              : `${today.me.playersOnScore.toLocaleString()} players on this score`}
-            {' · '}
-            {today.me.distance} off across every guess
+          <Text style={[styles.mineUnit, { color: colors.textMuted }]}>
+            {today.me.score === 1 ? 'POINT' : 'POINTS'}
           </Text>
+          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
+            Your guesses landed {today.me.avgOff} away on average.
+            {' '}
+            {today.me.playersOnScore === 1
+              ? 'Nobody else finished on this score.'
+              : `${today.me.playersOnScore.toLocaleString()} players finished on this score — the closer guesses rank higher.`}
+          </Text>
+
+          {/* The shape of the day. Nobody is ranked in it, so it says something
+              true however many people share a score - which is the thing a
+              position could never do. */}
+          {today.distribution.length > 1 && (
+            <View style={styles.dist}>
+              {today.distribution
+                .slice()
+                .reverse()
+                .map((d) => {
+                  const most = Math.max(...today.distribution.map((x) => x.players));
+                  const mine = d.score === today.me!.score;
+                  return (
+                    <View key={d.score} style={styles.distRow}>
+                      <Text style={[styles.distScore, { color: colors.textMuted }]}>{d.score}</Text>
+                      <View
+                        style={[
+                          styles.distBar,
+                          {
+                            backgroundColor: mine ? colors.text : colors.border,
+                            width: `${Math.max(4, (d.players / most) * 74)}%`,
+                          },
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.distCount,
+                          { color: mine ? colors.text : colors.textMuted },
+                        ]}
+                      >
+                        {d.players}
+                      </Text>
+                    </View>
+                  );
+                })}
+            </View>
+          )}
         </View>
       )}
 
@@ -174,6 +214,14 @@ export function BoardsScreen() {
         </Text>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
+          {/* The precision column is labelled. A bare 881 beside a score is a
+              number nobody can read, and one that is better when smaller. */}
+          {tab === 'today' && (
+            <View style={styles.head}>
+              <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF</Text>
+              <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
+            </View>
+          )}
           {list.map((e) => (
             <Pressable
               key={`${e.rank}-${e.name}`}
@@ -248,6 +296,15 @@ const styles = StyleSheet.create({
   },
   mineLead: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 1.8 },
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
+  mineUnit: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8, marginTop: -2 },
+  dist: { alignSelf: 'stretch', marginTop: 12, paddingHorizontal: 16, gap: 3 },
+  distRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  distScore: { width: 26, fontSize: 10, fontFamily: fonts.bold, textAlign: 'right' },
+  distBar: { height: 9, borderRadius: 3 },
+  distCount: { fontSize: 10, fontFamily: fonts.bold },
+  head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
+  headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 34, textAlign: 'right' },
+  headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 14, gap: 8 },
@@ -267,6 +324,7 @@ const styles = StyleSheet.create({
   crown: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
   sub: { fontSize: 11.5, fontFamily: fonts.bold, minWidth: 34, textAlign: 'right' },
-  value: { fontSize: 16, fontFamily: fonts.extraBold },
+  // Fixed width so the column header above it lines up with the numbers.
+  value: { fontSize: 16, fontFamily: fonts.extraBold, minWidth: 40, textAlign: 'right' },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, padding: 18 },
 });
