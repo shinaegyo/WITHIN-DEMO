@@ -189,6 +189,58 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
 
   const rows = board?.entries ?? [];
 
+  /**
+   * The rules, rendered in both states.
+   *
+   * They used to exist only before a run, so the moment the mode was actually
+   * yours to think about - the result screen, one run a day, with the whole of
+   * tomorrow to plan - was the moment they disappeared. Same block, both
+   * places.
+   */
+  const modeRules = () => (
+    <>
+          {/* Set out plainly rather than folded behind a disclosure. A
+              rule nobody opens is a rule nobody knows. */}
+          <Text style={[styles.rulesHead, { color: colors.text }]}>How Rush works</Text>
+          <Text style={[styles.rule, { color: colors.textMuted }]}>
+            Find one number, the next appears immediately, and you keep going until the clock
+            runs out. Your score is how many you found.
+          </Text>
+          <Text style={[styles.rule, { color: colors.textMuted }]}>
+            No clues, and no limit on guesses — the clock is the only thing you spend. The
+            colours work as they do everywhere else: blue means aim higher, red means lower,
+            and the stronger the colour the closer you are.
+          </Text>
+          <Text style={[styles.rule, { color: colors.textMuted }]}>
+            One run a day, and the clock starts the moment you press the button — not when the
+            first guess lands. Leaving stops it: close the app, switch tabs or go Home and the
+            clock holds where it was. Coming back gives you three seconds of countdown before
+            it starts again, so an interruption costs you nothing and nobody returns
+            mid-guess.
+          </Text>
+          <Text style={[styles.rule, { color: colors.textMuted }]}>
+            Ties break on guesses used. Two people who both found seven are separated by who
+            spent fewer guesses getting there, because reading the colours quickly is the
+            whole skill of the mode.
+          </Text>
+
+          <View style={[styles.facts, { borderColor: colors.border }]}>
+            {[
+              ['3:00', 'on the clock', 'once a day'],
+              ['∞', 'guesses', 'nothing but time is spent'],
+              ['0', 'clues', 'the colours are all you get'],
+              ['15 XP', 'a number', 'found, not guessed at'],
+            ].map(([value, label, note]) => (
+              <View key={label} style={styles.factRow}>
+                <Text style={[styles.factValue, { color: colors.text }]}>{value}</Text>
+                <Text style={[styles.factLabel, { color: colors.text }]}>{label}</Text>
+                <Text style={[styles.factNote, { color: colors.textMuted }]}>{note}</Text>
+              </View>
+            ))}
+          </View>
+    </>
+  );
+
   const standings = (title: string) =>
     rows.length === 0 ? null : (
       <View style={styles.board}>
@@ -278,45 +330,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                     read once and scrolled past every time after. */}
                 {standings('BEST TODAY')}
 
-                {/* Set out plainly rather than folded behind a disclosure. A
-                    rule nobody opens is a rule nobody knows. */}
-                <Text style={[styles.rulesHead, { color: colors.text }]}>How Rush works</Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  Find one number, the next appears immediately, and you keep going until the clock
-                  runs out. Your score is how many you found.
-                </Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  No clues, and no limit on guesses — the clock is the only thing you spend. The
-                  colours work as they do everywhere else: blue means aim higher, red means lower,
-                  and the stronger the colour the closer you are.
-                </Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  One run a day, and the clock starts the moment you press the button — not when the
-                  first guess lands. Leaving stops it: close the app, switch tabs or go Home and the
-                  clock holds where it was. Coming back gives you three seconds of countdown before
-                  it starts again, so an interruption costs you nothing and nobody returns
-                  mid-guess.
-                </Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  Ties break on guesses used. Two people who both found seven are separated by who
-                  spent fewer guesses getting there, because reading the colours quickly is the
-                  whole skill of the mode.
-                </Text>
-
-                <View style={[styles.facts, { borderColor: colors.border }]}>
-                  {[
-                    ['3:00', 'on the clock', 'once a day'],
-                    ['∞', 'guesses', 'nothing but time is spent'],
-                    ['0', 'clues', 'the colours are all you get'],
-                    ['15 XP', 'a number', 'found, not guessed at'],
-                  ].map(([value, label, note]) => (
-                    <View key={label} style={styles.factRow}>
-                      <Text style={[styles.factValue, { color: colors.text }]}>{value}</Text>
-                      <Text style={[styles.factLabel, { color: colors.text }]}>{label}</Text>
-                      <Text style={[styles.factNote, { color: colors.textMuted }]}>{note}</Text>
-                    </View>
-                  ))}
-                </View>
+                {modeRules()}
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
@@ -364,7 +378,10 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
               )}
             </View>
           ) : over ? (
-            <View style={styles.centre}>
+            <ScrollView
+              contentContainerStyle={styles.centre}
+              showsVerticalScrollIndicator={false}
+            >
               {/* The score is the headline. "Time" was the largest thing on the
                   screen and it is the least interesting fact about the run. */}
               <Text style={[styles.bigScore, { color: colors.text }]}>{state.found}</Text>
@@ -470,7 +487,9 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
               ) : (
                 standings('BEST TODAY')
               )}
-            </View>
+
+              <View style={styles.rulesWrap}>{modeRules()}</View>
+            </ScrollView>
           ) : (
             <>
               <View style={styles.counter}>
@@ -512,7 +531,12 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   clock: { fontSize: 22, fontFamily: fonts.extraBold, letterSpacing: 1 },
-  centre: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  // flexGrow rather than flex: as a scroll content container it has to be free
+  // to grow past the viewport now that the rules sit under the result.
+  centre: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', gap: 12, paddingBottom: 24 },
+  // The rules range against the margin; everything above them is centred, and
+  // alignItems would otherwise shrink each paragraph to its own width.
+  rulesWrap: { alignSelf: 'stretch', marginTop: 10 },
   foot: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 8 },
   footNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
   rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 16, marginBottom: 2 },
