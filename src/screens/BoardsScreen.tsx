@@ -187,8 +187,8 @@ export function BoardsScreen() {
               number nobody can read, and one that is better when smaller. */}
           {tab === 'today' && (
             <View style={styles.head}>
-              <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF</Text>
               <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
+              <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF</Text>
             </View>
           )}
           {list.map((e) => (
@@ -225,10 +225,11 @@ export function BoardsScreen() {
 
               {e.crown && <Text style={[styles.crown, { color: colors.accent }]}>CROWN</Text>}
               {!!e.unit && <Text style={[styles.unit, { color: colors.textMuted }]}>{e.unit}</Text>}
-              {/* Precision, shown because it decides the order. A podium
-                  ordered on something invisible is a podium nobody trusts. */}
-              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
+              {/* Points first, then the tiebreak, because that is the order
+                  they are sorted in. The other way round you read what settles
+                  a tie before you read the thing being tied. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
+              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
             </Pressable>
           ))}
         </ScrollView>
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
   mineUnit: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8, marginTop: -2 },
   head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
-  headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 34, textAlign: 'right' },
+  headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
   headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
   nameMe: { fontFamily: fonts.extraBold },
   crown: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
-  sub: { fontSize: 11.5, fontFamily: fonts.bold, minWidth: 34, textAlign: 'right' },
+  sub: { fontSize: 11.5, fontFamily: fonts.bold, minWidth: 40, textAlign: 'right' },
   // Fixed width so the column header above it lines up with the numbers.
   value: { fontSize: 16, fontFamily: fonts.extraBold, minWidth: 40, textAlign: 'right' },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, padding: 18 },
