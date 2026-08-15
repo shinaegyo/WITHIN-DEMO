@@ -194,7 +194,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           style={styles.rulesToggle}
         >
           <Text style={[styles.rulesLink, { color: colors.textMuted }]}>
-            How duels work {rules ? '⌃' : '⌄'}
+            How it works {rules ? '⌃' : '⌄'}
           </Text>
         </Pressable>
 
