@@ -37,6 +37,7 @@ interface Props {
   onOpenFriends: () => void;
   onOpenDuels: () => void;
   onOpenRanked: () => void;
+  onOpenProfile: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
   username: string;
@@ -49,6 +50,7 @@ export function HomeScreen({
   onOpenFriends,
   onOpenDuels,
   onOpenRanked,
+  onOpenProfile,
   practiceEpoch,
   username,
 }: Props) {
@@ -295,9 +297,18 @@ export function HomeScreen({
             navigations that disagree is worse than either alone. The slot it
             left holds the player level, which every mode feeds. */}
         {xp ? (
-          <View style={[styles.levelPill, { backgroundColor: colors.surfaceAlt }]}>
+          <Pressable
+            onPress={() => {
+              playTap();
+              onOpenProfile();
+            }}
+            style={({ pressed }) => [
+              styles.levelPill,
+              { backgroundColor: colors.surfaceAlt, opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
             <Text style={[styles.levelPillText, { color: colors.text }]}>LVL {xp.level}</Text>
-          </View>
+          </Pressable>
         ) : (
           <View style={styles.iconButton} />
         )}
@@ -323,7 +334,7 @@ export function HomeScreen({
         showsVerticalScrollIndicator={false}
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
-        <View style={[styles.hero, viewport ? { minHeight: viewport - 96 } : null]}>
+        <View style={[styles.hero, viewport ? { minHeight: Math.round(viewport * 0.62) } : null]}>
 
         {started ? (
           <>
@@ -678,8 +689,8 @@ const styles = StyleSheet.create({
   liveRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   liveLabel: { fontSize: 14, fontFamily: fonts.bold, flexShrink: 1 },
   liveGo: { fontSize: 12.5, fontFamily: fonts.extraBold },
-  dots: { flexDirection: 'row', gap: 10, alignItems: 'center' },
-  dayCol: { alignItems: 'center', gap: 5 },
+  dots: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  dayCol: { flex: 1, alignItems: 'center', gap: 5 },
   dayDot: { width: 14, height: 14, borderRadius: 7 },
   dayLetter: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.6 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
