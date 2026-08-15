@@ -132,7 +132,7 @@ export function BoardsScreen() {
             ...r,
             alltime: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe, crown: e.hasBelt,
+              value: `${e.score}`, isMe: e.isMe, crown: e.hasBelt,
             })),
           }));
         }
@@ -275,26 +275,23 @@ export function BoardsScreen() {
         <ScrollView contentContainerStyle={styles.list}>
           {/* The precision column is labelled. A bare 881 beside a score is a
               number nobody can read, and one that is better when smaller. */}
-          {tab === 'today' && (
-            <View style={styles.head}>
-              <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-              {/* The explanation lives behind the header rather than under the
-                  board. A footnote is read by nobody who is not already
-                  curious, and a full screen for one column is far too much
-                  room for one sentence. */}
-              <Pressable onPress={() => { playTap(); setExplain('today'); }} hitSlop={10}>
+          {/* Today and the season carry two columns; all time carries one.
+              A lifetime average is a number that barely moves after a few
+              weeks, so it separates nobody and reads as decoration - the
+              points are the record, and that is the whole of it.
+
+              The explanation lives behind the header rather than under the
+              board. A footnote is read by nobody who is not already curious,
+              and a full screen for one column is far too much room for one
+              sentence. */}
+          <View style={styles.head}>
+            <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
+            {tab !== 'alltime' && (
+              <Pressable onPress={() => { playTap(); setExplain(tab); }} hitSlop={10}>
                 <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
               </Pressable>
-            </View>
-          )}
-          {tab === 'alltime' && (
-            <View style={styles.head}>
-              <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-              <Pressable onPress={() => { playTap(); setExplain('alltime'); }} hitSlop={10}>
-                <Text style={[styles.headSub, { color: colors.textMuted }]}>DAYS ⓘ</Text>
-              </Pressable>
-            </View>
-          )}
+            )}
+          </View>
           {list.map((e) => (
             <Pressable
               key={`${e.rank}-${e.name}`}
