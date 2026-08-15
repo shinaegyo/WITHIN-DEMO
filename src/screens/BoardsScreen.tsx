@@ -383,9 +383,20 @@ const styles = StyleSheet.create({
   // inside the list, which already applies its own 14 to everything in it, so
   // adding the two together counted that padding twice and stood the labels a
   // clean 14 to the left of the numbers they name.
-  head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 13, paddingBottom: 5 },
-  headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
-  headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
+  // alignItems centre, and one lineHeight shared by both cells. The ⓘ is a
+  // taller glyph than any letter beside it, so the cell containing it built a
+  // taller line box - and with nothing saying how to align them vertically,
+  // the two labels sat at different heights.
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 10,
+    paddingRight: 13,
+    paddingBottom: 5,
+  },
+  headSub: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
+  headValue: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 14, gap: 8 },
