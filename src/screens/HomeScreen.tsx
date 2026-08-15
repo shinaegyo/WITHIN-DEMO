@@ -323,7 +323,7 @@ export function HomeScreen({
         showsVerticalScrollIndicator={false}
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
-        <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
+        <View style={[styles.hero, viewport ? { minHeight: viewport - 96 } : null]}>
 
         {started ? (
           <>
@@ -672,8 +672,8 @@ const styles = StyleSheet.create({
   liveRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   liveLabel: { fontSize: 14, fontFamily: fonts.bold, flexShrink: 1 },
   liveGo: { fontSize: 12.5, fontFamily: fonts.extraBold },
-  dots: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
-  dayDot: { flex: 1, height: 14, borderRadius: 7 },
+  dots: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  dayDot: { width: 14, height: 14, borderRadius: 7 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {
     width: 18,
