@@ -2,14 +2,19 @@ import { Asset } from 'expo-asset';
 import { musicEnabled, musicVolume, onVolumeChange } from './soundSettings';
 
 /**
- * Background music on the web, through a plain audio element.
+ * Background music on the web, looped by overlapping two copies of the track.
  *
- * The shared implementation creates a player per track and never produced a
- * sound here: nothing was audible and no audio element existed to inspect. An
- * <audio> tag streams rather than decoding three megabytes up front, loops
- * natively, and can be looked at in a browser when it misbehaves - which for
- * something this easy to get quietly wrong matters more than sharing code with
- * the native path.
+ * `loop = true` left a hole of silence every lap, and the cause is in the files
+ * rather than the player: none of them carries a Xing or LAME header, so no
+ * decoder can know the encoder's delay and padding, and every one of them adds
+ * silence at both ends. Nothing set on the element removes it.
+ *
+ * So each track keeps two elements and hands over between them. A second copy
+ * starts a little before the first runs out, one fading up while the other
+ * fades down, and the join lands inside the music rather than in the gap the
+ * encoder left. Decoding the whole file into a buffer would loop perfectly too
+ * and cost eighty megabytes of memory for four minutes of stereo, which is not
+ * a trade worth making on somebody's phone.
  */
 
 const SOURCES = {
@@ -20,26 +25,46 @@ const SOURCES = {
 
 export type Track = keyof typeof SOURCES;
 
-const els: Partial<Record<Track, HTMLAudioElement>> = {};
+/** How long the two copies overlap. Long enough to hide a seam, short enough
+ *  not to double the texture audibly. */
+const CROSSFADE = 1.6;
+/** Steps in the fade. Sixteen a second is smooth and costs nothing. */
+const TICK = 60;
+
+interface Pair {
+  a: HTMLAudioElement;
+  b: HTMLAudioElement;
+  live: 'a' | 'b';
+  watcher: ReturnType<typeof setInterval> | null;
+  fader: ReturnType<typeof setInterval> | null;
+}
+
+const pairs: Partial<Record<Track, Pair>> = {};
 let current: Track | null = null;
 let pendingGesture = false;
 
 onVolumeChange(() => {
-  Object.values(els).forEach((el) => {
-    if (el) el.volume = musicVolume();
-  });
+  const pair = current ? pairs[current] : null;
+  if (!pair) return;
+  // Only the copy that is playing follows the slider; the other is mid-fade or
+  // silent, and forcing it to full volume would make the seam audible.
+  pair[pair.live].volume = musicVolume();
 });
 
-function element(track: Track): HTMLAudioElement | null {
+function make(track: Track): HTMLAudioElement {
+  const el = new window.Audio(Asset.fromModule(SOURCES[track]).uri);
+  el.loop = false;
+  el.preload = 'auto';
+  el.volume = 0;
+  return el;
+}
+
+function pair(track: Track): Pair | null {
   if (typeof window === 'undefined') return null;
-  if (!els[track]) {
-    const el = new window.Audio(Asset.fromModule(SOURCES[track]).uri);
-    el.loop = true;
-    el.preload = 'auto';
-    el.volume = musicVolume();
-    els[track] = el;
+  if (!pairs[track]) {
+    pairs[track] = { a: make(track), b: make(track), live: 'a', watcher: null, fader: null };
   }
-  return els[track] ?? null;
+  return pairs[track] ?? null;
 }
 
 /**
@@ -58,21 +83,76 @@ function retryOnGesture(track: Track) {
   window.addEventListener('pointerdown', go, { once: true });
 }
 
-function start(track: Track) {
-  const el = element(track);
-  if (!el) return;
-  el.volume = musicVolume();
+function play(el: HTMLAudioElement, track: Track) {
   const played = el.play();
-  if (played && typeof played.catch === 'function') {
-    played.catch(() => retryOnGesture(track));
-  }
+  if (played && typeof played.catch === 'function') played.catch(() => retryOnGesture(track));
+}
+
+/** Fades one copy down and the other up over the overlap. */
+function handOver(p: Pair, track: Track) {
+  const from = p[p.live];
+  const to = p[p.live === 'a' ? 'b' : 'a'];
+
+  to.currentTime = 0;
+  to.volume = 0;
+  play(to, track);
+
+  const target = musicVolume();
+  const steps = Math.max(1, Math.round((CROSSFADE * 1000) / TICK));
+  let step = 0;
+
+  if (p.fader) clearInterval(p.fader);
+  p.fader = setInterval(() => {
+    step += 1;
+    const t = Math.min(1, step / steps);
+    to.volume = Math.min(1, target * t);
+    from.volume = Math.max(0, target * (1 - t));
+    if (t >= 1) {
+      if (p.fader) clearInterval(p.fader);
+      p.fader = null;
+      from.pause();
+      from.currentTime = 0;
+    }
+  }, TICK);
+
+  p.live = p.live === 'a' ? 'b' : 'a';
+}
+
+function watch(track: Track, p: Pair) {
+  if (p.watcher) clearInterval(p.watcher);
+  p.watcher = setInterval(() => {
+    if (current !== track) return;
+    const el = p[p.live];
+    if (!el.duration || Number.isNaN(el.duration)) return;
+    // Hand over while the outgoing copy is still playing, so the overlap covers
+    // the encoder's silence rather than landing in it.
+    if (!p.fader && el.duration - el.currentTime <= CROSSFADE) handOver(p, track);
+  }, 120);
+}
+
+function start(track: Track) {
+  const p = pair(track);
+  if (!p) return;
+  const el = p[p.live];
+  el.currentTime = 0;
+  el.volume = musicVolume();
+  play(el, track);
+  watch(track, p);
 }
 
 function pauseAll() {
-  Object.values(els).forEach((el) => {
-    if (!el) return;
-    el.pause();
-    el.currentTime = 0;
+  Object.entries(pairs).forEach(([, p]) => {
+    if (!p) return;
+    if (p.watcher) clearInterval(p.watcher);
+    if (p.fader) clearInterval(p.fader);
+    p.watcher = null;
+    p.fader = null;
+    [p.a, p.b].forEach((el) => {
+      el.pause();
+      el.currentTime = 0;
+      el.volume = 0;
+    });
+    p.live = 'a';
   });
 }
 
