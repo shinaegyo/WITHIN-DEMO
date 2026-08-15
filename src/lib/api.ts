@@ -1464,3 +1464,35 @@ export async function loadSeasonHistory(): Promise<SeasonHistory> {
     seasonsPlayed: raw.seasonsPlayed ?? 0,
   };
 }
+
+/** A friend matching what has been typed, with their place on the board. */
+export interface PlayerSuggestion {
+  userId: string;
+  name: string;
+  avatar: string | null;
+  /** Null when they have not played this board. */
+  rank: number | null;
+  score: number | null;
+}
+
+export async function suggestPlayers(
+  prefix: string,
+  board: BoardKind,
+  friends: boolean,
+): Promise<PlayerSuggestion[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('suggest_players', {
+    p_prefix: prefix,
+    p_board: board,
+    p_friends: friends,
+    p_limit: 6,
+  });
+  const raw = unwrap<any>(data, error);
+  return (raw.players ?? []).map((p: any) => ({
+    userId: p.userId,
+    name: p.name,
+    avatar: p.avatar ?? null,
+    rank: p.rank ?? null,
+    score: p.score ?? null,
+  }));
+}

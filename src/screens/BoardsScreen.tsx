@@ -12,6 +12,8 @@ import {
   loadSeasonLeaderboard,
   loadBoardWindow,
   findPlayer,
+  suggestPlayers,
+  PlayerSuggestion,
   Leaderboard,
   SeasonLeaderboard,
   AllTimeLeaderboard,
@@ -140,6 +142,7 @@ export function BoardsScreen() {
   const [ended, setEnded] = useState(false);
   const [query, setQuery] = useState('');
   const [found, setFound] = useState<string | null>(null);
+  const [hints, setHints] = useState<PlayerSuggestion[]>([]);
   const [busy, setBusy] = useState(false);
 
   const toRow = (e: {
@@ -149,11 +152,32 @@ export function BoardsScreen() {
     value: `${e.score}`, sub: tab === 'alltime' ? undefined : `${e.avgOff}`, isMe: e.isMe,
   });
 
+  // Friends only, and never for a single character - one letter matches most
+  // of a list and teaches nobody anything.
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setHints([]);
+      return;
+    }
+    let alive = true;
+    const id = setTimeout(() => {
+      suggestPlayers(q, tab, friends)
+        .then((p) => alive && setHints(p))
+        .catch(() => alive && setHints([]));
+    }, 180);
+    return () => {
+      alive = false;
+      clearTimeout(id);
+    };
+  }, [query, tab, friends]);
+
   const resetBrowse = () => {
     setMore([]);
     setNextFrom(10);
     setEnded(false);
     setFound(null);
+    setHints([]);
   };
 
   /** The next page under whatever is already shown. */
@@ -460,6 +484,34 @@ export function BoardsScreen() {
             </Pressable>
           </View>
 
+          {/* Your friends, as you type. Their place comes with the name, so a
+              suggestion answers the question before it is tapped. */}
+          {hints.length > 0 && (
+            <View style={[styles.hints, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+              {hints.map((h) => (
+                <Pressable
+                  key={h.userId}
+                  onPress={() => {
+                    playTap();
+                    setQuery(h.name);
+                    setHints([]);
+                    if (h.rank === null) setFound(`${h.name} has not played this one.`);
+                    else centreOn(h.userId, `Around ${h.name}`);
+                  }}
+                  style={({ pressed }) => [styles.hintRow, { opacity: pressed ? 0.6 : 1 }]}
+                >
+                  <Avatar value={h.avatar} size={24} />
+                  <Text style={[styles.hintName, { color: colors.text }]} numberOfLines={1}>
+                    {h.name}
+                  </Text>
+                  <Text style={[styles.hintRank, { color: colors.textMuted }]}>
+                    {h.rank === null ? 'not played' : `#${h.rank} · ${h.score}`}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
           {!!found && (
             <View style={styles.foundRow}>
               <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
@@ -683,6 +735,10 @@ const styles = StyleSheet.create({
   },
   searchBtn: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
   searchBtnText: { fontSize: 13, fontFamily: fonts.extraBold },
+  hints: { borderWidth: 1, borderRadius: 12, marginBottom: 10, overflow: 'hidden' },
+  hintRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 9 },
+  hintName: { flex: 1, fontSize: 13.5, fontFamily: fonts.bold },
+  hintRank: { fontSize: 12, fontFamily: fonts.bold },
   foundRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8 },
   foundClear: { fontSize: 12, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
   foundNote: { flex: 1, fontSize: 12, fontFamily: fonts.bold },
