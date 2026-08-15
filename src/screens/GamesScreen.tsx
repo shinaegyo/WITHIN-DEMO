@@ -22,7 +22,6 @@ export function GamesScreen({
   onWindow,
   onPractice,
   practiceLeft,
-  practiceNote,
 }: {
   onDuels: () => void;
   onImpossible: () => void;
@@ -30,8 +29,6 @@ export function GamesScreen({
   onWindow: () => void;
   onPractice: () => void;
   practiceLeft: number | null;
-  /** Said when there is nothing left to spend. */
-  practiceNote?: string | null;
 }) {
   const { colors } = useTheme();
   const [status, setStatus] = useState<HomeStatus | null>(null);
@@ -82,6 +79,8 @@ export function GamesScreen({
         : '',
       urgent: false,
       onPress: onImpossible,
+      spent:
+        !!status && status.impossible.sessionsLeft === 0 && status.impossible.lives === 0,
     },
     {
       label: 'Window',
@@ -108,6 +107,7 @@ export function GamesScreen({
       {rows.map((r) => (
         <Pressable
           key={r.label}
+          disabled={r.spent}
           onPress={() => {
             playTap();
             r.onPress();
@@ -115,9 +115,11 @@ export function GamesScreen({
           style={({ pressed }) => [
             styles.row,
             {
-              backgroundColor: pressed ? colors.surfaceAlt : colors.surface,
+              backgroundColor: pressed && !r.spent ? colors.surfaceAlt : colors.surface,
               borderColor: colors.border,
             },
+            // Spent for the day: dimmed, and it does not answer a press.
+            r.spent && styles.spent,
           ]}
         >
           <View style={styles.main}>
@@ -134,7 +136,7 @@ export function GamesScreen({
           >
             {r.status}
           </Text>
-          <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>
+          {!r.spent && <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>}
         </Pressable>
       ))}
 
@@ -143,26 +145,29 @@ export function GamesScreen({
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
       <Pressable
+        disabled={practiceLeft === 0}
         onPress={() => {
           playTap();
           onPractice();
         }}
         style={({ pressed }) => [
           styles.practice,
-          { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+          practiceLeft === 0
+            ? { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: 1 }
+            : { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
         ]}
       >
-        <Text style={[styles.practiceText, { color: colors.background }]}>
+        <Text
+          style={[
+            styles.practiceText,
+            { color: practiceLeft === 0 ? colors.textMuted : colors.background },
+          ]}
+        >
           Practice the Daily
         </Text>
       </Pressable>
-      <Text
-        style={[
-          styles.practiceSub,
-          { color: practiceNote ? feedbackColors.oneAway : colors.textMuted },
-        ]}
-      >
-        {practiceNote ?? practiceLabel}
+      <Text style={[styles.practiceSub, { color: colors.textMuted }]}>
+        {practiceLeft === 0 ? 'All three played today · new numbers at midnight' : practiceLabel}
       </Text>
 
       <Text style={[styles.note, { color: colors.textMuted }]}>
@@ -176,6 +181,7 @@ export function GamesScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 18, gap: 9 },
+  spent: { opacity: 0.45 },
   screenTitle: {
     fontSize: 26,
     fontFamily: fonts.extraBold,

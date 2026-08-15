@@ -148,7 +148,6 @@ function Screens({
   // request has to announce itself, or it sits there until the sender gives up.
   const [pending, setPending] = useState(0);
   const [friendsEpoch, setFriendsEpoch] = useState(0);
-  const [practiceNote, setPracticeNote] = useState<string | null>(null);
 
   // Checks in while the app is in front of the player, and stands down the
   // moment it is not.
@@ -225,10 +224,8 @@ function Screens({
   const startPractice = async () => {
     const left = await practiceRemaining();
     setPracticeEpoch((n) => n + 1);
-    if (left <= 0) {
-      setPracticeNote("That's all three practice rounds for today. New numbers at midnight.");
-      return;
-    }
+    // Nothing to say: the button is disabled once there is nothing to spend.
+    if (left <= 0) return;
     if (navRef.isReady()) navRef.navigate('Practice', { remainingAfterThis: left - 1 });
   };
 
@@ -288,7 +285,6 @@ function Screens({
                     onWindow={() => navigation.navigate('Window')}
                     onPractice={startPractice}
                     practiceLeft={practiceLeft}
-                    practiceNote={practiceNote}
                   />
                 )}
               </Tabs.Screen>
