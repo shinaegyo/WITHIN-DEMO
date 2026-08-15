@@ -249,7 +249,9 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
           </>
         ) : (
           <View style={styles.content}>
-            <ScreenTitle title="Window" onBack={onExit} />
+            <View style={styles.titleBleed}>
+              <ScreenTitle title="Window" onBack={onExit} />
+            </View>
 
             <Text style={[styles.probesLeft, { color: colors.text }]}>
               {state.probesLeft > 0
@@ -333,7 +335,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
-  content: { flex: 1, paddingHorizontal: 18, gap: 10 },
+  content: { flex: 1, paddingHorizontal: 18, gap: 10, alignSelf: 'stretch' },
   intro: { paddingHorizontal: 18, paddingBottom: 20, gap: 12 },
   card: { borderWidth: 1, borderRadius: 18, padding: 18, alignItems: 'center', gap: 4 },
   bigScore: { fontSize: 72, fontFamily: fonts.extraBold, letterSpacing: -3, lineHeight: 78 },
@@ -359,12 +361,14 @@ const styles = StyleSheet.create({
   footNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
   start: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
   startText: { fontSize: 16, fontFamily: fonts.extraBold },
+  titleBleed: { marginHorizontal: -18 },
   probesLeft: { fontSize: 14, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardWrap: { flex: 1 },
   commit: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 10 },
-  range: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  range: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'stretch' },
   field: {
     flex: 1,
+    minWidth: 0,
     borderWidth: 1.5,
     borderRadius: 14,
     paddingVertical: 12,

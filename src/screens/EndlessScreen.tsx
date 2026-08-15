@@ -17,6 +17,7 @@ import {
   loadEndless,
   loadEndlessBoard,
   messageFor,
+  startEndlessSession,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { arenaFor } from '../theme/arenas';
@@ -275,7 +276,33 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 </View>
               )}
 
-              <NumberInput disabled={busy} onSubmit={submit} />
+              {/* No session means no guess the server will accept, so the
+                  field goes away rather than taking a number and returning an
+                  error. A day that has turned lands here. */}
+              {state.inSession ? (
+                <NumberInput disabled={busy} onSubmit={submit} />
+              ) : (
+                <Pressable
+                  onPress={async () => {
+                    if (busy) return;
+                    setBusy(true);
+                    try {
+                      await startEndlessSession();
+                      await load();
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                  style={({ pressed }) => [
+                    styles.again,
+                    { backgroundColor: arena.text, opacity: pressed ? 0.85 : 1 },
+                  ]}
+                >
+                  <Text style={[styles.againText, { color: arena.background }]}>
+                    {state.sessionsLeft > 0 ? "Start today's climb" : 'Back tomorrow'}
+                  </Text>
+                </Pressable>
+              )}
 
               <View style={styles.boardWrap}>
                 <GuessBoard
