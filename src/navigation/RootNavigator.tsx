@@ -31,6 +31,7 @@ import { loadSoundSetting, loadVolumes, setSoundEnabled, soundEnabled } from '..
 import { IntroScreen } from '../screens/IntroScreen';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Avatar } from '../components/Avatar';
+import { BackButton } from '../components/BackButton';
 import { TabIcon, TabName } from '../components/TabIcon';
 import { GamesScreen } from '../screens/GamesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -238,10 +239,18 @@ function Screens({
   return (
     <NavigationContainer theme={navTheme} ref={navRef}>
       <Stack.Navigator
-        screenOptions={{
+        // One back button everywhere. The stack drew the platform's own arrow
+        // in its header while the mode screens drew ours, so the way back
+        // changed shape depending on which screen you were leaving.
+        screenOptions={({ navigation }) => ({
           headerTitleStyle: { fontFamily: fonts.extraBold },
           contentStyle: { backgroundColor: colors.background },
-        }}
+          headerBackVisible: false,
+          headerLeft: () =>
+            navigation.canGoBack() ? (
+              <BackButton color={colors.text} onPress={() => navigation.goBack()} />
+            ) : null,
+        })}
       >
         <Stack.Screen name="Home" options={{ headerShown: false }}>
           {({ navigation }) => (
