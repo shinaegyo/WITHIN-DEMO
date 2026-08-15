@@ -268,7 +268,11 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               <NumberInput disabled={busy} onSubmit={submit} />
 
               <View style={styles.boardWrap}>
-                <GuessBoard guesses={state.guesses} attemptsAllowed={state.attemptsAllowed} />
+                <GuessBoard
+                  guesses={state.guesses}
+                  attemptsAllowed={state.attemptsAllowed}
+                  blindOneAway
+                />
               </View>
             </>
           )}

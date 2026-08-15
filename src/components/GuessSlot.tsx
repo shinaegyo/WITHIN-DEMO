@@ -20,7 +20,20 @@ const slotBase = {
   overflow: 'hidden',
 } as const;
 
-export function FilledSlot({ result, attemptNumber }: { result: GuessResult; attemptNumber: number }) {
+export function FilledSlot({
+  result,
+  attemptNumber,
+  blindOneAway,
+}: {
+  result: GuessResult;
+  attemptNumber: number;
+  /**
+   * Drop the arrow on a one-away guess. ONE AWAY plus a direction is the number
+   * itself, which Impossible cannot afford to hand over; the daily can, because
+   * there the tension is the clock rather than the depth.
+   */
+  blindOneAway?: boolean;
+}) {
   const { colors } = useTheme();
   const anim = useRef(new Animated.Value(0)).current;
 
@@ -68,9 +81,11 @@ export function FilledSlot({ result, attemptNumber }: { result: GuessResult; att
       <Text style={[styles.attemptLabelFilled, { color: ink, opacity: 0.65 }]}>#{attemptNumber}</Text>
       <Text style={[styles.guessText, { color: ink }]}>{result.guess}</Text>
       <Text style={[styles.band, { color: bandInk }]}>{getBandLabel(result)}</Text>
-      <Text style={[styles.arrow, { color: bandInk }]} accessibilityLabel={arrowLabel}>
-        {arrow}
-      </Text>
+      {!(blindOneAway && result.isOneAway) && (
+        <Text style={[styles.arrow, { color: bandInk }]} accessibilityLabel={arrowLabel}>
+          {arrow}
+        </Text>
+      )}
     </Animated.View>
   );
 }

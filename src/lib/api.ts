@@ -293,6 +293,14 @@ export async function loadFriends(): Promise<FriendsState> {
   };
 }
 
+/** How many other people are here right now. A count, never a list. */
+export async function loadPlayersOnline(): Promise<number> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('players_online');
+  const raw = unwrap<any>(data, error);
+  return raw.online ?? 0;
+}
+
 /** Heartbeat, so friends can see you are around. */
 export async function touchPresence(): Promise<void> {
   try {

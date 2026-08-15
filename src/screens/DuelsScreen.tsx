@@ -1,14 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
   DuelSummary,
+  Friend,
   challengeFriend,
   findStrangerDuel,
   leaveDuelQueue,
   loadDuels,
+  loadFriends,
+  loadPlayersOnline,
   messageFor,
   respondToDuel,
 } from '../lib/api';
@@ -18,18 +22,27 @@ import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 
 /**
- * Duels are asynchronous, so this screen is mostly about whose turn it is.
- * Three states matter: waiting on you, waiting on them, and settled.
+ * Duels are asynchronous, so this screen is mostly about whose turn it is -
+ * and, before that, whether there is anybody to play at all.
+ *
+ * Which is why the friends list is the screen rather than a username field
+ * underneath a wall of rules. A duel needs the other person awake, so a name
+ * you have to remember and type could only ever tell you "not online" after
+ * the fact; a list with a dot beside each name answers it on sight. The rules
+ * fold away: they are worth reading once, and they were costing five lines
+ * above every single visit.
  */
 export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const { colors } = useTheme();
   const [all, setAll] = useState<DuelSummary[] | null>(null);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [online, setOnline] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState('');
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
   const [waiting, setWaiting] = useState<{ online: number } | null>(null);
+  const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -38,6 +51,14 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     } catch (err) {
       setError(messageFor(err instanceof ApiError ? err.code : 'network'));
     }
+    // Presence moves on its own and neither of these should be able to take the
+    // screen down with them.
+    loadFriends()
+      .then((f) => setFriends(f.friends))
+      .catch(() => {});
+    loadPlayersOnline()
+      .then(setOnline)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -66,12 +87,9 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     }
   };
 
-  const challenge = () =>
+  const challenge = (target: string) =>
     run(async () => {
-      const target = name.trim();
-      if (!target) return;
       await challengeFriend(target);
-      setName('');
       setNote(`Challenge sent to ${target}.`);
     });
 
@@ -154,98 +172,42 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
     </Pressable>
   );
 
+  // Anyone with a duel already open belongs in the sections above, not in a
+  // list of people to challenge - the same name twice is two different answers
+  // to "what do I do next".
+  const engaged = new Set(
+    duels.filter((d) => d.status === 'pending' || d.status === 'active').map((d) => d.opponent),
+  );
+  const challengeable = friends
+    .filter((f) => !engaged.has(f.name))
+    .sort((a, b) => (a.online === b.online ? a.name.localeCompare(b.name) : a.online ? -1 : 1));
+
   return (
-    <ScrollView
-      style={[styles.wrap, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={[styles.caption, { color: colors.textMuted }]}>
-        You pick the number they hunt and they pick yours, a fresh one each round. Seven attempts
-        then six then five. A round goes to whoever needed fewer guesses, and the next opens once
-        you have both played it. Level after three and a fourth number decides it.
-      </Text>
-
-      {/* Two ways in: somebody you know, or whoever else is here. */}
-      <Pressable
-        onPress={() =>
-          run(async () => {
-            const res = await findStrangerDuel();
-            if (res.status === 'matched') {
-              setWaiting(null);
-              onPlay(res.duelId);
-            } else {
-              setWaiting({ online: res.online });
-            }
-          })
-        }
-        style={({ pressed }) => [
-          styles.stranger,
-          { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
-        ]}
-      >
-        <Text style={[styles.strangerText, { color: colors.background }]}>Play a stranger</Text>
-      </Pressable>
-
-      {waiting && (
-        <Text style={[styles.note, { color: colors.textMuted }]}>
-          {waiting.online === 0
-            ? 'No one is online right now. Come back later.'
-            : 'Waiting for someone to press it too. Stay on this screen.'}
-          {'  '}
-          <Text
-            style={{ textDecorationLine: 'underline' }}
-            onPress={() =>
-              run(async () => {
-                await leaveDuelQueue();
-                setWaiting(null);
-              })
-            }
-          >
-            Stop waiting
-          </Text>
-        </Text>
-      )}
-
-      <Text style={[styles.or, { color: colors.textMuted }]}>OR PLAY A FRIEND</Text>
-
-      <View style={[styles.addRow, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-        <TextInput
-          style={[
-            styles.input,
-            { color: colors.text },
-            Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null,
-          ]}
-          value={name}
-          onChangeText={(t) => {
-            setName(t.replace(/[^A-Za-z0-9_]/g, ''));
-            if (note) setNote(null);
-          }}
-          placeholder="Challenge a friend"
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          autoCorrect={false}
-          maxLength={16}
-          onSubmitEditing={challenge}
-          returnKeyType="send"
-        />
+    <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Pressable
-          onPress={challenge}
-          disabled={busy || !name.trim()}
-          style={({ pressed }) => [
-            styles.addButton,
-            { backgroundColor: name.trim() ? colors.text : colors.border, opacity: pressed ? 0.85 : 1 },
-          ]}
+          onPress={() => {
+            playTap();
+            setRules((r) => !r);
+          }}
+          style={styles.rulesToggle}
         >
-          <Text style={[styles.addText, { color: name.trim() ? colors.background : colors.textMuted }]}>
-            Send
+          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>
+            How duels work {rules ? '⌃' : '⌄'}
           </Text>
         </Pressable>
-      </View>
 
-      {note && <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>}
+        {rules && (
+          <Text style={[styles.caption, { color: colors.textMuted }]}>
+            You pick the number they hunt and they pick yours, a fresh one each round. Seven
+            attempts then six then five. A round goes to whoever needed fewer guesses, and the next
+            opens once you have both played it. Level after three and a fourth number decides it.
+          </Text>
+        )}
 
-      {waitingOnYou.length > 0 && (
+        {note && <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>}
+
+        {waitingOnYou.length > 0 && (
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON YOU</Text>
           {waitingOnYou.map((d) => (
@@ -292,11 +254,125 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         </>
       )}
 
-      {duels.length === 0 && (
-        <Text style={[styles.empty, { color: colors.textMuted }]}>
-          No duels yet. Challenge someone you're already friends with.
-        </Text>
-      )}
+        <Text style={[styles.heading, { color: colors.textMuted }]}>FRIENDS</Text>
+
+        {challengeable.length === 0 ? (
+          <Text style={[styles.empty, { color: colors.textMuted }]}>
+            {friends.length === 0
+              ? 'Add someone on the Friends tab and they show up here to challenge.'
+              : 'Everyone you know already has a duel going with you.'}
+          </Text>
+        ) : (
+          challengeable.map((f) => (
+            <View
+              key={f.name}
+              style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}
+            >
+              <Pressable style={styles.friendMain} onPress={() => setLooking(f.name)}>
+                <Avatar value={f.avatar} size={34} />
+                <View style={styles.friendText}>
+                  <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                    {f.name}
+                  </Text>
+                  <View style={styles.presence}>
+                    <View
+                      style={[
+                        styles.dot,
+                        { backgroundColor: f.online ? feedbackColors.correct : colors.border },
+                      ]}
+                    />
+                    <Text style={[styles.meta, { color: colors.textMuted }]}>
+                      {f.online ? 'Online now' : 'Not here'}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+
+              {/* Offline is a state, not an error message after the fact: a
+                  duel needs them awake, so the button says so before it is
+                  pressed rather than failing once it has been. */}
+              <Pressable
+                onPress={() => {
+                  playTap();
+                  challenge(f.name);
+                }}
+                disabled={busy || !f.online}
+                style={({ pressed }) => [
+                  styles.challenge,
+                  {
+                    backgroundColor: f.online ? colors.text : 'transparent',
+                    borderColor: colors.border,
+                    borderWidth: f.online ? 0 : 1,
+                    opacity: pressed ? 0.85 : 1,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.challengeText,
+                    { color: f.online ? colors.background : colors.textMuted },
+                  ]}
+                >
+                  {f.online ? 'Challenge' : 'Offline'}
+                </Text>
+              </Pressable>
+            </View>
+          ))
+        )}
+      </ScrollView>
+
+      {/* The way in sits under everything rather than on top of it: the list
+          answers who, this answers what if nobody. */}
+      <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
+        {waiting ? (
+          <Text style={[styles.note, { color: colors.textMuted }]}>
+            {waiting.online === 0
+              ? 'Nobody else is here right now. Come back later.'
+              : 'Waiting for someone to press it too. Stay on this screen.'}
+            {'  '}
+            <Text
+              style={{ textDecorationLine: 'underline' }}
+              onPress={() =>
+                run(async () => {
+                  await leaveDuelQueue();
+                  setWaiting(null);
+                })
+              }
+            >
+              Stop waiting
+            </Text>
+          </Text>
+        ) : (
+          <Pressable
+            onPress={() => {
+              playTap();
+              run(async () => {
+                const res = await findStrangerDuel();
+                if (res.status === 'matched') {
+                  setWaiting(null);
+                  onPlay(res.duelId);
+                } else {
+                  setWaiting({ online: res.online });
+                }
+              });
+            }}
+            style={({ pressed }) => [
+              styles.stranger,
+              { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+            ]}
+          >
+            <Text style={[styles.strangerText, { color: colors.background }]}>Play a stranger</Text>
+            <Text style={[styles.strangerSub, { color: colors.background }]}>
+              {online === null
+                ? ' '
+                : online === 0
+                  ? 'Nobody else is here'
+                  : `${online} ${online === 1 ? 'player' : 'players'} online`}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+
       <PlayerCardModal
         username={looking}
         onClose={() => {
@@ -304,34 +380,26 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           load();
         }}
       />
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
-  caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 16 },
-  stranger: { borderRadius: 16, paddingVertical: 15, alignItems: 'center', marginBottom: 4 },
+  content: { padding: 20, paddingBottom: 24 },
+  rulesToggle: { alignSelf: 'flex-start', paddingVertical: 2, marginBottom: 4 },
+  rulesLink: { fontSize: 11.5, fontFamily: fonts.bold, letterSpacing: 0.3 },
+  caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 8, marginTop: 6 },
+  foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
+  stranger: { borderRadius: 16, paddingVertical: 13, alignItems: 'center' },
   strangerText: { fontSize: 16, fontFamily: fonts.extraBold },
-  or: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginTop: 16, marginBottom: 8 },
-  addRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: 14, padding: 5 },
-  input: {
-    flex: 1,
-    minWidth: 0,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    fontFamily: fonts.bold,
-  },
-  addButton: {
-    alignSelf: 'stretch',
-    borderRadius: 10,
-    paddingHorizontal: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addText: { fontSize: 14, fontFamily: fonts.extraBold },
+  strangerSub: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 0.6, opacity: 0.6, marginTop: 2 },
+  friendMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  friendText: { flex: 1, minWidth: 0 },
+  presence: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
+  challenge: { borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8 },
+  challengeText: { fontSize: 12.5, fontFamily: fonts.extraBold },
   note: { fontSize: 12, fontFamily: fonts.medium, marginTop: 8 },
   heading: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginTop: 24, marginBottom: 8 },
   row: {

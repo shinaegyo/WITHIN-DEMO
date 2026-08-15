@@ -13,6 +13,8 @@ interface Props {
   showRemaining?: boolean;
   /** Extra line on the final guess. Round-specific, so the screen supplies it. */
   finalNote?: string;
+  /** Impossible only: a one-away guess keeps its label but loses its arrow. */
+  blindOneAway?: boolean;
 }
 
 /**
@@ -26,7 +28,13 @@ interface Props {
  * into a countdown of everything still to lose; the count is stated in words
  * instead.
  */
-export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, finalNote }: Props) {
+export function GuessBoard({
+  guesses,
+  attemptsAllowed,
+  showRemaining = true,
+  finalNote,
+  blindOneAway,
+}: Props) {
   const { colors } = useTheme();
   const remaining = Math.max(0, attemptsAllowed - guesses.length);
 
@@ -51,7 +59,12 @@ export function GuessBoard({ guesses, attemptsAllowed, showRemaining = true, fin
         .map((result, index) => ({ result, attemptNumber: index + 1 }))
         .reverse()
         .map(({ result, attemptNumber }) => (
-          <FilledSlot key={attemptNumber} result={result} attemptNumber={attemptNumber} />
+          <FilledSlot
+            key={attemptNumber}
+            result={result}
+            attemptNumber={attemptNumber}
+            blindOneAway={blindOneAway}
+          />
         ))}
     </View>
   );
