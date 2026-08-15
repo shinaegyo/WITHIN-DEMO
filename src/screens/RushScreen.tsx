@@ -48,6 +48,13 @@ import { playTrack } from '../utils/music';
  * it - a timer the client owns is a timer the client can stop, and here the
  * whole score is a function of the clock.
  */
+/** 1st, 2nd, 3rd - a bare "4 of 12" reads as a score rather than a placing. */
+function ordinal(n: number): string {
+  const rest = n % 100;
+  if (rest >= 11 && rest <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+
 export function RushScreen({ onExit }: { onExit: () => void }) {
   const { colors } = useTheme();
   const [state, setState] = useState<RushState | null>(null);
@@ -333,11 +340,11 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
               {/* Where that sits among everyone who ran today. A position is
                   worth reading among a few dozen people and worth nothing among
                   ten thousand, so past twenty runs it becomes a percentage. */}
-              {board?.me && board.total > 1 && (
+              {board?.me && (board.me.topPercent !== null || board.total >= 5) && (
                 <Text style={[styles.standing, { color: colors.text }]}>
                   {board.me.topPercent !== null
                     ? `Top ${board.me.topPercent}% today`
-                    : `${board.me.rank} of ${board.total} today`}
+                    : `${ordinal(board.me.rank)} of ${board.total} today`}
                 </Text>
               )}
 
@@ -467,11 +474,17 @@ const styles = StyleSheet.create({
   medalText: { fontSize: 10, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 13.5, fontFamily: fonts.bold },
   me: { textDecorationLine: 'underline' },
-  found: { fontSize: 15, fontFamily: fonts.extraBold, width: 26, textAlign: 'right' },
+  found: { fontSize: 15, fontFamily: fonts.extraBold, width: 42, textAlign: 'right' },
   guessCount: { fontSize: 12, fontFamily: fonts.bold, width: 54, textAlign: 'right' },
   headSpacer: { flex: 1 },
   colHead: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1, width: 54, textAlign: 'right' },
-  colHeadRight: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1, width: 26, textAlign: 'right' },
+  colHeadRight: {
+    fontSize: 8.5,
+    fontFamily: fonts.bold,
+    letterSpacing: 0.6,
+    width: 42,
+    textAlign: 'right',
+  },
   standing: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 2 },
   dist: { alignSelf: 'stretch', marginTop: 14, gap: 4 },
   distRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
