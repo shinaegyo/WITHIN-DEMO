@@ -414,8 +414,10 @@ const styles = StyleSheet.create({
   card: { borderWidth: 1, borderRadius: 18, padding: 18, alignItems: 'center', gap: 4 },
   bigScore: { fontSize: 72, fontFamily: fonts.extraBold, letterSpacing: -3, lineHeight: 78 },
   scoreLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8 },
-  rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, textAlign: 'center' },
-  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 14, textAlign: 'center' },
+  // Left, like Impossible. A screen that centres some things and ranges
+  // others against the margin reads as two screens stitched together.
+  rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 14, marginBottom: -2 },
   foot: {
     borderTopWidth: 1,
     paddingTop: 12,
@@ -459,7 +461,7 @@ const styles = StyleSheet.create({
   worth: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
   note: { fontSize: 12, fontFamily: fonts.bold, textAlign: 'center' },
   board: { gap: 6, marginTop: 4 },
-  boardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, textAlign: 'center' },
+  boardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   spacer: { flex: 1 },
   rank: { width: 20, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
