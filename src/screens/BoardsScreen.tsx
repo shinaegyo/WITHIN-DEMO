@@ -54,20 +54,12 @@ interface Row {
 }
 
 const TABS: { key: Board; label: string; note: string }[] = [
-  {
-    key: 'today',
-    label: 'Today',
-    // The column headers say what the numbers measure; this says what the
-    // second one is for. A leaderboard sorted on something unexplained is a
-    // leaderboard people assume is broken.
-    note: 'Points from today’s three rounds. AVG OFF is how far a typical guess landed from the answer — when scores are level, the closer guesses rank higher.',
-  },
-  {
-    key: 'alltime',
-    // Named for what it ranks. "All time" invited a total; this is a rate.
-    label: 'All time',
-    note: 'Average points a day, across every daily played. Ten days to qualify — so somebody who started last week can still climb it.',
-  },
+  // The columns are explained under the board rather than above it: nothing
+  // should stand between opening this tab and seeing the standings, and the
+  // question only occurs to somebody who has already looked at the rows.
+  { key: 'today', label: 'Today', note: 'Points from today’s three rounds. Finished days only.' },
+  // Named for what it ranks. "All time" invited a total; this is a rate.
+  { key: 'alltime', label: 'All time', note: 'Points from every daily challenge played.' },
 ];
 
 export function BoardsScreen() {
@@ -161,21 +153,6 @@ export function BoardsScreen() {
           players - nobody is glad to be four-thousandth at something they did
           well - so this says how you did rather than what number you are, and
           states the tie instead of hiding it. */}
-      {tab === 'alltime' && allTime?.pending && (
-        <View style={[styles.mine, { borderColor: colors.border }]}>
-          <Text style={[styles.mineLead, { color: colors.textMuted }]}>NOT ON THE BOARD YET</Text>
-          <View style={styles.mineLine}>
-            <Text style={[styles.mineScore, { color: colors.text }]}>{allTime.pending.perDay}</Text>
-            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>a day</Text>
-          </View>
-          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {allTime.pending.daysNeeded === 1
-              ? 'One more day played and you are on it.'
-              : `${allTime.pending.daysNeeded} more days played and you are on it.`}
-          </Text>
-        </View>
-      )}
-
       {tab === 'alltime' && allTime?.me && (
         <View style={[styles.mine, { borderColor: colors.border }]}>
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
@@ -184,11 +161,13 @@ export function BoardsScreen() {
               : `${allTime.me.rank} OF ${allTime.totalPlayers} ALL TIME`}
           </Text>
           <View style={styles.mineLine}>
-            <Text style={[styles.mineScore, { color: colors.text }]}>{allTime.me.perDay}</Text>
-            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>a day</Text>
+            <Text style={[styles.mineScore, { color: colors.text }]}>
+              {allTime.me.totalPoints.toLocaleString()}
+            </Text>
+            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
           </View>
           <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {allTime.me.totalPoints.toLocaleString()} points across {allTime.me.daysPlayed} days.
+            {allTime.me.daysPlayed} days played, {allTime.me.perDay} a day on average.
           </Text>
         </View>
       )}
@@ -245,7 +224,7 @@ export function BoardsScreen() {
           )}
           {tab === 'alltime' && (
             <View style={styles.head}>
-              <Text style={[styles.headValue, { color: colors.textMuted }]}>A DAY</Text>
+              <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
               <Text style={[styles.headSub, { color: colors.textMuted }]}>DAYS</Text>
             </View>
           )}
@@ -290,6 +269,14 @@ export function BoardsScreen() {
               {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
             </Pressable>
           ))}
+
+          {/* The columns, explained where the question actually arises: after
+              you have read the rows and wondered what the small number is. */}
+          <Text style={[styles.footnote, { color: colors.textMuted }]}>
+            {tab === 'today'
+              ? 'AVG OFF is how far a typical guess landed from the answer. When two players finish level on points, the closer guesses rank higher.'
+              : 'DAYS is how many dailies you have finished. Level on points, whoever needed fewer days ranks higher.'}
+          </Text>
         </ScrollView>
       )}
 
@@ -326,6 +313,14 @@ const styles = StyleSheet.create({
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
   mineLine: { flexDirection: 'row', alignItems: 'baseline', gap: 7 },
   mineUnit: { fontSize: 15, fontFamily: fonts.bold },
+  footnote: {
+    fontSize: 11.5,
+    fontFamily: fonts.medium,
+    lineHeight: 18,
+    paddingHorizontal: 22,
+    paddingTop: 18,
+    paddingBottom: 4,
+  },
   head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
   headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
   headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
