@@ -452,16 +452,28 @@ export function BoardsScreen() {
               returnKeyType="search"
               autoCapitalize="none"
             />
+            {/* Search, because a button beside a text field is read as that
+                field's submit whatever it says on it. Find me does something
+                else entirely and was sitting where the eye expected this. */}
             <Pressable
-              onPress={findMe}
+              onPress={search}
+              disabled={busy}
               style={({ pressed }) => [
                 styles.findMe,
-                { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+                { borderColor: colors.border, opacity: pressed || busy ? 0.6 : 1 },
               ]}
             >
-              <Text style={[styles.findMeText, { color: colors.text }]}>Find me</Text>
+              <Text style={[styles.findMeText, { color: colors.text }]}>Search</Text>
             </Pressable>
           </View>
+
+          {/* On its own line, as a link rather than a button: it is a shortcut
+              to one place in the list, not a second thing to type into. */}
+          <Pressable onPress={findMe} style={styles.findMeLink} hitSlop={6}>
+            <Text style={[styles.findMeLinkText, { color: colors.textMuted }]}>
+              Find me on this board
+            </Text>
+          </Pressable>
 
           {!!found && (
             <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
@@ -671,6 +683,8 @@ const styles = StyleSheet.create({
   },
   findMe: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
   findMeText: { fontSize: 13, fontFamily: fonts.extraBold },
+  findMeLink: { alignSelf: 'flex-end', paddingBottom: 8, paddingHorizontal: 2 },
+  findMeLinkText: { fontSize: 12.5, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
   foundNote: { fontSize: 12, fontFamily: fonts.bold, paddingBottom: 8 },
   showMore: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   showMoreText: { fontSize: 13, fontFamily: fonts.extraBold },
