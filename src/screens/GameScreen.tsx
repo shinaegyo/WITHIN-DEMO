@@ -112,7 +112,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
     const { round } = game;
     const canLeave = round.attemptsUsed === 0 && game.currentRound === 1;
-    const unscored = game.rounds.some((r) => r.status === 'lost');
 
     return (
       <KeyboardAvoidingView
@@ -131,15 +130,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           />
 
           <ClueCard clue={round.clue1} />
-
-          {/* States the consequence, not the cause. Naming the miss made a bad
-              day feel narrated; the player knows what happened. This only needs
-              to stop a +0 from reading as a bug. */}
-          {unscored && (
-            <Text style={[styles.unscored, { color: colors.textMuted }]}>
-              No more points can be added today.
-            </Text>
-          )}
 
           <NumberInput
             disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
@@ -190,12 +180,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   flex: { flex: 1 },
-  unscored: {
-    fontSize: 11.5,
-    fontFamily: fonts.medium,
-    textAlign: 'center',
-    marginTop: -2,
-  },
   content: {
     flex: 1,
     paddingHorizontal: 20,

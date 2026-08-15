@@ -114,9 +114,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        The round is over and it scores nothing, and no more points can be added for the rest of the
-        day. You still play the rounds that are left and still see every number. Points are only
-        collected while your day is unbroken.
+        The round is over and it scores nothing. The rounds after it are unaffected — every round
+        stands on its own, so a missed number costs you that round and nothing else.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         The number is revealed once the round ends, whether you found it or not.
