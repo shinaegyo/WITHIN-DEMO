@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Text } from './AppText';
 import { ScreenTitle } from './ScreenTitle';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTap } from '../utils/sound';
 
 /** Space between two sections sharing a page. */
 const GAP = 26;
@@ -154,4 +156,41 @@ const styles = StyleSheet.create({
   page: { paddingHorizontal: 22, paddingTop: 12, paddingBottom: 28 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 7, paddingVertical: 16 },
   dot: { width: 7, height: 7, borderRadius: 4 },
+});
+
+/**
+ * The way in, identical on all four modes.
+ *
+ * Outlined rather than filled: every one of these screens already has a solid
+ * button that starts the mode, and the rules must never be the thing the eye
+ * lands on first.
+ */
+export function RulesButton({ onPress }: { onPress: () => void }) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      onPress={() => {
+        playTap();
+        onPress();
+      }}
+      style={({ pressed }) => [
+        buttonStyles.button,
+        { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+      ]}
+    >
+      <Text style={[buttonStyles.label, { color: colors.textMuted }]}>How to play</Text>
+    </Pressable>
+  );
+}
+
+const buttonStyles = StyleSheet.create({
+  button: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 13,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    marginTop: 22,
+  },
+  label: { fontSize: 14, fontFamily: fonts.extraBold },
 });

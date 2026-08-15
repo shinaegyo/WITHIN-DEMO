@@ -15,6 +15,8 @@ import { GuessBoard } from '../components/GuessBoard';
 import { NumberInput } from '../components/NumberInput';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
+import { PagedRules, RulesButton } from '../components/PagedRules';
+import { windowRules } from '../components/modeRules';
 import {
   ApiError,
   WindowEntry,
@@ -67,6 +69,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   const [note, setNote] = useState<string | null>(null);
   const [centre, setCentre] = useState('');
   const [focused, setFocused] = useState(false);
+  const [rules, setRules] = useState(false);
   const [spreadIdx, setSpreadIdx] = useState(DEFAULT_SPREAD);
   const spread = SPREADS[spreadIdx];
   const [result, setResult] = useState<
@@ -128,6 +131,9 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
       setBusy(false);
     }
   };
+
+  // The rulebook takes the whole screen rather than sitting under it.
+  if (rules) return <PagedRules title="How Window works" onBack={() => setRules(false)} sections={windowRules()} />;
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!state) return <StatusScreen loading />;
@@ -220,51 +226,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
 
               {standings()}
 
-              {/* Before a run only. Afterwards the screen is about the score,
-                  and a page of rules under it is a manual handed to somebody
-                  who has just finished reading it. */}
-              {!done && (
-                <>
-              <Text style={[styles.rulesHead, { color: colors.text }]}>How Window works</Text>
-              <Text style={[styles.rule, { color: colors.textMuted }]}>
-                Three probe guesses, answered with the same colours as everywhere else: blue means
-                aim higher, red means lower, and the stronger the colour the closer you are. They
-                cost nothing and none of them ends the round.
-              </Text>
-              <Text style={[styles.rule, { color: colors.textMuted }]}>
-                Then you commit to a range — 525 to 560 — that the number has to be inside. Your
-                score is 101 minus the width of it. A window of 1 is 100 points, a window of 40 is
-                61, and a window of 100 is 1. If the number is outside, it is nothing.
-              </Text>
-              {/* The scoring, as a table rather than three examples buried in a
-                  sentence. Every row is a spread the stepper actually offers,
-                  so this is the bet being priced and not an illustration. */}
-              <View style={[styles.scale, { borderColor: colors.border }]}>
-                {SPREADS.map((s2) => {
-                  const width = Math.min(1000, 1 + s2 * 2);
-                  return (
-                    <View key={s2} style={styles.scaleRow}>
-                      <Text style={[styles.scaleSpread, { color: colors.text }]}>
-                        {s2 === 0 ? 'exact' : `±${s2}`}
-                      </Text>
-                      <Text style={[styles.scaleWidth, { color: colors.textMuted }]}>
-                        {width} wide
-                      </Text>
-                      <Text style={[styles.scaleScore, { color: colors.text }]}>
-                        {101 - width}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-
-              <Text style={[styles.rule, { color: colors.textMuted }]}>
-                Miss — the number lands outside the range you committed to — and it is nothing at
-                all, however narrow the window was. One a day, the same number for everyone, and
-                every point is an XP toward your level.
-              </Text>
-                </>
-              )}
+              {!done && <RulesButton onPress={() => setRules(true)} />}
             </ScrollView>
 
             {!done && (

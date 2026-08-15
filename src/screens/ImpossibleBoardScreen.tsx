@@ -4,6 +4,8 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
+import { PagedRules, RulesButton } from '../components/PagedRules';
+import { impossibleRules } from '../components/modeRules';
 import {
   ApiError,
   EndlessEntry,
@@ -49,6 +51,7 @@ export function ImpossibleBoardScreen({
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
   const [status, setStatus] = useState<HomeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -65,6 +68,9 @@ export function ImpossibleBoardScreen({
   useEffect(() => {
     load();
   }, [load]);
+
+  // The rulebook takes the whole screen rather than sitting under it.
+  if (rules) return <PagedRules title="How Impossible works" onBack={() => setRules(false)} sections={impossibleRules()} />;
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!rows) return <StatusScreen loading />;
@@ -139,54 +145,7 @@ export function ImpossibleBoardScreen({
             app is furniture standing between the player and the only thing on
             the screen worth reading. It scrolls; that is what scrolling is
             for. */}
-        <Text style={[styles.rulesHead, { color: colors.text }]}>How Impossible works</Text>
-
-        <Text style={[styles.rule, { color: colors.textMuted }]}>
-          Numbers one after another, up to 100 of them, and everyone plays the same sequence this
-          week. One clue per number, held back until only a few attempts remain.
-        </Text>
-        <Text style={[styles.rule, { color: colors.textMuted }]}>
-          Running out of attempts costs a life, not the climb — you have five, and the same number
-          is waiting. Lose all five and you drop back to your last checkpoint.
-        </Text>
-        <Text style={[styles.rule, { color: colors.textMuted }]}>
-          Every fifth level is a checkpoint — 5, 10, 15, 20 and so on — and the checkpoint is the
-          level you start tomorrow from. Clear level 32 and stop, and tomorrow begins at 30. It is
-          also where you land if you lose all five lives, so a fall costs at most four numbers
-          however deep you are.
-        </Text>
-        <Text style={[styles.rule, { color: colors.textMuted }]}>
-          One climb a day, spent on your first guess rather than by opening it. Your lives come back
-          full every day — however many you had left when you stopped, you begin the next one with
-          all five.
-        </Text>
-        <Text style={[styles.rule, { color: colors.textMuted }]}>
-          The week's board keeps the deepest level you have ever reached, so a climb that ends badly
-          still counts for everything it got through.
-        </Text>
-
-        {/* Straight from the table the game reads, so it cannot drift. */}
-        <View style={[styles.tiers, { borderColor: colors.border }]}>
-          {ARENAS.map((a, i) => {
-            const last = ARENAS[i + 1];
-            return (
-              <View key={a.key} style={styles.tierRow}>
-                <View style={[styles.swatch, { backgroundColor: a.background }]} />
-                <Text style={[styles.tierName, { color: colors.text }]}>{a.name}</Text>
-                <Text style={[styles.tierRange, { color: colors.textMuted }]}>
-                  {a.from}–{last ? last.from - 1 : 100}
-                </Text>
-                <Text style={[styles.tierAttempts, { color: colors.textMuted }]}>
-                  {a.attempts} attempts
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <Text style={[styles.rule, { color: colors.textMuted }]}>
-          Every number cleared pays 20 XP toward your level, and reaching a new tier pays 50.
-        </Text>
+        <RulesButton onPress={() => setRules(true)} />
       </ScrollView>
 
       {/* The way in sits under the standings rather than replacing them. */}

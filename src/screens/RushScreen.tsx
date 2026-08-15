@@ -17,6 +17,8 @@ import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay'
 import { GuessBoard } from '../components/GuessBoard';
 import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
+import { PagedRules, RulesButton } from '../components/PagedRules';
+import { rushRules } from '../components/modeRules';
 import {
   ApiError,
   RushBoard,
@@ -70,6 +72,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   const [found, setFound] = useState<number | null>(null);
   // 3, 2, 1 before the clock starts again, so nobody comes back mid-guess.
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [rules, setRules] = useState(false);
   const ended = useRef(false);
   const running = useRef(false);
 
@@ -187,58 +190,11 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
     [busy, load],
   );
 
+  // The rulebook takes the whole screen rather than sitting under it.
+  if (rules) return <PagedRules title="How Rush works" onBack={() => setRules(false)} sections={rushRules()} />;
+
   const rows = board?.entries ?? [];
 
-  /**
-   * The rules, rendered in both states.
-   *
-   * Before a run only. Once the run is over the screen is about what you did,
-   * and a page of rules under the score is a manual handed to somebody who has
-   * just finished reading it.
-   */
-  const modeRules = () => (
-    <>
-          {/* Set out plainly rather than folded behind a disclosure. A
-              rule nobody opens is a rule nobody knows. */}
-          <Text style={[styles.rulesHead, { color: colors.text }]}>How Rush works</Text>
-          <Text style={[styles.rule, { color: colors.textMuted }]}>
-            Find one number, the next appears immediately, and you keep going until the clock
-            runs out. Your score is how many you found.
-          </Text>
-          <Text style={[styles.rule, { color: colors.textMuted }]}>
-            No clues, and no limit on guesses — the clock is the only thing you spend. The
-            colours work as they do everywhere else: blue means aim higher, red means lower,
-            and the stronger the colour the closer you are.
-          </Text>
-          <Text style={[styles.rule, { color: colors.textMuted }]}>
-            One run a day, and the clock starts the moment you press the button — not when the
-            first guess lands. Leaving stops it: close the app, switch tabs or go Home and the
-            clock holds where it was. Coming back gives you three seconds of countdown before
-            it starts again, so an interruption costs you nothing and nobody returns
-            mid-guess.
-          </Text>
-          <Text style={[styles.rule, { color: colors.textMuted }]}>
-            Ties break on guesses used. Two people who both found seven are separated by who
-            spent fewer guesses getting there, because reading the colours quickly is the
-            whole skill of the mode.
-          </Text>
-
-          <View style={[styles.facts, { borderColor: colors.border }]}>
-            {[
-              ['3:00', 'on the clock', 'once a day'],
-              ['∞', 'guesses', 'nothing but time is spent'],
-              ['0', 'clues', 'the colours are all you get'],
-              ['15 XP', 'a number', 'found, not guessed at'],
-            ].map(([value, label, note]) => (
-              <View key={label} style={styles.factRow}>
-                <Text style={[styles.factValue, { color: colors.text }]}>{value}</Text>
-                <Text style={[styles.factLabel, { color: colors.text }]}>{label}</Text>
-                <Text style={[styles.factNote, { color: colors.textMuted }]}>{note}</Text>
-              </View>
-            ))}
-          </View>
-    </>
-  );
 
   const standings = (title: string) =>
     rows.length === 0 ? null : (
@@ -329,7 +285,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                     read once and scrolled past every time after. */}
                 {standings('BEST TODAY')}
 
-                {modeRules()}
+                <RulesButton onPress={() => setRules(true)} />
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
