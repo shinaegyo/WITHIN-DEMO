@@ -332,12 +332,13 @@ export async function loadFriends(): Promise<FriendsState> {
 
 export interface RecentDay {
   date: string;
-  /** 'complete' | 'playing' | 'eliminated' | 'none' — 'none' means not played. */
+  /** 'complete' | 'playing' | 'none' for a day let go, 'future' for one to come. */
   status: string;
+  isToday: boolean;
   score: number;
 }
 
-/** The last seven days including the gaps, so a streak can show its shape. */
+/** This week, Monday to Sunday, gaps and days still ahead included. */
 export async function loadRecentDays(days = 7): Promise<RecentDay[]> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('recent_days', { p_days: days });
@@ -345,6 +346,7 @@ export async function loadRecentDays(days = 7): Promise<RecentDay[]> {
   return (raw ?? []).map((d: any) => ({
     date: d.date,
     status: d.status ?? 'none',
+    isToday: !!d.isToday,
     score: d.score ?? 0,
   }));
 }

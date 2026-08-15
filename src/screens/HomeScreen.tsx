@@ -464,18 +464,12 @@ export function HomeScreen({
         {/* The level, with the sentence that gives the other modes a reason to
             exist once the daily is done. */}
         {xp && (
-          <Pressable
-            style={[styles.card, { borderColor: colors.border }]}
-            onPress={() => {
-              playTap();
-              onEndless();
-            }}
-          >
+          <View style={[styles.card, { borderColor: colors.border }]}>
             <LevelBar xp={xp} />
             <Text style={[styles.cardBody, { color: colors.textMuted }]}>
               {xp.needed - xp.into} XP to level {xp.level + 1} — every mode pays into it.
             </Text>
-          </Pressable>
+          </View>
         )}
 
         {/* Only when there is something to do. A block that says "nothing is
@@ -526,27 +520,39 @@ export function HomeScreen({
         {hasFriendsToday &&
           renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
 
-        {/* Seven days, gaps included. The streak number cannot show the shape of
-            itself, and a run about to break looks like nothing. */}
+        {/* Monday to Sunday. A rolling window moved today to the right-hand
+            end every day, so the row never looked like the same thing twice and
+            no dot said which day it was. */}
         {week.length > 0 && (
           <View style={[styles.card, { borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>LAST SEVEN DAYS</Text>
+            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>THIS WEEK</Text>
             <View style={styles.dots}>
               {week.map((d, i) => {
                 const done = d.status === 'complete';
-                const today = i === week.length - 1;
+                const ahead = d.status === 'future';
                 return (
-                  <View
-                    key={d.date}
-                    style={[
-                      styles.dayDot,
-                      {
-                        backgroundColor: done ? feedbackColors.correct : 'transparent',
-                        borderColor: today ? colors.text : colors.border,
-                        borderWidth: today ? 2 : 1.5,
-                      },
-                    ]}
-                  />
+                  <View key={d.date} style={styles.dayCol}>
+                    <View
+                      style={[
+                        styles.dayDot,
+                        {
+                          backgroundColor: done ? feedbackColors.correct : 'transparent',
+                          borderColor: d.isToday ? colors.text : colors.border,
+                          borderWidth: d.isToday ? 2 : 1.5,
+                          // A day that has not happened is not a day you missed.
+                          opacity: ahead ? 0.4 : 1,
+                        },
+                      ]}
+                    />
+                    <Text
+                      style={[
+                        styles.dayLetter,
+                        { color: d.isToday ? colors.text : colors.textMuted, opacity: ahead ? 0.5 : 1 },
+                      ]}
+                    >
+                      {'MTWTFSS'[i]}
+                    </Text>
+                  </View>
                 );
               })}
             </View>
@@ -673,7 +679,9 @@ const styles = StyleSheet.create({
   liveLabel: { fontSize: 14, fontFamily: fonts.bold, flexShrink: 1 },
   liveGo: { fontSize: 12.5, fontFamily: fonts.extraBold },
   dots: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  dayCol: { alignItems: 'center', gap: 5 },
   dayDot: { width: 14, height: 14, borderRadius: 7 },
+  dayLetter: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.6 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {
     width: 18,
