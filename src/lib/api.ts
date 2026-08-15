@@ -1202,6 +1202,11 @@ export function messageFor(code: string, guess?: number): string {
     default:
       // Not the player's connection: something failed at our end, and saying
       // "check your network" sends them to reload a page that cannot help.
-      return 'Something went wrong at our end. Try that again in a moment.';
+      //
+      // The server's own words are shown after it. They are not written for
+      // players, but a bug nobody can reproduce is worth an ugly line: the
+      // person who hits it can read it off their screen, which beats asking
+      // them to open a console on a phone.
+      return `Something went wrong at our end — ${code}`;
   }
 }
