@@ -103,60 +103,44 @@ const G6 = 1567.98;
 const C7 = 2093.0;
 
 /**
- * A press, built like a physical one.
+ * A press, as something struck.
  *
- * The old tap was a single sine blip, which is the sound of a test tone rather
- * than of something happening: no attack, no body, nothing to feel. A press
- * anyone finds satisfying has three parts arriving in a few milliseconds - a
- * soft noise transient for the contact, a short tuned body that falls slightly
- * in pitch as it dies, and a little low weight underneath so it does not read
- * as thin on a phone speaker.
+ * The first attempt built it the way a physical button is built - noise
+ * transient, tuned body, low thump - which at this volume is also how a
+ * suppressed gunshot is built. This is simpler: a fundamental with one quiet
+ * partial above it, decaying fast. No noise, nothing to grit.
  *
- * Quiet on purpose. This plays on every press in the app, and the sounds people
+ * The two are the same instrument at different sizes. Forward is small and
+ * mid-pitched, back is larger and lower, so the pair reads as one object being
+ * tapped in two places rather than as two unrelated effects.
+ *
+ * Quiet on purpose. These play on every press in the app, and the sounds people
  * keep switched on are the ones they stop noticing.
  */
-function pock({ freq, drop = 90, length = 0.07, noise = 0.22, sub = 0.16, gain = 0.5 }) {
-  const length_ = Math.floor(length * SAMPLE_RATE);
-  const buffer = new Float32Array(length_);
-  // One-pole low pass, so the transient is a knock rather than a hiss.
-  let filtered = 0;
-  let seed = 12345;
-  const random = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return (seed / 0x3fffffff) - 1;
-  };
+function struck({ freq, overtone, mix = 0.3, length = 0.06, decay = 75 }) {
+  const total = Math.floor(length * SAMPLE_RATE);
+  const buffer = new Float32Array(total);
 
-  for (let i = 0; i < length_; i += 1) {
+  for (let i = 0; i < total; i += 1) {
     const t = i / SAMPLE_RATE;
-    const progress = i / length_;
-
-    // Contact: a few milliseconds of soft noise, gone almost at once.
-    filtered += 0.35 * (random() - filtered);
-    const transient = filtered * Math.exp(-t * 420) * noise;
-
-    // Body: falls in pitch as it decays, which is what makes it sound like an
-    // object rather than a beep.
-    const f = freq - drop * progress;
-    const body = Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 46);
-
-    // Weight: brief and low, felt more than heard.
-    const weight = Math.sin(2 * Math.PI * 190 * t) * Math.exp(-t * 70) * sub;
-
-    // A short fade at the very end so the buffer never cuts mid-cycle.
-    const tail = progress > 0.86 ? (1 - progress) / 0.14 : 1;
-
-    buffer[i] = (transient + body + weight) * gain * tail;
+    const progress = i / total;
+    // A fade at the very end, or the buffer cuts mid-cycle and adds a click of
+    // its own - which is the thing being avoided.
+    const tail = progress > 0.88 ? (1 - progress) / 0.12 : 1;
+    const body =
+      Math.sin(2 * Math.PI * freq * t) + mix * Math.sin(2 * Math.PI * overtone * t);
+    buffer[i] = body * Math.exp(-t * decay) * tail;
   }
 
   return buffer;
 }
 
 const SOUNDS = {
-  // Every press in the app.
-  tap: pock({ freq: 880, drop: 110, gain: 0.5 }),
+  // Every press in the app: a small wooden knock, dry and mid-pitched.
+  tap: struck({ freq: 430, overtone: 1290, mix: 0.35, length: 0.06, decay: 75 }),
 
-  // Going back: the same shape, lower, so it reads as the opposite of forward.
-  back: pock({ freq: 620, drop: 90, length: 0.08, gain: 0.46 }),
+  // Going back: the same knock struck lower and softer, felt more than heard.
+  back: struck({ freq: 220, overtone: 440, mix: 0.25, length: 0.09, decay: 52 }),
 
   // WITHIN 10 — a bright, quick two-note lift. Encouraging, not a fanfare.
   'within-10': render([
