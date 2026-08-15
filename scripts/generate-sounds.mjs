@@ -59,11 +59,13 @@ function render(notes) {
   return buffer;
 }
 
-function toWav(buffer) {
-  // Normalise to avoid clipping when notes overlap.
+function toWav(buffer, target = 0.89) {
+  // Normalise to avoid clipping when notes overlap. The target differs per
+  // sound: a press that fires on every touch has to sit under the sounds that
+  // mean something, or the app rattles.
   let peak = 0;
   for (const sample of buffer) peak = Math.max(peak, Math.abs(sample));
-  const scale = peak > 0 ? 0.89 / peak : 1;
+  const scale = peak > 0 ? target / peak : 1;
 
   const data = Buffer.alloc(buffer.length * 2);
   for (let i = 0; i < buffer.length; i += 1) {
@@ -100,7 +102,62 @@ const E6 = 1318.51;
 const G6 = 1567.98;
 const C7 = 2093.0;
 
+/**
+ * A press, built like a physical one.
+ *
+ * The old tap was a single sine blip, which is the sound of a test tone rather
+ * than of something happening: no attack, no body, nothing to feel. A press
+ * anyone finds satisfying has three parts arriving in a few milliseconds - a
+ * soft noise transient for the contact, a short tuned body that falls slightly
+ * in pitch as it dies, and a little low weight underneath so it does not read
+ * as thin on a phone speaker.
+ *
+ * Quiet on purpose. This plays on every press in the app, and the sounds people
+ * keep switched on are the ones they stop noticing.
+ */
+function pock({ freq, drop = 90, length = 0.07, noise = 0.22, sub = 0.16, gain = 0.5 }) {
+  const length_ = Math.floor(length * SAMPLE_RATE);
+  const buffer = new Float32Array(length_);
+  // One-pole low pass, so the transient is a knock rather than a hiss.
+  let filtered = 0;
+  let seed = 12345;
+  const random = () => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return (seed / 0x3fffffff) - 1;
+  };
+
+  for (let i = 0; i < length_; i += 1) {
+    const t = i / SAMPLE_RATE;
+    const progress = i / length_;
+
+    // Contact: a few milliseconds of soft noise, gone almost at once.
+    filtered += 0.35 * (random() - filtered);
+    const transient = filtered * Math.exp(-t * 420) * noise;
+
+    // Body: falls in pitch as it decays, which is what makes it sound like an
+    // object rather than a beep.
+    const f = freq - drop * progress;
+    const body = Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 46);
+
+    // Weight: brief and low, felt more than heard.
+    const weight = Math.sin(2 * Math.PI * 190 * t) * Math.exp(-t * 70) * sub;
+
+    // A short fade at the very end so the buffer never cuts mid-cycle.
+    const tail = progress > 0.86 ? (1 - progress) / 0.14 : 1;
+
+    buffer[i] = (transient + body + weight) * gain * tail;
+  }
+
+  return buffer;
+}
+
 const SOUNDS = {
+  // Every press in the app.
+  tap: pock({ freq: 880, drop: 110, gain: 0.5 }),
+
+  // Going back: the same shape, lower, so it reads as the opposite of forward.
+  back: pock({ freq: 620, drop: 90, length: 0.08, gain: 0.46 }),
+
   // WITHIN 10 — a bright, quick two-note lift. Encouraging, not a fanfare.
   'within-10': render([
     { start: 0, duration: 0.16, freq: A5, gain: 0.55, decay: 2.4 },
@@ -126,9 +183,12 @@ const SOUNDS = {
   ]),
 };
 
+/** How loud each sits relative to the others. */
+const PEAKS = { tap: 0.42, back: 0.40 };
+
 mkdirSync(OUT_DIR, { recursive: true });
 for (const [name, buffer] of Object.entries(SOUNDS)) {
   const file = join(OUT_DIR, `${name}.wav`);
-  writeFileSync(file, toWav(buffer));
-  console.log(`wrote ${file} (${(buffer.length / SAMPLE_RATE).toFixed(2)}s)`);
+  writeFileSync(file, toWav(buffer, PEAKS[name] ?? 0.89));
+  console.log(`wrote ${file} (${(buffer.length / SAMPLE_RATE).toFixed(2)}s, peak ${PEAKS[name] ?? 0.89})`);
 }
