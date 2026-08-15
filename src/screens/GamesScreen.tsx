@@ -121,20 +121,21 @@ export function GamesScreen({
         </Pressable>
       ))}
 
+      {/* An action, so it looks like one. A left-aligned line of bold text was
+          a link pretending not to be a button. */}
       <Pressable
         onPress={() => {
           playTap();
           onPractice();
         }}
-        style={({ pressed }) => [styles.practice, { opacity: pressed ? 0.6 : 1 }]}
+        style={({ pressed }) => [
+          styles.practice,
+          { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+        ]}
       >
-        <Text style={[styles.practiceText, { color: colors.text }]}>
-          Warm up with a practice round ›
-        </Text>
-        <Text style={[styles.practiceSub, { color: colors.textMuted }]}>
-          {practiceLabel}
-        </Text>
+        <Text style={[styles.practiceText, { color: colors.background }]}>Practice round</Text>
       </Pressable>
+      <Text style={[styles.practiceSub, { color: colors.textMuted }]}>{practiceLabel}</Text>
 
       <Text style={[styles.note, { color: colors.textMuted }]}>
         None of these touch your points, streak or place on the leaderboard. That is the daily, and
@@ -169,8 +170,20 @@ const styles = StyleSheet.create({
     maxWidth: '46%',
   },
   arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
-  practice: { paddingHorizontal: 4, paddingTop: 16, gap: 2 },
-  practiceText: { fontSize: 14, fontFamily: fonts.extraBold },
-  practiceSub: { fontSize: 11.5, fontFamily: fonts.medium },
-  note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 12, paddingHorizontal: 2 },
+  practice: {
+    marginTop: 18,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  practiceText: { fontSize: 15, fontFamily: fonts.extraBold },
+  practiceSub: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', marginTop: 8 },
+  note: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    lineHeight: 18,
+    marginTop: 16,
+    paddingHorizontal: 2,
+    textAlign: 'center',
+  },
 });
