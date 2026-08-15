@@ -19,11 +19,14 @@ import {
   loadFriendsLeaderboard,
   loadHomeStatus,
   loadLeaderboard,
+  loadRecentDays,
   loadXp,
+  RecentDay,
   XpState,
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
+import { LevelBar } from '../components/LevelBar';
 import { PlayerCardModal } from '../components/PlayerCard';
 
 
@@ -64,6 +67,7 @@ export function HomeScreen({
   // underneath rather than crowding it.
   const [viewport, setViewport] = useState(0);
   const [xp, setXp] = useState<XpState | null>(null);
+  const [week, setWeek] = useState<RecentDay[]>([]);
 
   useEffect(() => {
     playTrack('home');
@@ -134,6 +138,12 @@ export function HomeScreen({
 
     // Refetched when the day's score moves, because finishing the day is the
     // most likely moment for the level to have changed underneath.
+    loadRecentDays(7)
+      .then((d) => {
+        if (!cancelled) setWeek(d);
+      })
+      .catch(() => {});
+
     loadXp()
       .then((x) => {
         if (!cancelled) setXp(x);
@@ -413,42 +423,140 @@ export function HomeScreen({
         )}
         </View>
 
-        {/* Friends first. Beating people you know pulls harder than placing
-            among strangers, so the wider board sits underneath. */}
-        {hasFriendsToday &&
-          renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
-
-        {!hasFriendsToday && (
-          <View style={styles.inviteCard}>
-            <Pressable onPress={onOpenFriends}>
-              <Text style={[styles.inviteTitle, { color: colors.text }]}>Play with friends</Text>
-              <Text style={[styles.inviteBody, { color: colors.textMuted }]}>
-                Everyone gets the same three numbers, so adding a friend puts their day beside
-                yours.
-              </Text>
-              <Text style={[styles.inviteLink, { color: colors.textMuted }]}>Add by username ›</Text>
-            </Pressable>
-
-            {/* Adding by username only works for someone who already plays. This
-                is the other half: a link for someone who does not. */}
-            <Pressable
-              onPress={async () => {
-                const res = await shareInvite();
-                setShareNote(res.copied ? 'Invite copied — paste it anywhere.' : null);
-                setShareFailed(!res.ok);
-                if (!res.ok) setShareNote('Could not share the invite.');
-              }}
-              style={({ pressed }) => [
-                styles.inviteButton,
-                { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-              ]}
-            >
-              <Text style={[styles.inviteButtonText, { color: colors.text }]}>Invite a friend</Text>
-            </Pressable>
+        {/* What the day actually did. The score alone says how much, never
+            which round went wrong, and that is the part worth looking at. */}
+        {game.rounds.some((r) => r.status !== 'playing') && (
+          <View style={[styles.card, { borderColor: colors.border }]}>
+            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>YOUR DAY</Text>
+            <View style={styles.roundBars}>
+              {game.rounds.map((r) => (
+                <View key={r.round} style={styles.roundBar}>
+                  {/* A round still to come is not a round lost. Red is for a
+                      number that beat you, never for one you have not met. */}
+                  <View
+                    style={[
+                      styles.roundFill,
+                      {
+                        backgroundColor:
+                          r.status === 'won'
+                            ? feedbackColors.correct
+                            : r.status === 'lost'
+                              ? feedbackColors.oneAway
+                              : colors.border,
+                      },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.roundScore,
+                      { color: r.status === 'playing' ? colors.textMuted : colors.text },
+                    ]}
+                  >
+                    {r.status === 'won' ? r.score : r.status === 'lost' ? '0' : '·'}
+                  </Text>
+                  <Text style={[styles.roundLabel, { color: colors.textMuted }]}>R{r.round}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         )}
 
-        {board.length > 0 && renderBoard("TODAY'S TOP", 'All time ›', preview, onOpenLeaderboard)}
+        {/* The level, with the sentence that gives the other modes a reason to
+            exist once the daily is done. */}
+        {xp && (
+          <Pressable
+            style={[styles.card, { borderColor: colors.border }]}
+            onPress={() => {
+              playTap();
+              onEndless();
+            }}
+          >
+            <LevelBar xp={xp} />
+            <Text style={[styles.cardBody, { color: colors.textMuted }]}>
+              {xp.needed - xp.into} XP to level {xp.level + 1} — every mode pays into it.
+            </Text>
+          </Pressable>
+        )}
+
+        {/* Only when there is something to do. A block that says "nothing is
+            waiting" is worse than no block. */}
+        {(!!modes?.duelsWaiting || (modes?.impossible.lives ?? 0) > 0 ||
+          (modes?.impossible.sessionsLeft ?? 0) > 0) && (
+          <View style={[styles.card, { borderColor: colors.border }]}>
+            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>WAITING FOR YOU</Text>
+
+            {!!modes?.duelsWaiting && (
+              <Pressable
+                style={styles.liveRow}
+                onPress={() => {
+                  playTap();
+                  onOpenDuels();
+                }}
+              >
+                <Text style={[styles.liveLabel, { color: colors.text }]}>
+                  {modes.duelsWaiting === 1 ? 'A duel needs you' : `${modes.duelsWaiting} duels need you`}
+                </Text>
+                <Text style={[styles.liveGo, { color: feedbackColors.correct }]}>Play ›</Text>
+              </Pressable>
+            )}
+
+            {((modes?.impossible.sessionsLeft ?? 0) > 0 || (modes?.impossible.lives ?? 0) > 0) && (
+              <Pressable
+                style={styles.liveRow}
+                onPress={() => {
+                  playTap();
+                  onEndless();
+                }}
+              >
+                <Text style={[styles.liveLabel, { color: colors.text }]}>
+                  Impossible · level {modes?.impossible.level ?? 1}
+                </Text>
+                <Text style={[styles.liveGo, { color: colors.textMuted }]}>
+                  {(modes?.impossible.sessionsLeft ?? 0) > 0
+                    ? 'Climb ›'
+                    : `${modes?.impossible.lives} ${modes?.impossible.lives === 1 ? 'life' : 'lives'} ›`}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {/* People you know, not the world. At this size a global top ten reads
+            as an empty room; four friends' scores read as a race. */}
+        {hasFriendsToday &&
+          renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
+
+        {/* Seven days, gaps included. The streak number cannot show the shape of
+            itself, and a run about to break looks like nothing. */}
+        {week.length > 0 && (
+          <View style={[styles.card, { borderColor: colors.border }]}>
+            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>LAST SEVEN DAYS</Text>
+            <View style={styles.dots}>
+              {week.map((d, i) => {
+                const done = d.status === 'complete';
+                const today = i === week.length - 1;
+                return (
+                  <View
+                    key={d.date}
+                    style={[
+                      styles.dayDot,
+                      {
+                        backgroundColor: done ? feedbackColors.correct : 'transparent',
+                        borderColor: today ? colors.text : colors.border,
+                        borderWidth: today ? 2 : 1.5,
+                      },
+                    ]}
+                  />
+                );
+              })}
+            </View>
+            <Text style={[styles.cardBody, { color: colors.textMuted }]}>
+              {game.stats.currentStreak > 0
+                ? `${game.stats.currentStreak} day streak — finish today to keep it.`
+                : 'Finish all three rounds to start a streak.'}
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
@@ -547,28 +655,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
   },
   boardGap: { marginTop: 10 },
-  inviteCard: {
-    alignSelf: 'stretch',
-    marginTop: 44,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 14,
+  card: {
     borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#8A8F98',
-    gap: 4,
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 10,
+    gap: 10,
   },
-  inviteTitle: { fontSize: 14.5, fontFamily: fonts.extraBold },
-  inviteBody: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
-  inviteButton: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 11,
-    alignItems: 'center',
-    marginTop: 14,
-  },
-  inviteButtonText: { fontSize: 14, fontFamily: fonts.extraBold },
-  inviteLink: { fontSize: 11.5, fontFamily: fonts.bold, marginTop: 4 },
+  cardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4 },
+  cardBody: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
+  roundBars: { flexDirection: 'row', gap: 8 },
+  roundBar: { flex: 1, alignItems: 'center', gap: 4 },
+  roundFill: { height: 6, borderRadius: 3, alignSelf: 'stretch' },
+  roundScore: { fontSize: 17, fontFamily: fonts.extraBold },
+  roundLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1 },
+  liveRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  liveLabel: { fontSize: 14, fontFamily: fonts.bold, flexShrink: 1 },
+  liveGo: { fontSize: 12.5, fontFamily: fonts.extraBold },
+  dots: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
+  dayDot: { flex: 1, height: 14, borderRadius: 7 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {
     width: 18,

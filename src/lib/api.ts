@@ -330,6 +330,25 @@ export async function loadFriends(): Promise<FriendsState> {
   };
 }
 
+export interface RecentDay {
+  date: string;
+  /** 'complete' | 'playing' | 'eliminated' | 'none' — 'none' means not played. */
+  status: string;
+  score: number;
+}
+
+/** The last seven days including the gaps, so a streak can show its shape. */
+export async function loadRecentDays(days = 7): Promise<RecentDay[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('recent_days', { p_days: days });
+  const raw = unwrap<any>(data, error);
+  return (raw ?? []).map((d: any) => ({
+    date: d.date,
+    status: d.status ?? 'none',
+    score: d.score ?? 0,
+  }));
+}
+
 /** How many other people are here right now. A count, never a list. */
 export async function loadPlayersOnline(): Promise<number> {
   await ensureSignedIn();
