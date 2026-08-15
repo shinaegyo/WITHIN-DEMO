@@ -62,7 +62,7 @@ export function FriendsScreen({
   useEffect(() => {
     const id = setInterval(() => {
       if (!busy) load();
-    }, 15000);
+    }, 8000);
     return () => clearInterval(id);
   }, [busy, load]);
 

@@ -6,7 +6,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
@@ -20,7 +20,7 @@ import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
-import { loadFriends, touchPresence } from '../lib/api';
+import { clearPresence, loadFriends, touchPresence } from '../lib/api';
 import { playTap, warmSounds } from '../utils/sound';
 import { fonts } from '../theme/fonts';
 import { practiceRemaining, consumePracticeRound } from '../utils/practiceLimit';
@@ -144,12 +144,38 @@ function Screens({
   const [pending, setPending] = useState(0);
   const [friendsEpoch, setFriendsEpoch] = useState(0);
 
-  // Checks in while the app is open, so friends see a live dot rather than a
-  // stale one. Stops as soon as the screen goes away.
+  // Checks in while the app is in front of the player, and stands down the
+  // moment it is not.
+  //
+  // Beating for as long as the app was merely loaded meant a backgrounded tab
+  // reported somebody as present, so the dot said a copy of the app existed
+  // rather than that anyone was there. Foreground only, and leaving is
+  // announced rather than waited out - the window is two minutes, and a duel
+  // round is three.
   useEffect(() => {
-    touchPresence();
-    const id = setInterval(touchPresence, 60_000);
-    return () => clearInterval(id);
+    let beat: ReturnType<typeof setInterval> | null = null;
+
+    const start = () => {
+      touchPresence();
+      if (beat) clearInterval(beat);
+      beat = setInterval(touchPresence, 45_000);
+    };
+    const stop = () => {
+      if (beat) clearInterval(beat);
+      beat = null;
+      clearPresence();
+    };
+
+    start();
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') start();
+      else stop();
+    });
+
+    return () => {
+      sub.remove();
+      if (beat) clearInterval(beat);
+    };
   }, []);
 
   // A request arrives from somebody else's phone, so the badge has to look for

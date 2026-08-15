@@ -369,6 +369,21 @@ export async function touchPresence(): Promise<void> {
   }
 }
 
+/**
+ * Stands the player down the moment they look away.
+ *
+ * Without it a dot stays lit for the whole two-minute window after somebody
+ * leaves, and anyone can challenge them into a three-minute round they will
+ * never see.
+ */
+export async function clearPresence(): Promise<void> {
+  try {
+    await supabase.rpc('clear_presence');
+  } catch {
+    /* leaving quietly is still leaving */
+  }
+}
+
 export async function sendFriendRequest(username: string): Promise<FriendAction> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('send_friend_request', { p_username: username });
