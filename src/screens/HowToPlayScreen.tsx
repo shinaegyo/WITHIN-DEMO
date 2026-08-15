@@ -160,8 +160,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         Your level is the other half, and everything pays into it. The daily pays its points, plus
         fifty for all three rounds won. Impossible pays twenty a number and fifty for reaching a
-        new tier. A duel pays eighty to win and twenty-five to lose. Each level costs a little more
-        than the last, and nothing you play is ever worth nothing.
+        new tier. A duel pays eighty to win and twenty-five to lose. Practice pays nothing, which
+        is what makes it practice. Each level costs a little more than the last.
       </Text>
     </>,
 
