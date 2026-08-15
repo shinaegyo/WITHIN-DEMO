@@ -186,6 +186,12 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
     rows.length === 0 ? null : (
       <View style={styles.board}>
         <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
+        <View style={styles.row}>
+          <Text style={[styles.rank, { color: 'transparent' }]}>0</Text>
+          <View style={styles.headSpacer} />
+          <Text style={[styles.colHead, { color: colors.textMuted }]}>GUESSES</Text>
+          <Text style={[styles.colHeadRight, { color: colors.textMuted }]}>FOUND</Text>
+        </View>
         {rows.map((e, i) => (
           <View key={`${e.rank}-${e.name}-${i}`} style={styles.row}>
             {MEDALS[e.rank] ? (
@@ -204,7 +210,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             </Text>
             {/* The tiebreak, shown because it is what separates two equal
                 scores: seven in 41 guesses is a better run than seven in 58. */}
-            <Text style={[styles.guessCount, { color: colors.textMuted }]}>{e.attempts}g</Text>
+            <Text style={[styles.guessCount, { color: colors.textMuted }]}>{e.attempts}</Text>
             <Text style={[styles.found, { color: colors.text }]}>{e.found}</Text>
           </View>
         ))}
@@ -335,6 +341,13 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                 </Text>
               )}
 
+              {board?.me && board.me.found > 0 && (
+                <Text style={[styles.body, { color: colors.textMuted }]}>
+                  {board.me.attempts} guesses, {(board.me.attempts / board.me.found).toFixed(1)} a
+                  number. Equal scores are ranked by that.
+                </Text>
+              )}
+
               {/* Nobody is ranked in a distribution, which is why it survives
                   any number of players sharing a score. */}
               {board && board.distribution.length > 1 && (
@@ -351,7 +364,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                           style={[
                             styles.distBar,
                             {
-                              backgroundColor: mine ? feedbackColors.correct : colors.border,
+                              backgroundColor: mine ? colors.text : colors.border,
                               width: `${Math.max(4, (d.players / most) * 78)}%`,
                             },
                           ]}
@@ -455,7 +468,10 @@ const styles = StyleSheet.create({
   name: { flex: 1, fontSize: 13.5, fontFamily: fonts.bold },
   me: { textDecorationLine: 'underline' },
   found: { fontSize: 15, fontFamily: fonts.extraBold, width: 26, textAlign: 'right' },
-  guessCount: { fontSize: 11, fontFamily: fonts.bold },
+  guessCount: { fontSize: 12, fontFamily: fonts.bold, width: 54, textAlign: 'right' },
+  headSpacer: { flex: 1 },
+  colHead: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1, width: 54, textAlign: 'right' },
+  colHeadRight: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1, width: 26, textAlign: 'right' },
   standing: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 2 },
   dist: { alignSelf: 'stretch', marginTop: 14, gap: 4 },
   distRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
