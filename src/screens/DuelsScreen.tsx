@@ -405,17 +405,19 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 20, paddingBottom: 24 },
+  // Sitting at the foot of the list now, so it needs air above it: pressed
+  // against the line before it, the link read as part of that sentence.
   rulesToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     alignSelf: 'flex-start',
-    paddingVertical: 2,
-    marginBottom: 4,
+    paddingVertical: 8,
+    marginTop: 26,
   },
   up: { transform: [{ rotate: '180deg' }] },
-  rulesLink: { fontSize: 11.5, fontFamily: fonts.bold, letterSpacing: 0.3 },
-  caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 8, marginTop: 6 },
+  rulesLink: { fontSize: 12.5, fontFamily: fonts.bold, letterSpacing: 0.2 },
+  caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 19, marginTop: 2 },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
   waiting: { alignItems: 'center', gap: 6, paddingVertical: 8 },
   waitingLine: { fontSize: 14, fontFamily: fonts.bold, textAlign: 'center' },
