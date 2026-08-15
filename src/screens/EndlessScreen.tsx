@@ -235,8 +235,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               {board.length > 0 && (
                 <View style={styles.boardList}>
                   <Text style={[styles.boardTitle, { color: arena.muted }]}>FURTHEST THIS WEEK</Text>
-                  {board.slice(0, 5).map((e) => (
-                    <View key={`${e.rank}-${e.name}`} style={styles.boardRow}>
+                  {board.slice(0, 5).map((e, i) => (
+                    <View key={`${e.rank}-${e.name}-${i}`} style={styles.boardRow}>
                       <Text style={[styles.boardRank, { color: arena.muted }]}>{e.rank}</Text>
                       <Text style={[styles.boardName, { color: arena.text }]} numberOfLines={1}>
                         {e.name}

@@ -781,12 +781,6 @@ export async function startEndlessSession(): Promise<void> {
   unwrap<any>(data, error);
 }
 
-export async function endlessRestart(): Promise<void> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('endless_restart');
-  unwrap<any>(data, error);
-}
-
 export async function loadEndlessBoard(): Promise<EndlessEntry[]> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('endless_leaderboard', { p_limit: 50 });

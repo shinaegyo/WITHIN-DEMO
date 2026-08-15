@@ -89,9 +89,10 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
           </Text>
         )}
 
-        {rows.map((e) => (
+        {rows.map((e, i) => (
         <View
-          key={`${e.rank}-${e.name}`}
+          // Ranks tie and names are not unique, so neither identifies a row.
+          key={`${e.rank}-${e.name}-${i}`}
           style={[
             styles.row,
             e.isMe

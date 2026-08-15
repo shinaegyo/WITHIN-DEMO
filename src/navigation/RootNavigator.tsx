@@ -24,6 +24,7 @@ import { loadFriends, touchPresence } from '../lib/api';
 import { playTap, warmSounds } from '../utils/sound';
 import { fonts } from '../theme/fonts';
 import { practiceRemaining, consumePracticeRound } from '../utils/practiceLimit';
+import { devSkipOnboarding, wantsDevSkip } from '../utils/devSkip';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
 import { loadSoundSetting, loadVolumes, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
 import { IntroScreen } from '../screens/IntroScreen';
@@ -406,6 +407,14 @@ export function RootNavigator() {
   const [introStep, setIntroStep] = useState<'avatar' | 'rules' | 'practice' | 'account' | 'daily'>('avatar');
 
   useEffect(() => {
+    // localhost?dev lands on the home screen: name the anonymous player, mark
+    // them taught, and carry on as though the tutorial had been done.
+    if (wantsDevSkip()) {
+      devSkipOnboarding()
+        .then(() => profile.refresh())
+        .finally(() => setIntroSeen(true));
+      return;
+    }
     hasSeenIntro().then(setIntroSeen);
   }, []);
 
