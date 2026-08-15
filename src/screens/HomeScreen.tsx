@@ -425,44 +425,6 @@ export function HomeScreen({
         )}
         </View>
 
-        {/* What the day actually did. The score alone says how much, never
-            which round went wrong, and that is the part worth looking at. */}
-        {game.rounds.some((r) => r.status !== 'playing') && (
-          <View style={[styles.card, { borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.textMuted }]}>YOUR DAY</Text>
-            <View style={styles.roundBars}>
-              {game.rounds.map((r) => (
-                <View key={r.round} style={styles.roundBar}>
-                  {/* A round still to come is not a round lost. Red is for a
-                      number that beat you, never for one you have not met. */}
-                  <View
-                    style={[
-                      styles.roundFill,
-                      {
-                        backgroundColor:
-                          r.status === 'won'
-                            ? feedbackColors.correct
-                            : r.status === 'lost'
-                              ? feedbackColors.oneAway
-                              : colors.border,
-                      },
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.roundScore,
-                      { color: r.status === 'playing' ? colors.textMuted : colors.text },
-                    ]}
-                  >
-                    {r.status === 'won' ? r.score : r.status === 'lost' ? '0' : '·'}
-                  </Text>
-                  <Text style={[styles.roundLabel, { color: colors.textMuted }]}>R{r.round}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
         {/* People you know, not the world. At this size a global top ten reads
             as an empty room; four friends' scores read as a race. */}
         {hasFriendsToday &&
@@ -566,20 +528,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
   },
   boardGap: { marginTop: 10 },
-  card: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 16,
-    marginTop: 10,
-    gap: 10,
-  },
-  cardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4 },
-  cardBody: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
-  roundBars: { flexDirection: 'row', gap: 8 },
-  roundBar: { flex: 1, alignItems: 'center', gap: 4 },
-  roundFill: { height: 6, borderRadius: 3, alignSelf: 'stretch' },
-  roundScore: { fontSize: 17, fontFamily: fonts.extraBold },
-  roundLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1 },
   boardRank: { width: 18, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardMedal: {
     width: 18,
