@@ -12,7 +12,6 @@ import {
   loadSeasonLeaderboard,
   loadBoardWindow,
   findPlayer,
-  myUserId,
   Leaderboard,
   SeasonLeaderboard,
   AllTimeLeaderboard,
@@ -188,12 +187,6 @@ export function BoardsScreen() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const findMe = async () => {
-    playTap();
-    const id = await myUserId();
-    if (id) centreOn(id, 'Around you');
   };
 
   const search = async () => {
@@ -459,21 +452,13 @@ export function BoardsScreen() {
               onPress={search}
               disabled={busy}
               style={({ pressed }) => [
-                styles.findMe,
+                styles.searchBtn,
                 { borderColor: colors.border, opacity: pressed || busy ? 0.6 : 1 },
               ]}
             >
-              <Text style={[styles.findMeText, { color: colors.text }]}>Search</Text>
+              <Text style={[styles.searchBtnText, { color: colors.text }]}>Search</Text>
             </Pressable>
           </View>
-
-          {/* On its own line, as a link rather than a button: it is a shortcut
-              to one place in the list, not a second thing to type into. */}
-          <Pressable onPress={findMe} style={styles.findMeLink} hitSlop={6}>
-            <Text style={[styles.findMeLinkText, { color: colors.textMuted }]}>
-              Find me on this board
-            </Text>
-          </Pressable>
 
           {!!found && (
             <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
@@ -681,10 +666,8 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
   },
-  findMe: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
-  findMeText: { fontSize: 13, fontFamily: fonts.extraBold },
-  findMeLink: { alignSelf: 'flex-end', paddingBottom: 8, paddingHorizontal: 2 },
-  findMeLinkText: { fontSize: 12.5, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
+  searchBtn: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
+  searchBtnText: { fontSize: 13, fontFamily: fonts.extraBold },
   foundNote: { fontSize: 12, fontFamily: fonts.bold, paddingBottom: 8 },
   showMore: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   showMoreText: { fontSize: 13, fontFamily: fonts.extraBold },
