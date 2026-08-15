@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { GuessBoard } from '../components/GuessBoard';
@@ -63,7 +62,6 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   const [board, setBoard] = useState<WindowEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [rules, setRules] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [centre, setCentre] = useState('');
   const [focused, setFocused] = useState(false);
@@ -205,44 +203,22 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
 
               {standings()}
 
-              <Pressable
-                onPress={() => {
-                  playTap();
-                  setRules((r) => !r);
-                }}
-                style={styles.rulesToggle}
-              >
-                <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
-                <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
-                  <Path
-                    d="M6 9.5 12 15.5l6-6"
-                    stroke={colors.textMuted}
-                    strokeWidth={2.4}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                </Svg>
-              </Pressable>
-
-              {rules && (
-                <>
-                  <Text style={[styles.rule, { color: colors.textMuted }]}>
-                    Three probe guesses, answered with the same colours as everywhere else: blue
-                    means aim higher, red means lower, and the stronger the colour the closer you
-                    are. They cost nothing and none of them ends the round.
-                  </Text>
-                  <Text style={[styles.rule, { color: colors.textMuted }]}>
-                    Then you commit to a range — 525 to 560 — that the number has to be inside.
-                    Your score is 101 minus the width of it. A window of 1 is 100 points, a window
-                    of 40 is 61, and a window of 100 is 1. If the number is outside, it is nothing.
-                  </Text>
-                  <Text style={[styles.rule, { color: colors.textMuted }]}>
-                    One a day, the same number for everyone, and every point is an XP toward your
-                    level.
-                  </Text>
-                </>
-              )}
+              {/* Set out plainly rather than folded behind a disclosure. A rule
+                  nobody opens is a rule nobody knows. */}
+              <Text style={[styles.rulesHead, { color: colors.text }]}>How Window works</Text>
+              <Text style={[styles.rule, { color: colors.textMuted }]}>
+                Three probe guesses, answered with the same colours as everywhere else: blue means
+                aim higher, red means lower, and the stronger the colour the closer you are. They
+                cost nothing and none of them ends the round.
+              </Text>
+              <Text style={[styles.rule, { color: colors.textMuted }]}>
+                Then you commit to a range — 525 to 560 — that the number has to be inside. Your
+                score is 101 minus the width of it. A window of 1 is 100 points, a window of 40 is
+                61, and a window of 100 is 1. If the number is outside, it is nothing.
+              </Text>
+              <Text style={[styles.rule, { color: colors.textMuted }]}>
+                One a day, the same number for everyone, and every point is an XP toward your level.
+              </Text>
             </ScrollView>
 
             {!done && (
@@ -439,16 +415,7 @@ const styles = StyleSheet.create({
   bigScore: { fontSize: 72, fontFamily: fonts.extraBold, letterSpacing: -3, lineHeight: 78 },
   scoreLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8 },
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, textAlign: 'center' },
-  rulesToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    marginTop: 12,
-  },
-  rulesLink: { fontSize: 12.5, fontFamily: fonts.bold },
-  up: { transform: [{ rotate: '180deg' }] },
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 14, textAlign: 'center' },
   foot: {
     borderTopWidth: 1,
     paddingTop: 12,

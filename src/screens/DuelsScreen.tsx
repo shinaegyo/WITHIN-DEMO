@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
@@ -51,7 +50,6 @@ export function DuelsScreen({
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
   const [waiting, setWaiting] = useState<{ online: number } | null>(null);
-  const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -315,36 +313,12 @@ export function DuelsScreen({
         )}
         {/* Rules last, as on every other mode screen: read once, scrolled past
             every time after. */}
-        <Pressable
-          onPress={() => {
-            playTap();
-            setRules((r) => !r);
-          }}
-          style={styles.rulesToggle}
-        >
-          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
-          {/* Drawn rather than typed. The ⌄ and ⌃ characters are modifier
-              letters, not arrows: they sit high, render differently on every
-              platform, and change size when the state flips. */}
-          <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
-            <Path
-              d="M6 9.5 12 15.5l6-6"
-              stroke={colors.textMuted}
-              strokeWidth={2.4}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </Svg>
-        </Pressable>
-
-        {rules && (
-          <Text style={[styles.caption, { color: colors.textMuted }]}>
-            You pick the number they hunt and they pick yours, a fresh one each round. Seven
-            attempts then six then five. A round goes to whoever needed fewer guesses, and the next
-            opens once you have both played it. Level after three and a fourth number decides it.
-          </Text>
-        )}
+        <Text style={[styles.rulesHead, { color: colors.text }]}>How duels work</Text>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          You pick the number they hunt and they pick yours, a fresh one each round. Seven attempts
+          then six then five. A round goes to whoever needed fewer guesses, and the next opens once
+          you have both played it. Level after three and a fourth number decides it.
+        </Text>
 
 
       </ScrollView>
@@ -417,18 +391,9 @@ export function DuelsScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 20, paddingBottom: 24 },
-  // Sitting at the foot of the list now, so it needs air above it: pressed
-  // against the line before it, the link read as part of that sentence.
-  rulesToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    marginTop: 26,
-  },
-  up: { transform: [{ rotate: '180deg' }] },
-  rulesLink: { fontSize: 12.5, fontFamily: fonts.bold, letterSpacing: 0.2 },
+  // Sitting at the foot of the list, so it needs air above it: pressed against
+  // the line before it, the heading read as part of that sentence.
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 4 },
   caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 19, marginTop: 2 },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
   waiting: { alignItems: 'center', gap: 6, paddingVertical: 8 },

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
@@ -48,7 +47,6 @@ export function ImpossibleBoardScreen({
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
   const [status, setStatus] = useState<HomeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -134,31 +132,13 @@ export function ImpossibleBoardScreen({
         </View>
         ))}
 
-        {/* Folded away, the way Window, Duel and Rush fold theirs. This was the
-            one mode that opened onto a page of rules, which pushed the thing
-            you came for - the standings, and the button - off the screen. */}
-        <Pressable
-          onPress={() => {
-            playTap();
-            setRules((r) => !r);
-          }}
-          style={styles.rulesToggle}
-        >
-          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
-          <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
-            <Path
-              d="M6 9.5 12 15.5l6-6"
-              stroke={colors.textMuted}
-              strokeWidth={2.4}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </Svg>
-        </Pressable>
+        {/* Set out plainly rather than folded behind a disclosure. A rule
+            nobody opens is a rule nobody knows, and a row of chevrons down the
+            app is furniture standing between the player and the only thing on
+            the screen worth reading. It scrolls; that is what scrolling is
+            for. */}
+        <Text style={[styles.rulesHead, { color: colors.text }]}>How Impossible works</Text>
 
-        {rules && (
-          <>
         <Text style={[styles.rule, { color: colors.textMuted }]}>
           Numbers one after another, up to 100 of them, and everyone plays the same sequence this
           week. One clue per number, held back until only a few attempts remain.
@@ -195,8 +175,6 @@ export function ImpossibleBoardScreen({
         <Text style={[styles.rule, { color: colors.textMuted }]}>
           Every number cleared pays 20 XP toward your level, and reaching a new tier pays 50.
         </Text>
-          </>
-        )}
       </ScrollView>
 
       {/* The way in sits under the standings rather than replacing them. */}
@@ -251,17 +229,7 @@ export function ImpossibleBoardScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 16, gap: 8, paddingBottom: 20 },
-  rulesToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    marginTop: 18,
-    marginBottom: 4,
-  },
-  rulesLink: { fontSize: 12.5, fontFamily: fonts.bold },
-  up: { transform: [{ rotate: '180deg' }] },
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 8 },
   rule: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 10 },
   tiers: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 2, marginBottom: 12 },
   tierRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 12, gap: 10 },

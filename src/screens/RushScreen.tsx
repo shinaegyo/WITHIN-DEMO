@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { BackButton } from '../components/BackButton';
 import { ScreenTitle } from '../components/ScreenTitle';
@@ -71,7 +70,6 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   const [found, setFound] = useState<number | null>(null);
   // 3, 2, 1 before the clock starts again, so nobody comes back mid-guess.
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [rules, setRules] = useState(false);
   const ended = useRef(false);
   const running = useRef(false);
 
@@ -280,44 +278,23 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                     read once and scrolled past every time after. */}
                 {standings('BEST TODAY')}
 
-                <Pressable
-                  onPress={() => {
-                    playTap();
-                    setRules((r) => !r);
-                  }}
-                  style={styles.rulesToggle}
-                >
-                  <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
-                  <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
-                    <Path
-                      d="M6 9.5 12 15.5l6-6"
-                      stroke={colors.textMuted}
-                      strokeWidth={2.4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                  </Svg>
-                </Pressable>
-
-                {rules && (
-                  <>
-                    <Text style={[styles.rule, { color: colors.textMuted }]}>
-                      Find one number, the next appears immediately, and you keep going until the
-                      clock runs out. Your score is how many you found.
-                    </Text>
-                    <Text style={[styles.rule, { color: colors.textMuted }]}>
-                      No clues, and no limit on guesses — the clock is the only thing you spend.
-                      The colours work as they do everywhere else: blue means aim higher, red means
-                      lower, and the stronger the colour the closer you are.
-                    </Text>
-                    <Text style={[styles.rule, { color: colors.textMuted }]}>
-                      One run a day, starting the moment you press the button. Leaving stops the
-                      clock and coming back gives you a countdown, so an interruption costs you
-                      nothing. Every number found pays 15 XP.
-                    </Text>
-                  </>
-                )}
+                {/* Set out plainly rather than folded behind a disclosure. A
+                    rule nobody opens is a rule nobody knows. */}
+                <Text style={[styles.rulesHead, { color: colors.text }]}>How Rush works</Text>
+                <Text style={[styles.rule, { color: colors.textMuted }]}>
+                  Find one number, the next appears immediately, and you keep going until the clock
+                  runs out. Your score is how many you found.
+                </Text>
+                <Text style={[styles.rule, { color: colors.textMuted }]}>
+                  No clues, and no limit on guesses — the clock is the only thing you spend. The
+                  colours work as they do everywhere else: blue means aim higher, red means lower,
+                  and the stronger the colour the closer you are.
+                </Text>
+                <Text style={[styles.rule, { color: colors.textMuted }]}>
+                  One run a day, starting the moment you press the button. Leaving stops the clock
+                  and coming back gives you a countdown, so an interruption costs you nothing. Every
+                  number found pays 15 XP.
+                </Text>
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
@@ -516,9 +493,7 @@ const styles = StyleSheet.create({
   centre: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   foot: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 8 },
   footNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
-  rulesToggle: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingVertical: 6 },
-  rulesLink: { fontSize: 12.5, fontFamily: fonts.bold },
-  up: { transform: [{ rotate: '180deg' }] },
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 16, marginBottom: 2 },
   intro: { paddingTop: 10, paddingBottom: 20, gap: 12 },
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   title: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -1 },
