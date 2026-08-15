@@ -225,9 +225,7 @@ export function BoardsScreen() {
                   curious, and a full screen for one column is far too much
                   room for one sentence. */}
               <Pressable onPress={() => { playTap(); setExplain('today'); }} hitSlop={10}>
-                <Text style={[styles.headSub, styles.headTap, { color: colors.accent }]}>
-                  AVG OFF ⓘ
-                </Text>
+                <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
               </Pressable>
             </View>
           )}
@@ -235,9 +233,7 @@ export function BoardsScreen() {
             <View style={styles.head}>
               <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
               <Pressable onPress={() => { playTap(); setExplain('alltime'); }} hitSlop={10}>
-                <Text style={[styles.headSub, styles.headTap, { color: colors.accent }]}>
-                  DAYS ⓘ
-                </Text>
+                <Text style={[styles.headSub, { color: colors.textMuted }]}>DAYS ⓘ</Text>
               </Pressable>
             </View>
           )}
@@ -295,17 +291,26 @@ export function BoardsScreen() {
           >
             {explain === 'today' ? (
               <>
-                <Text style={[styles.sheetTitle, { color: colors.text }]}>Avg off</Text>
+                {/* Spelled out even though the column is abbreviated: a header
+                    has a width to respect and a sheet does not, and the short
+                    form not telling somebody enough is why they opened this. */}
+                <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
                 <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  How far a typical guess landed from the answer.
+                  How far a typical guess landed from the answer, counting every guess you made
+                  across all three rounds.
                 </Text>
                 <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  Say the number was 342 and you guessed 500, then 400, then 350, then 342. Those
-                  guesses were 158, 58, 8 and 0 away — 224 altogether, across four guesses.
+                  Say one round's number was 342 and you guessed 500, then 400, then 350, then
+                  342. Those guesses were 158, 58, 8 and 0 away — 224 altogether, across four
+                  guesses.
                 </Text>
                 <View style={[styles.sheetSum, { borderColor: colors.border }]}>
-                  <Text style={[styles.sheetSumText, { color: colors.text }]}>224 ÷ 4 = 56 avg off</Text>
+                  <Text style={[styles.sheetSumText, { color: colors.text }]}>224 ÷ 4 = 56</Text>
                 </View>
+                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                  All three rounds add together the same way, then divide by how many guesses you
+                  made in the whole day.
+                </Text>
                 <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
                   Lower is better. When two players finish level on points, the closer guesses rank
                   higher.
@@ -361,7 +366,6 @@ const styles = StyleSheet.create({
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
   mineLine: { flexDirection: 'row', alignItems: 'baseline', gap: 7 },
   mineUnit: { fontSize: 15, fontFamily: fonts.bold },
-  headTap: { textDecorationLine: 'underline' },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: 26 },
   sheet: { borderWidth: 1, borderRadius: 20, padding: 22, gap: 10, maxWidth: 420, width: '100%' },
   sheetTitle: { fontSize: 21, fontFamily: fonts.extraBold, letterSpacing: -0.4 },
