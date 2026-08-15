@@ -43,6 +43,38 @@ import { playTap } from '../utils/sound';
  */
 type Board = 'today' | 'season' | 'alltime';
 
+
+/**
+ * Where you came, said the way that suits the size of the crowd.
+ *
+ * The rule is your position, not the size of the field. Being 37th of ten
+ * thousand is a real achievement and "Top 1%" throws it away, lumping you in
+ * with ninety-nine other people - so a place inside the top hundred is stated
+ * as a place. Below that a position tells you nothing you want to know, and
+ * the share does: nobody is glad to be four-thousandth at something they did
+ * well.
+ *
+ * Under twenty players a percentage is nonsense in the other direction, and
+ * the server withholds it there anyway.
+ *
+ * Decimals are deliberately absent. If the top hundred always show a rank then
+ * anybody seeing a share is at least 101st, which is over 1% until the game
+ * has a hundred thousand players - and by then the cutoff should be higher
+ * than a hundred rather than the number more precise.
+ */
+const NAMED_PLACES = 100;
+
+function standing(
+  me: { rank: number; topPercent: number | null },
+  total: number,
+  when: string,
+): string {
+  if (me.topPercent === null || me.rank <= NAMED_PLACES) {
+    return `#${me.rank.toLocaleString()} OF ${total.toLocaleString()} ${when}`;
+  }
+  return `TOP ${me.topPercent}% ${when}`;
+}
+
 /** "August" — the season is a calendar month, so it has the month's name. */
 function seasonName(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -190,11 +222,7 @@ export function BoardsScreen() {
       {tab === 'season' && season && (
         <View style={[styles.mine, { borderColor: colors.border }]}>
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
-            {season.me
-              ? season.me.topPercent !== null
-                ? `TOP ${season.me.topPercent}% THIS SEASON`
-                : `${season.me.rank} OF ${season.totalPlayers} THIS SEASON`
-              : 'NOT ON THIS SEASON YET'}
+            {season.me ? standing(season.me, season.totalPlayers, 'THIS SEASON') : 'NOT ON THIS SEASON YET'}
           </Text>
           <View style={styles.mineLine}>
             <Text style={[styles.mineScore, { color: colors.text }]}>
@@ -214,9 +242,7 @@ export function BoardsScreen() {
       {tab === 'alltime' && allTime?.me && (
         <View style={[styles.mine, { borderColor: colors.border }]}>
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
-            {allTime.me.topPercent !== null
-              ? `TOP ${allTime.me.topPercent}% ALL TIME`
-              : `${allTime.me.rank} OF ${allTime.totalPlayers} ALL TIME`}
+            {standing(allTime.me, allTime.totalPlayers, 'ALL TIME')}
           </Text>
           <View style={styles.mineLine}>
             <Text style={[styles.mineScore, { color: colors.text }]}>
@@ -234,9 +260,7 @@ export function BoardsScreen() {
       {tab === 'today' && today?.me && (
         <View style={[styles.mine, { borderColor: colors.border }]}>
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
-            {today.me.topPercent !== null
-              ? `TOP ${today.me.topPercent}% TODAY`
-              : `${today.me.rank} OF ${today.totalPlayers} TODAY`}
+            {standing(today.me, today.totalPlayers, 'TODAY')}
           </Text>
           {/* One line. Stacked, the unit read as a third label in a card that
               already had two, and put a line break between a number and the
