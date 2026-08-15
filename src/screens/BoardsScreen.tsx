@@ -152,11 +152,11 @@ export function BoardsScreen() {
     value: `${e.score}`, sub: tab === 'alltime' ? undefined : `${e.avgOff}`, isMe: e.isMe,
   });
 
-  // Friends only, and never for a single character - one letter matches most
-  // of a list and teaches nobody anything.
+  // From the first keystroke. A friends list is short, so one letter narrows
+  // it as usefully as two, and waiting for a second reads as a broken field.
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
+    if (q.length < 1) {
       setHints([]);
       return;
     }
