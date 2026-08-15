@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { BackButton } from '../components/BackButton';
 import { Avatar } from '../components/Avatar';
@@ -69,6 +70,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   const [found, setFound] = useState<number | null>(null);
   // 3, 2, 1 before the clock starts again, so nobody comes back mid-guess.
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [rules, setRules] = useState(false);
   const ended = useRef(false);
   const running = useRef(false);
 
@@ -263,40 +265,76 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             <View style={styles.flex}>
               <ScrollView contentContainerStyle={styles.intro} showsVerticalScrollIndicator={false}>
                 <Text style={[styles.title, { color: colors.text }]}>Rush</Text>
-
                 <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  Three minutes. Find one number, the next appears immediately, and you keep going
-                  until the clock runs out. Your score is how many you found.
-                </Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  No clues here, and no limit on guesses — the clock is the only thing you spend.
-                  The colours work exactly as they do everywhere else: blue means aim higher, red
-                  means lower, and the stronger the colour the closer you are.
-                </Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  Everyone hunts the same numbers each day, so the scores compare directly. One run
-                  a day, and it starts the moment you press the button.
-                </Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  Leaving stops the clock and coming back gives you a countdown, so an interruption
-                  costs you nothing. Every number found pays 15 XP toward your level.
+                  Three minutes, as many numbers as you can find. Everyone hunts the same ones
+                  today, so the scores compare directly.
                 </Text>
 
+                {/* Standings first, rules underneath - the same order as
+                    Impossible, and the order that matches why anybody opens a
+                    mode screen. The board is the reason to play; the rules are
+                    read once and scrolled past every time after. */}
                 {standings('BEST TODAY')}
+
+                <Pressable
+                  onPress={() => {
+                    playTap();
+                    setRules((r) => !r);
+                  }}
+                  style={styles.rulesToggle}
+                >
+                  <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
+                  <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
+                    <Path
+                      d="M6 9.5 12 15.5l6-6"
+                      stroke={colors.textMuted}
+                      strokeWidth={2.4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                  </Svg>
+                </Pressable>
+
+                {rules && (
+                  <>
+                    <Text style={[styles.rule, { color: colors.textMuted }]}>
+                      Find one number, the next appears immediately, and you keep going until the
+                      clock runs out. Your score is how many you found.
+                    </Text>
+                    <Text style={[styles.rule, { color: colors.textMuted }]}>
+                      No clues, and no limit on guesses — the clock is the only thing you spend.
+                      The colours work as they do everywhere else: blue means aim higher, red means
+                      lower, and the stronger the colour the closer you are.
+                    </Text>
+                    <Text style={[styles.rule, { color: colors.textMuted }]}>
+                      One run a day, starting the moment you press the button. Leaving stops the
+                      clock and coming back gives you a countdown, so an interruption costs you
+                      nothing. Every number found pays 15 XP.
+                    </Text>
+                  </>
+                )}
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
 
-              <Pressable
-                onPress={begin}
-                disabled={busy}
-                style={({ pressed }) => [
-                  styles.start,
-                  { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
-                ]}
-              >
-                <Text style={[styles.startText, { color: colors.background }]}>Start the clock</Text>
-              </Pressable>
+              <View style={[styles.foot, { borderColor: colors.border }]}>
+                <Text style={[styles.footNote, { color: colors.textMuted }]}>
+                  One run a day · three minutes
+                </Text>
+                <Pressable
+                  onPress={begin}
+                  disabled={busy}
+                  style={({ pressed }) => [
+                    styles.start,
+                    { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+                  ]}
+                >
+                  <Text style={[styles.startText, { color: colors.background }]}>
+                    Start the clock
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           ) : state.paused || countdown !== null ? (
             <View style={styles.centre}>
@@ -439,6 +477,11 @@ const styles = StyleSheet.create({
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   clock: { fontSize: 22, fontFamily: fonts.extraBold, letterSpacing: 1 },
   centre: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  foot: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 8 },
+  footNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
+  rulesToggle: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingVertical: 6 },
+  rulesLink: { fontSize: 12.5, fontFamily: fonts.bold },
+  up: { transform: [{ rotate: '180deg' }] },
   intro: { paddingTop: 10, paddingBottom: 20, gap: 12 },
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   title: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -1 },

@@ -187,37 +187,6 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Pressable
-          onPress={() => {
-            playTap();
-            setRules((r) => !r);
-          }}
-          style={styles.rulesToggle}
-        >
-          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
-          {/* Drawn rather than typed. The ⌄ and ⌃ characters are modifier
-              letters, not arrows: they sit high, render differently on every
-              platform, and change size when the state flips. */}
-          <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
-            <Path
-              d="M6 9.5 12 15.5l6-6"
-              stroke={colors.textMuted}
-              strokeWidth={2.4}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </Svg>
-        </Pressable>
-
-        {rules && (
-          <Text style={[styles.caption, { color: colors.textMuted }]}>
-            You pick the number they hunt and they pick yours, a fresh one each round. Seven
-            attempts then six then five. A round goes to whoever needed fewer guesses, and the next
-            opens once you have both played it. Level after three and a fourth number decides it.
-          </Text>
-        )}
-
         {note && <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>}
 
         {waitingOnYou.length > 0 && (
@@ -332,6 +301,40 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
             </View>
           ))
         )}
+        {/* Rules last, as on every other mode screen: read once, scrolled past
+            every time after. */}
+        <Pressable
+          onPress={() => {
+            playTap();
+            setRules((r) => !r);
+          }}
+          style={styles.rulesToggle}
+        >
+          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
+          {/* Drawn rather than typed. The ⌄ and ⌃ characters are modifier
+              letters, not arrows: they sit high, render differently on every
+              platform, and change size when the state flips. */}
+          <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
+            <Path
+              d="M6 9.5 12 15.5l6-6"
+              stroke={colors.textMuted}
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </Svg>
+        </Pressable>
+
+        {rules && (
+          <Text style={[styles.caption, { color: colors.textMuted }]}>
+            You pick the number they hunt and they pick yours, a fresh one each round. Seven
+            attempts then six then five. A round goes to whoever needed fewer guesses, and the next
+            opens once you have both played it. Level after three and a fourth number decides it.
+          </Text>
+        )}
+
+
       </ScrollView>
 
       {/* The way in sits under everything rather than on top of it: the list
