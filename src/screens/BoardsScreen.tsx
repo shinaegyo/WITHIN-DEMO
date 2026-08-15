@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, TextInput, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
@@ -10,6 +10,9 @@ import {
   loadAllTimeLeaderboard,
   loadLeaderboard,
   loadSeasonLeaderboard,
+  loadBoardWindow,
+  findPlayer,
+  myUserId,
   Leaderboard,
   SeasonLeaderboard,
   AllTimeLeaderboard,
@@ -130,6 +133,85 @@ export function BoardsScreen() {
   // Not a fourth tab: friends is a filter on all three windows, not a window of
   // its own. Today among friends is the one people check every morning.
   const [friends, setFriends] = useState(false);
+  // Everything below the podium: a page at a time, or a window centred on
+  // somebody. The podium itself is still the first page, so the two never
+  // disagree about who is third.
+  const [more, setMore] = useState<Row[]>([]);
+  const [nextFrom, setNextFrom] = useState(10);
+  const [ended, setEnded] = useState(false);
+  const [query, setQuery] = useState('');
+  const [found, setFound] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const toRow = (e: {
+    rank: number; name: string; avatar: string | null; score: number; avgOff: number; isMe: boolean;
+  }): Row => ({
+    rank: e.rank, name: e.name, avatar: e.avatar,
+    value: `${e.score}`, sub: tab === 'alltime' ? undefined : `${e.avgOff}`, isMe: e.isMe,
+  });
+
+  const resetBrowse = () => {
+    setMore([]);
+    setNextFrom(10);
+    setEnded(false);
+    setFound(null);
+  };
+
+  /** The next page under whatever is already shown. */
+  const showMore = async () => {
+    if (busy || ended) return;
+    setBusy(true);
+    try {
+      const w = await loadBoardWindow(tab, friends, { offset: nextFrom, limit: 25 });
+      const rows = w.entries.map(toRow);
+      setMore((m) => [...m, ...rows]);
+      setNextFrom(nextFrom + rows.length);
+      if (rows.length === 0 || nextFrom + rows.length >= Math.min(w.totalPlayers, 500)) setEnded(true);
+    } catch {
+      setEnded(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Centre the list on somebody: you, or whoever was searched for. */
+  const centreOn = async (id: string, label: string | null) => {
+    setBusy(true);
+    try {
+      const w = await loadBoardWindow(tab, friends, { around: id, limit: 7 });
+      setMore(w.entries.map(toRow));
+      setNextFrom(w.from + w.entries.length - 1);
+      setEnded(false);
+      setFound(label);
+    } catch {
+      setFound('Not on this board.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const findMe = async () => {
+    playTap();
+    const id = await myUserId();
+    if (id) centreOn(id, 'Around you');
+  };
+
+  const search = async () => {
+    const name = query.trim();
+    if (!name) return;
+    playTap();
+    setBusy(true);
+    try {
+      const r = await findPlayer(name, tab, friends);
+      if (!r.found) setFound(`No player called ${name}.`);
+      else if (r.onBoard === false || !r.userId) setFound(`${r.name} has not played this one.`);
+      else await centreOn(r.userId, `Around ${r.name}`);
+    } catch {
+      setFound('Could not search just now.');
+    } finally {
+      setBusy(false);
+    }
+  };
   // Today's board carries more than a list: where you came as a share of the
   // field, how many people are level with you, and the shape of the day.
   const [today, setToday] = useState<Leaderboard | null>(null);
@@ -209,6 +291,7 @@ export function BoardsScreen() {
                   setFriends(f);
                   // Everything on screen belongs to the other field.
                   setRows({});
+              resetBrowse();
                   setToday(null);
                   setSeason(null);
                   setAllTime(null);
@@ -238,6 +321,7 @@ export function BoardsScreen() {
             onPress={() => {
               playTap();
               setTab(t.key);
+              resetBrowse();
             }}
             style={[
               styles.segment,
@@ -364,6 +448,42 @@ export function BoardsScreen() {
               </Pressable>
             )}
           </View>
+          {/* Search and Find me, above the names. Nobody wants to scroll to
+              4,568 - they want to see 4,565 to 4,571 and know who is one good
+              morning away. */}
+          <View style={styles.tools}>
+            <TextInput
+              style={[
+                styles.search,
+                { color: colors.text, borderColor: colors.border },
+                // The browser draws its own focus ring in the system accent,
+                // which arrives amber on this machine and belongs to no palette
+                // in the app. Same suppression NumberInput uses.
+                Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null,
+              ]}
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Find a player"
+              placeholderTextColor={colors.textMuted}
+              onSubmitEditing={search}
+              returnKeyType="search"
+              autoCapitalize="none"
+            />
+            <Pressable
+              onPress={findMe}
+              style={({ pressed }) => [
+                styles.findMe,
+                { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+              ]}
+            >
+              <Text style={[styles.findMeText, { color: colors.text }]}>Find me</Text>
+            </Pressable>
+          </View>
+
+          {!!found && (
+            <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
+          )}
+
           {list.map((e) => (
             <Pressable
               key={`${e.rank}-${e.name}`}
@@ -405,6 +525,47 @@ export function BoardsScreen() {
               {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
             </Pressable>
           ))}
+
+          {/* The rest of the board, a page at a time, capped at five hundred
+              because past that nobody is reading names. */}
+          {more.map((e) => (
+            <Pressable
+              key={`w-${e.rank}-${e.name}`}
+              onPress={() => {
+                playTap();
+                setLooking(e.name);
+              }}
+              style={[
+                styles.row,
+                e.isMe
+                  ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
+                  : { borderColor: colors.border, backgroundColor: colors.surface },
+              ]}
+            >
+              <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
+              <Avatar value={e.avatar} size={30} />
+              <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                {e.name}
+              </Text>
+              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
+              <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
+            </Pressable>
+          ))}
+
+          {!ended && (
+            <Pressable
+              onPress={() => { playTap(); showMore(); }}
+              disabled={busy}
+              style={({ pressed }) => [
+                styles.showMore,
+                { borderColor: colors.border, opacity: pressed || busy ? 0.6 : 1 },
+              ]}
+            >
+              <Text style={[styles.showMoreText, { color: colors.textMuted }]}>
+                {busy ? 'Loading…' : 'Show more'}
+              </Text>
+            </Pressable>
+          )}
         </ScrollView>
       )}
 
@@ -498,6 +659,21 @@ const styles = StyleSheet.create({
   filter: { flexShrink: 0, flexDirection: 'row', borderRadius: 999, padding: 3 },
   filterTab: { borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6 },
   filterText: { fontSize: 11.5, fontFamily: fonts.extraBold },
+  tools: { flexDirection: 'row', gap: 8, paddingBottom: 10 },
+  search: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13.5,
+    fontFamily: fonts.semiBold,
+  },
+  findMe: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
+  findMeText: { fontSize: 13, fontFamily: fonts.extraBold },
+  foundNote: { fontSize: 12, fontFamily: fonts.bold, paddingBottom: 8 },
+  showMore: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
+  showMoreText: { fontSize: 13, fontFamily: fonts.extraBold },
   head: {
     flexDirection: 'row',
     alignItems: 'center',

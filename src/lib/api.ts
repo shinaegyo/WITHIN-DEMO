@@ -1330,3 +1330,95 @@ export function messageFor(code: string, guess?: number): string {
       return `Something went wrong at our end — ${code}`;
   }
 }
+
+/** One slice of a board: a page, or a window centred on somebody. */
+export interface BoardWindow {
+  from: number;
+  totalPlayers: number;
+  entries: {
+    rank: number;
+    name: string;
+    avatar: string | null;
+    score: number;
+    avgOff: number;
+    days: number;
+    isMe: boolean;
+  }[];
+}
+
+export type BoardKind = 'today' | 'season' | 'alltime';
+
+function toWindow(raw: any): BoardWindow {
+  return {
+    from: raw.from ?? 1,
+    totalPlayers: raw.totalPlayers ?? 0,
+    entries: (raw.entries ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      avatar: e.avatar ?? null,
+      score: e.score ?? 0,
+      avgOff: e.avg_off ?? 0,
+      days: e.days ?? 0,
+      isMe: !!e.is_me,
+    })),
+  };
+}
+
+export async function loadBoardWindow(
+  board: BoardKind,
+  friends: boolean,
+  opts: { offset?: number; around?: string; limit?: number } = {},
+): Promise<BoardWindow> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('board_window', {
+    p_board: board,
+    p_friends: friends,
+    p_around: opts.around ?? null,
+    p_offset: opts.offset ?? 0,
+    p_limit: opts.limit ?? 25,
+  });
+  return toWindow(unwrap<any>(data, error));
+}
+
+/** Your own id, for centring a window on yourself. */
+export async function myUserId(): Promise<string | null> {
+  const { data } = await supabase.auth.getUser();
+  return data.user?.id ?? null;
+}
+
+export interface FoundPlayer {
+  found: boolean;
+  onBoard?: boolean;
+  userId?: string;
+  name?: string;
+  avatar?: string | null;
+  rank?: number;
+  score?: number;
+  avgOff?: number;
+  isMe?: boolean;
+}
+
+export async function findPlayer(
+  name: string,
+  board: BoardKind,
+  friends: boolean,
+): Promise<FoundPlayer> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('find_player', {
+    p_name: name,
+    p_board: board,
+    p_friends: friends,
+  });
+  const raw = unwrap<any>(data, error);
+  return {
+    found: !!raw.found,
+    onBoard: raw.onBoard !== false,
+    userId: raw.userId,
+    name: raw.name,
+    avatar: raw.avatar ?? null,
+    rank: raw.rank,
+    score: raw.score,
+    avgOff: raw.avgOff,
+    isMe: !!raw.isMe,
+  };
+}
