@@ -431,6 +431,24 @@ export async function loadDuels(): Promise<DuelSummary[]> {
   }));
 }
 
+/** Pair with a stranger who is here now, or join the queue and wait. */
+export async function findStrangerDuel(): Promise<
+  { status: 'matched'; duelId: string } | { status: 'waiting'; online: number }
+> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_find_stranger');
+  const raw = unwrap<any>(data, error);
+  return raw.status === 'matched'
+    ? { status: 'matched', duelId: raw.duelId }
+    : { status: 'waiting', online: raw.online ?? 0 };
+}
+
+export async function leaveDuelQueue(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_leave_queue');
+  unwrap<any>(data, error);
+}
+
 /** Returns the duel it created, so the caller can open it. */
 export async function challengeFriend(username: string): Promise<string | null> {
   await ensureSignedIn();

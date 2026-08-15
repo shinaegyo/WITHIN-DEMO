@@ -6,6 +6,8 @@ import {
   ApiError,
   DuelSummary,
   challengeFriend,
+  findStrangerDuel,
+  leaveDuelQueue,
   loadDuels,
   messageFor,
   respondToDuel,
@@ -27,6 +29,7 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState<{ online: number } | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -163,6 +166,49 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         you have both played it. Level after three and a fourth number decides it.
       </Text>
 
+      {/* Two ways in: somebody you know, or whoever else is here. */}
+      <Pressable
+        onPress={() =>
+          run(async () => {
+            const res = await findStrangerDuel();
+            if (res.status === 'matched') {
+              setWaiting(null);
+              onPlay(res.duelId);
+            } else {
+              setWaiting({ online: res.online });
+            }
+          })
+        }
+        style={({ pressed }) => [
+          styles.stranger,
+          { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+        ]}
+      >
+        <Text style={[styles.strangerText, { color: colors.background }]}>Play a stranger</Text>
+      </Pressable>
+
+      {waiting && (
+        <Text style={[styles.note, { color: colors.textMuted }]}>
+          {waiting.online === 0
+            ? 'No one is online right now. Come back later.'
+            : 'Waiting for someone to press it too. Stay on this screen.'}
+          {'  '}
+          <Text
+            style={{ textDecorationLine: 'underline' }}
+            onPress={() =>
+              run(async () => {
+                await leaveDuelQueue();
+                setWaiting(null);
+              })
+            }
+          >
+            Stop waiting
+          </Text>
+        </Text>
+      )}
+
+      <Text style={[styles.or, { color: colors.textMuted }]}>OR PLAY A FRIEND</Text>
+
       <View style={[styles.addRow, { borderColor: colors.border, backgroundColor: colors.surface }]}>
         <TextInput
           style={[
@@ -266,6 +312,9 @@ const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 20, paddingBottom: 40 },
   caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 16 },
+  stranger: { borderRadius: 16, paddingVertical: 15, alignItems: 'center', marginBottom: 4 },
+  strangerText: { fontSize: 16, fontFamily: fonts.extraBold },
+  or: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginTop: 16, marginBottom: 8 },
   addRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: 14, padding: 5 },
   input: {
     flex: 1,
