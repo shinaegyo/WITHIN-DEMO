@@ -271,10 +271,9 @@ export interface AllTimeEntry {
   rank: number;
   name: string;
   avatar: string | null;
-  /** Points per day. The board ranks the rate, not the pile. */
   score: number;
-  /** The pile, kept as a record rather than a ranking. */
-  totalPoints: number;
+  /** How far a typical guess landed, over everything you have played. */
+  avgOff: number;
   daysPlayed: number;
   bestStreak: number;
   /** ISO timestamp of the player's most recent guess, or null. */
@@ -286,17 +285,38 @@ export interface AllTimeEntry {
 export interface AllTimeLeaderboard {
   entries: AllTimeEntry[];
   totalPlayers: number;
-  /** Days of play before a per-day average means anything. */
-  minimumDays: number;
   me: {
-    perDay: number;
-    totalPoints: number;
+    score: number;
+    avgOff: number;
     daysPlayed: number;
     rank: number;
     topPercent: number | null;
   } | null;
-  /** Set instead of `me` while you are still short of the minimum. */
-  pending: { daysPlayed: number; daysNeeded: number; perDay: number } | null;
+}
+
+/** One calendar month, in the player's own timezone. */
+export interface SeasonLeaderboard {
+  /** First day of the month, ISO. */
+  season: string;
+  /** First day of the next month — what the countdown counts to. */
+  endsOn: string;
+  entries: {
+    rank: number;
+    name: string;
+    avatar: string | null;
+    score: number;
+    avgOff: number;
+    days: number;
+    isMe: boolean;
+  }[];
+  me: {
+    score: number;
+    avgOff: number;
+    days: number;
+    rank: number;
+    topPercent: number | null;
+  } | null;
+  totalPlayers: number;
 }
 
 export interface Leaderboard {
@@ -1133,21 +1153,13 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
   const raw = unwrap<any>(data, error);
   return {
     totalPlayers: raw.totalPlayers ?? 0,
-    minimumDays: raw.minimumDays ?? 10,
     me: raw.me
       ? {
-          perDay: raw.me.perDay ?? 0,
-          totalPoints: raw.me.totalPoints ?? 0,
+          score: raw.me.score ?? 0,
+          avgOff: raw.me.avgOff ?? 0,
           daysPlayed: raw.me.daysPlayed ?? 0,
           rank: raw.me.rank ?? 0,
           topPercent: raw.me.topPercent ?? null,
-        }
-      : null,
-    pending: raw.pending
-      ? {
-          daysPlayed: raw.pending.daysPlayed ?? 0,
-          daysNeeded: raw.pending.daysNeeded ?? 0,
-          perDay: raw.pending.perDay ?? 0,
         }
       : null,
     entries: (raw.entries ?? []).map((e: any) => ({
@@ -1155,13 +1167,42 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
       name: e.name,
       avatar: e.avatar ?? null,
       score: e.score,
-      totalPoints: e.total_points ?? 0,
+      avgOff: e.avg_off ?? 0,
       daysPlayed: e.days_played ?? 0,
       bestStreak: e.best_streak ?? 0,
       lastPlayedAt: e.last_played_at ?? null,
       isMe: !!e.is_me,
       hasBelt: !!e.has_belt,
     })),
+  };
+}
+
+export async function loadSeasonLeaderboard(): Promise<SeasonLeaderboard> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('season_leaderboard', { p_limit: 10 });
+  const raw = unwrap<any>(data, error);
+  return {
+    season: raw.season,
+    endsOn: raw.endsOn,
+    totalPlayers: raw.totalPlayers ?? 0,
+    entries: (raw.entries ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      avatar: e.avatar ?? null,
+      score: e.score ?? 0,
+      avgOff: e.avg_off ?? 0,
+      days: e.days ?? 0,
+      isMe: !!e.is_me,
+    })),
+    me: raw.me
+      ? {
+          score: raw.me.score ?? 0,
+          avgOff: raw.me.avgOff ?? 0,
+          days: raw.me.days ?? 0,
+          rank: raw.me.rank ?? 0,
+          topPercent: raw.me.topPercent ?? null,
+        }
+      : null,
   };
 }
 

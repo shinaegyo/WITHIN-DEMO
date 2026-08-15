@@ -9,7 +9,9 @@ import {
   ApiError,
   loadAllTimeLeaderboard,
   loadLeaderboard,
+  loadSeasonLeaderboard,
   Leaderboard,
+  SeasonLeaderboard,
   AllTimeLeaderboard,
   messageFor,
 } from '../lib/api';
@@ -39,7 +41,23 @@ import { playTap } from '../utils/sound';
  * So this tab means one thing: the daily, which is the only mode that scores
  * points, keeps a streak, or places anybody.
  */
-type Board = 'today' | 'alltime';
+type Board = 'today' | 'season' | 'alltime';
+
+/** "August" — the season is a calendar month, so it has the month's name. */
+function seasonName(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return d.toLocaleDateString(undefined, { month: 'long' });
+}
+
+/** Whole days to the first of next month, counted from midnight tonight. */
+function daysLeft(endsOn: string): string {
+  const end = new Date(`${endsOn}T00:00:00`).getTime();
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const days = Math.max(0, Math.round((end - midnight) / 86400000));
+  if (days === 0) return 'today';
+  return days === 1 ? '1 day' : `${days} days`;
+}
 
 interface Row {
   rank: number;
@@ -58,7 +76,11 @@ const TABS: { key: Board; label: string; note: string }[] = [
   // should stand between opening this tab and seeing the standings, and the
   // question only occurs to somebody who has already looked at the rows.
   { key: 'today', label: 'Today', note: 'Points from today’s three rounds. Finished days only.' },
-  // Named for what it ranks. "All time" invited a total; this is a rate.
+  {
+    key: 'season',
+    label: 'Season',
+    note: 'Points from this month’s dailies. It resets on the 1st, so a good month beats a long history.',
+  },
   { key: 'alltime', label: 'All time', note: 'Points from every daily challenge played.' },
 ];
 
@@ -77,6 +99,7 @@ export function BoardsScreen() {
   // field, how many people are level with you, and the shape of the day.
   const [today, setToday] = useState<Leaderboard | null>(null);
   const [allTime, setAllTime] = useState<AllTimeLeaderboard | null>(null);
+  const [season, setSeason] = useState<SeasonLeaderboard | null>(null);
 
   const load = useCallback(
     async (which: Board) => {
@@ -92,6 +115,16 @@ export function BoardsScreen() {
               value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
             })),
           }));
+        } else if (which === 'season') {
+          const b = await loadSeasonLeaderboard();
+          setSeason(b);
+          setRows((r) => ({
+            ...r,
+            season: b.entries.map((e) => ({
+              rank: e.rank, name: e.name, avatar: e.avatar,
+              value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
+            })),
+          }));
         } else if (which === 'alltime') {
           const b = await loadAllTimeLeaderboard();
           setAllTime(b);
@@ -99,7 +132,7 @@ export function BoardsScreen() {
             ...r,
             alltime: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, sub: `${e.daysPlayed}`, isMe: e.isMe, crown: e.hasBelt,
+              value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe, crown: e.hasBelt,
             })),
           }));
         }
@@ -154,6 +187,30 @@ export function BoardsScreen() {
           players - nobody is glad to be four-thousandth at something they did
           well - so this says how you did rather than what number you are, and
           states the tie instead of hiding it. */}
+      {tab === 'season' && season && (
+        <View style={[styles.mine, { borderColor: colors.border }]}>
+          <Text style={[styles.mineLead, { color: colors.textMuted }]}>
+            {season.me
+              ? season.me.topPercent !== null
+                ? `TOP ${season.me.topPercent}% THIS SEASON`
+                : `${season.me.rank} OF ${season.totalPlayers} THIS SEASON`
+              : 'NOT ON THIS SEASON YET'}
+          </Text>
+          <View style={styles.mineLine}>
+            <Text style={[styles.mineScore, { color: colors.text }]}>
+              {(season.me?.score ?? 0).toLocaleString()}
+            </Text>
+            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
+          </View>
+          {/* The countdown is the whole reason a season is different from a
+              running total: it is the thing that makes the last week matter. */}
+          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
+            {seasonName(season.season)} ends in {daysLeft(season.endsOn)}
+            {season.me ? ` · ${season.me.days} played, ${season.me.avgOff} avg off` : ' · play one to join it'}
+          </Text>
+        </View>
+      )}
+
       {tab === 'alltime' && allTime?.me && (
         <View style={[styles.mine, { borderColor: colors.border }]}>
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
@@ -163,13 +220,13 @@ export function BoardsScreen() {
           </Text>
           <View style={styles.mineLine}>
             <Text style={[styles.mineScore, { color: colors.text }]}>
-              {allTime.me.totalPoints.toLocaleString()}
+              {allTime.me.score.toLocaleString()}
             </Text>
             <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
           </View>
           <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {allTime.me.daysPlayed} {allTime.me.daysPlayed === 1 ? 'day' : 'days'} played,{' '}
-            {allTime.me.perDay} a day on average.
+            {allTime.me.daysPlayed} {allTime.me.daysPlayed === 1 ? 'day' : 'days'} played, and your
+            guesses landed {allTime.me.avgOff} away on average.
           </Text>
         </View>
       )}
@@ -290,45 +347,27 @@ export function BoardsScreen() {
             style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => {}}
           >
-            {explain === 'today' ? (
-              <>
-                {/* Spelled out even though the column is abbreviated: a header
-                    has a width to respect and a sheet does not, and the short
-                    form not telling somebody enough is why they opened this. */}
-                <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
-                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  How far a typical guess landed from the answer, counting every guess you made
-                  across all three rounds.
-                </Text>
-                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  Say one round's number was 342 and you guessed 500, then 400, then 350, then
-                  342. Those guesses were 158, 58, 8 and 0 away — 224 altogether, across four
-                  guesses.
-                </Text>
-                <View style={[styles.sheetSum, { borderColor: colors.border }]}>
-                  <Text style={[styles.sheetSumText, { color: colors.text }]}>224 ÷ 4 = 56</Text>
-                </View>
-                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  All three rounds add together the same way, then divide by how many guesses you
-                  made in the whole day.
-                </Text>
-                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  Lower is better. When two players finish level on points, the closer guesses rank
-                  higher.
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text style={[styles.sheetTitle, { color: colors.text }]}>Days</Text>
-                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  How many dailies you have finished.
-                </Text>
-                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                  Two players on 2,400 points, one after 12 days and one after 20: the same total in
-                  fewer days is the better record, so 12 ranks higher.
-                </Text>
-              </>
-            )}
+            {/* One sheet: today, the season and all time all break ties on
+                the same measure, so there is one thing to explain. */}
+            <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
+            <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+              How far a typical guess landed from the answer, counting every guess you made.
+            </Text>
+            <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+              Say one round's number was 342 and you guessed 500, then 400, then 350, then 342.
+              Those guesses were 158, 58, 8 and 0 away — 224 altogether, across four guesses.
+            </Text>
+            <View style={[styles.sheetSum, { borderColor: colors.border }]}>
+              <Text style={[styles.sheetSumText, { color: colors.text }]}>224 ÷ 4 = 56</Text>
+            </View>
+            <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+              Every round adds in the same way — a day for today's board, a month for the season,
+              everything you have played for all time.
+            </Text>
+            <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+              Lower is better. When two players finish level on points, the closer guesses rank
+              higher.
+            </Text>
             <Pressable onPress={() => { playTap(); setExplain(null); }} style={styles.sheetClose}>
               <Text style={[styles.sheetCloseText, { color: colors.text }]}>Got it</Text>
             </Pressable>
