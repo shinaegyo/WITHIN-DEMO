@@ -54,7 +54,7 @@ export function GamesScreen({
       label: 'Impossible',
       sub: 'A climb that keeps your place all week',
       status: status
-        ? status.impossible.sessionsLeft === 0
+        ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
           ? `Level ${status.impossible.level} · back tomorrow`
           : `Level ${status.impossible.level} · today's climb is waiting`
         : '',

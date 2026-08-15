@@ -60,6 +60,10 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
   const best = rows.find((e) => e.isMe)?.depth ?? status?.impossible.best ?? 0;
   const level = status?.impossible.level ?? 1;
   const lives = status?.impossible.lives ?? 0;
+  // Once today's climb is started there are no sessions left, so sessionsLeft
+  // alone would lock a player out of the run they are in the middle of. A day
+  // is only over when the sessions and the lives are both gone.
+  const canClimb = left === null || left > 0 || lives > 0;
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
@@ -130,7 +134,7 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
             }
             onPlay();
           }}
-          disabled={left === 0}
+          disabled={!canClimb}
           style={({ pressed }) => [
             styles.play,
             {
@@ -140,9 +144,9 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
           ]}
         >
           <Text
-            style={[styles.playText, { color: left === 0 ? colors.textMuted : colors.background }]}
+            style={[styles.playText, { color: canClimb ? colors.background : colors.textMuted }]}
           >
-            {left === 0 ? "Today's climb is done — back tomorrow" : 'Climb'}
+            {canClimb ? 'Climb' : "Today's climb is done — back tomorrow"}
           </Text>
         </Pressable>
       </View>
