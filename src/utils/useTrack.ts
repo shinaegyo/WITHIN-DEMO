@@ -15,8 +15,12 @@ import { playTrack, type Track } from './music';
  * So focus is an addition rather than a requirement. The track starts on mount,
  * which is all the tutorial needs, and where there is a navigator it also
  * restarts on focus, which is what the tabs need.
+ *
+ * A null track means silence, and it has to be asked for rather than left out:
+ * a screen that says nothing keeps whatever the last screen started, so the
+ * daily would have played the home track over itself.
  */
-export function useTrack(track: Track): void {
+export function useTrack(track: Track | null): void {
   const navigation = useContext(NavigationContext);
 
   useEffect(() => {
