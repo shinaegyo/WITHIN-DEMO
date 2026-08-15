@@ -105,13 +105,10 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Each round is tighter than the last: seven attempts in round 1, six in round 2, five in
-        round 3.
+        round 3. Solving on your final attempt costs you nothing — the next round starts where it
+        always does.
       </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Cut it fine and it costs you. Solve a round on your very last attempt and the next round
-        gives you one attempt fewer still, down to a minimum of five. Solve with even one attempt to
-        spare and your limit stays exactly where it is.
-      </Text>
+
     </>,
 
     <>
