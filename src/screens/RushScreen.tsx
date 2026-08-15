@@ -185,17 +185,16 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             </View>
           ) : over ? (
             <View style={styles.centre}>
-              <Text style={[styles.title, { color: colors.text }]}>Time</Text>
-              <Text style={[styles.score, { color: colors.text }]}>{state.found}</Text>
-              <Text style={[styles.body, { color: colors.textMuted }]}>
-                {state.found === 0
-                  ? 'none found — the clock ran out'
-                  : state.found === 1
-                    ? '1 number found today'
-                    : `${state.found} numbers found today`}
+              {/* The score is the headline. "Time" was the largest thing on the
+                  screen and it is the least interesting fact about the run. */}
+              <Text style={[styles.bigScore, { color: colors.text }]}>{state.found}</Text>
+              <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>
+                {state.found === 1 ? 'NUMBER FOUND' : 'NUMBERS FOUND'}
               </Text>
               <Text style={[styles.body, { color: colors.textMuted }]}>
-                One run a day. The next numbers arrive at midnight.
+                {state.found === 0
+                  ? 'The clock ran out before you found one.'
+                  : "Time's up. One run a day — new numbers at midnight."}
               </Text>
 
               {board.length === 0 ? (
@@ -284,6 +283,8 @@ const styles = StyleSheet.create({
   startText: { fontSize: 16, fontFamily: fonts.extraBold },
   counter: { alignItems: 'center' },
   score: { fontSize: 52, fontFamily: fonts.extraBold, letterSpacing: -2 },
+  bigScore: { fontSize: 96, fontFamily: fonts.extraBold, letterSpacing: -4, lineHeight: 104 },
+  scoreLabel: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 2, marginTop: -8 },
   counterLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.6, marginTop: -4 },
   gotIt: { fontSize: 13, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardWrap: { flex: 1 },
