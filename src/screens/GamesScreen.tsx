@@ -44,12 +44,15 @@ export function GamesScreen({
     return () => clearInterval(id);
   }, [load]);
 
+  // Named for what it rehearses. Sitting under three modes, "practice round"
+  // read as practice for those - and it is not: it is one number played the way
+  // the daily plays, with nothing counted.
   const practiceLabel =
     practiceLeft === null
-      ? 'Unranked, unscored, nothing at stake'
+      ? 'One number, played like the daily. Nothing counted.'
       : practiceLeft === 0
-        ? 'None left today'
-        : `${practiceLeft} left today · unranked, unscored`;
+        ? 'One number, played like the daily. None left today.'
+        : `One number, played like the daily. ${practiceLeft} left today.`;
 
   const rows = [
     {
@@ -123,6 +126,8 @@ export function GamesScreen({
 
       {/* An action, so it looks like one. A left-aligned line of bold text was
           a link pretending not to be a button. */}
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
       <Pressable
         onPress={() => {
           playTap();
@@ -133,7 +138,9 @@ export function GamesScreen({
           { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
         ]}
       >
-        <Text style={[styles.practiceText, { color: colors.background }]}>Practice round</Text>
+        <Text style={[styles.practiceText, { color: colors.background }]}>
+          Practice the daily
+        </Text>
       </Pressable>
       <Text style={[styles.practiceSub, { color: colors.textMuted }]}>{practiceLabel}</Text>
 
@@ -170,6 +177,7 @@ const styles = StyleSheet.create({
     maxWidth: '46%',
   },
   arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
+  divider: { height: 1, marginTop: 20, marginHorizontal: 40 },
   practice: {
     marginTop: 18,
     borderRadius: 16,
