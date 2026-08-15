@@ -48,7 +48,12 @@ export function onSoundChange(listener: (on: boolean) => void): () => void {
 
 const MUSIC_KEY = 'within.music';
 
-let music = false;
+// On until somebody turns it off. It used to default off, on the grounds that
+// music starting by itself is the shortest route to a muted tab - which is true
+// of music that starts while you are already playing, and wrong for the first
+// thirty seconds of an app you have never opened, where the sound is most of
+// what makes it feel like a game rather than a form.
+let music = true;
 
 export function musicEnabled(): boolean {
   return music;
@@ -56,9 +61,12 @@ export function musicEnabled(): boolean {
 
 export async function loadMusicSetting(): Promise<boolean> {
   try {
-    music = (await AsyncStorage.getItem(MUSIC_KEY)) === 'on';
+    const stored = await AsyncStorage.getItem(MUSIC_KEY);
+    // Only a stored 'off' silences it. A player who has never touched the
+    // setting has not chosen silence, and anyone who has is remembered.
+    music = stored === null ? true : stored === 'on';
   } catch {
-    music = false;
+    music = true;
   }
   return music;
 }

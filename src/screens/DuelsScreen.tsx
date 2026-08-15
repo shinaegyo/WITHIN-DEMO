@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
@@ -193,9 +194,20 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           }}
           style={styles.rulesToggle}
         >
-          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>
-            How it works {rules ? '⌃' : '⌄'}
-          </Text>
+          <Text style={[styles.rulesLink, { color: colors.textMuted }]}>How it works</Text>
+          {/* Drawn rather than typed. The ⌄ and ⌃ characters are modifier
+              letters, not arrows: they sit high, render differently on every
+              platform, and change size when the state flips. */}
+          <Svg width={14} height={14} viewBox="0 0 24 24" style={rules ? styles.up : undefined}>
+            <Path
+              d="M6 9.5 12 15.5l6-6"
+              stroke={colors.textMuted}
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </Svg>
         </Pressable>
 
         {rules && (
@@ -390,7 +402,15 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 20, paddingBottom: 24 },
-  rulesToggle: { alignSelf: 'flex-start', paddingVertical: 2, marginBottom: 4 },
+  rulesToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    alignSelf: 'flex-start',
+    paddingVertical: 2,
+    marginBottom: 4,
+  },
+  up: { transform: [{ rotate: '180deg' }] },
   rulesLink: { fontSize: 11.5, fontFamily: fonts.bold, letterSpacing: 0.3 },
   caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 8, marginTop: 6 },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },

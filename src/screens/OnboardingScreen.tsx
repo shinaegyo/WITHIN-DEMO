@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { confirmLinkEmail, confirmSignIn, setUsername, startLinkEmail, startSign
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { playTrack } from '../utils/music';
 
 /**
  * First-run flow. Two steps, because the account and the name are separate
@@ -37,6 +38,14 @@ export function OnboardingScreen({
   onSkip?: () => void;
 }) {
   const { colors } = useTheme();
+
+  // The first screen anybody sees, so the music starts here rather than after
+  // the tutorial. A browser refuses audio until something is pressed; the
+  // player waits for that press and starts then, which is the name field or
+  // the button either way.
+  useEffect(() => {
+    playTrack('home');
+  }, []);
 
   const [step, setStep] = useState<Step>(mode === 'name' ? 'username' : 'account');
   const [flow, setFlow] = useState<'link' | 'signin'>('link');
