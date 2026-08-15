@@ -23,6 +23,17 @@ export function FeedbackOverlay({ trigger, onDone }: Props) {
 
 function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => void }) {
   const isOneAway = kind === 'oneAway';
+
+  // Held in a ref so the burst does not depend on it.
+  //
+  // Every screen passes an inline arrow, which is a new function on each
+  // render, and listing it as a dependency restarted the animation whenever the
+  // parent re-rendered for any reason at all. Rush re-renders every second to
+  // tick its clock, so the burst tore itself down and began again a second
+  // later - forever, never finishing, never calling this, and outliving the
+  // number it belonged to.
+  const done = useRef(onDone);
+  done.current = onDone;
   const accent = isOneAway ? feedbackColors.oneAway : feedbackColors.within10;
 
   const glow = useRef(new Animated.Value(0)).current;
@@ -76,11 +87,11 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
     ]);
 
     const sequence = Animated.sequence([entrance, emphasis, Animated.delay(90), exit]);
-    let done = false;
+    let called = false;
     const finish = () => {
-      if (done) return;
-      done = true;
-      onDone();
+      if (called) return;
+      called = true;
+      done.current();
     };
 
     sequence.start(({ finished }) => {
@@ -96,7 +107,7 @@ function FeedbackBurst({ kind, onDone }: { kind: FeedbackKind; onDone: () => voi
       clearTimeout(failsafe);
       sequence.stop();
     };
-  }, [isOneAway, glow, flash, scale, opacity, shake, onDone]);
+  }, [isOneAway, glow, flash, scale, opacity, shake]);
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.wrap, noHit]}>
