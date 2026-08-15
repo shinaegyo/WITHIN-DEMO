@@ -15,6 +15,12 @@ interface Props {
   finalNote?: string;
   /** Impossible only: a one-away guess keeps its label but loses its arrow. */
   blindOneAway?: boolean;
+  /**
+   * Overrides the theme ink. Impossible paints its own arena, and the count
+   * above the board is the first thing to disappear when the two disagree.
+   */
+  ink?: string;
+  inkMuted?: string;
 }
 
 /**
@@ -34,9 +40,13 @@ export function GuessBoard({
   showRemaining = true,
   finalNote,
   blindOneAway,
+  ink,
+  inkMuted,
 }: Props) {
   const { colors } = useTheme();
   const remaining = Math.max(0, attemptsAllowed - guesses.length);
+  const strong = ink ?? colors.text;
+  const soft = inkMuted ?? colors.textMuted;
 
   return (
     <View style={styles.board}>
@@ -44,13 +54,11 @@ export function GuessBoard({
         <View style={styles.header}>
           {remaining === 1 ? (
             <>
-              <Text style={[styles.count, { color: colors.text }]}>LAST GUESS</Text>
-              {!!finalNote && (
-                <Text style={[styles.note, { color: colors.textMuted }]}>{finalNote}</Text>
-              )}
+              <Text style={[styles.count, { color: strong }]}>LAST GUESS</Text>
+              {!!finalNote && <Text style={[styles.note, { color: soft }]}>{finalNote}</Text>}
             </>
           ) : (
-            <Text style={[styles.count, { color: colors.text }]}>{remaining} GUESSES LEFT</Text>
+            <Text style={[styles.count, { color: strong }]}>{remaining} GUESSES LEFT</Text>
           )}
         </View>
       )}

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
@@ -16,7 +17,6 @@ import {
   messageFor,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
-import { useTheme } from '../theme/ThemeContext';
 import { arenaFor } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
 import { playTrack } from '../utils/music';
@@ -37,7 +37,6 @@ import { playCorrect, playForTier } from '../utils/sound';
  * the player already holds would be worthless.
  */
 export function EndlessScreen({ onExit }: { onExit: () => void }) {
-  const { colors } = useTheme();
   const [state, setState] = useState<EndlessState | null>(null);
   const [board, setBoard] = useState<EndlessEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -149,9 +148,17 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
 
   const myRank = board.find((e) => e.isMe);
   const arena = arenaFor(state.level);
+  const hairline = 'rgba(255, 255, 255, 0.18)';
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: arena.background }]} edges={['top', 'bottom']}>
+      {/* The light drains downward rather than sitting flat, so the deep end of
+          the screen is always the darker one. */}
+      <LinearGradient
+        colors={[arena.background, arena.backgroundDeep]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
           <View style={styles.head}>
@@ -179,31 +186,31 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           ) : solved ? (
             <View style={styles.result}>
               <Text style={[styles.overTitle, { color: arena.text }]}>Correct</Text>
-              <Text style={[styles.overBody, { color: colors.textMuted }]}>
+              <Text style={[styles.overBody, { color: arena.muted }]}>
                 {solved.answer !== null ? `It was ${solved.answer}. ` : ''}
                 That's level {solved.level} cleared.
               </Text>
               {solved.shrankTo !== null ? (
-                <Text style={[styles.overBody, { color: colors.text }]}>
+                <Text style={[styles.overBody, { color: arena.text }]}>
                   Attempts drop to {solved.shrankTo} from here.
                 </Text>
               ) : (
-                <Text style={[styles.overBody, { color: colors.textMuted }]}>Next one coming…</Text>
+                <Text style={[styles.overBody, { color: arena.muted }]}>Next one coming…</Text>
               )}
             </View>
           ) : over ? (
             <View style={styles.result}>
-              <Text style={[styles.overTitle, { color: colors.text }]}>
+              <Text style={[styles.overTitle, { color: arena.text }]}>
                 {over.sessionOver ? 'Climb over' : 'Life lost'}
               </Text>
-              <Text style={[styles.overBody, { color: colors.textMuted }]}>
+              <Text style={[styles.overBody, { color: arena.muted }]}>
                 {over.answer !== null ? `The number was ${over.answer}. ` : ''}
                 {over.sessionOver
                   ? `That was the last life. You keep ${arenaFor(over.restartsAt ?? 1).name}` +
                     ` — the next climb starts at level ${over.restartsAt ?? 1}.`
                   : `${over.depth} ${over.depth === 1 ? 'life' : 'lives'} left. The same number is waiting.`}
               </Text>
-              <Text style={[styles.overBody, { color: colors.textMuted }]}>
+              <Text style={[styles.overBody, { color: arena.muted }]}>
                 Everyone plays the same numbers this week, so how far you got compares directly.
               </Text>
               {!over.sessionOver ? (
@@ -211,15 +218,15 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   onPress={again}
                   style={({ pressed }) => [
                     styles.again,
-                    { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+                    { backgroundColor: arena.text, opacity: pressed ? 0.85 : 1 },
                   ]}
                 >
-                  <Text style={[styles.againText, { color: colors.background }]}>
+                  <Text style={[styles.againText, { color: arena.background }]}>
                     Keep climbing
                   </Text>
                 </Pressable>
               ) : (
-                <Text style={[styles.overBody, { color: colors.textMuted }]}>
+                <Text style={[styles.overBody, { color: arena.muted }]}>
                   {state.sessionsLeft > 0
                     ? 'One more session today, whenever you want it.'
                     : "That's both sessions for today. Tomorrow you climb again from there."}
@@ -228,14 +235,14 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
 
               {board.length > 0 && (
                 <View style={styles.boardList}>
-                  <Text style={[styles.boardTitle, { color: colors.textMuted }]}>FURTHEST THIS WEEK</Text>
+                  <Text style={[styles.boardTitle, { color: arena.muted }]}>FURTHEST THIS WEEK</Text>
                   {board.slice(0, 5).map((e) => (
                     <View key={`${e.rank}-${e.name}`} style={styles.boardRow}>
-                      <Text style={[styles.boardRank, { color: colors.textMuted }]}>{e.rank}</Text>
-                      <Text style={[styles.boardName, { color: colors.text }]} numberOfLines={1}>
+                      <Text style={[styles.boardRank, { color: arena.muted }]}>{e.rank}</Text>
+                      <Text style={[styles.boardName, { color: arena.text }]} numberOfLines={1}>
                         {e.name}
                       </Text>
-                      <Text style={[styles.boardDepth, { color: colors.text }]}>{e.depth}</Text>
+                      <Text style={[styles.boardDepth, { color: arena.text }]}>{e.depth}</Text>
                     </View>
                   ))}
                 </View>
@@ -256,8 +263,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               {state.clue1 ? (
                 <ClueCard clue={state.clue1} />
               ) : (
-                <View style={[styles.noClue, { borderColor: colors.border }]}>
-                  <Text style={[styles.noClueText, { color: colors.textMuted }]}>
+                <View style={[styles.noClue, { borderColor: hairline }]}>
+                  <Text style={[styles.noClueText, { color: arena.muted }]}>
                     {state.level > 89
                       ? 'A clue arrives on your last attempt.'
                       : 'A clue arrives with three attempts left.'}
@@ -272,6 +279,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   guesses={state.guesses}
                   attemptsAllowed={state.attemptsAllowed}
                   blindOneAway
+                  ink={arena.text}
+                  inkMuted={arena.muted}
                 />
               </View>
             </>
