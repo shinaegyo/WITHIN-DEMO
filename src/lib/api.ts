@@ -790,6 +790,71 @@ export async function endlessGuess(guess: number) {
   };
 }
 
+export interface RushState {
+  started: boolean;
+  over: boolean;
+  found: number;
+  secondsLeft: number;
+  guesses: GuessResult[];
+}
+
+export interface RushEntry {
+  rank: number;
+  name: string;
+  avatar: string | null;
+  found: number;
+  isMe: boolean;
+}
+
+export async function loadRush(): Promise<RushState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('rush_state');
+  const raw = unwrap<any>(data, error);
+  return {
+    started: !!raw.started,
+    over: !!raw.over,
+    found: raw.found ?? 0,
+    secondsLeft: raw.secondsLeft ?? 0,
+    guesses: (raw.guesses ?? []).map(toGuessResult),
+  };
+}
+
+/** Starts the clock. It runs whether the app is open or not. */
+export async function startRush(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('rush_start');
+  unwrap<any>(data, error);
+}
+
+export async function rushGuess(guess: number) {
+  await ensureSignedIn();
+  const raw = await onceMore(async () => {
+    const { data, error } = await supabase.rpc('rush_guess', { p_guess: guess });
+    return unwrap<any>(data, error);
+  });
+  return {
+    solved: !!raw.solved,
+    found: raw.found as number,
+    secondsLeft: raw.secondsLeft as number,
+    over: !!raw.over,
+    result: toGuessResult(raw.guess),
+    answer: (raw.answer ?? null) as number | null,
+  };
+}
+
+export async function loadRushBoard(): Promise<RushEntry[]> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('rush_leaderboard', { p_limit: 50 });
+  const raw = unwrap<any>(data, error);
+  return (raw.entries ?? []).map((e: any) => ({
+    rank: e.rank,
+    name: e.name,
+    avatar: e.avatar ?? null,
+    found: e.found ?? 0,
+    isMe: !!e.is_me,
+  }));
+}
+
 export interface XpState {
   xp: number;
   level: number;
@@ -988,6 +1053,8 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_runs_left':
     case 'no_sessions_left':
       return "That's today's climb. Your place is kept — come back tomorrow.";
+    case 'time_up':
+      return "Time's up.";
     case 'no_session':
       return 'Start a session first.';
     case 'network':

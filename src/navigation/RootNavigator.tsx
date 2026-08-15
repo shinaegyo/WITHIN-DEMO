@@ -10,6 +10,7 @@ import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
+import { RushScreen } from '../screens/RushScreen';
 import { AccountScreen } from '../screens/AccountScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
@@ -54,6 +55,7 @@ export type RootStackParamList = {
   Audio: undefined;
   Avatar: undefined;
   Endless: undefined;
+  Rush: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
   HowToPlay: undefined;
@@ -258,6 +260,7 @@ function Screens({
                   <GamesScreen
                     onDuels={() => navigation.navigate('Duels')}
                     onImpossible={() => navigation.navigate('ImpossibleBoard')}
+                    onRush={() => navigation.navigate('Rush')}
                     onPractice={startPractice}
                     practiceLeft={practiceLeft}
                   />
@@ -343,6 +346,10 @@ function Screens({
           {({ navigation }) => (
             <EndlessScreen onExit={() => navigation.navigate('Home')} />
           )}
+        </Stack.Screen>
+
+        <Stack.Screen name="Rush" options={{ headerShown: false }}>
+          {({ navigation }) => <RushScreen onExit={() => navigation.navigate('Home')} />}
         </Stack.Screen>
 
         <Stack.Screen

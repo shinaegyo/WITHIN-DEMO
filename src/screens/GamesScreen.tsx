@@ -17,11 +17,13 @@ import { playTap } from '../utils/sound';
 export function GamesScreen({
   onDuels,
   onImpossible,
+  onRush,
   onPractice,
   practiceLeft,
 }: {
   onDuels: () => void;
   onImpossible: () => void;
+  onRush: () => void;
   onPractice: () => void;
   practiceLeft: number | null;
 }) {
@@ -64,6 +66,13 @@ export function GamesScreen({
         : '',
       urgent: false,
       onPress: onImpossible,
+    },
+    {
+      label: 'Rush',
+      sub: 'Three minutes, as many numbers as you can find',
+      status: 'One run a day',
+      urgent: false,
+      onPress: onRush,
     },
     {
       label: 'Practice',
