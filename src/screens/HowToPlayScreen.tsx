@@ -150,11 +150,17 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     </>,
 
     <>
-      <Text style={[styles.h2, { color: colors.text }]}>Streaks</Text>
+      <Text style={[styles.h2, { color: colors.text }]}>Streaks and levels</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Finish all three rounds without using a retry and your streak grows. Miss a round, miss a
         day, or take a retry, and it starts again from zero — a streak is meant to be earned
         outright. New numbers arrive at midnight, your time.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        Your level is the other half, and everything pays into it. The daily pays its points, plus
+        fifty for all three rounds won. Impossible pays twenty a number and fifty for reaching a
+        new tier. A duel pays eighty to win and twenty-five to lose. Each level costs a little more
+        than the last, and nothing you play is ever worth nothing.
       </Text>
     </>,
 
@@ -174,35 +180,20 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Numbers one after another, up to 100 of them. Six attempts each for the first nineteen, five
-        from the twentieth, four from the fiftieth. One miss ends the run. Everyone plays the same numbers each week, so how far you got is worth comparing.
+        Numbers one after another, up to 100 of them. Eight attempts each to begin with, seven from
+        the tenth, six from the fortieth, five from the ninetieth. One clue per number, and it
+        arrives late — when only a few attempts are left. Everyone plays the same numbers each
+        week, so how far you got is worth comparing.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        It is called Impossible because it is. Four attempts for a number between 1 and 1000 is
-        close to a coin toss, so a run ending at six or seven is a good one, not a failure — the
-        hundredth number is there to be unreachable.
+        Running out of attempts costs a life, not the climb. You have five, and the number waits
+        for you. Lose all five and the climb drops back to the start of the deepest tier you had
+        reached — the four tiers are checkpoints, so you never replay ground you have already won.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Five runs a day. Every run starts from the first number again, and the week's board keeps
-        your deepest — so the five are attempts at one climb, not five separate scores.
-      </Text>
-    </>,
-
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>Ranked</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        The same match, against whoever else is looking for one rather than someone you know. You
-        pick their number, they pick yours, three rounds and a decider if it is level.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        What changes is the end. Everyone starts on a rating of 1000, and the winner takes rating
-        off the loser — so beating someone above you is worth far more than beating someone below,
-        and there is nothing to gain from beating the same person over and over. Leaving a ranked
-        match hands it to your opponent and costs rating.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        One person in the whole game holds the crown. The only way to get it is to beat whoever has
-        it, and if nobody does, the next ranked winner takes it. It cannot be earned any other way.
+        Two sessions a day, and your level carries across them and across days. The week's board
+        keeps the deepest level you reached, so a climb that ends badly still counts for what it
+        got through.
       </Text>
     </>,
 

@@ -325,23 +325,25 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
           answers who, this answers what if nobody. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
         {waiting ? (
-          <Text style={[styles.note, { color: colors.textMuted }]}>
-            {waiting.online === 0
-              ? 'Nobody else is here right now. Come back later.'
-              : 'Waiting for someone to press it too. Stay on this screen.'}
-            {'  '}
-            <Text
-              style={{ textDecorationLine: 'underline' }}
-              onPress={() =>
+          // Two centred lines rather than one wrapping paragraph with a link
+          // trailing off the end of it: the state, then the way out of it.
+          <View style={styles.waiting}>
+            <Text style={[styles.waitingLine, { color: colors.text }]} numberOfLines={1}>
+              {waiting.online === 0 ? 'Nobody else is here' : 'Waiting for someone to join…'}
+            </Text>
+            <Pressable
+              onPress={() => {
+                playTap();
                 run(async () => {
                   await leaveDuelQueue();
                   setWaiting(null);
-                })
-              }
+                });
+              }}
+              hitSlop={8}
             >
-              Stop waiting
-            </Text>
-          </Text>
+              <Text style={[styles.stopWaiting, { color: colors.textMuted }]}>Stop waiting</Text>
+            </Pressable>
+          </View>
         ) : (
           <Pressable
             onPress={() => {
@@ -391,6 +393,14 @@ const styles = StyleSheet.create({
   rulesLink: { fontSize: 11.5, fontFamily: fonts.bold, letterSpacing: 0.3 },
   caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 8, marginTop: 6 },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
+  waiting: { alignItems: 'center', gap: 6, paddingVertical: 8 },
+  waitingLine: { fontSize: 14, fontFamily: fonts.bold, textAlign: 'center' },
+  stopWaiting: {
+    fontSize: 12,
+    fontFamily: fonts.bold,
+    textDecorationLine: 'underline',
+    textAlign: 'center',
+  },
   stranger: { borderRadius: 16, paddingVertical: 13, alignItems: 'center' },
   strangerText: { fontSize: 16, fontFamily: fonts.extraBold },
   strangerSub: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 0.6, opacity: 0.6, marginTop: 2 },
