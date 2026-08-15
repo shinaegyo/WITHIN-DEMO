@@ -18,6 +18,8 @@ import {
   loadFriendsLeaderboard,
   loadHomeStatus,
   loadLeaderboard,
+  loadXp,
+  XpState,
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
@@ -60,6 +62,7 @@ export function HomeScreen({
   // layout it had before anything sat below it. Everything else scrolls in
   // underneath rather than crowding it.
   const [viewport, setViewport] = useState(0);
+  const [xp, setXp] = useState<XpState | null>(null);
 
   useEffect(() => {
     playTrack('home');
@@ -126,6 +129,16 @@ export function HomeScreen({
       })
       .catch(() => {
         /* the modes still work without their status lines */
+      });
+
+    // Refetched when the day's score moves, because finishing the day is the
+    // most likely moment for the level to have changed underneath.
+    loadXp()
+      .then((x) => {
+        if (!cancelled) setXp(x);
+      })
+      .catch(() => {
+        /* the header simply stays quiet */
       });
 
     loadLeaderboard()
@@ -268,8 +281,15 @@ export function HomeScreen({
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.header}>
         {/* The menu is gone: everything it held is a tab now, and two
-            navigations that disagree is worse than either alone. */}
-        <View style={styles.iconButton} />
+            navigations that disagree is worse than either alone. The slot it
+            left holds the player level, which every mode feeds. */}
+        {xp ? (
+          <View style={[styles.levelPill, { backgroundColor: colors.surfaceAlt }]}>
+            <Text style={[styles.levelPillText, { color: colors.text }]}>LVL {xp.level}</Text>
+          </View>
+        ) : (
+          <View style={styles.iconButton} />
+        )}
 
         {started ? <Wordmark size={24} /> : <View />}
 
@@ -469,6 +489,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  levelPill: {
+    height: 28,
+    minWidth: 52,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  levelPillText: { fontSize: 11, fontFamily: fonts.extraBold, letterSpacing: 0.8 },
   menuIcon: { fontSize: 19, fontFamily: fonts.bold },
   dot: {
     position: 'absolute',

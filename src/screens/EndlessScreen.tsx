@@ -42,7 +42,13 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [board, setBoard] = useState<EndlessEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [over, setOver] = useState<
-    { answer: number | null; depth: number; sessionOver: boolean } | null
+    {
+      answer: number | null;
+      depth: number;
+      sessionOver: boolean;
+      /** Set only on the last life: the level the next session starts from. */
+      restartsAt: number | null;
+    } | null
   >(null);
   const [trigger, setTrigger] = useState<FeedbackTrigger | null>(null);
   const [busy, setBusy] = useState(false);
@@ -110,11 +116,16 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           hapticForTier(res.result.tier);
           playForTier(res.result.tier);
         }
-        // A miss costs a life and leaves you on the same number; the climb
-        // only pauses when the lives run out.
+        // A miss costs a life and leaves you on the same number. The last one
+        // ends the climb, which falls back to the arena you had reached.
         if (res.lostLife) {
           playLose();
-          setOver({ answer: res.answer, depth: res.lives, sessionOver: res.sessionOver });
+          setOver({
+            answer: res.answer,
+            depth: res.lives,
+            sessionOver: res.sessionOver,
+            restartsAt: res.restartsAt,
+          });
         }
         await load();
         return { ok: true as const };
@@ -183,12 +194,13 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           ) : over ? (
             <View style={styles.result}>
               <Text style={[styles.overTitle, { color: colors.text }]}>
-                {over.sessionOver ? 'Session over' : 'Life lost'}
+                {over.sessionOver ? 'Climb over' : 'Life lost'}
               </Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
                 {over.answer !== null ? `The number was ${over.answer}. ` : ''}
                 {over.sessionOver
-                  ? 'Your climb keeps its place. Come back for the next session.'
+                  ? `That was the last life. You keep ${arenaFor(over.restartsAt ?? 1).name}` +
+                    ` — the next climb starts at level ${over.restartsAt ?? 1}.`
                   : `${over.depth} ${over.depth === 1 ? 'life' : 'lives'} left. The same number is waiting.`}
               </Text>
               <Text style={[styles.overBody, { color: colors.textMuted }]}>
@@ -210,7 +222,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 <Text style={[styles.overBody, { color: colors.textMuted }]}>
                   {state.sessionsLeft > 0
                     ? 'One more session today, whenever you want it.'
-                    : "That's both sessions for today. Tomorrow you pick up exactly here."}
+                    : "That's both sessions for today. Tomorrow you climb again from there."}
                 </Text>
               )}
 

@@ -698,10 +698,32 @@ export async function endlessGuess(guess: number) {
     lostLife: !!raw.lostLife,
     lives: raw.lives ?? 0,
     sessionOver: !!raw.sessionOver,
+    /** Where the next session picks up when the last life goes: the arena floor. */
+    restartsAt: (raw.restartsAt ?? null) as number | null,
     level: raw.level as number,
     attemptsAllowed: raw.attemptsAllowed as number,
     result: toGuessResult(raw.guess),
     answer: (raw.answer ?? null) as number | null,
+  };
+}
+
+export interface XpState {
+  xp: number;
+  level: number;
+  /** Experience earned inside the current level, and what the next one costs. */
+  into: number;
+  needed: number;
+}
+
+export async function loadXp(): Promise<XpState> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('xp_state');
+  const raw = unwrap<any>(data, error);
+  return {
+    xp: raw.xp ?? 0,
+    level: raw.level ?? 1,
+    into: raw.into ?? 0,
+    needed: raw.needed ?? 250,
   };
 }
 

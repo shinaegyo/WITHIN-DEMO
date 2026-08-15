@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/Avatar';
-import { AllTimeEntry, loadAllTimeLeaderboard, loadRanked } from '../lib/api';
+import { LevelBar } from '../components/LevelBar';
+import { AllTimeEntry, XpState, loadAllTimeLeaderboard, loadRanked, loadXp } from '../lib/api';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
@@ -37,8 +38,12 @@ export function ProfileScreen({
   const [rank, setRank] = useState<AllTimeEntry | null>(null);
   const [rating, setRating] = useState<number | null>(null);
   const [crown, setCrown] = useState(false);
+  const [xp, setXp] = useState<XpState | null>(null);
 
   const load = useCallback(() => {
+    loadXp()
+      .then(setXp)
+      .catch(() => {});
     loadAllTimeLeaderboard()
       .then((b) => setRank(b.entries.find((e) => e.isMe) ?? null))
       .catch(() => {});
@@ -95,6 +100,10 @@ export function ProfileScreen({
           </Text>
         </View>
       </Pressable>
+
+      <View style={styles.levelWrap}>
+        <LevelBar xp={xp} />
+      </View>
 
       <View style={styles.stats}>
         {[
@@ -158,6 +167,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 24, fontFamily: fonts.extraBold, flexShrink: 1 },
   crown: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
   sub: { fontSize: 12, fontFamily: fonts.medium, marginTop: 2 },
+  levelWrap: { marginTop: 20 },
   stats: { flexDirection: 'row', gap: 8, marginTop: 20 },
   stat: { flex: 1, borderWidth: 1, borderRadius: 14, paddingVertical: 12, alignItems: 'center' },
   statValue: { fontSize: 20, fontFamily: fonts.extraBold },

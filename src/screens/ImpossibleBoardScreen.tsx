@@ -54,7 +54,9 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
   if (!rows) return <StatusScreen loading />;
 
   const left = status?.impossible.sessionsLeft ?? null;
-  const best = status?.impossible.best ?? 0;
+  // From the board rather than the run: a climb that ran out of lives falls
+  // back to its arena, and the deepest level reached is what the week records.
+  const best = rows.find((e) => e.isMe)?.depth ?? status?.impossible.best ?? 0;
   const level = status?.impossible.level ?? 1;
   const lives = status?.impossible.lives ?? 0;
 
