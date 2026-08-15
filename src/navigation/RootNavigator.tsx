@@ -353,12 +353,18 @@ function Screens({
 
         <Stack.Screen name="Endless" options={{ headerShown: false }}>
           {({ navigation }) => (
-            <EndlessScreen onExit={() => navigation.navigate('Home')} />
+            <EndlessScreen
+              onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
+            />
           )}
         </Stack.Screen>
 
         <Stack.Screen name="Rush" options={{ headerShown: false }}>
-          {({ navigation }) => <RushScreen onExit={() => navigation.navigate('Home')} />}
+          {({ navigation }) => (
+            <RushScreen
+              onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
+            />
+          )}
         </Stack.Screen>
 
         <Stack.Screen
