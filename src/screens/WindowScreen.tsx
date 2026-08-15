@@ -181,30 +181,48 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {!state.started || done ? (
           <>
+            {/* No subtitle once it is played: it explains a mode you have just
+                finished, directly above the score it is competing with. */}
             <ScreenTitle
               title="Window"
-              subtitle="Three probes, then commit to a range the number is inside. The narrower it is, the more it scores."
+              subtitle={
+                done
+                  ? undefined
+                  : 'Three probes, then commit to a range the number is inside. The narrower it is, the more it scores.'
+              }
               onBack={onExit}
             />
             <ScrollView contentContainerStyle={styles.intro} showsVerticalScrollIndicator={false}>
+              {/* The result, given room. It used to be a bordered box holding a
+                  number, a label and a sentence, with the standings starting
+                  eight points below it - so the one thing the player came back
+                  for was the same size as everything around it and fenced off
+                  besides. No border, air on both sides, and the score reads as
+                  a sentence you can take in at a glance. */}
               {done && (
-                <View style={[styles.card, { borderColor: colors.border }]}>
+                <View style={styles.result}>
+                  <Text style={[styles.resultLead, { color: colors.textMuted }]}>
+                    {state.score > 0 ? 'YOU SCORED' : 'YOU MISSED IT'}
+                  </Text>
                   <Text style={[styles.bigScore, { color: colors.text }]}>{state.score}</Text>
                   <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>
                     {state.score === 1 ? 'POINT' : 'POINTS'}
                   </Text>
-                  <Text style={[styles.rule, { color: colors.textMuted }]}>
+                  <Text style={[styles.resultLine, { color: colors.text }]}>
                     {state.score > 0
                       ? `It was ${state.answer}, inside your ${state.width}-wide window.`
-                      : `It was ${state.answer}, outside your window of ${state.lo}–${state.hi}.`}
+                      : `It was ${state.answer}. Your window was ${state.lo}–${state.hi}.`}
                   </Text>
                 </View>
               )}
 
               {standings()}
 
-              {/* Set out plainly rather than folded behind a disclosure. A rule
-                  nobody opens is a rule nobody knows. */}
+              {/* Before a run only. Afterwards the screen is about the score,
+                  and a page of rules under it is a manual handed to somebody
+                  who has just finished reading it. */}
+              {!done && (
+                <>
               <Text style={[styles.rulesHead, { color: colors.text }]}>How Window works</Text>
               <Text style={[styles.rule, { color: colors.textMuted }]}>
                 Three probe guesses, answered with the same colours as everywhere else: blue means
@@ -243,6 +261,8 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
                 all, however narrow the window was. One a day, the same number for everyone, and
                 every point is an XP toward your level.
               </Text>
+                </>
+              )}
             </ScrollView>
 
             {!done && (
@@ -434,10 +454,12 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 18, gap: 10, alignSelf: 'stretch' },
-  intro: { paddingHorizontal: 18, paddingBottom: 20, gap: 12 },
-  card: { borderWidth: 1, borderRadius: 18, padding: 18, alignItems: 'center', gap: 4 },
-  bigScore: { fontSize: 72, fontFamily: fonts.extraBold, letterSpacing: -3, lineHeight: 78 },
-  scoreLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8 },
+  intro: { paddingHorizontal: 18, paddingBottom: 24, gap: 14 },
+  result: { alignItems: 'center', paddingTop: 18, paddingBottom: 26, gap: 2 },
+  resultLead: { fontSize: 11, fontFamily: fonts.bold, letterSpacing: 2 },
+  resultLine: { fontSize: 14.5, fontFamily: fonts.semiBold, lineHeight: 21, textAlign: 'center', marginTop: 12 },
+  bigScore: { fontSize: 104, fontFamily: fonts.extraBold, letterSpacing: -5, lineHeight: 112 },
+  scoreLabel: { fontSize: 11, fontFamily: fonts.bold, letterSpacing: 2 },
   // Left, like Impossible. A screen that centres some things and ranges
   // others against the margin reads as two screens stitched together.
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },

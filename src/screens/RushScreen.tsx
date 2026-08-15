@@ -192,10 +192,9 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   /**
    * The rules, rendered in both states.
    *
-   * They used to exist only before a run, so the moment the mode was actually
-   * yours to think about - the result screen, one run a day, with the whole of
-   * tomorrow to plan - was the moment they disappeared. Same block, both
-   * places.
+   * Before a run only. Once the run is over the screen is about what you did,
+   * and a page of rules under the score is a manual handed to somebody who has
+   * just finished reading it.
    */
   const modeRules = () => (
     <>
@@ -487,8 +486,6 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
               ) : (
                 standings('BEST TODAY')
               )}
-
-              <View style={styles.rulesWrap}>{modeRules()}</View>
             </ScrollView>
           ) : (
             <>
