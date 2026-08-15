@@ -73,7 +73,7 @@ export function MenuDrawer({
             },
           ]}
         >
-          <View style={styles.brand}><Wordmark size={32} /></View>
+          <View style={styles.brand}><Wordmark size={32} color={colors.text} /></View>
 
           {items.map((item) => (
             <Pressable

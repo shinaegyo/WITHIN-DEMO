@@ -99,7 +99,7 @@ export function OnboardingScreen({
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <Wordmark size={44} />
+            <Wordmark size={44} color={colors.text} />
             <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
           </View>
 

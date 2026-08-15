@@ -17,7 +17,7 @@ export function Header({ onBack }: { onBack?: () => void }) {
             <Text style={[styles.back, { color: colors.textMuted }]}>‹</Text>
           </Pressable>
         )}
-        <Wordmark size={24} />
+        <Wordmark size={24} color={colors.text} />
       </View>
 
       <Pressable

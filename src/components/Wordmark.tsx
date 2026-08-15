@@ -1,84 +1,44 @@
-import MaskedView from '@react-native-masked-view/masked-view';
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Platform, StyleProp, StyleSheet, TextStyle, View } from 'react-native';
+import { Platform, StyleProp, StyleSheet, TextStyle } from 'react-native';
 import { Text } from './AppText';
-import { wordmarkGradient } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 
 interface Props {
   size: number;
+  /** Defaults to the theme ink the screen passes in. */
+  color?: string;
   style?: StyleProp<TextStyle>;
 }
 
 /**
- * The WITHIN wordmark. Every place the name appears renders this, so the
- * treatment is defined once rather than being repeated per screen.
+ * The WITHIN wordmark, set flat.
  *
- * React Native's Text can't take a gradient fill, so the gradient is drawn
- * behind a mask cut to the letterforms. The mask needs a real size to work
- * against, hence the invisible copy of the text inside it.
+ * It used to carry the blue-to-red gradient, which was the game's own scale -
+ * blue means go higher, red means lower - poured into the logo as decoration.
+ * A colour that carries meaning stops carrying it the moment it is also used
+ * because it looks nice, and through the middle the interpolation landed on
+ * mauve, which is the muddiest part of that ramp.
+ *
+ * The two colours belong to the mark and the tiles now. The name is set in one
+ * ink and holds its own.
  */
-export function Wordmark({ size, style }: Props) {
-  const textStyle: StyleProp<TextStyle> = [
-    styles.text,
-    { fontSize: size, letterSpacing: -size * 0.031 },
-    style,
-  ];
-
-  const label = <Text style={textStyle}>WITHIN</Text>;
-
-  // react-native-web doesn't implement MaskedView — it renders the mask itself,
-  // which came out as flat black. CSS does gradient text natively, so the web
-  // build takes that route instead.
-  if (Platform.OS === 'web') {
-    return (
-      <Text
-        style={[
-          textStyle,
-          {
-            backgroundImage: `linear-gradient(90deg, ${wordmarkGradient[0]}, ${wordmarkGradient[1]})`,
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-          } as unknown as TextStyle,
-        ]}
-      >
-        WITHIN
-      </Text>
-    );
-  }
-
+export function Wordmark({ size, color = '#F7F8FA', style }: Props) {
   return (
-    <MaskedView style={styles.wrap} maskElement={<View style={styles.maskWrap}>{label}</View>}>
-      <LinearGradient
-        colors={wordmarkGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        {/* Sizes the gradient to the text without being visible itself. */}
-        <Text style={[textStyle, styles.spacer]}>WITHIN</Text>
-      </LinearGradient>
-    </MaskedView>
+    <Text
+      style={[
+        styles.text,
+        { fontSize: size, letterSpacing: -size * 0.035, color },
+        style,
+      ]}
+    >
+      WITHIN
+    </Text>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    // Masked content has no intrinsic size on some platforms until laid out.
-    flexDirection: 'row',
-  },
-  maskWrap: {
-    backgroundColor: 'transparent',
-  },
   text: {
     fontFamily: fonts.logo,
-    // Colour is irrelevant — the mask only cares about opacity — but web needs
-    // an opaque fill for the mask to register.
-    color: '#000000',
     ...Platform.select({ android: { includeFontPadding: false }, default: {} }),
-  },
-  spacer: {
-    opacity: 0,
   },
 });

@@ -19,7 +19,7 @@ export function StatusScreen({
 
   return (
     <View style={styles.wrap}>
-      <Wordmark size={30} />
+      <Wordmark size={30} color={colors.text} />
       {loading ? (
         <ActivityIndicator color={colors.accent} style={styles.spinner} />
       ) : (

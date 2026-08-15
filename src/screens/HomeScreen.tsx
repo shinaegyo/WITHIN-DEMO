@@ -22,6 +22,7 @@ import {
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
+import { Mark } from '../components/Mark';
 
 
 interface Props {
@@ -219,7 +220,7 @@ export function HomeScreen({
           <View style={styles.iconButton} />
         )}
 
-        {started ? <Wordmark size={24} /> : <View />}
+        {started ? <Wordmark size={24} color={colors.text} /> : <View />}
 
         <Pressable
           style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
@@ -289,7 +290,10 @@ export function HomeScreen({
           </>
         ) : (
           <>
-            <Wordmark size={62} />
+            <View style={styles.brand}>
+              <Mark size={44} ink={colors.text} />
+              <Wordmark size={58} color={colors.text} />
+            </View>
             <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
           </>
         )}
@@ -407,6 +411,7 @@ const styles = StyleSheet.create({
     // the pinned clock.
     paddingBottom: 72,
   },
+  brand: { alignItems: 'center', gap: 10 },
   hero: {
     alignItems: 'center',
     justifyContent: 'center',
