@@ -17,10 +17,9 @@ import { musicEnabled } from './soundSettings';
 const SOURCES = {
   home: require('../../assets/music/home.mp3'),
   game: require('../../assets/music/game.mp3'),
-  duel: require('../../assets/music/duel.mp3'),
-  // Impossible gets its own: a climb somebody enters deliberately, for twenty
-  // minutes at a time, is a different room from a three-round daily.
-  impossible: require('../../assets/music/impossible.mp3'),
+  // duel.mp3 and impossible.mp3 were dropped here rather than deleted: eleven
+  // megabytes of audio no screen could reach any more, downloaded by everyone.
+  // Both are still in git if a mode ever wants its own room back.
 } as const;
 
 export type Track = keyof typeof SOURCES;
@@ -31,7 +30,10 @@ export type Track = keyof typeof SOURCES;
  * Down from 0.4: the tracks are mastered for listening rather than for playing
  * underneath something, so they arrived as the loudest thing in the room.
  */
-const VOLUME = 0.24;
+// Taken down with the web's trim, and for the same reason: one track now sits
+// under every mode, so it is heard for the whole session rather than in
+// stretches, and anything that plays constantly has to sit further back.
+const VOLUME = 0.10;
 
 const players: Partial<Record<Track, AudioPlayer>> = {};
 let current: Track | null = null;

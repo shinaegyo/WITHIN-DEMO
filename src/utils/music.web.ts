@@ -20,10 +20,9 @@ import { musicEnabled, musicVolume, onVolumeChange } from './soundSettings';
 const SOURCES = {
   home: require('../../assets/music/home.mp3'),
   game: require('../../assets/music/game.mp3'),
-  duel: require('../../assets/music/duel.mp3'),
-  // Impossible gets its own: a climb somebody enters deliberately, for twenty
-  // minutes at a time, is a different room from a three-round daily.
-  impossible: require('../../assets/music/impossible.mp3'),
+  // duel.mp3 and impossible.mp3 were dropped here rather than deleted: eleven
+  // megabytes of audio no screen could reach any more, downloaded by everyone.
+  // Both are still in git if a mode ever wants its own room back.
 } as const;
 
 export type Track = keyof typeof SOURCES;
@@ -35,7 +34,7 @@ const CROSSFADE = 1.6;
 const TICK = 60;
 
 /**
- * Every track plays at 60% of what the slider says.
+ * Every track plays at 25% of what the slider says.
  *
  * The tracks were mastered for listening rather than for sitting under a game,
  * so at any setting above a whisper they were the loudest thing in the room.
@@ -43,7 +42,7 @@ const TICK = 60;
  * runs from silent to as loud as it goes - and moves the whole range down with
  * it.
  */
-const TRIM = 0.6;
+const TRIM = 0.25;
 
 function level(): number {
   return musicVolume() * TRIM;
