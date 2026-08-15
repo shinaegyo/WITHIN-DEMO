@@ -165,42 +165,6 @@ export function BoardsScreen() {
               : `${today.me.playersOnScore.toLocaleString()} players finished on this score — the closer guesses rank higher.`}
           </Text>
 
-          {/* The shape of the day. Nobody is ranked in it, so it says something
-              true however many people share a score - which is the thing a
-              position could never do. */}
-          {today.distribution.length > 1 && (
-            <View style={styles.dist}>
-              {today.distribution
-                .slice()
-                .reverse()
-                .map((d) => {
-                  const most = Math.max(...today.distribution.map((x) => x.players));
-                  const mine = d.score === today.me!.score;
-                  return (
-                    <View key={d.score} style={styles.distRow}>
-                      <Text style={[styles.distScore, { color: colors.textMuted }]}>{d.score}</Text>
-                      <View
-                        style={[
-                          styles.distBar,
-                          {
-                            backgroundColor: mine ? colors.text : colors.border,
-                            width: `${Math.max(4, (d.players / most) * 74)}%`,
-                          },
-                        ]}
-                      />
-                      <Text
-                        style={[
-                          styles.distCount,
-                          { color: mine ? colors.text : colors.textMuted },
-                        ]}
-                      >
-                        {d.players}
-                      </Text>
-                    </View>
-                  );
-                })}
-            </View>
-          )}
         </View>
       )}
 
@@ -297,11 +261,6 @@ const styles = StyleSheet.create({
   mineLead: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 1.8 },
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
   mineUnit: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.8, marginTop: -2 },
-  dist: { alignSelf: 'stretch', marginTop: 12, paddingHorizontal: 16, gap: 3 },
-  distRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  distScore: { width: 26, fontSize: 10, fontFamily: fonts.bold, textAlign: 'right' },
-  distBar: { height: 9, borderRadius: 3 },
-  distCount: { fontSize: 10, fontFamily: fonts.bold },
   head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
   headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 34, textAlign: 'right' },
   headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
