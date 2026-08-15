@@ -56,8 +56,8 @@ export function GamesScreen({
 
   const rows = [
     {
-      label: 'Challenge',
-      sub: 'Duel a friend, picking each other’s numbers',
+      label: 'Duel',
+      sub: 'You pick their number, they pick yours',
       status: status && status.duelsWaiting > 0 ? `${status.duelsWaiting} waiting on you` : 'Start one',
       urgent: !!status && status.duelsWaiting > 0,
       onPress: onDuels,
@@ -91,6 +91,7 @@ export function GamesScreen({
       style={[styles.wrap, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
+      <Text style={[styles.screenTitle, { color: colors.text }]}>Games</Text>
       {rows.map((r) => (
         <Pressable
           key={r.label}
@@ -155,6 +156,13 @@ export function GamesScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 18, gap: 9 },
+  screenTitle: {
+    fontSize: 26,
+    fontFamily: fonts.extraBold,
+    marginBottom: 4,
+    letterSpacing: -0.4,
+    textAlign: 'center',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

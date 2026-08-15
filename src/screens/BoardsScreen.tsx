@@ -97,6 +97,7 @@ export function BoardsScreen() {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      <Text style={[styles.screenTitle, { color: colors.text }]}>Leaderboard</Text>
       <View style={styles.segments}>
         {TABS.map((t) => (
           <Pressable
@@ -183,6 +184,15 @@ export function BoardsScreen() {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
+  screenTitle: {
+    fontSize: 26,
+    fontFamily: fonts.extraBold,
+    letterSpacing: -0.4,
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 6,
+  },
   segments: { flexDirection: 'row', gap: 6, paddingHorizontal: 14, paddingTop: 12 },
   segment: { flex: 1, borderRadius: 11, paddingVertical: 9, alignItems: 'center' },
   segmentText: { fontSize: 12, fontFamily: fonts.extraBold },
