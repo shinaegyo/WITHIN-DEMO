@@ -21,6 +21,7 @@ import {
 import { fonts } from '../theme/fonts';
 import { arenaFor } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
+import { useFocusEffect } from '@react-navigation/native';
 import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
@@ -71,9 +72,13 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
     }
   }, []);
 
-  useEffect(() => {
-    playTrack('impossible');
-  }, []);
+  // On focus rather than on mount: a tab screen mounts once and never again,
+  // so coming back from a mode used to leave that mode's music playing.
+  useFocusEffect(
+    useCallback(() => {
+      playTrack('impossible');
+    }, []),
+  );
 
   useEffect(() => {
     load();

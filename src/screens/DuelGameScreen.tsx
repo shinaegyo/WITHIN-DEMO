@@ -24,6 +24,7 @@ import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
 import { useTheme } from '../theme/ThemeContext';
 import { playLose, playWin } from '../utils/sound';
+import { useFocusEffect } from '@react-navigation/native';
 import { playTrack } from '../utils/music';
 
 /**
@@ -65,9 +66,13 @@ export function DuelGameScreen({
     }
   }, [duelId]);
 
-  useEffect(() => {
-    playTrack('duel');
-  }, []);
+  // On focus rather than on mount: a tab screen mounts once and never again,
+  // so coming back from a mode used to leave that mode's music playing.
+  useFocusEffect(
+    useCallback(() => {
+      playTrack('duel');
+    }, []),
+  );
 
   useEffect(() => {
     load();

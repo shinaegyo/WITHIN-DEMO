@@ -34,6 +34,21 @@ const CROSSFADE = 1.6;
 /** Steps in the fade. Sixteen a second is smooth and costs nothing. */
 const TICK = 60;
 
+/**
+ * Every track plays at 60% of what the slider says.
+ *
+ * The tracks were mastered for listening rather than for sitting under a game,
+ * so at any setting above a whisper they were the loudest thing in the room.
+ * Trimming here rather than in the setting keeps the slider honest - it still
+ * runs from silent to as loud as it goes - and moves the whole range down with
+ * it.
+ */
+const TRIM = 0.6;
+
+function level(): number {
+  return musicVolume() * TRIM;
+}
+
 interface Pair {
   a: HTMLAudioElement;
   b: HTMLAudioElement;
@@ -51,7 +66,7 @@ onVolumeChange(() => {
   if (!pair) return;
   // Only the copy that is playing follows the slider; the other is mid-fade or
   // silent, and forcing it to full volume would make the seam audible.
-  pair[pair.live].volume = musicVolume();
+  pair[pair.live].volume = level();
 });
 
 function make(track: Track): HTMLAudioElement {
@@ -100,7 +115,7 @@ function handOver(p: Pair, track: Track) {
   to.volume = 0;
   play(to, track);
 
-  const target = musicVolume();
+  const target = level();
   const steps = Math.max(1, Math.round((CROSSFADE * 1000) / TICK));
   let step = 0;
 
@@ -138,7 +153,7 @@ function start(track: Track) {
   if (!p) return;
   const el = p[p.live];
   el.currentTime = 0;
-  el.volume = musicVolume();
+  el.volume = level();
   play(el, track);
   watch(track, p);
 }

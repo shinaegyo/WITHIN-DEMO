@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Wordmark } from '../components/Wordmark';
@@ -9,6 +9,7 @@ import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { useFocusEffect } from '@react-navigation/native';
 import { playTrack } from '../utils/music';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
@@ -62,9 +63,13 @@ export function HomeScreen({
   const [viewport, setViewport] = useState(0);
   const [xp, setXp] = useState<XpState | null>(null);
 
-  useEffect(() => {
-    playTrack('home');
-  }, []);
+  // On focus rather than on mount: a tab screen mounts once and never again,
+  // so coming back from a mode used to leave that mode's music playing.
+  useFocusEffect(
+    useCallback(() => {
+      playTrack('home');
+    }, []),
+  );
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);

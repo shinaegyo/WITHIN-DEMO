@@ -36,6 +36,7 @@ import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier, playLose, playTap } from '../utils/sound';
+import { useFocusEffect } from '@react-navigation/native';
 import { playTrack } from '../utils/music';
 
 /**
@@ -88,9 +89,13 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
     }
   }, []);
 
-  useEffect(() => {
-    playTrack('game');
-  }, []);
+  // On focus rather than on mount: a tab screen mounts once and never again,
+  // so coming back from a mode used to leave that mode's music playing.
+  useFocusEffect(
+    useCallback(() => {
+      playTrack('game');
+    }, []),
+  );
 
   useEffect(() => {
     load();

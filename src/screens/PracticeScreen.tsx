@@ -14,6 +14,7 @@ import { GuessResult } from '../game/types';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { useFocusEffect } from '@react-navigation/native';
 import { playTrack } from '../utils/music';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
@@ -49,9 +50,13 @@ export function PracticeScreen({
   const [showResult, setShowResult] = useState(false);
 
   const [last, setLast] = useState<GuessResult | null>(null);
-  useEffect(() => {
-    playTrack('game');
-  }, []);
+  // On focus rather than on mount: a tab screen mounts once and never again,
+  // so coming back from a mode used to leave that mode's music playing.
+  useFocusEffect(
+    useCallback(() => {
+      playTrack('game');
+    }, []),
+  );
 
   useEffect(() => {
     if (!last) return;

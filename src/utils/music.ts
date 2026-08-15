@@ -25,8 +25,13 @@ const SOURCES = {
 
 export type Track = keyof typeof SOURCES;
 
-/** Quiet enough to sit under a countdown rather than beside it. */
-const VOLUME = 0.4;
+/**
+ * Quiet enough to sit under a countdown rather than beside it.
+ *
+ * Down from 0.4: the tracks are mastered for listening rather than for playing
+ * underneath something, so they arrived as the loudest thing in the room.
+ */
+const VOLUME = 0.24;
 
 const players: Partial<Record<Track, AudioPlayer>> = {};
 let current: Track | null = null;
