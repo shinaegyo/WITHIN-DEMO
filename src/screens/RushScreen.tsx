@@ -188,10 +188,21 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
               <Text style={[styles.title, { color: colors.text }]}>Time</Text>
               <Text style={[styles.score, { color: colors.text }]}>{state.found}</Text>
               <Text style={[styles.body, { color: colors.textMuted }]}>
-                {state.found === 1 ? 'number found' : 'numbers found'} · back tomorrow
+                {state.found === 0
+                  ? 'none found — the clock ran out'
+                  : state.found === 1
+                    ? '1 number found today'
+                    : `${state.found} numbers found today`}
+              </Text>
+              <Text style={[styles.body, { color: colors.textMuted }]}>
+                One run a day. The next numbers arrive at midnight.
               </Text>
 
-              {board.length > 0 && (
+              {board.length === 0 ? (
+                <Text style={[styles.body, { color: colors.textMuted }]}>
+                  Nobody else has run today yet.
+                </Text>
+              ) : (
                 <View style={styles.board}>
                   <Text style={[styles.boardTitle, { color: colors.textMuted }]}>TODAY</Text>
                   {board.slice(0, 8).map((e, i) => (
@@ -259,19 +270,31 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   clock: { fontSize: 22, fontFamily: fonts.extraBold, letterSpacing: 1 },
-  centre: { flex: 1, justifyContent: 'center', gap: 12 },
-  title: { fontSize: 30, fontFamily: fonts.extraBold },
-  body: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 20 },
-  note: { fontSize: 12.5, fontFamily: fonts.bold },
-  start: { borderRadius: 16, paddingVertical: 15, alignItems: 'center', marginTop: 6 },
+  centre: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  title: { fontSize: 30, fontFamily: fonts.extraBold, textAlign: 'center' },
+  body: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 20, textAlign: 'center' },
+  note: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
+  start: {
+    alignSelf: 'stretch',
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 6,
+  },
   startText: { fontSize: 16, fontFamily: fonts.extraBold },
   counter: { alignItems: 'center' },
   score: { fontSize: 52, fontFamily: fonts.extraBold, letterSpacing: -2 },
   counterLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.6, marginTop: -4 },
   gotIt: { fontSize: 13, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardWrap: { flex: 1 },
-  board: { marginTop: 18, gap: 6 },
-  boardTitle: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 2 },
+  board: { alignSelf: 'stretch', marginTop: 18, gap: 6 },
+  boardTitle: {
+    fontSize: 9.5,
+    fontFamily: fonts.bold,
+    letterSpacing: 1.4,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   rank: { width: 20, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
   medal: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
