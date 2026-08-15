@@ -229,7 +229,6 @@ function Screens({
               <Tabs.Screen name="Games">
                 {() => (
                   <GamesScreen
-                    onRanked={() => navigation.navigate('Ranked')}
                     onDuels={() => navigation.navigate('Duels')}
                     onImpossible={() => navigation.navigate('ImpossibleBoard')}
                     onPractice={startPractice}

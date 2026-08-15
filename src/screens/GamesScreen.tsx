@@ -14,13 +14,11 @@ import { playTap } from '../utils/sound';
  * to open one of these, and it was the one thing a list of names could not say.
  */
 export function GamesScreen({
-  onRanked,
   onDuels,
   onImpossible,
   onPractice,
   practiceLeft,
 }: {
-  onRanked: () => void;
   onDuels: () => void;
   onImpossible: () => void;
   onPractice: () => void;
@@ -44,23 +42,6 @@ export function GamesScreen({
   }, [load]);
 
   const rows = [
-    {
-      label: 'Ranked',
-      sub: 'Play strangers for a rating and the crown',
-      status: status?.ranked.needsMe
-        ? 'Your turn'
-        : status?.ranked.inMatch
-          ? 'Waiting on them'
-          : status?.ranked.queued
-            ? 'Looking for an opponent'
-            : status?.ranked.iHoldBelt
-              ? 'You hold the crown'
-              : status?.ranked.beltHolder
-                ? `${status.ranked.beltHolder} holds the crown`
-                : 'The crown is going spare',
-      urgent: !!status?.ranked.needsMe,
-      onPress: onRanked,
-    },
     {
       label: 'Challenge',
       sub: 'Duel a friend, picking each other’s numbers',

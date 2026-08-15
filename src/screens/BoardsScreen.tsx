@@ -8,7 +8,6 @@ import {
   loadAllTimeLeaderboard,
   loadEndlessBoard,
   loadLeaderboard,
-  loadRanked,
   messageFor,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
@@ -24,7 +23,7 @@ import { playTap } from '../utils/sound';
  * meant three of them were never found. One screen, four segments, and each
  * loads only when it is asked for.
  */
-type Board = 'today' | 'alltime' | 'impossible' | 'ranked';
+type Board = 'today' | 'alltime' | 'impossible';
 
 interface Row {
   rank: number;
@@ -40,7 +39,6 @@ const TABS: { key: Board; label: string; note: string }[] = [
   { key: 'today', label: 'Today', note: 'Points from today’s three rounds. Finished days only.' },
   { key: 'alltime', label: 'All time', note: 'Points from every daily challenge played.' },
   { key: 'impossible', label: 'Impossible', note: 'How deep everyone got this week. Same numbers for all, resets Monday.' },
-  { key: 'ranked', label: 'Ranked', note: 'Rating from matches against other players. The crown goes to whoever takes it.' },
 ];
 
 export function BoardsScreen() {
@@ -72,22 +70,13 @@ export function BoardsScreen() {
               value: `${e.score}`, isMe: e.isMe, crown: e.hasBelt,
             })),
           }));
-        } else if (which === 'impossible') {
+        } else {
           const b = await loadEndlessBoard();
           setRows((r) => ({
             ...r,
             impossible: b.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
               value: `${e.depth}`, unit: e.depth === 1 ? 'number' : 'numbers', isMe: e.isMe,
-            })),
-          }));
-        } else {
-          const b = await loadRanked();
-          setRows((r) => ({
-            ...r,
-            ranked: b.board.map((e) => ({
-              rank: e.rank, name: e.name, avatar: null,
-              value: `${e.rating}`, unit: `${e.won}–${e.lost}`, isMe: e.isMe, crown: e.hasBelt,
             })),
           }));
         }
