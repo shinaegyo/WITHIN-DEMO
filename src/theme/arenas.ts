@@ -21,6 +21,14 @@ export interface Arena {
   name: string;
   from: number;
   attempts: number;
+  /**
+   * Attempts remaining when the clue appears; 99 means from the first guess.
+   *
+   * Mirrors endless_clue_at on the server. Two copies of one rule is a risk,
+   * and the alternative was a screen that could not say when the clue is due
+   * without asking - which is worse, because it has to say it before then.
+   */
+  clueAt: number;
   background: string;
   /** The deeper end of the vertical wash. */
   backgroundDeep: string;
@@ -38,22 +46,22 @@ export interface Arena {
 
 export const ARENAS: Arena[] = [
   {
-    key: 'shallows', name: 'The Shallows', from: 1, attempts: 8,
-    background: '#12708C', backgroundDeep: '#0B4557', surface: '#051F27',
-    text: '#F2FBFE', muted: '#A6E9F7', accent: '#6FDCEA',
+    key: 'shallows', name: 'The Shallows', from: 1, attempts: 8, clueAt: 99,
+    background: '#0F5F6E', backgroundDeep: '#0A3E4A', surface: '#04191F',
+    text: '#F2FBFE', muted: '#9FE2EC', accent: '#5FD2E0',
   },
   {
-    key: 'depths', name: 'The Depths', from: 20, attempts: 7,
+    key: 'depths', name: 'The Depths', from: 20, attempts: 7, clueAt: 3,
     background: '#0E4A78', backgroundDeep: '#092E4A', surface: '#04131F',
     text: '#EFF7FD', muted: '#8FCDF0', accent: '#5AB0EE',
   },
   {
-    key: 'dark', name: 'The Dark', from: 40, attempts: 6,
+    key: 'dark', name: 'The Dark', from: 40, attempts: 6, clueAt: 2,
     background: '#0A2D48', backgroundDeep: '#061B2B', surface: '#020B11',
     text: '#EAF2F8', muted: '#79ADD2', accent: '#4E93C4',
   },
   {
-    key: 'edge', name: 'The Edge', from: 80, attempts: 5,
+    key: 'edge', name: 'The Edge', from: 80, attempts: 5, clueAt: 1,
     background: '#050A12', backgroundDeep: '#3A0A0C', surface: '#2E3339',
     text: '#FFF1EE', muted: '#FF8A7A', accent: '#E8503C',
   },

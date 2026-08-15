@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { BackButton } from '../components/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
 import { ClueCard } from '../components/ClueCard';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
@@ -171,10 +172,25 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         <View style={styles.content}>
           <View style={styles.head}>
             <BackButton color={arena.text} onPress={onExit} />
-            <Text style={[styles.badge, { color: arena.muted }]}>
-              {'♥'.repeat(Math.max(0, state.lives))} {state.lives}{' '}
-              {state.lives === 1 ? 'LIFE' : 'LIVES'}
-            </Text>
+            <View style={styles.lives}>
+              <Svg width={62} height={10} viewBox="0 0 62 10">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Circle
+                    key={i}
+                    cx={5 + i * 13}
+                    cy={5}
+                    r={4}
+                    fill={i < state.lives ? arena.muted : 'none'}
+                    stroke={arena.muted}
+                    strokeWidth={1.4}
+                    opacity={i < state.lives ? 1 : 0.4}
+                  />
+                ))}
+              </Svg>
+              <Text style={[styles.badge, { color: arena.muted }]}>
+                {state.lives} {state.lives === 1 ? 'LIFE' : 'LIVES'}
+              </Text>
+            </View>
           </View>
 
           {solved && arrived ? (
@@ -269,9 +285,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               ) : (
                 <View style={[styles.noClue, { borderColor: hairline }]}>
                   <Text style={[styles.noClueText, { color: arena.muted }]}>
-                    {state.level > 89
+                    {arena.clueAt === 1
                       ? 'A clue arrives on your last attempt.'
-                      : 'A clue arrives with three attempts left.'}
+                      : `A clue arrives with ${arena.clueAt === 2 ? 'two' : 'three'} attempts left.`}
                   </Text>
                 </View>
               )}
@@ -331,6 +347,7 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
+  lives: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   arenaName: { fontSize: 12, fontFamily: fonts.extraBold, letterSpacing: 2.4, marginBottom: 4 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },
