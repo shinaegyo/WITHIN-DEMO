@@ -1083,6 +1083,8 @@ export function messageFor(code: string, guess?: number): string {
       return 'You can only challenge someone you are friends with.';
     case 'not_online':
       return 'They are not online. Rounds are timed, so both of you need to be here.';
+    case 'name_locked':
+      return 'Your name can be changed once a year. This one is set for now.';
     case 'paused':
       return 'The clock is stopped.';
     case 'time_up':

@@ -105,6 +105,7 @@ export async function setUsername(name: string): Promise<{ ok: true } | { ok: fa
       bad_length: 'Use between 3 and 16 characters.',
       bad_characters: 'Letters, numbers and underscores only.',
       taken: 'That name is already taken.',
+      name_locked: 'A name can only be changed once a year, and yours is set for now.',
       name_not_allowed: 'Pick a different name — that one is not allowed.',
       name_needs_letters: 'Names need at least one letter.',
       not_authenticated: 'You need to be signed in.',
