@@ -1,7 +1,8 @@
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Platform, StyleProp, StyleSheet, Text, TextStyle, View } from 'react-native';
+import { Platform, StyleProp, StyleSheet, TextStyle, View } from 'react-native';
+import { Text } from './AppText';
 import { wordmarkGradient } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 

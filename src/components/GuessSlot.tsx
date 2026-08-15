@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { Text } from './AppText';
 import { getBandLabel } from '../game/proximity';
 import { GuessResult } from '../game/types';
 import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';

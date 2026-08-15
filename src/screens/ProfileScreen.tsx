@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { LevelBar } from '../components/LevelBar';
 import { AllTimeEntry, XpState, loadAllTimeLeaderboard, loadRanked, loadXp } from '../lib/api';

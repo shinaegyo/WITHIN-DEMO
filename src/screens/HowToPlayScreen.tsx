@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
@@ -191,7 +192,7 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         reached — the four tiers are checkpoints, so you never replay ground you have already won.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Two sessions a day, and your level carries across them and across days. The week's board
+        One climb a day, and your level carries from one day to the next. The week's board
         keeps the deepest level you reached, so a climb that ends badly still counts for what it
         got through.
       </Text>

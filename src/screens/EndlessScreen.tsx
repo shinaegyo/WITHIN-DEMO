@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
@@ -227,9 +228,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 </Pressable>
               ) : (
                 <Text style={[styles.overBody, { color: arena.muted }]}>
-                  {state.sessionsLeft > 0
-                    ? 'One more session today, whenever you want it.'
-                    : "That's both sessions for today. Tomorrow you climb again from there."}
+                  That is today's climb. Tomorrow you start again from there.
                 </Text>
               )}
 

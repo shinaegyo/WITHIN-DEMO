@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { HomeStatus, loadHomeStatus } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -55,9 +56,7 @@ export function GamesScreen({
       status: status
         ? status.impossible.sessionsLeft === 0
           ? `Level ${status.impossible.level} · back tomorrow`
-          : `Level ${status.impossible.level} · ${status.impossible.sessionsLeft} ${
-              status.impossible.sessionsLeft === 1 ? 'session' : 'sessions'
-            } left`
+          : `Level ${status.impossible.level} · today's climb is waiting`
         : '',
       urgent: false,
       onPress: onImpossible,

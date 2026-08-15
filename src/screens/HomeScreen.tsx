@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { Wordmark } from '../components/Wordmark';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusScreen } from '../components/StatusScreen';

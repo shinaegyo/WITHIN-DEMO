@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { StatusScreen } from '../components/StatusScreen';
 import {
@@ -141,11 +142,7 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
           <Text
             style={[styles.playText, { color: left === 0 ? colors.textMuted : colors.background }]}
           >
-            {left === 0
-              ? 'Both sessions used — back tomorrow'
-              : left === null
-                ? 'Climb'
-                : `Climb · ${left} ${left === 1 ? 'session' : 'sessions'} left today`}
+            {left === 0 ? "Today's climb is done — back tomorrow" : 'Climb'}
           </Text>
         </Pressable>
       </View>

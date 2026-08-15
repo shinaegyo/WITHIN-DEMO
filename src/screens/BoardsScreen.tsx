@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
@@ -38,7 +39,7 @@ interface Row {
 const TABS: { key: Board; label: string; note: string }[] = [
   { key: 'today', label: 'Today', note: 'Points from today’s three rounds. Finished days only.' },
   { key: 'alltime', label: 'All time', note: 'Points from every daily challenge played.' },
-  { key: 'impossible', label: 'Impossible', note: 'How deep everyone got this week. Same numbers for all, resets Monday.' },
+  { key: 'impossible', label: 'Impossible', note: 'How deep everyone got this week. Same numbers for everyone, reset each Monday.' },
 ];
 
 export function BoardsScreen() {
