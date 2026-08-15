@@ -168,51 +168,20 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         game, and the only mode that scores points, keeps a streak and places you on the
         leaderboard.
       </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        It also comes first. The modes below stay shut until today's three rounds are done, every
-        day — they are what the day opens into, not an alternative to it.
-      </Text>
-    </>,
+      {/* The modes used to be spelled out here as well: Impossible's tiers and
+          lives, the duel's rounds and ties, and eventually Rush and Window
+          too. Every one of them already explains itself on its own screen,
+          under How it works, next to the button that starts it — so this page
+          was a second copy of the same rules, kept somewhere else and going
+          stale on its own schedule.
 
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>Impossible</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Numbers one after another, up to 100 of them. Eight attempts each to begin with, seven from
-        the tenth, six from the fortieth, five from the ninetieth. One clue per number, and it
-        arrives late — when only a few attempts are left. Everyone plays the same numbers each
-        week, so how far you got is worth comparing.
-      </Text>
+          What stays is what is true in every mode: which way the colours
+          point, what the clue is, how a round runs out, and that the daily is
+          the only thing that scores. */}
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Running out of attempts costs a life, not the climb. You have five, and the number waits
-        for you. Lose all five and the climb drops back to the start of the deepest tier you had
-        reached — the four tiers are checkpoints, so you never replay ground you have already won.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        One climb a day, and your level carries from one day to the next. The week's board
-        keeps the deepest level you reached, so a climb that ends badly still counts for what it
-        got through.
-      </Text>
-    </>,
-
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>Duelling a friend</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Add someone as a friend and you can challenge them. Once they accept, the duel opens with
-        both of you choosing: you set the number they have to find, they set yours. A fresh number
-        each round, with seven attempts then six then five. Each round goes to whoever needed fewer
-        guesses. Solve it in the same number and the round is a tie, shown in orange, counting for
-        neither of you.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        Neither of you can guess until both numbers are in, so nobody starts while the other is
-        still choosing. When you finish a round you wait for them, and the next opens once you have
-        both played it — so you always know how the duel stands before you pick again. If all three
-        end level, a fourth number decides it. If that ties too, the duel is drawn.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        You never play at the same time, and you never see their board until the round is settled.
-        Duels are separate from your daily: they change no points, no streak and no leaderboard
-        place.
+        It also comes first. The other modes stay shut until today's three rounds are done, every
+        day — they are what the day opens into, not an alternative to it. Each one explains its own
+        rules on the way in.
       </Text>
     </>,
 

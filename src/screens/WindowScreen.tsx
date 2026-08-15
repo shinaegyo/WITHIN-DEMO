@@ -46,8 +46,16 @@ import { playForTier, playLose, playTap, playWin } from '../utils/sound';
  * the same thing: a guess, answered by how close it was. What changes is that
  * finding the number is not the point - saying how sure you are is.
  */
-/** The spreads worth offering: one tap each, and every one a different bet. */
-const SPREADS = [0, 3, 5, 10, 20, 35];
+/**
+ * The spreads worth offering, stepped through rather than laid out.
+ *
+ * Six chips in a row was six controls for one decision, and it put the price of
+ * the bet - the only number that matters - in small grey type under a button.
+ * A stepper is one control, so the range and what it is worth can be the
+ * largest thing on the screen instead.
+ */
+const SPREADS = [0, 1, 2, 3, 5, 8, 12, 18, 25, 35];
+const DEFAULT_SPREAD = 4; // ±5
 
 export function WindowScreen({ onExit }: { onExit: () => void }) {
   const { colors } = useTheme();
@@ -58,7 +66,9 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   const [rules, setRules] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [centre, setCentre] = useState('');
-  const [spread, setSpread] = useState(5);
+  const [focused, setFocused] = useState(false);
+  const [spreadIdx, setSpreadIdx] = useState(DEFAULT_SPREAD);
+  const spread = SPREADS[spreadIdx];
   const [result, setResult] = useState<
     { inside: boolean; width: number; score: number; answer: number } | null
   >(null);
@@ -276,56 +286,122 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
             {/* The commitment: a centre and a spread, not two ends.
                 Nobody thinks "525 to 560" - they think "about 542, give or take
                 18" - and asking for the ends made the player do the arithmetic
-                the game is scoring. The spread is the whole decision, so it is
-                a row of taps rather than a number to type. */}
-            <View style={[styles.commit, { borderColor: colors.border }]}>
-              <View style={styles.centreRow}>
-                <TextInput
-                  style={[styles.centreField, { color: colors.text, borderColor: colors.border }]}
-                  value={centre}
-                  onChangeText={(t) => setCentre(t.replace(/[^0-9]/g, '').slice(0, 4))}
-                  placeholder="your number"
-                  placeholderTextColor={colors.textMuted}
-                  keyboardType="number-pad"
-                  inputMode="numeric"
-                />
-              </View>
+                the game is scoring.
 
-              <View style={styles.spreads}>
-                {SPREADS.map((s2) => {
-                  const on = spread === s2;
-                  return (
-                    <Pressable
-                      key={s2}
-                      onPress={() => {
-                        playTap();
-                        setSpread(s2);
-                      }}
+                Both halves share one outline, the same instrument the probe
+                field above is, so the commit stops reading as a form bolted to
+                the bottom of a game. What you are committing to, and what it
+                pays, is set large underneath - it is the decision, and it was
+                the smallest type on the screen. */}
+            <View style={[styles.commit, { borderColor: colors.border }]}>
+              <View
+                style={[
+                  styles.shell,
+                  {
+                    borderColor: focused ? colors.text : colors.border,
+                    backgroundColor: focused ? colors.surfaceAlt : colors.surface,
+                  },
+                ]}
+              >
+                <View style={styles.fieldWrap}>
+                  <TextInput
+                    style={[
+                      styles.field,
+                      { color: colors.text },
+                      Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null,
+                    ]}
+                    value={centre}
+                    onChangeText={(t) => {
+                      setCentre(t.replace(/[^0-9]/g, '').slice(0, 4));
+                      if (note) setNote(null);
+                    }}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    // Drawn below instead, so it can be quieter than the number
+                    // typed over it.
+                    placeholder=""
+                    keyboardType="number-pad"
+                    inputMode="numeric"
+                    maxLength={4}
+                  />
+                  {!centre && (
+                    <View
+                      pointerEvents="none"
+                      style={[StyleSheet.absoluteFill, styles.placeholderWrap]}
+                    >
+                      <Text style={[styles.placeholder, { color: colors.textMuted }]}>
+                        Enter number
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <View style={[styles.stepper, { backgroundColor: colors.surfaceAlt }]}>
+                  <Pressable
+                    onPress={() => {
+                      playTap();
+                      setSpreadIdx(spreadIdx - 1);
+                    }}
+                    disabled={spreadIdx === 0}
+                    style={styles.step}
+                    hitSlop={6}
+                    accessibilityLabel="Narrower window"
+                  >
+                    <Text
                       style={[
-                        styles.spread,
-                        on
-                          ? { backgroundColor: colors.text }
-                          : { borderColor: colors.border, borderWidth: 1 },
+                        styles.stepText,
+                        { color: spreadIdx === 0 ? colors.border : colors.text },
                       ]}
                     >
-                      <Text
-                        style={[
-                          styles.spreadText,
-                          { color: on ? colors.background : colors.textMuted },
-                        ]}
-                      >
-                        {s2 === 0 ? 'exact' : `±${s2}`}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                      −
+                    </Text>
+                  </Pressable>
+
+                  <Text style={[styles.spreadText, { color: colors.text }]}>
+                    {spread === 0 ? 'exact' : `±${spread}`}
+                  </Text>
+
+                  <Pressable
+                    onPress={() => {
+                      playTap();
+                      setSpreadIdx(spreadIdx + 1);
+                    }}
+                    disabled={spreadIdx === SPREADS.length - 1}
+                    style={styles.step}
+                    hitSlop={6}
+                    accessibilityLabel="Wider window"
+                  >
+                    <Text
+                      style={[
+                        styles.stepText,
+                        {
+                          color:
+                            spreadIdx === SPREADS.length - 1 ? colors.border : colors.text,
+                        },
+                      ]}
+                    >
+                      +
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
 
-              <Text style={[styles.worth, { color: span ? colors.text : colors.textMuted }]}>
-                {span
-                  ? `${span.lo}–${span.hi} · ${span.width} wide · worth ${101 - span.width}`
-                  : 'A window of 1 is worth 100'}
-              </Text>
+              <View style={styles.readout}>
+                {span ? (
+                  <>
+                    <Text style={[styles.range, { color: colors.text }]}>
+                      {span.lo} – {span.hi}
+                    </Text>
+                    <Text style={[styles.worth, { color: colors.textMuted }]}>
+                      {span.width} wide · worth {101 - span.width}
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={[styles.worth, { color: colors.textMuted }]}>
+                    A window of 1 is worth 100
+                  </Text>
+                )}
+              </View>
 
               {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
 
@@ -387,20 +463,32 @@ const styles = StyleSheet.create({
   probesLeft: { fontSize: 14, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardWrap: { flex: 1 },
   commit: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 10 },
-  centreRow: { alignSelf: 'stretch' },
-  centreField: {
-    alignSelf: 'stretch',
-    minWidth: 0,
+  // Deliberately the same shell as NumberInput: one outline around a field and
+  // the control that goes with it.
+  shell: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1.5,
-    borderRadius: 14,
-    paddingVertical: 13,
-    textAlign: 'center',
-    fontSize: 22,
-    fontFamily: fonts.extraBold,
+    borderRadius: 16,
+    padding: 5,
   },
-  spreads: { flexDirection: 'row', gap: 6, alignSelf: 'stretch' },
-  spread: { flex: 1, minWidth: 0, borderRadius: 10, paddingVertical: 9, alignItems: 'center' },
-  spreadText: { fontSize: 12, fontFamily: fonts.extraBold },
+  fieldWrap: { flex: 1, minWidth: 0, justifyContent: 'center' },
+  field: { paddingHorizontal: 13, paddingVertical: 11, fontSize: 22, fontFamily: fonts.bold },
+  placeholderWrap: { justifyContent: 'center', paddingHorizontal: 13 },
+  placeholder: { fontSize: 16, fontFamily: fonts.semiBold },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    borderRadius: 12,
+    paddingHorizontal: 2,
+  },
+  step: { width: 34, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
+  stepText: { fontSize: 20, fontFamily: fonts.extraBold, lineHeight: 24 },
+  spreadText: { fontSize: 14, fontFamily: fonts.extraBold, minWidth: 46, textAlign: 'center' },
+  // Fixed height so the range appearing does not shove the button down.
+  readout: { minHeight: 46, justifyContent: 'center', alignItems: 'center', gap: 1 },
+  range: { fontSize: 30, fontFamily: fonts.extraBold, letterSpacing: -0.6, lineHeight: 34 },
   worth: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
   note: { fontSize: 12, fontFamily: fonts.bold, textAlign: 'center' },
   board: { gap: 6, marginTop: 4 },

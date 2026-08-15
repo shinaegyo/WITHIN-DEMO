@@ -218,7 +218,21 @@ export function HomeScreen({
           <View style={styles.iconButton} />
         )}
 
-        {started ? <Wordmark size={24} color={colors.text} /> : <View />}
+        {/* The mark travels with the name. On the finished-day screen the word
+            was sitting up here alone, which is the one place the brand is
+            small enough to need the shape doing the work.
+
+            Laid over the row rather than in it. Sharing a space-between row
+            with a level pill on one side and a round button on the other
+            centred it between two things of different widths, which is not the
+            middle of anything - the wordmark was already sitting right of
+            centre before the mark arrived to make it obvious. */}
+        {started && (
+          <View pointerEvents="none" style={styles.headerBrand}>
+            <Mark size={20} ink={colors.text} />
+            <Wordmark size={24} color={colors.text} />
+          </View>
+        )}
 
         <Pressable
           style={[styles.iconButton, { backgroundColor: colors.surfaceAlt }]}
@@ -410,6 +424,17 @@ const styles = StyleSheet.create({
     paddingBottom: 72,
   },
   brand: { alignItems: 'center', gap: 10 },
+  headerBrand: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 8,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
   hero: {
     alignItems: 'center',
     justifyContent: 'center',
