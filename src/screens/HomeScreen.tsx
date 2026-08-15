@@ -179,7 +179,7 @@ export function HomeScreen({
     ? 'Share result'
     : inProgress
       ? `Continue round ${game.currentRound}`
-      : 'Press to play';
+      : 'Play';
 
 
 
