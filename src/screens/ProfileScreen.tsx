@@ -6,6 +6,7 @@ import { LevelBar } from '../components/LevelBar';
 import { AllTimeEntry, XpState, loadAllTimeLeaderboard, loadRanked, loadXp } from '../lib/api';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
+import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 
@@ -34,6 +35,10 @@ export function ProfileScreen({
   onHowToPlay: () => void;
   onPrivacy: () => void;
 }) {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { colors, mode, toggle } = useTheme();
   const { game } = useDailyGameContext();
   const [rank, setRank] = useState<AllTimeEntry | null>(null);

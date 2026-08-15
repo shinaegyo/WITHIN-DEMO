@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
+import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -12,6 +13,10 @@ const PAGE_PADDING = 40;
 
 /** Nothing in the game itself explains the colour system, so this screen does. */
 export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = {}) {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(0);
   const [heights, setHeights] = useState<number[]>([]);

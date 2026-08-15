@@ -6,10 +6,15 @@ import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import { AllTimeEntry, ApiError, loadAllTimeLeaderboard, messageFor } from '../lib/api';
 import { fonts } from '../theme/fonts';
+import { useTrack } from '../utils/useTrack';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 
 export function LeaderboardScreen() {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { colors } = useTheme();
   const [entries, setEntries] = useState<AllTimeEntry[] | null>(null);
   const [total, setTotal] = useState(0);

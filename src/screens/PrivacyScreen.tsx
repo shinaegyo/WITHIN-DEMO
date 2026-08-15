@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { fonts } from '../theme/fonts';
+import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 
 /** Fill this in before pointing any advertising at the game. */
@@ -19,6 +20,10 @@ const UPDATED = '14 August 2026';
  * advertising paragraph says plainly that there is none yet.
  */
 export function PrivacyBody() {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { colors } = useTheme();
 
   const P = ({ children }: { children: React.ReactNode }) => (

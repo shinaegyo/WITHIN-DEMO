@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AVATAR_COLORS, Avatar, CHARACTERS, COLOR_KEYS, parseAvatar } from '../components/Avatar';
 import { setAvatar } from '../lib/api';
 import { fonts } from '../theme/fonts';
+import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 
@@ -34,6 +35,10 @@ export function AvatarScreen({
   /** Only offered during the tutorial, where the game has not started yet. */
   onSkip?: () => void;
 }) {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { colors } = useTheme();
   const start = parseAvatar(current);
   const [character, setCharacter] = useState(start.character);

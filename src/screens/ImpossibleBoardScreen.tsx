@@ -14,6 +14,7 @@ import {
   startEndlessSession,
 } from '../lib/api';
 import { ARENAS } from '../theme/arenas';
+import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
@@ -43,6 +44,7 @@ export function ImpossibleBoardScreen({
   onPlay: () => void;
   onBack: () => void;
 }) {
+  useTrack('game');
   const { colors } = useTheme();
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
   const [status, setStatus] = useState<HomeStatus | null>(null);

@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { HomeStatus, loadHomeStatus } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
+import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
@@ -30,6 +31,10 @@ export function GamesScreen({
   onPractice: () => void;
   practiceLeft: number | null;
 }) {
+  // The Games tab is the game section, so it carries the game section's
+  // music. Left to inherit it was silent arriving from Home and playing
+  // arriving back from Rush, which is the worst of both.
+  useTrack('game');
   const { colors } = useTheme();
   const [status, setStatus] = useState<HomeStatus | null>(null);
 

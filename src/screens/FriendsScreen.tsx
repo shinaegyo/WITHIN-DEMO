@@ -15,6 +15,7 @@ import {
   sendFriendRequest,
 } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
+import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
@@ -35,6 +36,10 @@ export function FriendsScreen({
   /** Challenging someone opens the duel rather than sending a message. */
   onPlay: (duelId: string) => void;
 }) {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { colors } = useTheme();
   const [state, setState] = useState<FriendsState | null>(null);
   const [error, setError] = useState<string | null>(null);

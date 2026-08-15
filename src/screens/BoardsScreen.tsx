@@ -13,6 +13,7 @@ import {
   messageFor,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
+import { useTrack } from '../utils/useTrack';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
@@ -44,6 +45,10 @@ const TABS: { key: Board; label: string; note: string }[] = [
 ];
 
 export function BoardsScreen() {
+  // Silent. Music belongs to playing, not to the rooms around it - and it has
+  // to be asked for, because a screen that says nothing keeps whatever the
+  // last one started, so this kept a mode's track playing over a list.
+  useTrack(null);
   const { colors } = useTheme();
   const [tab, setTab] = useState<Board>('today');
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});
