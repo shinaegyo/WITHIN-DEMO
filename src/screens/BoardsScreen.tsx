@@ -157,12 +157,17 @@ export function BoardsScreen() {
           <Text style={[styles.mineUnit, { color: colors.textMuted }]}>
             {today.me.score === 1 ? 'POINT' : 'POINTS'}
           </Text>
+          {/* The explanation is unconditional. It used to ride along with the
+              tie - "4 players on this score, the closer guesses rank higher" -
+              so on any day you were alone on your score, nothing on the screen
+              said what AVG OFF was for. The column was there every day and the
+              reason for it only some days. */}
           <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            Your guesses landed {today.me.avgOff} away on average.
-            {' '}
-            {today.me.playersOnScore === 1
-              ? 'Nobody else finished on this score.'
-              : `${today.me.playersOnScore.toLocaleString()} players finished on this score — the closer guesses rank higher.`}
+            Your guesses landed {today.me.avgOff} away on average — closer guesses rank higher when
+            scores are level.
+            {today.me.playersOnScore > 1
+              ? ` ${today.me.playersOnScore.toLocaleString()} players finished on ${today.me.score}.`
+              : ''}
           </Text>
 
         </View>
