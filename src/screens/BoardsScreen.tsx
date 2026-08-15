@@ -222,7 +222,13 @@ export function BoardsScreen() {
       const r = await findPlayer(name, tab, friends);
       if (!r.found) setFound(`No player called ${name}.`);
       else if (r.onBoard === false || !r.userId) setFound(`${r.name} has not played this one.`);
-      else await centreOn(r.userId, `Around ${r.name}`);
+      else {
+        // Same as tapping a suggestion: the field has done its job and the
+        // note below says whose window this is.
+        setQuery('');
+        setHints([]);
+        await centreOn(r.userId, `Around ${r.name}`);
+      }
     } catch {
       setFound('Could not search just now.');
     } finally {
@@ -493,7 +499,13 @@ export function BoardsScreen() {
                   key={h.userId}
                   onPress={() => {
                     playTap();
-                    setQuery(h.name);
+                    // The field empties rather than filling with the name.
+                    // Setting it re-fired the lookup, which matched that exact
+                    // name and put the suggestion straight back - leaving the
+                    // row you had just tapped sitting above the result it
+                    // produced. "Around jpdw" already says who you are looking
+                    // at, so the field has nothing left to hold.
+                    setQuery('');
                     setHints([]);
                     if (h.rank === null) setFound(`${h.name} has not played this one.`);
                     else centreOn(h.userId, `Around ${h.name}`);
