@@ -431,23 +431,6 @@ export function BoardsScreen() {
         <ScrollView contentContainerStyle={styles.list}>
           {/* The precision column is labelled. A bare 881 beside a score is a
               number nobody can read, and one that is better when smaller. */}
-          {/* Today and the season carry two columns; all time carries one.
-              A lifetime average is a number that barely moves after a few
-              weeks, so it separates nobody and reads as decoration - the
-              points are the record, and that is the whole of it.
-
-              The explanation lives behind the header rather than under the
-              board. A footnote is read by nobody who is not already curious,
-              and a full screen for one column is far too much room for one
-              sentence. */}
-          <View style={styles.head}>
-            <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-            {tab !== 'alltime' && (
-              <Pressable onPress={() => { playTap(); setExplain(tab); }} hitSlop={10}>
-                <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
-              </Pressable>
-            )}
-          </View>
           {/* Search and Find me, above the names. Nobody wants to scroll to
               4,568 - they want to see 4,565 to 4,571 and know who is one good
               morning away. */}
@@ -484,6 +467,23 @@ export function BoardsScreen() {
             <Text style={[styles.foundNote, { color: colors.textMuted }]}>{found}</Text>
           )}
 
+          {/* Today and the season carry two columns; all time carries one.
+              A lifetime average is a number that barely moves after a few
+              weeks, so it separates nobody and reads as decoration - the
+              points are the record, and that is the whole of it.
+
+              The explanation lives behind the header rather than under the
+              board. A footnote is read by nobody who is not already curious,
+              and a full screen for one column is far too much room for one
+              sentence. */}
+          <View style={styles.head}>
+            <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
+            {tab !== 'alltime' && (
+              <Pressable onPress={() => { playTap(); setExplain(tab); }} hitSlop={10}>
+                <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
+              </Pressable>
+            )}
+          </View>
           {list.map((e) => (
             <Pressable
               key={`${e.rank}-${e.name}`}
