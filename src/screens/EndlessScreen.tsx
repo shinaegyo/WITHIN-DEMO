@@ -281,6 +281,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   blindOneAway
                   ink={arena.text}
                   inkMuted={arena.muted}
+                  tileSurface={arena.surface}
                 />
               </View>
             </>

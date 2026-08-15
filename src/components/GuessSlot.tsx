@@ -24,6 +24,8 @@ export function FilledSlot({
   result,
   attemptNumber,
   blindOneAway,
+  surface,
+  ink: inkOverride,
 }: {
   result: GuessResult;
   attemptNumber: number;
@@ -33,6 +35,16 @@ export function FilledSlot({
    * there the tension is the clock rather than the depth.
    */
   blindOneAway?: boolean;
+  /**
+   * The ground an unfilled tile sits on, and the ink it carries there.
+   *
+   * Only the close bands get a saturated fill; everything further out falls
+   * back to a surface, and taking that from the app theme put a black card on
+   * a teal arena in dark mode and a white one in light. Impossible passes its
+   * arena instead, so a distant guess belongs to the tier it was made in.
+   */
+  surface?: string;
+  ink?: string;
 }) {
   const { colors } = useTheme();
   const anim = useRef(new Animated.Value(0)).current;
@@ -51,7 +63,7 @@ export function FilledSlot({
 
   // Filled tiles are saturated enough to carry white; unfilled ones sit on the
   // neutral surface and use normal theme text.
-  const ink = fill ? '#FFFFFF' : colors.text;
+  const ink = fill ? '#FFFFFF' : (inkOverride ?? colors.text);
   // On an unfilled tile the accent is the only colour, so it does the work of
   // signalling direction and closeness.
   const bandInk = fill ? '#FFFFFF' : getTileInk(result.direction, result.tier);
@@ -68,7 +80,7 @@ export function FilledSlot({
       style={[
         styles.slot,
         {
-          backgroundColor: fill ?? colors.surface,
+          backgroundColor: fill ?? surface ?? colors.surface,
           opacity: anim,
           transform: [
             { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) },

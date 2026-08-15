@@ -21,6 +21,8 @@ interface Props {
    */
   ink?: string;
   inkMuted?: string;
+  /** Ground for the tiles that have no saturated fill of their own. */
+  tileSurface?: string;
 }
 
 /**
@@ -42,6 +44,7 @@ export function GuessBoard({
   blindOneAway,
   ink,
   inkMuted,
+  tileSurface,
 }: Props) {
   const { colors } = useTheme();
   const remaining = Math.max(0, attemptsAllowed - guesses.length);
@@ -72,6 +75,8 @@ export function GuessBoard({
             result={result}
             attemptNumber={attemptNumber}
             blindOneAway={blindOneAway}
+            surface={tileSurface}
+            ink={ink}
           />
         ))}
     </View>
