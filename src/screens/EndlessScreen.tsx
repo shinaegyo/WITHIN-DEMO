@@ -72,7 +72,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   }, []);
 
   useEffect(() => {
-    playTrack('game');
+    playTrack('impossible');
   }, []);
 
   useEffect(() => {

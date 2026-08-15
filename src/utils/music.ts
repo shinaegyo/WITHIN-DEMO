@@ -18,6 +18,9 @@ const SOURCES = {
   home: require('../../assets/music/home.mp3'),
   game: require('../../assets/music/game.mp3'),
   duel: require('../../assets/music/duel.mp3'),
+  // Impossible gets its own: a climb somebody enters deliberately, for twenty
+  // minutes at a time, is a different room from a three-round daily.
+  impossible: require('../../assets/music/impossible.mp3'),
 } as const;
 
 export type Track = keyof typeof SOURCES;
