@@ -8,7 +8,6 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
-import { BUILD } from '../utils/version';
 
 /**
  * You, and the settings that describe how you play rather than how you are
@@ -156,9 +155,6 @@ export function ProfileScreen({
           <Text style={[styles.arrow, { color: colors.textMuted }]}>{mode === 'dark' ? '☾' : '☀'}</Text>
         </Pressable>
       </View>
-
-      {/* So "is that live yet?" is a question anyone can answer by looking. */}
-      <Text style={[styles.build, { color: colors.textMuted }]}>Build {BUILD}</Text>
     </ScrollView>
   );
 }
@@ -193,5 +189,4 @@ const styles = StyleSheet.create({
   rowDetail: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 2 },
   tag: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 1.1 },
   arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
-  build: { fontSize: 10, fontFamily: fonts.medium, textAlign: 'center', marginTop: 18, opacity: 0.6 },
 });

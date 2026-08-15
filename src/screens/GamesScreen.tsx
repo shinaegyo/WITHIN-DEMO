@@ -57,10 +57,10 @@ export function GamesScreen({
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
           ? `Level ${status.impossible.level} · back tomorrow`
           : status.impossible.sessionsLeft === 0
-            ? `Level ${status.impossible.level} · climb in progress, ${
-                status.impossible.lives
-              } ${status.impossible.lives === 1 ? 'life' : 'lives'} left`
-            : `Level ${status.impossible.level} · today's climb is waiting`
+            ? `Level ${status.impossible.level} · ${status.impossible.lives} ${
+                status.impossible.lives === 1 ? 'life' : 'lives'
+              } left`
+            : `Level ${status.impossible.level} · ready`
         : '',
       urgent: false,
       onPress: onImpossible,
@@ -100,8 +100,12 @@ export function GamesScreen({
           ]}
         >
           <View style={styles.main}>
-            <Text style={[styles.label, { color: colors.text }]}>{r.label}</Text>
-            <Text style={[styles.sub, { color: colors.textMuted }]}>{r.sub}</Text>
+            <Text style={[styles.label, { color: colors.text }]} numberOfLines={1}>
+              {r.label}
+            </Text>
+            <Text style={[styles.sub, { color: colors.textMuted }]} numberOfLines={2}>
+              {r.sub}
+            </Text>
           </View>
           <Text
             style={[styles.status, { color: r.urgent ? feedbackColors.correct : colors.textMuted }]}
@@ -138,7 +142,13 @@ const styles = StyleSheet.create({
   main: { flex: 1, minWidth: 0 },
   label: { fontSize: 17, fontFamily: fonts.extraBold },
   sub: { fontSize: 12, fontFamily: fonts.medium, marginTop: 3 },
-  status: { fontSize: 12, fontFamily: fonts.bold, flexShrink: 1, textAlign: 'right' },
+  status: {
+    fontSize: 12,
+    fontFamily: fonts.bold,
+    textAlign: 'right',
+    flexShrink: 1,
+    maxWidth: '46%',
+  },
   arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
   note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 12, paddingHorizontal: 2 },
 });
