@@ -168,7 +168,8 @@ export function BoardsScreen() {
             <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
           </View>
           <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {allTime.me.daysPlayed} days played, {allTime.me.perDay} a day on average.
+            {allTime.me.daysPlayed} {allTime.me.daysPlayed === 1 ? 'day' : 'days'} played,{' '}
+            {allTime.me.perDay} a day on average.
           </Text>
         </View>
       )}
@@ -374,9 +375,14 @@ const styles = StyleSheet.create({
   sheetSumText: { fontSize: 15, fontFamily: fonts.extraBold },
   sheetClose: { alignSelf: 'flex-end', paddingTop: 6, paddingHorizontal: 4 },
   sheetCloseText: { fontSize: 14, fontFamily: fonts.extraBold },
-  head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
-  headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
-  headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
+  // Fixed widths, not minimums, and the same ones the number columns use.
+  // Sized to their text, a longer label - AVG OFF against DAYS - grew its own
+  // cell and shoved POINTS sideways, so the two tabs disagreed about where the
+  // headers sat. paddingRight is the list's 14 plus the row's 13, which is
+  // where the numbers themselves end.
+  head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 27, paddingBottom: 5 },
+  headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
+  headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 14, gap: 8 },
@@ -395,8 +401,8 @@ const styles = StyleSheet.create({
   nameMe: { fontFamily: fonts.extraBold },
   crown: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
-  sub: { fontSize: 11.5, fontFamily: fonts.bold, minWidth: 40, textAlign: 'right' },
+  sub: { fontSize: 11.5, fontFamily: fonts.bold, width: 56, textAlign: 'right' },
   // Fixed width so the column header above it lines up with the numbers.
-  value: { fontSize: 16, fontFamily: fonts.extraBold, minWidth: 40, textAlign: 'right' },
+  value: { fontSize: 16, fontFamily: fonts.extraBold, width: 46, textAlign: 'right' },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, padding: 18 },
 });
