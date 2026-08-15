@@ -22,13 +22,14 @@ export interface Arena {
   from: number;
   attempts: number;
   /**
-   * Attempts remaining when the clue appears; 99 means from the first guess.
+   * The attempt the clue appears on, counted forward: 1 means immediately.
    *
-   * Mirrors endless_clue_at on the server. Two copies of one rule is a risk,
-   * and the alternative was a screen that could not say when the clue is due
-   * without asking - which is worse, because it has to say it before then.
+   * Mirrors endless_clue_at on the server, which derives the same rule from
+   * each tier's allowance. Two copies of one rule is a risk, and the
+   * alternative was a screen that could not say when the clue is due without
+   * asking - which is worse, because it has to say it before then.
    */
-  clueAt: number;
+  clueFrom: number;
   background: string;
   /** The deeper end of the vertical wash. */
   backgroundDeep: string;
@@ -46,22 +47,22 @@ export interface Arena {
 
 export const ARENAS: Arena[] = [
   {
-    key: 'shallows', name: 'The Shallows', from: 1, attempts: 8, clueAt: 99,
-    background: '#0F5F6E', backgroundDeep: '#0A3E4A', surface: '#04191F',
-    text: '#F2FBFE', muted: '#9FE2EC', accent: '#5FD2E0',
+    key: 'shallows', name: 'The Shallows', from: 1, attempts: 8, clueFrom: 1,
+    background: '#17628F', backgroundDeep: '#0F4467', surface: '#051D2C',
+    text: '#F3FAFF', muted: '#A8D6F5', accent: '#63B8F0',
   },
   {
-    key: 'depths', name: 'The Depths', from: 20, attempts: 7, clueAt: 3,
+    key: 'depths', name: 'The Depths', from: 20, attempts: 7, clueFrom: 3,
     background: '#0E4A78', backgroundDeep: '#092E4A', surface: '#04131F',
     text: '#EFF7FD', muted: '#8FCDF0', accent: '#5AB0EE',
   },
   {
-    key: 'dark', name: 'The Dark', from: 40, attempts: 6, clueAt: 2,
+    key: 'dark', name: 'The Dark', from: 40, attempts: 6, clueFrom: 4,
     background: '#0A2D48', backgroundDeep: '#061B2B', surface: '#020B11',
     text: '#EAF2F8', muted: '#79ADD2', accent: '#4E93C4',
   },
   {
-    key: 'edge', name: 'The Edge', from: 80, attempts: 5, clueAt: 1,
+    key: 'edge', name: 'The Edge', from: 80, attempts: 5, clueFrom: 5,
     background: '#050A12', backgroundDeep: '#3A0A0C', surface: '#2E3339',
     text: '#FFF1EE', muted: '#FF8A7A', accent: '#E8503C',
   },

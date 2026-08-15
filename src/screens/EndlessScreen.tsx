@@ -285,9 +285,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               ) : (
                 <View style={[styles.noClue, { borderColor: hairline }]}>
                   <Text style={[styles.noClueText, { color: arena.muted }]}>
-                    {arena.clueAt === 1
-                      ? 'A clue arrives on your last attempt.'
-                      : `A clue arrives with ${arena.clueAt === 2 ? 'two' : 'three'} attempts left.`}
+                    {`A clue arrives on your ${
+                      ['', 'first', 'second', 'third', 'fourth', 'fifth'][arena.clueFrom] ??
+                      `${arena.clueFrom}th`
+                    } attempt.`}
                   </Text>
                 </View>
               )}
