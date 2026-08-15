@@ -44,6 +44,13 @@ export function GamesScreen({
     return () => clearInterval(id);
   }, [load]);
 
+  const practiceLabel =
+    practiceLeft === null
+      ? 'Unranked, unscored, nothing at stake'
+      : practiceLeft === 0
+        ? 'None left today'
+        : `${practiceLeft} left today · unranked, unscored`;
+
   const rows = [
     {
       label: 'Challenge',
@@ -73,18 +80,6 @@ export function GamesScreen({
       status: 'One run a day',
       urgent: false,
       onPress: onRush,
-    },
-    {
-      label: 'Practice',
-      sub: 'Unranked, unscored, as many as you have left',
-      status:
-        practiceLeft === null
-          ? ''
-          : practiceLeft === 0
-            ? 'None left today'
-            : `${practiceLeft} left today`,
-      urgent: false,
-      onPress: onPractice,
     },
   ];
 
@@ -126,6 +121,21 @@ export function GamesScreen({
         </Pressable>
       ))}
 
+      <Pressable
+        onPress={() => {
+          playTap();
+          onPractice();
+        }}
+        style={({ pressed }) => [styles.practice, { opacity: pressed ? 0.6 : 1 }]}
+      >
+        <Text style={[styles.practiceText, { color: colors.text }]}>
+          Warm up with a practice round ›
+        </Text>
+        <Text style={[styles.practiceSub, { color: colors.textMuted }]}>
+          {practiceLabel}
+        </Text>
+      </Pressable>
+
       <Text style={[styles.note, { color: colors.textMuted }]}>
         None of these touch your points, streak or place on the leaderboard. That is the daily, and
         it is the only thing that counts.
@@ -159,5 +169,8 @@ const styles = StyleSheet.create({
     maxWidth: '46%',
   },
   arrow: { fontSize: 16, fontFamily: fonts.bold, marginTop: -2 },
+  practice: { paddingHorizontal: 4, paddingTop: 16, gap: 2 },
+  practiceText: { fontSize: 14, fontFamily: fonts.extraBold },
+  practiceSub: { fontSize: 11.5, fontFamily: fonts.medium },
   note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 12, paddingHorizontal: 2 },
 });

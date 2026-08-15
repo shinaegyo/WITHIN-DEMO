@@ -341,7 +341,7 @@ function Screens({
               // Remounts for a fresh number each round.
               key={route.params.remainingAfterThis}
               remainingAfterThis={route.params.remainingAfterThis}
-              onExit={() => navigation.navigate('Home')}
+              onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
               onPlayAnother={startPractice}
             />
           )}
