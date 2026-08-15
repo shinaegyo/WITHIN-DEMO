@@ -38,8 +38,17 @@ export function LevelUpOverlay({ from, to, needed, onDone }: Props) {
   const ready = useRef(false);
 
   useEffect(() => {
-    hapticCorrect();
-    playWin();
+    // Ahead of the animation and outside it. A haptic that throws on a
+    // platform without one - the web, which is every player today - took the
+    // whole sequence with it, leaving a full-screen scrim over a card still
+    // sitting at opacity zero and no way to tap past it.
+    try {
+      hapticCorrect();
+      playWin();
+    } catch {
+      /* the card is the celebration; the noise is a bonus */
+    }
+
     Animated.sequence([
       Animated.timing(rise, {
         toValue: 1,
@@ -133,7 +142,9 @@ export function LevelUpOverlay({ from, to, needed, onDone }: Props) {
 
 const styles = StyleSheet.create({
   scrim: { alignItems: 'center', justifyContent: 'center', zIndex: 20 },
-  card: { alignItems: 'center', paddingHorizontal: 32, gap: 10 },
+  // Stretched, so the bar spans the card rather than shrinking to the width of
+  // whichever line of text happens to be longest.
+  card: { alignSelf: 'stretch', alignItems: 'center', paddingHorizontal: 44, gap: 10 },
   title: { fontSize: 12, fontFamily: fonts.bold, letterSpacing: 3, marginTop: 6 },
   numbers: { height: 118, justifyContent: 'center', alignSelf: 'stretch' },
   centre: { alignItems: 'center', justifyContent: 'center' },
