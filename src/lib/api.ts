@@ -793,6 +793,8 @@ export async function endlessGuess(guess: number) {
 export interface RushState {
   started: boolean;
   over: boolean;
+  /** The clock is stopped because the player left. */
+  paused: boolean;
   found: number;
   secondsLeft: number;
   guesses: GuessResult[];
@@ -813,6 +815,7 @@ export async function loadRush(): Promise<RushState> {
   return {
     started: !!raw.started,
     over: !!raw.over,
+    paused: !!raw.paused,
     found: raw.found ?? 0,
     secondsLeft: raw.secondsLeft ?? 0,
     guesses: (raw.guesses ?? []).map(toGuessResult),
@@ -823,6 +826,22 @@ export async function loadRush(): Promise<RushState> {
 export async function startRush(): Promise<void> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('rush_start');
+  unwrap<any>(data, error);
+}
+
+/** Stops the clock. Called when the player leaves the screen or the app. */
+export async function pauseRush(): Promise<void> {
+  try {
+    await supabase.rpc('rush_pause');
+  } catch {
+    /* the run keeps running; better than a crash on the way out */
+  }
+}
+
+/** Starts it again, once the player has had their countdown. */
+export async function resumeRush(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('rush_resume');
   unwrap<any>(data, error);
 }
 
@@ -1032,6 +1051,8 @@ export function messageFor(code: string, guess?: number): string {
       return 'You can only challenge someone you are friends with.';
     case 'not_online':
       return 'They are not online. Rounds are timed, so both of you need to be here.';
+    case 'paused':
+      return 'The clock is stopped.';
     case 'time_up':
       return 'Time ran out on that round.';
     case 'duel_already_open':
@@ -1053,6 +1074,8 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_runs_left':
     case 'no_sessions_left':
       return "That's today's climb. Your place is kept — come back tomorrow.";
+    case 'paused':
+      return 'The clock is stopped.';
     case 'time_up':
       return "Time's up.";
     case 'no_session':
