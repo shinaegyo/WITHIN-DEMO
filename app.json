@@ -32,7 +32,7 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 180,
           "resizeMode": "contain",
-          "backgroundColor": "#F7F8FA",
+          "backgroundColor": "#F4F7FC",
           "dark": {
             "image": "./assets/splash-icon.png",
             "imageWidth": 180,

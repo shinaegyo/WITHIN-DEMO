@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
+import { Mark } from './Mark';
 import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
@@ -19,6 +20,9 @@ export function StatusScreen({
 
   return (
     <View style={styles.wrap}>
+      {/* The first thing anyone sees while the day loads, so it is the mark
+          rather than the name alone. */}
+      <Mark size={40} ink={colors.text} />
       <Wordmark size={30} color={colors.text} />
       {loading ? (
         <ActivityIndicator color={colors.accent} style={styles.spinner} />

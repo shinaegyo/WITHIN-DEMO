@@ -12,15 +12,19 @@ export interface ThemeColors {
 // NOTE: `background` for each theme is duplicated in app.json as the splash
 // screen colour (light + dark). Keep them in sync, otherwise launching the app
 // flashes the wrong colour before the first frame renders.
+// Cool rather than neutral. The greys were the default grey of every app, and
+// blue and red sitting on them read as two colours that wandered in; a faint
+// cool cast makes the pair look chosen. The accent is the tiles' own blue -
+// there is no reason for a third hue when the game already has one.
 export const lightColors: ThemeColors = {
-  background: '#F7F8FA',
+  background: '#F4F7FC',
   surface: '#FFFFFF',
-  surfaceAlt: '#EEF0F3',
-  border: '#DDE1E6',
-  text: '#15161A',
-  textMuted: '#6B7280',
-  accent: '#4F46E5',
-  danger: '#DC2626',
+  surfaceAlt: '#E8EEF8',
+  border: '#D4DEEC',
+  text: '#0F141C',
+  textMuted: '#586376',
+  accent: '#2563EB',
+  danger: '#D93A2F',
 };
 
 export const darkColors: ThemeColors = {
@@ -30,8 +34,10 @@ export const darkColors: ThemeColors = {
   border: '#2E3138',
   text: '#F5F5F7',
   textMuted: '#9CA3AF',
-  accent: '#818CF8',
-  danger: '#F87171',
+  // The tiles' blue, lifted for a dark ground. Indigo was a fourth colour in a
+  // game that only has two.
+  accent: '#6FA5EE',
+  danger: '#FF7A6B',
 };
 
 // Proximity tile colors are intentionally constant across light/dark mode —
