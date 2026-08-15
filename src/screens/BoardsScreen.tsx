@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
@@ -72,6 +72,7 @@ export function BoardsScreen() {
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
+  const [explain, setExplain] = useState<Board | null>(null);
   // Today's board carries more than a list: where you came as a share of the
   // field, how many people are level with you, and the shape of the day.
   const [today, setToday] = useState<Leaderboard | null>(null);
@@ -219,13 +220,25 @@ export function BoardsScreen() {
           {tab === 'today' && (
             <View style={styles.head}>
               <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-              <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF</Text>
+              {/* The explanation lives behind the header rather than under the
+                  board. A footnote is read by nobody who is not already
+                  curious, and a full screen for one column is far too much
+                  room for one sentence. */}
+              <Pressable onPress={() => { playTap(); setExplain('today'); }} hitSlop={10}>
+                <Text style={[styles.headSub, styles.headTap, { color: colors.accent }]}>
+                  AVG OFF ⓘ
+                </Text>
+              </Pressable>
             </View>
           )}
           {tab === 'alltime' && (
             <View style={styles.head}>
               <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-              <Text style={[styles.headSub, { color: colors.textMuted }]}>DAYS</Text>
+              <Pressable onPress={() => { playTap(); setExplain('alltime'); }} hitSlop={10}>
+                <Text style={[styles.headSub, styles.headTap, { color: colors.accent }]}>
+                  DAYS ⓘ
+                </Text>
+              </Pressable>
             </View>
           )}
           {list.map((e) => (
@@ -269,18 +282,53 @@ export function BoardsScreen() {
               {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
             </Pressable>
           ))}
-
-          {/* The columns, explained where the question actually arises: after
-              you have read the rows and wondered what the small number is. */}
-          <Text style={[styles.footnote, { color: colors.textMuted }]}>
-            {tab === 'today'
-              ? 'AVG OFF is how far a typical guess landed from the answer. When two players finish level on points, the closer guesses rank higher.'
-              : 'DAYS is how many dailies you have finished. Level on points, whoever needed fewer days ranks higher.'}
-          </Text>
         </ScrollView>
       )}
 
       <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
+
+      <Modal visible={explain !== null} transparent animationType="fade" onRequestClose={() => setExplain(null)}>
+        <Pressable style={styles.scrim} onPress={() => setExplain(null)}>
+          <Pressable
+            style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            onPress={() => {}}
+          >
+            {explain === 'today' ? (
+              <>
+                <Text style={[styles.sheetTitle, { color: colors.text }]}>Avg off</Text>
+                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                  How far a typical guess landed from the answer.
+                </Text>
+                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                  Say the number was 342 and you guessed 500, then 400, then 350, then 342. Those
+                  guesses were 158, 58, 8 and 0 away — 224 altogether, across four guesses.
+                </Text>
+                <View style={[styles.sheetSum, { borderColor: colors.border }]}>
+                  <Text style={[styles.sheetSumText, { color: colors.text }]}>224 ÷ 4 = 56 avg off</Text>
+                </View>
+                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                  Lower is better. When two players finish level on points, the closer guesses rank
+                  higher.
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.sheetTitle, { color: colors.text }]}>Days</Text>
+                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                  How many dailies you have finished.
+                </Text>
+                <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                  Two players on 2,400 points, one after 12 days and one after 20: the same total in
+                  fewer days is the better record, so 12 ranks higher.
+                </Text>
+              </>
+            )}
+            <Pressable onPress={() => { playTap(); setExplain(null); }} style={styles.sheetClose}>
+              <Text style={[styles.sheetCloseText, { color: colors.text }]}>Got it</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -313,14 +361,15 @@ const styles = StyleSheet.create({
   mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
   mineLine: { flexDirection: 'row', alignItems: 'baseline', gap: 7 },
   mineUnit: { fontSize: 15, fontFamily: fonts.bold },
-  footnote: {
-    fontSize: 11.5,
-    fontFamily: fonts.medium,
-    lineHeight: 18,
-    paddingHorizontal: 22,
-    paddingTop: 18,
-    paddingBottom: 4,
-  },
+  headTap: { textDecorationLine: 'underline' },
+  scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: 26 },
+  sheet: { borderWidth: 1, borderRadius: 20, padding: 22, gap: 10, maxWidth: 420, width: '100%' },
+  sheetTitle: { fontSize: 21, fontFamily: fonts.extraBold, letterSpacing: -0.4 },
+  sheetBody: { fontSize: 14, fontFamily: fonts.medium, lineHeight: 21 },
+  sheetSum: { borderWidth: 1, borderRadius: 12, paddingVertical: 11, alignItems: 'center', marginVertical: 2 },
+  sheetSumText: { fontSize: 15, fontFamily: fonts.extraBold },
+  sheetClose: { alignSelf: 'flex-end', paddingTop: 6, paddingHorizontal: 4 },
+  sheetCloseText: { fontSize: 14, fontFamily: fonts.extraBold },
   head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 18, paddingBottom: 4 },
   headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
   headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, minWidth: 40, textAlign: 'right' },
