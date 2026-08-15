@@ -212,6 +212,19 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               ) : (
                 <Text style={[styles.overBody, { color: arena.muted }]}>Next one coming…</Text>
               )}
+
+              {/* The checkpoint, said at the only moment it is about to matter.
+                  It is the one rule that decides what a day is worth, and it
+                  was written down once on a screen nobody reads twice. */}
+              <Text style={[styles.checkpoint, { color: arena.text }]}>
+                {solved.level % 5 === 0
+                  ? `Checkpoint. Tomorrow starts you at level ${solved.level} — next one at ${solved.level + 5}.`
+                  : 5 - (solved.level % 5) === 1
+                    ? `One more level to the checkpoint at ${solved.level + 1}.`
+                    : `${5 - (solved.level % 5)} levels to the checkpoint at ${
+                        solved.level + (5 - (solved.level % 5))
+                      }.`}
+              </Text>
             </View>
           ) : over ? (
             <View style={styles.result}>
@@ -349,6 +362,13 @@ const styles = StyleSheet.create({
   noClueText: { fontSize: 12.5, fontFamily: fonts.medium },
   levelLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4, marginTop: -2 },
   boardWrap: { flex: 1 },
+  checkpoint: {
+    fontSize: 13,
+    fontFamily: fonts.extraBold,
+    textAlign: 'center',
+    lineHeight: 19,
+    marginTop: 10,
+  },
   result: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 12 },
   overTitle: { fontSize: 28, fontFamily: fonts.extraBold },
   overBody: { fontSize: 13, fontFamily: fonts.medium, textAlign: 'center', lineHeight: 19 },

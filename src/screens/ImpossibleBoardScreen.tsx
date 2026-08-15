@@ -145,13 +145,18 @@ export function ImpossibleBoardScreen({
         </Text>
         <Text style={[styles.rule, { color: colors.textMuted }]}>
           Running out of attempts costs a life, not the climb — you have five, and the same number
-          is waiting. Lose all five and you drop back to your last checkpoint. Every fifth level is
-          one, so a fall costs at most four numbers however deep you are.
+          is waiting. Lose all five and you drop back to your last checkpoint.
         </Text>
         <Text style={[styles.rule, { color: colors.textMuted }]}>
-          One climb a day, spent on your first guess rather than by opening it. A new day starts you
-          at your last checkpoint with five fresh lives — however many you had left when you
-          stopped, you begin the next day with all five.
+          Every fifth level is a checkpoint — 5, 10, 15, 20 and so on — and the checkpoint is the
+          level you start tomorrow from. Clear level 32 and stop, and tomorrow begins at 30. It is
+          also where you land if you lose all five lives, so a fall costs at most four numbers
+          however deep you are.
+        </Text>
+        <Text style={[styles.rule, { color: colors.textMuted }]}>
+          One climb a day, spent on your first guess rather than by opening it. Your lives come back
+          full every day — however many you had left when you stopped, you begin the next one with
+          all five.
         </Text>
         <Text style={[styles.rule, { color: colors.textMuted }]}>
           The week's board keeps the deepest level you have ever reached, so a climb that ends badly
