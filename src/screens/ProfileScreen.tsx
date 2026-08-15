@@ -129,18 +129,29 @@ export function ProfileScreen({
         {rating !== null ? ` · ${rating} ranked` : ''}
       </Text>
 
+      {/* Ordered by how much each one changes your experience, and grouped so
+          the order reads as deliberate rather than as the sequence they
+          happened to be built in.
+
+          Identity first: an account without an email loses its streak and its
+          whole history the moment somebody clears their browser, which makes
+          it the highest-stakes row on the screen. It used to sit below a
+          cosmetic. Then the one thing here that makes you better at the game,
+          then the two preferences, then the row nobody opens unless they came
+          looking for it. */}
       <View style={styles.rows}>
+        <Row label="Profile & sign in" detail="Your name, and an email to keep your streak" onPress={onAccount} />
         <Row
           label="Avatar"
           detail={avatar ? 'Change your character or colour' : 'Pick a character and a colour'}
           tag={avatar ? undefined : 'NEW'}
           onPress={onAvatar}
         />
-        <Row label="Profile & sign in" detail="Your name, and an email to keep your streak" onPress={onAccount} />
-        <Row label="Audio" detail="Sound effects, music, and how loud each is" onPress={onAudio} />
-        <Row label="How to play" detail="The rules, in full" onPress={onHowToPlay} />
-        <Row label="Privacy" detail="What the game keeps, and how to remove it" onPress={onPrivacy} />
+      </View>
 
+      <View style={styles.rows}>
+        <Row label="How to play" detail="The rules, in full" onPress={onHowToPlay} />
+        <Row label="Audio" detail="Sound effects, music, and how loud each is" onPress={onAudio} />
         <Pressable
           onPress={() => {
             playTap();
@@ -159,6 +170,10 @@ export function ProfileScreen({
           </View>
           <Text style={[styles.arrow, { color: colors.textMuted }]}>{mode === 'dark' ? '☾' : '☀'}</Text>
         </Pressable>
+      </View>
+
+      <View style={styles.rows}>
+        <Row label="Privacy" detail="What the game keeps, and how to remove it" onPress={onPrivacy} />
       </View>
     </ScrollView>
   );
