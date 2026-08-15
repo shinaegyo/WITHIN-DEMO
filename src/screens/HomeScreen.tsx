@@ -16,15 +16,12 @@ import { shareInvite, shareResult } from '../utils/share';
 import {
   HomeStatus,
   LeaderboardEntry,
-  loadFriendsLeaderboard,
   loadHomeStatus,
-  loadLeaderboard,
   loadXp,
   XpState,
 } from '../lib/api';
 import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
-import { PlayerCardModal } from '../components/PlayerCard';
 
 
 interface Props {
@@ -57,10 +54,7 @@ export function HomeScreen({
   const [practiceLeft, setPracticeLeft] = useState<number | null>(null);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [shareFailed, setShareFailed] = useState(false);
-  const [board, setBoard] = useState<LeaderboardEntry[]>([]);
-  const [friendsBoard, setFriendsBoard] = useState<LeaderboardEntry[]>([]);
   const [modes, setModes] = useState<HomeStatus | null>(null);
-  const [looking, setLooking] = useState<string | null>(null);
   // The first screen is sized to the viewport so it keeps the open, centred
   // layout it had before anything sat below it. Everything else scrolls in
   // underneath rather than crowding it.
@@ -118,13 +112,6 @@ export function HomeScreen({
   const dayOver = !!game && game.dayStatus !== 'playing';
   useEffect(() => {
     let cancelled = false;
-    loadFriendsLeaderboard()
-      .then((rows) => {
-        if (!cancelled) setFriendsBoard(rows);
-      })
-      .catch(() => {
-        /* a missing friends board shouldn't take the screen down */
-      });
 
     loadHomeStatus()
       .then((s2) => {
@@ -145,14 +132,6 @@ export function HomeScreen({
         /* the header simply stays quiet */
       });
 
-    loadLeaderboard()
-      .then((res) => {
-        if (cancelled) return;
-        setBoard(res.entries);
-      })
-      .catch(() => {
-        /* the board is a nicety; a failure here shouldn't disturb the screen */
-      });
     return () => {
       cancelled = true;
     };
@@ -201,76 +180,12 @@ export function HomeScreen({
       ? `Continue round ${game.currentRound}`
       : 'Press to play';
 
-  // Top ten, with the player appended when they placed outside it — a board
-  // that never shows your own row is just a list of other people.
-  const top = board.slice(0, 10);
-  const me = board.find((e) => e.isMe);
-  const preview = me && !top.some((e) => e.isMe) ? [...top, me] : top;
 
-  // The board always includes the player, so a single row means no friends.
-  const hasFriendsToday = friendsBoard.some((e) => !e.isMe);
 
   const lastHour = !finished && remaining < 60 * 60 * 1000;
 
-  const renderBoard = (
-    title: string,
-    link: string,
-    rows: LeaderboardEntry[],
-    onPress: () => void,
-  ) => (
-    <Pressable style={styles.boardCard} onPress={onPress}>
-      <View style={styles.boardHead}>
-        <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
-        <Text style={[styles.boardMore, { color: colors.textMuted }]}>{link}</Text>
-      </View>
-
-      {rows.map((item, i) => (
-        <Pressable
-          key={`${item.rank}-${item.name}`}
-          onPress={() => {
-            playTap();
-            setLooking(item.name);
-          }}
-          style={[
-            styles.boardRow,
-            // Your own row is the one you look for first, so it is drawn
-            // differently rather than labelled. A name followed by "(you)"
-            // reads as part of the name.
-            item.isMe
-              ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
-              : { borderColor: colors.border, backgroundColor: colors.surface },
-            // A gap in the numbering means the player's own row was pulled up
-            // from further down; say so with space.
-            i > 0 && rows[i - 1].rank < item.rank - 1 && styles.boardGap,
-          ]}
-        >
-          {MEDALS[item.rank] ? (
-            <View style={[styles.boardMedal, { backgroundColor: MEDALS[item.rank].ring }]}>
-              <Text style={[styles.boardMedalText, { color: MEDALS[item.rank].ink }]}>
-                {item.rank}
-              </Text>
-            </View>
-          ) : (
-            <Text style={[styles.boardRank, { color: colors.textMuted }]}>{item.rank}</Text>
-          )}
-
-          <Avatar value={item.avatar} size={24} />
-          <Text
-            style={[styles.boardName, { color: colors.text }, item.isMe && styles.boardNameMe]}
-            numberOfLines={1}
-          >
-            {item.name}
-          </Text>
-
-          {!item.isComplete && (
-            <Text style={[styles.boardOut, { color: colors.textMuted }]}>OUT</Text>
-          )}
-          <Text style={[styles.boardScore, { color: colors.text }]}>{item.score}</Text>
-        </Pressable>
-      ))}
-    </Pressable>
-  );
-
+  // Finishing the day turns the button into the share, which is the only thing
+  // left to do with a day that is over.
   const onPrimary = finished
     ? async () => {
         playTap();
@@ -425,14 +340,8 @@ export function HomeScreen({
         )}
         </View>
 
-        {/* People you know, not the world. At this size a global top ten reads
-            as an empty room; four friends' scores read as a race. */}
-        {hasFriendsToday &&
-          renderBoard('FRIENDS TODAY', 'Manage ›', friendsBoard.slice(0, 10), onOpenFriends)}
-
       </ScrollView>
 
-      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
 
       {/* Pinned rather than scrolled. The clock is the reason to come back, so
           it should be readable wherever the player happens to be on the page,
