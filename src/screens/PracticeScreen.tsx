@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StatusBar, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
+import { BackButton } from '../components/BackButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
@@ -117,9 +118,7 @@ export function PracticeScreen({
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <Pressable onPress={onExit} hitSlop={10}>
-              <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
-            </Pressable>
+            <BackButton color={colors.text} onPress={onExit} />
             <View style={[styles.badge, { borderColor: colors.border }]}>
               <Text style={[styles.badgeText, { color: colors.textMuted }]}>PRACTICE · UNRANKED</Text>
             </View>

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
+import { BackButton } from '../components/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
@@ -163,9 +164,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
           <View style={styles.head}>
-            <Pressable onPress={onExit} hitSlop={10}>
-              <Text style={[styles.back, { color: arena.text }]}>‹ HOME</Text>
-            </Pressable>
+            <BackButton color={arena.text} onPress={onExit} />
             <Text style={[styles.badge, { color: arena.muted }]}>
               {'♥'.repeat(Math.max(0, state.lives))} {state.lives}{' '}
               {state.lives === 1 ? 'LIFE' : 'LIVES'}

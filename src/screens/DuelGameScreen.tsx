@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
+import { BackButton } from '../components/BackButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClueCard } from '../components/ClueCard';
 import { GuessBoard } from '../components/GuessBoard';
@@ -198,12 +199,10 @@ export function DuelGameScreen({
       >
         <View style={styles.content}>
           <View style={styles.head}>
-            <Pressable
+            <BackButton
+              color={colors.text}
               onPress={() => (duel.status === 'active' ? setLeaving(true) : onExit())}
-              hitSlop={10}
-            >
-              <Text style={[styles.back, { color: colors.text }]}>‹ DUELS</Text>
-            </Pressable>
+            />
             <Text style={[styles.vs, { color: colors.textMuted }]}>VS {duel.opponent.toUpperCase()}</Text>
           </View>
 

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../components/AppText';
+import { BackButton } from '../components/BackButton';
 import { Avatar } from '../components/Avatar';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
@@ -236,15 +237,13 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
           <View style={styles.head}>
-            <Pressable
+            <BackButton
+              color={colors.text}
               onPress={() => {
                 if (running.current) pauseRush();
                 onExit();
               }}
-              hitSlop={10}
-            >
-              <Text style={[styles.back, { color: colors.text }]}>‹ HOME</Text>
-            </Pressable>
+            />
             {live && (
               <Text
                 style={[
