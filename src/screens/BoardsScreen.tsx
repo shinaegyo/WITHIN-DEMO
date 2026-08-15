@@ -375,12 +375,15 @@ const styles = StyleSheet.create({
   sheetSumText: { fontSize: 15, fontFamily: fonts.extraBold },
   sheetClose: { alignSelf: 'flex-end', paddingTop: 6, paddingHorizontal: 4 },
   sheetCloseText: { fontSize: 14, fontFamily: fonts.extraBold },
-  // Fixed widths, not minimums, and the same ones the number columns use.
-  // Sized to their text, a longer label - AVG OFF against DAYS - grew its own
-  // cell and shoved POINTS sideways, so the two tabs disagreed about where the
-  // headers sat. paddingRight is the list's 14 plus the row's 13, which is
-  // where the numbers themselves end.
-  head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 27, paddingBottom: 5 },
+  // Fixed widths, not minimums, and the same ones the number columns use: a
+  // label sized to its own text - AVG OFF against DAYS - grew its cell and
+  // shoved POINTS sideways, so the two tabs disagreed with each other.
+  //
+  // paddingRight is the row's 13 and only the row's 13. This header lives
+  // inside the list, which already applies its own 14 to everything in it, so
+  // adding the two together counted that padding twice and stood the labels a
+  // clean 14 to the left of the numbers they name.
+  head: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, paddingRight: 13, paddingBottom: 5 },
   headSub: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
   headValue: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
