@@ -52,8 +52,7 @@ export function PracticeScreen({
   const [showResult, setShowResult] = useState(false);
 
   const [last, setLast] = useState<GuessResult | null>(null);
-  // Silent, like the daily it is practice for.
-  useTrack(null);
+  useTrack('game');
 
   useEffect(() => {
     if (!last) return;

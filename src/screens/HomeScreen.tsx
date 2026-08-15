@@ -67,7 +67,12 @@ export function HomeScreen({
   // level they are now on.
   const [levelUp, setLevelUp] = useState<{ from: number; to: number } | null>(null);
 
-  useTrack('home');
+  // Silent. Home is a scoreboard and a countdown, looked at for a few seconds
+  // between things - the music was starting up and being walked away from, and
+  // it is the one screen you pass through every single time. Asked for
+  // explicitly rather than omitted: a screen that says nothing keeps whatever
+  // the last one started, which would leave a mode's track playing over it.
+  useTrack(null);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);

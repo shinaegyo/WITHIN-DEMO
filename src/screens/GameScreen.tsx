@@ -39,10 +39,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   // WITHIN 10. Seeding the ref with whatever is already there on mount means
   // the effect only ever fires for something new.
   const played = useRef(lastResult);
-  // Silence. Three rounds of deliberate guessing is the one place in the app
-  // where a soundtrack competes with the thing the player came to do - and
-  // asked for explicitly, because otherwise the home track follows them in.
-  useTrack(null);
+  useTrack('game');
 
   useEffect(() => {
     if (!lastResult || lastResult === played.current) return;
