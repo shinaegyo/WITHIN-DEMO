@@ -291,10 +291,32 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                   and the stronger the colour the closer you are.
                 </Text>
                 <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  One run a day, starting the moment you press the button. Leaving stops the clock
-                  and coming back gives you a countdown, so an interruption costs you nothing. Every
-                  number found pays 15 XP.
+                  One run a day, and the clock starts the moment you press the button — not when the
+                  first guess lands. Leaving stops it: close the app, switch tabs or go Home and the
+                  clock holds where it was. Coming back gives you three seconds of countdown before
+                  it starts again, so an interruption costs you nothing and nobody returns
+                  mid-guess.
                 </Text>
+                <Text style={[styles.rule, { color: colors.textMuted }]}>
+                  Ties break on guesses used. Two people who both found seven are separated by who
+                  spent fewer guesses getting there, because reading the colours quickly is the
+                  whole skill of the mode.
+                </Text>
+
+                <View style={[styles.facts, { borderColor: colors.border }]}>
+                  {[
+                    ['3:00', 'on the clock', 'once a day'],
+                    ['∞', 'guesses', 'nothing but time is spent'],
+                    ['0', 'clues', 'the colours are all you get'],
+                    ['15 XP', 'a number', 'found, not guessed at'],
+                  ].map(([value, label, note]) => (
+                    <View key={label} style={styles.factRow}>
+                      <Text style={[styles.factValue, { color: colors.text }]}>{value}</Text>
+                      <Text style={[styles.factLabel, { color: colors.text }]}>{label}</Text>
+                      <Text style={[styles.factNote, { color: colors.textMuted }]}>{note}</Text>
+                    </View>
+                  ))}
+                </View>
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
@@ -494,6 +516,13 @@ const styles = StyleSheet.create({
   foot: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 8 },
   footNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center' },
   rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 16, marginBottom: 2 },
+  // Same shape as Impossible's tier table: a bordered block of rows, the value
+  // first and the reading of it alongside.
+  facts: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 6, marginBottom: 4 },
+  factRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 12, gap: 10 },
+  factValue: { width: 52, fontSize: 15, fontFamily: fonts.extraBold },
+  factLabel: { fontSize: 13, fontFamily: fonts.bold },
+  factNote: { flex: 1, fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'right' },
   intro: { paddingTop: 10, paddingBottom: 20, gap: 12 },
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   title: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -1 },

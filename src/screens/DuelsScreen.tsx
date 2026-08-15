@@ -313,11 +313,36 @@ export function DuelsScreen({
         )}
         {/* Rules last, as on every other mode screen: read once, scrolled past
             every time after. */}
-        <Text style={[styles.rulesHead, { color: colors.text }]}>How duels work</Text>
+        <Text style={[styles.rulesHead, { color: colors.text }]}>How Duels works</Text>
+
         <Text style={[styles.caption, { color: colors.textMuted }]}>
-          You pick the number they hunt and they pick yours, a fresh one each round. Seven attempts
-          then six then five. A round goes to whoever needed fewer guesses, and the next opens once
-          you have both played it. Level after three and a fourth number decides it.
+          Add someone as a friend and challenge them. Once they accept, you both choose: you set the
+          number they have to find, and they set yours. Neither of you can guess until both numbers
+          are in, so nobody starts while the other is still deciding.
+        </Text>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          Three rounds, a fresh number each time, always chosen by the other player. Seven attempts
+          in the first round, six in the second, five in the third.
+        </Text>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          A round goes to whoever found it in fewer guesses. Solve it in the same number and the
+          round is a tie, shown in orange, counting for neither of you. If only one of you finds it,
+          that round is theirs however many attempts it took; if neither of you does, it is a tie.
+        </Text>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          You never play at the same time, and you never see their board until the round is settled.
+          Finish a round and you wait for them — the next one opens once you have both played it, so
+          you always know how the duel stands before you pick the next number.
+        </Text>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          Whoever has taken more rounds after three wins the duel. Level after three — one round
+          each, or all three tied, or any other way of arriving even — and a fourth number decides
+          it, with five attempts. If that one ties too, the duel is drawn and neither of you takes
+          it.
+        </Text>
+        <Text style={[styles.caption, { color: colors.textMuted }]}>
+          Duels are separate from your daily. They change no points, no streak and no place on the
+          leaderboard — winning one pays 80 XP toward your level, and losing one still pays 25.
         </Text>
 
 

@@ -216,8 +216,32 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
                 score is 101 minus the width of it. A window of 1 is 100 points, a window of 40 is
                 61, and a window of 100 is 1. If the number is outside, it is nothing.
               </Text>
+              {/* The scoring, as a table rather than three examples buried in a
+                  sentence. Every row is a spread the stepper actually offers,
+                  so this is the bet being priced and not an illustration. */}
+              <View style={[styles.scale, { borderColor: colors.border }]}>
+                {SPREADS.map((s2) => {
+                  const width = Math.min(1000, 1 + s2 * 2);
+                  return (
+                    <View key={s2} style={styles.scaleRow}>
+                      <Text style={[styles.scaleSpread, { color: colors.text }]}>
+                        {s2 === 0 ? 'exact' : `±${s2}`}
+                      </Text>
+                      <Text style={[styles.scaleWidth, { color: colors.textMuted }]}>
+                        {width} wide
+                      </Text>
+                      <Text style={[styles.scaleScore, { color: colors.text }]}>
+                        {101 - width}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+
               <Text style={[styles.rule, { color: colors.textMuted }]}>
-                One a day, the same number for everyone, and every point is an XP toward your level.
+                Miss — the number lands outside the range you committed to — and it is nothing at
+                all, however narrow the window was. One a day, the same number for everyone, and
+                every point is an XP toward your level.
               </Text>
             </ScrollView>
 
@@ -418,6 +442,12 @@ const styles = StyleSheet.create({
   // others against the margin reads as two screens stitched together.
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 14, marginBottom: -2 },
+  // Same shape as Impossible's tier table.
+  scale: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 2, marginBottom: 2 },
+  scaleRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 7, paddingHorizontal: 12, gap: 10 },
+  scaleSpread: { width: 52, fontSize: 13.5, fontFamily: fonts.extraBold },
+  scaleWidth: { flex: 1, fontSize: 12, fontFamily: fonts.medium },
+  scaleScore: { fontSize: 15, fontFamily: fonts.extraBold },
   foot: {
     borderTopWidth: 1,
     paddingTop: 12,
