@@ -106,10 +106,45 @@ function toGuessResult(raw: any): GuessResult {
   };
 }
 
+/**
+ * A dropped request and a broken server are not the same thing.
+ *
+ * Every failure used to arrive as ApiError(error.message), and any message the
+ * screens did not recognise became "Connection problem. Check your network" -
+ * so a server fault was reported as the player's wifi, and the one detail that
+ * would have identified it was discarded. The transport failures are now named
+ * as such, everything else is kept verbatim behind a code the screens can fall
+ * through on, and the original is logged where it can be read.
+ */
 function unwrap<T>(data: any, error: any): T {
-  if (error) throw new ApiError(error.message ?? 'network');
+  if (error) {
+    const message = String(error.message ?? '');
+    if (/fetch|network|load failed|timeout|offline|aborted/i.test(message)) {
+      throw new ApiError('network');
+    }
+    console.error('[within] server error:', error);
+    throw new ApiError(error.message ?? 'server');
+  }
   if (data?.error) throw new ApiError(data.error);
   return data as T;
+}
+
+/**
+ * One retry on a dropped request.
+ *
+ * A guess is a single small write on a phone that may be holding one bar, and
+ * losing it costs the player their turn with nothing on screen to say whether
+ * it counted. Retried once, quietly - the server rejects a repeat of the same
+ * guess as a duplicate, so a request that did land cannot be applied twice.
+ */
+async function onceMore<T>(call: () => Promise<T>): Promise<T> {
+  try {
+    return await call();
+  } catch (err) {
+    if (!(err instanceof ApiError) || err.code !== 'network') throw err;
+    await new Promise((r) => setTimeout(r, 450));
+    return call();
+  }
 }
 
 function toRound(raw: any): CurrentRound {
@@ -177,8 +212,10 @@ export interface SubmitResult {
 }
 
 export async function submitGuess(guess: number): Promise<SubmitResult> {
-  const { data, error } = await supabase.rpc('submit_guess', { p_guess: guess });
-  const raw = unwrap<any>(data, error);
+  const raw = await onceMore(async () => {
+    const { data, error } = await supabase.rpc('submit_guess', { p_guess: guess });
+    return unwrap<any>(data, error);
+  });
 
   return {
     result: toGuessResult(raw.guess),
@@ -699,8 +736,10 @@ export async function loadEndless(): Promise<EndlessState> {
 
 export async function endlessGuess(guess: number) {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('endless_guess', { p_guess: guess });
-  const raw = unwrap<any>(data, error);
+  const raw = await onceMore(async () => {
+    const { data, error } = await supabase.rpc('endless_guess', { p_guess: guess });
+    return unwrap<any>(data, error);
+  });
   return {
     solved: !!raw.solved,
     lostLife: !!raw.lostLife,
@@ -915,10 +954,14 @@ export function messageFor(code: string, guess?: number): string {
       return 'No run in progress. Start a new one.';
     case 'no_runs_left':
     case 'no_sessions_left':
-      return "That's both sessions for today. The climb keeps your place — come back tomorrow.";
+      return "That's today's climb. Your place is kept — come back tomorrow.";
     case 'no_session':
       return 'Start a session first.';
+    case 'network':
+      return 'That guess did not reach us. Check your signal and try again.';
     default:
-      return 'Connection problem. Check your network and try again.';
+      // Not the player's connection: something failed at our end, and saying
+      // "check your network" sends them to reload a page that cannot help.
+      return 'Something went wrong at our end. Try that again in a moment.';
   }
 }
