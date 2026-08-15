@@ -17,7 +17,7 @@ import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
-  RushEntry,
+  RushBoard,
   RushState,
   loadRush,
   loadRushBoard,
@@ -51,7 +51,7 @@ import { playTrack } from '../utils/music';
 export function RushScreen({ onExit }: { onExit: () => void }) {
   const { colors } = useTheme();
   const [state, setState] = useState<RushState | null>(null);
-  const [board, setBoard] = useState<RushEntry[]>([]);
+  const [board, setBoard] = useState<RushBoard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [trigger, setTrigger] = useState<FeedbackTrigger | null>(null);
@@ -71,6 +71,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
       setState(s);
       setLeft(s.secondsLeft);
       loadRushBoard().then(setBoard).catch(() => {});
+
     } catch (err) {
       setError(messageFor(err instanceof ApiError ? err.code : 'network'));
     }
@@ -179,6 +180,37 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
     [busy, load],
   );
 
+  const rows = board?.entries ?? [];
+
+  const standings = (title: string) =>
+    rows.length === 0 ? null : (
+      <View style={styles.board}>
+        <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
+        {rows.map((e, i) => (
+          <View key={`${e.rank}-${e.name}-${i}`} style={styles.row}>
+            {MEDALS[e.rank] ? (
+              <View style={[styles.medal, { backgroundColor: MEDALS[e.rank].ring }]}>
+                <Text style={[styles.medalText, { color: MEDALS[e.rank].ink }]}>{e.rank}</Text>
+              </View>
+            ) : (
+              <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
+            )}
+            <Avatar value={e.avatar} size={24} />
+            <Text
+              style={[styles.name, { color: colors.text }, e.isMe && styles.me]}
+              numberOfLines={1}
+            >
+              {e.name}
+            </Text>
+            {/* The tiebreak, shown because it is what separates two equal
+                scores: seven in 41 guesses is a better run than seven in 58. */}
+            <Text style={[styles.guessCount, { color: colors.textMuted }]}>{e.attempts}g</Text>
+            <Text style={[styles.found, { color: colors.text }]}>{e.found}</Text>
+          </View>
+        ))}
+      </View>
+    );
+
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!state) return <StatusScreen loading />;
 
@@ -238,32 +270,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                   costs you nothing. Every number found pays 15 XP toward your level.
                 </Text>
 
-                {board.length > 0 && (
-                  <View style={styles.board}>
-                    <Text style={[styles.boardTitle, { color: colors.textMuted }]}>TODAY</Text>
-                    {board.slice(0, 8).map((e, i) => (
-                      <View key={`${e.rank}-${e.name}-${i}`} style={styles.row}>
-                        {MEDALS[e.rank] ? (
-                          <View style={[styles.medal, { backgroundColor: MEDALS[e.rank].ring }]}>
-                            <Text style={[styles.medalText, { color: MEDALS[e.rank].ink }]}>
-                              {e.rank}
-                            </Text>
-                          </View>
-                        ) : (
-                          <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
-                        )}
-                        <Avatar value={e.avatar} size={24} />
-                        <Text
-                          style={[styles.name, { color: colors.text }, e.isMe && styles.me]}
-                          numberOfLines={1}
-                        >
-                          {e.name}
-                        </Text>
-                        <Text style={[styles.found, { color: colors.text }]}>{e.found}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
+                {standings('BEST TODAY')}
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
@@ -317,35 +324,58 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                   : "Time's up. One run a day — new numbers at midnight."}
               </Text>
 
-              {board.length === 0 ? (
+              {/* Where that sits among everyone who ran today. A position is
+                  worth reading among a few dozen people and worth nothing among
+                  ten thousand, so past twenty runs it becomes a percentage. */}
+              {board?.me && board.total > 1 && (
+                <Text style={[styles.standing, { color: colors.text }]}>
+                  {board.me.topPercent !== null
+                    ? `Top ${board.me.topPercent}% today`
+                    : `${board.me.rank} of ${board.total} today`}
+                </Text>
+              )}
+
+              {/* Nobody is ranked in a distribution, which is why it survives
+                  any number of players sharing a score. */}
+              {board && board.distribution.length > 1 && (
+                <View style={styles.dist}>
+                  {board.distribution.map((d) => {
+                    const most = Math.max(...board.distribution.map((x) => x.players));
+                    const mine = d.found === state.found;
+                    return (
+                      <View key={d.found} style={styles.distRow}>
+                        <Text style={[styles.distFound, { color: colors.textMuted }]}>
+                          {d.found}
+                        </Text>
+                        <View
+                          style={[
+                            styles.distBar,
+                            {
+                              backgroundColor: mine ? feedbackColors.correct : colors.border,
+                              width: `${Math.max(4, (d.players / most) * 78)}%`,
+                            },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.distCount,
+                            { color: mine ? colors.text : colors.textMuted },
+                          ]}
+                        >
+                          {d.players}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              {rows.length === 0 ? (
                 <Text style={[styles.body, { color: colors.textMuted }]}>
                   Nobody else has run today yet.
                 </Text>
               ) : (
-                <View style={styles.board}>
-                  <Text style={[styles.boardTitle, { color: colors.textMuted }]}>TODAY</Text>
-                  {board.slice(0, 8).map((e, i) => (
-                    <View key={`${e.rank}-${e.name}-${i}`} style={styles.row}>
-                      {MEDALS[e.rank] ? (
-                        <View style={[styles.medal, { backgroundColor: MEDALS[e.rank].ring }]}>
-                          <Text style={[styles.medalText, { color: MEDALS[e.rank].ink }]}>
-                            {e.rank}
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
-                      )}
-                      <Avatar value={e.avatar} size={24} />
-                      <Text
-                        style={[styles.name, { color: colors.text }, e.isMe && styles.me]}
-                        numberOfLines={1}
-                      >
-                        {e.name}
-                      </Text>
-                      <Text style={[styles.found, { color: colors.text }]}>{e.found}</Text>
-                    </View>
-                  ))}
-                </View>
+                standings('BEST TODAY')
               )}
             </View>
           ) : (
@@ -424,5 +454,12 @@ const styles = StyleSheet.create({
   medalText: { fontSize: 10, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 13.5, fontFamily: fonts.bold },
   me: { textDecorationLine: 'underline' },
-  found: { fontSize: 15, fontFamily: fonts.extraBold },
+  found: { fontSize: 15, fontFamily: fonts.extraBold, width: 26, textAlign: 'right' },
+  guessCount: { fontSize: 11, fontFamily: fonts.bold },
+  standing: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 2 },
+  dist: { alignSelf: 'stretch', marginTop: 14, gap: 4 },
+  distRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  distFound: { width: 16, fontSize: 11, fontFamily: fonts.extraBold, textAlign: 'right' },
+  distBar: { height: 12, borderRadius: 3 },
+  distCount: { fontSize: 10.5, fontFamily: fonts.bold },
 });

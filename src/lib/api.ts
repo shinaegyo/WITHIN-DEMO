@@ -805,7 +805,23 @@ export interface RushEntry {
   name: string;
   avatar: string | null;
   found: number;
+  attempts: number;
   isMe: boolean;
+}
+
+export interface RushBoard {
+  entries: RushEntry[];
+  /** Everyone who ran today, including runs that found nothing. */
+  total: number;
+  me: {
+    found: number;
+    attempts: number;
+    rank: number;
+    /** Null until there are enough runs for a percentage to mean anything. */
+    topPercent: number | null;
+  } | null;
+  /** How many players found each score today. */
+  distribution: { found: number; players: number }[];
 }
 
 export async function loadRush(): Promise<RushState> {
@@ -861,17 +877,33 @@ export async function rushGuess(guess: number) {
   };
 }
 
-export async function loadRushBoard(): Promise<RushEntry[]> {
+export async function loadRushBoard(): Promise<RushBoard> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('rush_leaderboard', { p_limit: 50 });
+  const { data, error } = await supabase.rpc('rush_leaderboard', { p_limit: 10 });
   const raw = unwrap<any>(data, error);
-  return (raw.entries ?? []).map((e: any) => ({
-    rank: e.rank,
-    name: e.name,
-    avatar: e.avatar ?? null,
-    found: e.found ?? 0,
-    isMe: !!e.is_me,
-  }));
+  return {
+    entries: (raw.entries ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      avatar: e.avatar ?? null,
+      found: e.found ?? 0,
+      attempts: e.attempts ?? 0,
+      isMe: !!e.is_me,
+    })),
+    total: raw.total ?? 0,
+    me: raw.me
+      ? {
+          found: raw.me.found ?? 0,
+          attempts: raw.me.attempts ?? 0,
+          rank: raw.me.rank ?? 0,
+          topPercent: raw.me.topPercent ?? null,
+        }
+      : null,
+    distribution: (raw.distribution ?? []).map((d: any) => ({
+      found: d.found ?? 0,
+      players: d.players ?? 0,
+    })),
+  };
 }
 
 export interface XpState {
