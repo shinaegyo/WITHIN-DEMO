@@ -76,14 +76,14 @@ const Tabs = createMaterialTopTabNavigator();
  * Route name to icon, written out rather than derived.
  *
  * Lower-casing the route name to find an icon looked tidy and silently drew
- * nothing the moment a tab was called Board and the icon was called
+ * nothing the moment a tab was called Rank and the icon was called
  * leaderboard - a missing tab with no error anywhere.
  */
 const ICONS: Record<string, TabName> = {
   Games: 'games',
   Friends: 'friends',
   Home: 'home',
-  Board: 'leaderboard',
+  Rank: 'leaderboard',
 };
 
 /**
@@ -318,7 +318,7 @@ function Screens({
                 )}
               </Tabs.Screen>
 
-              <Tabs.Screen name="Board" component={BoardsScreen} />
+              <Tabs.Screen name="Rank" component={BoardsScreen} />
 
               <Tabs.Screen name="You">
                 {() => (
