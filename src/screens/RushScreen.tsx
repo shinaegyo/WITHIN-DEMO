@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   clock: { fontSize: 22, fontFamily: fonts.extraBold, letterSpacing: 1 },
   centre: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  title: { fontSize: 30, fontFamily: fonts.extraBold, textAlign: 'center' },
+  title: { fontSize: 46, fontFamily: fonts.extraBold, textAlign: 'center', letterSpacing: -1 },
   body: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 20, textAlign: 'center' },
   note: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
   start: {
