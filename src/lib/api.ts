@@ -257,9 +257,9 @@ export interface LeaderboardEntry {
   /** "cat-blue", or null for anyone who has not chosen yet. */
   avatar: string | null;
   score: number;
-  /** Every guess summed against its answer. Orders the podium. */
+  /** Every guess summed against its answer. Kept for reference; not sorted on. */
   distance: number;
-  /** How far a typical guess landed. What the row actually shows. */
+  /** How far a typical guess landed. Shown in the row, and what orders it. */
   avgOff: number;
   isMe: boolean;
   /** False for a day that ended in elimination rather than all three rounds. */
