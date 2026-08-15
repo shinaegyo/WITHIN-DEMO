@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
+import { ScreenTitle } from '../components/ScreenTitle';
 import { HomeStatus, loadHomeStatus } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -91,7 +92,7 @@ export function GamesScreen({
       style={[styles.wrap, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      <Text style={[styles.screenTitle, { color: colors.text }]}>Games</Text>
+      <ScreenTitle title="Games" />
       {rows.map((r) => (
         <Pressable
           key={r.label}

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { BackButton } from '../components/BackButton';
+import { ScreenTitle } from '../components/ScreenTitle';
 import { Avatar } from '../components/Avatar';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
@@ -237,26 +238,36 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {!state.started ? (
+          <ScreenTitle
+            title="Rush"
+            subtitle="Three minutes, as many numbers as you can find. Everyone hunts the same ones today, so the scores compare directly."
+            onBack={onExit}
+          />
+        ) : null}
+
         <View style={styles.content}>
-          <View style={styles.head}>
-            <BackButton
-              color={colors.text}
-              onPress={() => {
-                if (running.current) pauseRush();
-                onExit();
-              }}
-            />
-            {live && (
-              <Text
-                style={[
-                  styles.clock,
-                  { color: left <= 30 ? feedbackColors.oneAway : colors.text },
-                ]}
-              >
-                {clock}
-              </Text>
-            )}
-          </View>
+          {state.started && (
+            <View style={styles.head}>
+              <BackButton
+                color={colors.text}
+                onPress={() => {
+                  if (running.current) pauseRush();
+                  onExit();
+                }}
+              />
+              {live && (
+                <Text
+                  style={[
+                    styles.clock,
+                    { color: left <= 30 ? feedbackColors.oneAway : colors.text },
+                  ]}
+                >
+                  {clock}
+                </Text>
+              )}
+            </View>
+          )}
 
           {!state.started ? (
             // Laid out like Impossible's way in: what the mode is, then how far
@@ -264,11 +275,6 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             // their one run of the day finding out what the rules are.
             <View style={styles.flex}>
               <ScrollView contentContainerStyle={styles.intro} showsVerticalScrollIndicator={false}>
-                <Text style={[styles.title, { color: colors.text }]}>Rush</Text>
-                <Text style={[styles.rule, { color: colors.textMuted }]}>
-                  Three minutes, as many numbers as you can find. Everyone hunts the same ones
-                  today, so the scores compare directly.
-                </Text>
 
                 {/* Standings first, rules underneath - the same order as
                     Impossible, and the order that matches why anybody opens a

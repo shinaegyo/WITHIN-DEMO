@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
+import { ScreenTitle } from '../components/ScreenTitle';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
@@ -97,7 +98,7 @@ export function BoardsScreen() {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
-      <Text style={[styles.screenTitle, { color: colors.text }]}>Leaderboard</Text>
+      <ScreenTitle title="Leaderboard" />
       <View style={styles.segments}>
         {TABS.map((t) => (
           <Pressable

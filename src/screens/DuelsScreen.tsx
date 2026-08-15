@@ -4,6 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
+import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
@@ -34,7 +35,13 @@ import { playTap } from '../utils/sound';
  * fold away: they are worth reading once, and they were costing five lines
  * above every single visit.
  */
-export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
+export function DuelsScreen({
+  onPlay,
+  onBack,
+}: {
+  onPlay: (duelId: string) => void;
+  onBack: () => void;
+}) {
   const { colors } = useTheme();
   const [all, setAll] = useState<DuelSummary[] | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -186,6 +193,11 @@ export function DuelsScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      <ScreenTitle
+        title="Duels"
+        subtitle="You pick the number they hunt and they pick yours. Both of you have to be here."
+        onBack={onBack}
+      />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {note && <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>}
 

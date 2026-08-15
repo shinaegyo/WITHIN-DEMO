@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
+import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
@@ -35,7 +36,13 @@ import { playTap } from '../utils/sound';
  * they were written down was How to Play, five taps away on another tab. Under
  * the board is where somebody is already standing when they wonder.
  */
-export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
+export function ImpossibleBoardScreen({
+  onPlay,
+  onBack,
+}: {
+  onPlay: () => void;
+  onBack: () => void;
+}) {
   const { colors } = useTheme();
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
   const [status, setStatus] = useState<HomeStatus | null>(null);
@@ -77,11 +84,12 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+      <ScreenTitle
+        title="Impossible"
+        subtitle="Everyone plays the same numbers this week, so how far you got compares directly. It resets on Monday."
+        onBack={onBack}
+      />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.caption, { color: colors.textMuted }]}>
-          Everyone plays the same numbers this week, so how far you got compares directly. It resets
-          on Monday.
-        </Text>
 
         {rows.length === 0 && (
           <Text style={[styles.caption, { color: colors.textMuted }]}>

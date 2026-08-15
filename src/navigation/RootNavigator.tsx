@@ -369,16 +369,22 @@ function Screens({
 
         <Stack.Screen
           name="ImpossibleBoard"
-          options={{ title: 'Impossible · this week', headerBackTitle: 'Back' }}
+          options={{ headerShown: false }}
         >
           {({ navigation }) => (
-            <ImpossibleBoardScreen onPlay={() => navigation.replace('Endless')} />
+            <ImpossibleBoardScreen
+              onPlay={() => navigation.replace('Endless')}
+              onBack={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
+            />
           )}
         </Stack.Screen>
 
-        <Stack.Screen name="Duels" options={{ title: 'Duels', headerBackTitle: 'Back' }}>
+        <Stack.Screen name="Duels" options={{ headerShown: false }}>
           {({ navigation }) => (
-            <DuelsScreen onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })} />
+            <DuelsScreen
+              onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })}
+              onBack={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
+            />
           )}
         </Stack.Screen>
 
