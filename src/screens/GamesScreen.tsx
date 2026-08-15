@@ -139,7 +139,7 @@ export function GamesScreen({
         ]}
       >
         <Text style={[styles.practiceText, { color: colors.background }]}>
-          Practice the daily
+          Practice the Daily
         </Text>
       </Pressable>
       <Text style={[styles.practiceSub, { color: colors.textMuted }]}>{practiceLabel}</Text>
