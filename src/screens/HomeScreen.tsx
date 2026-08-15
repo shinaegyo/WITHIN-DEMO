@@ -23,6 +23,8 @@ import {
 import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
 import { Mark } from '../components/Mark';
+import { LevelUpOverlay } from '../components/LevelUpOverlay';
+import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
 
 
 interface Props {
@@ -61,6 +63,9 @@ export function HomeScreen({
   // underneath rather than crowding it.
   const [viewport, setViewport] = useState(0);
   const [xp, setXp] = useState<XpState | null>(null);
+  // Set only when this device has not yet congratulated the player for the
+  // level they are now on.
+  const [levelUp, setLevelUp] = useState<{ from: number; to: number } | null>(null);
 
   useTrack('home');
 
@@ -135,6 +140,35 @@ export function HomeScreen({
       cancelled = true;
     };
   }, [dayOver, game?.totalScore]);
+
+  /**
+   * Home is where the level-up lands.
+   *
+   * XP arrives from five places and none of them is a good host: Impossible has
+   * no gap between numbers, the duel result is about the duel, and a Rush score
+   * has already been covered once. Home is where every mode returns to, so one
+   * check here catches all of them and interrupts nothing.
+   *
+   * A device that has never recorded a level writes it down silently. Otherwise
+   * a player who was already level 6 would be congratulated for it the first
+   * time they opened the app after this shipped.
+   */
+  useEffect(() => {
+    if (!xp) return;
+    let alive = true;
+    (async () => {
+      const seen = await lastSeenLevel();
+      if (!alive) return;
+      if (seen === null || xp.level <= seen) {
+        markLevelSeen(xp.level);
+        return;
+      }
+      setLevelUp({ from: seen, to: xp.level });
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [xp?.level]);
 
   if (phase === 'loading') {
     return (
@@ -376,6 +410,18 @@ export function HomeScreen({
         </Text>
         <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
       </View>
+
+      {levelUp && xp && (
+        <LevelUpOverlay
+          from={levelUp.from}
+          to={levelUp.to}
+          needed={xp.needed}
+          onDone={() => {
+            markLevelSeen(levelUp.to);
+            setLevelUp(null);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
