@@ -103,21 +103,23 @@ const G6 = 1567.98;
 const C7 = 2093.0;
 
 /**
- * A press, as something struck.
+ * A press, as a switch closing.
  *
  * The first attempt built it the way a physical button is built - noise
  * transient, tuned body, low thump - which at this volume is also how a
- * suppressed gunshot is built. This is simpler: a fundamental with one quiet
- * partial above it, decaying fast. No noise, nothing to grit.
+ * suppressed gunshot is built. This gets the same physicality with no noise in
+ * it at all: a two-millisecond snap high above the body, then a short round
+ * tone underneath. The snap is what the finger feels; the body is what the ear
+ * keeps.
  *
- * The two are the same instrument at different sizes. Forward is small and
- * mid-pitched, back is larger and lower, so the pair reads as one object being
- * tapped in two places rather than as two unrelated effects.
+ * Fifty milliseconds, because the thing that makes a press wear badly is not
+ * its character but its length - anything that rings starts overlapping itself
+ * when somebody taps quickly.
  *
- * Quiet on purpose. These play on every press in the app, and the sounds people
- * keep switched on are the ones they stop noticing.
+ * Back is the same instrument struck lower and left to sit: no snap, a longer
+ * decay, felt more than heard.
  */
-function struck({ freq, overtone, mix = 0.3, length = 0.06, decay = 75 }) {
+function press({ freq, snap = 0, snapFreq = 2600, length = 0.05, decay = 95, mix = 0 }) {
   const total = Math.floor(length * SAMPLE_RATE);
   const buffer = new Float32Array(total);
 
@@ -127,20 +129,25 @@ function struck({ freq, overtone, mix = 0.3, length = 0.06, decay = 75 }) {
     // A fade at the very end, or the buffer cuts mid-cycle and adds a click of
     // its own - which is the thing being avoided.
     const tail = progress > 0.88 ? (1 - progress) / 0.12 : 1;
+
+    const contact = snap * Math.sin(2 * Math.PI * snapFreq * t) * Math.exp(-t * 900);
     const body =
-      Math.sin(2 * Math.PI * freq * t) + mix * Math.sin(2 * Math.PI * overtone * t);
-    buffer[i] = body * Math.exp(-t * decay) * tail;
+      Math.sin(2 * Math.PI * freq * t) +
+      (mix ? mix * Math.sin(2 * Math.PI * freq * 2 * t) : 0);
+
+    buffer[i] = (contact + body * Math.exp(-t * decay)) * tail;
   }
 
   return buffer;
 }
 
 const SOUNDS = {
-  // Every press in the app: a small wooden knock, dry and mid-pitched.
-  tap: struck({ freq: 430, overtone: 1290, mix: 0.35, length: 0.06, decay: 75 }),
+  // Every press in the app: a snap into a short round body.
+  tap: press({ freq: 520, snap: 0.5, length: 0.05, decay: 95 }),
 
-  // Going back: the same knock struck lower and softer, felt more than heard.
-  back: struck({ freq: 220, overtone: 440, mix: 0.25, length: 0.09, decay: 52 }),
+  // Going back: the same body an octave and a half down, no snap on the front,
+  // left to fall away - so the pair is one instrument rather than two effects.
+  back: press({ freq: 220, snap: 0, mix: 0.25, length: 0.09, decay: 52 }),
 
   // WITHIN 10 — a bright, quick two-note lift. Encouraging, not a fanfare.
   'within-10': render([
