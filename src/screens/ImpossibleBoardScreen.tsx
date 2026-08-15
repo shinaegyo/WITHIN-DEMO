@@ -142,7 +142,12 @@ export function ImpossibleBoardScreen({ onPlay }: { onPlay: () => void }) {
           style={({ pressed }) => [
             styles.play,
             {
-              backgroundColor: left === 0 ? colors.border : colors.text,
+              // The pill and its ink come from one predicate. They used to be
+              // decided separately - the fill by whether a session was left,
+              // the ink by whether the button worked at all - and a climb in
+              // progress satisfied one and not the other, so the label went
+              // black on a black pill the moment the status arrived.
+              backgroundColor: canClimb ? colors.text : colors.border,
               opacity: pressed ? 0.85 : 1,
             },
           ]}
