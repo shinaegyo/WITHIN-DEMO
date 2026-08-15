@@ -10,6 +10,7 @@ import {
   loadAllTimeLeaderboard,
   loadLeaderboard,
   Leaderboard,
+  AllTimeLeaderboard,
   messageFor,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
@@ -53,8 +54,20 @@ interface Row {
 }
 
 const TABS: { key: Board; label: string; note: string }[] = [
-  { key: 'today', label: 'Today', note: 'Points from today’s three rounds. Finished days only.' },
-  { key: 'alltime', label: 'All time', note: 'Points from every daily challenge played.' },
+  {
+    key: 'today',
+    label: 'Today',
+    // The column headers say what the numbers measure; this says what the
+    // second one is for. A leaderboard sorted on something unexplained is a
+    // leaderboard people assume is broken.
+    note: 'Points from today’s three rounds. AVG OFF is how far a typical guess landed from the answer — when scores are level, the closer guesses rank higher.',
+  },
+  {
+    key: 'alltime',
+    // Named for what it ranks. "All time" invited a total; this is a rate.
+    label: 'All time',
+    note: 'Average points a day, across every daily played. Ten days to qualify — so somebody who started last week can still climb it.',
+  },
 ];
 
 export function BoardsScreen() {
@@ -70,6 +83,7 @@ export function BoardsScreen() {
   // Today's board carries more than a list: where you came as a share of the
   // field, how many people are level with you, and the shape of the day.
   const [today, setToday] = useState<Leaderboard | null>(null);
+  const [allTime, setAllTime] = useState<AllTimeLeaderboard | null>(null);
 
   const load = useCallback(
     async (which: Board) => {
@@ -87,11 +101,12 @@ export function BoardsScreen() {
           }));
         } else if (which === 'alltime') {
           const b = await loadAllTimeLeaderboard();
+          setAllTime(b);
           setRows((r) => ({
             ...r,
             alltime: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, isMe: e.isMe, crown: e.hasBelt,
+              value: `${e.score}`, sub: `${e.daysPlayed}`, isMe: e.isMe, crown: e.hasBelt,
             })),
           }));
         }
@@ -146,6 +161,38 @@ export function BoardsScreen() {
           players - nobody is glad to be four-thousandth at something they did
           well - so this says how you did rather than what number you are, and
           states the tie instead of hiding it. */}
+      {tab === 'alltime' && allTime?.pending && (
+        <View style={[styles.mine, { borderColor: colors.border }]}>
+          <Text style={[styles.mineLead, { color: colors.textMuted }]}>NOT ON THE BOARD YET</Text>
+          <View style={styles.mineLine}>
+            <Text style={[styles.mineScore, { color: colors.text }]}>{allTime.pending.perDay}</Text>
+            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>a day</Text>
+          </View>
+          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
+            {allTime.pending.daysNeeded === 1
+              ? 'One more day played and you are on it.'
+              : `${allTime.pending.daysNeeded} more days played and you are on it.`}
+          </Text>
+        </View>
+      )}
+
+      {tab === 'alltime' && allTime?.me && (
+        <View style={[styles.mine, { borderColor: colors.border }]}>
+          <Text style={[styles.mineLead, { color: colors.textMuted }]}>
+            {allTime.me.topPercent !== null
+              ? `TOP ${allTime.me.topPercent}% ALL TIME`
+              : `${allTime.me.rank} OF ${allTime.totalPlayers} ALL TIME`}
+          </Text>
+          <View style={styles.mineLine}>
+            <Text style={[styles.mineScore, { color: colors.text }]}>{allTime.me.perDay}</Text>
+            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>a day</Text>
+          </View>
+          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
+            {allTime.me.totalPoints.toLocaleString()} points across {allTime.me.daysPlayed} days.
+          </Text>
+        </View>
+      )}
+
       {tab === 'today' && today?.me && (
         <View style={[styles.mine, { borderColor: colors.border }]}>
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
@@ -194,6 +241,12 @@ export function BoardsScreen() {
             <View style={styles.head}>
               <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
               <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF</Text>
+            </View>
+          )}
+          {tab === 'alltime' && (
+            <View style={styles.head}>
+              <Text style={[styles.headValue, { color: colors.textMuted }]}>A DAY</Text>
+              <Text style={[styles.headSub, { color: colors.textMuted }]}>DAYS</Text>
             </View>
           )}
           {list.map((e) => (
