@@ -65,7 +65,7 @@ export function DuelGameScreen({
     }
   }, [duelId]);
 
-  useTrack('duel');
+  useTrack('game');
 
   useEffect(() => {
     load();

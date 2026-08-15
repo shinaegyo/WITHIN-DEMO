@@ -31,6 +31,7 @@ import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 import { hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playForTier, playLose, playTap, playWin } from '../utils/sound';
+import { useTrack } from '../utils/useTrack';
 
 /**
  * Window: three probes, then commit to a range.
@@ -58,6 +59,7 @@ const DEFAULT_SPREAD = 4; // ±5
 
 export function WindowScreen({ onExit }: { onExit: () => void }) {
   const { colors } = useTheme();
+  useTrack('game');
   const [state, setState] = useState<WindowState | null>(null);
   const [board, setBoard] = useState<WindowEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
