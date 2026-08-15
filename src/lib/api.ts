@@ -257,6 +257,8 @@ export interface LeaderboardEntry {
   /** "cat-blue", or null for anyone who has not chosen yet. */
   avatar: string | null;
   score: number;
+  /** Every guess summed against its answer. Lower is better play. */
+  distance: number;
   isMe: boolean;
   /** False for a day that ended in elimination rather than all three rounds. */
   isComplete: boolean;
@@ -285,8 +287,24 @@ export interface Leaderboard {
   /** People part-way through today, so the finished count can explain itself. */
   stillPlaying: number;
   puzzleDate: string;
+  /** The podium only - ten rows, strictly ordered. */
   entries: LeaderboardEntry[];
   totalPlayers: number;
+  /**
+   * Where you came, said the way it is worth saying at scale: a percentile
+   * rather than a position, and the size of the crowd on your exact score.
+   */
+  me: {
+    score: number;
+    distance: number;
+    rank: number;
+    /** Null until there are enough players for a percentage to mean anything. */
+    topPercent: number | null;
+    /** Everyone on your score, you included. */
+    playersOnScore: number;
+  } | null;
+  /** How many finished on each score today. */
+  distribution: { score: number; players: number }[];
 }
 
 /** The long game: cumulative points across every day played. */
@@ -1113,7 +1131,9 @@ export async function loadAllTimeLeaderboard(): Promise<AllTimeLeaderboard> {
 
 export async function loadLeaderboard(): Promise<Leaderboard> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('daily_leaderboard', { p_limit: 50 });
+  // Ten, not fifty. The list is a podium now; everyone else is answered by the
+  // percentile and the distribution rather than by a position in a long column.
+  const { data, error } = await supabase.rpc('daily_leaderboard', { p_limit: 10 });
   const raw = unwrap<any>(data, error);
   return {
     puzzleDate: raw.puzzleDate,
@@ -1124,9 +1144,23 @@ export async function loadLeaderboard(): Promise<Leaderboard> {
       name: e.name,
       avatar: e.avatar ?? null,
       score: e.score,
+      distance: e.distance ?? 0,
       isMe: !!e.is_me,
       isComplete: !!e.is_complete,
       roundsWon: e.rounds_won ?? 0,
+    })),
+    me: raw.me
+      ? {
+          score: raw.me.score ?? 0,
+          distance: raw.me.distance ?? 0,
+          rank: raw.me.rank ?? 0,
+          topPercent: raw.me.topPercent ?? null,
+          playersOnScore: raw.me.playersOnScore ?? 0,
+        }
+      : null,
+    distribution: (raw.distribution ?? []).map((d: any) => ({
+      score: d.score ?? 0,
+      players: d.players ?? 0,
     })),
   };
 }

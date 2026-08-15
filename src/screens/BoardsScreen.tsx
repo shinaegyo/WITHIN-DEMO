@@ -9,6 +9,7 @@ import {
   ApiError,
   loadAllTimeLeaderboard,
   loadLeaderboard,
+  Leaderboard,
   messageFor,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
@@ -45,6 +46,8 @@ interface Row {
   avatar: string | null;
   value: string;
   unit?: string;
+  /** Shown small beside the value: today's board uses it for precision. */
+  sub?: string;
   isMe: boolean;
   crown?: boolean;
 }
@@ -64,6 +67,9 @@ export function BoardsScreen() {
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
+  // Today's board carries more than a list: where you came as a share of the
+  // field, how many people are level with you, and the shape of the day.
+  const [today, setToday] = useState<Leaderboard | null>(null);
 
   const load = useCallback(
     async (which: Board) => {
@@ -71,11 +77,12 @@ export function BoardsScreen() {
       try {
         if (which === 'today') {
           const b = await loadLeaderboard();
+          setToday(b);
           setRows((r) => ({
             ...r,
             today: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, isMe: e.isMe,
+              value: `${e.score}`, sub: `${e.distance}`, isMe: e.isMe,
             })),
           }));
         } else if (which === 'alltime') {
@@ -134,6 +141,29 @@ export function BoardsScreen() {
 
       <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>
 
+      {/* Your day, before the podium.
+          A position is the wrong instrument once there are thousands of
+          players - nobody is glad to be four-thousandth at something they did
+          well - so this says how you did rather than what number you are, and
+          states the tie instead of hiding it. */}
+      {tab === 'today' && today?.me && (
+        <View style={[styles.mine, { borderColor: colors.border }]}>
+          <Text style={[styles.mineLead, { color: colors.textMuted }]}>
+            {today.me.topPercent !== null
+              ? `TOP ${today.me.topPercent}% TODAY`
+              : `${today.me.rank} OF ${today.totalPlayers} TODAY`}
+          </Text>
+          <Text style={[styles.mineScore, { color: colors.text }]}>{today.me.score}</Text>
+          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
+            {today.me.playersOnScore === 1
+              ? 'nobody else finished on this score'
+              : `${today.me.playersOnScore.toLocaleString()} players on this score`}
+            {' · '}
+            {today.me.distance} off across every guess
+          </Text>
+        </View>
+      )}
+
       {error ? (
         <StatusScreen message={error} onRetry={() => load(tab)} />
       ) : !list ? (
@@ -178,6 +208,9 @@ export function BoardsScreen() {
 
               {e.crown && <Text style={[styles.crown, { color: colors.accent }]}>CROWN</Text>}
               {!!e.unit && <Text style={[styles.unit, { color: colors.textMuted }]}>{e.unit}</Text>}
+              {/* Precision, shown because it decides the order. A podium
+                  ordered on something invisible is a podium nobody trusts. */}
+              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
             </Pressable>
           ))}
@@ -203,6 +236,19 @@ const styles = StyleSheet.create({
   segments: { flexDirection: 'row', gap: 6, paddingHorizontal: 14, paddingTop: 12 },
   segment: { flex: 1, borderRadius: 11, paddingVertical: 9, alignItems: 'center' },
   segmentText: { fontSize: 12, fontFamily: fonts.extraBold },
+  // Your own day, set apart from the podium above it.
+  mine: {
+    borderWidth: 1,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    gap: 2,
+  },
+  mineLead: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 1.8 },
+  mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
+  mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 14, gap: 8 },
   row: {
@@ -220,6 +266,7 @@ const styles = StyleSheet.create({
   nameMe: { fontFamily: fonts.extraBold },
   crown: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
+  sub: { fontSize: 11.5, fontFamily: fonts.bold, minWidth: 34, textAlign: 'right' },
   value: { fontSize: 16, fontFamily: fonts.extraBold },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, padding: 18 },
 });
