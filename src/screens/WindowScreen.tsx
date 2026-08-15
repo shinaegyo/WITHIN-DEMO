@@ -46,6 +46,9 @@ import { playForTier, playLose, playTap, playWin } from '../utils/sound';
  * the same thing: a guess, answered by how close it was. What changes is that
  * finding the number is not the point - saying how sure you are is.
  */
+/** The spreads worth offering: one tap each, and every one a different bet. */
+const SPREADS = [0, 3, 5, 10, 20, 35];
+
 export function WindowScreen({ onExit }: { onExit: () => void }) {
   const { colors } = useTheme();
   const [state, setState] = useState<WindowState | null>(null);
@@ -54,8 +57,8 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   const [busy, setBusy] = useState(false);
   const [rules, setRules] = useState(false);
   const [note, setNote] = useState<string | null>(null);
-  const [lo, setLo] = useState('');
-  const [hi, setHi] = useState('');
+  const [centre, setCentre] = useState('');
+  const [spread, setSpread] = useState(5);
   const [result, setResult] = useState<
     { inside: boolean; width: number; score: number; answer: number } | null
   >(null);
@@ -95,12 +98,12 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   );
 
   const commit = async () => {
-    const a = parseInt(lo, 10);
-    const b = parseInt(hi, 10);
-    if (!a || !b || a > b) {
-      setNote('Enter a low and a high, in that order.');
+    if (!span) {
+      setNote('Enter the number you are aiming at.');
       return;
     }
+    const a = span.lo;
+    const b = span.hi;
     playTap();
     setBusy(true);
     try {
@@ -119,10 +122,15 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!state) return <StatusScreen loading />;
 
-  const width = (() => {
-    const a = parseInt(lo, 10);
-    const b = parseInt(hi, 10);
-    return a && b && b >= a ? b - a + 1 : null;
+  // A centre and a spread become the span the server wants. Clamped at the ends
+  // of the range, which can only ever narrow it - and a narrower window scores
+  // more, so the edge case pays rather than punishes.
+  const span = (() => {
+    const c = parseInt(centre, 10);
+    if (!c || c < 1 || c > 1000) return null;
+    const lo = Math.max(1, c - spread);
+    const hi = Math.min(1000, c + spread);
+    return { lo, hi, width: hi - lo + 1 };
   })();
 
   const standings = () =>
@@ -265,37 +273,57 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
               <GuessBoard guesses={state.probes} attemptsAllowed={3} showRemaining={false} />
             </View>
 
-            {/* The commitment. Available from the first probe on, because taking
-                a wide window early rather than spending all three is a decision
-                somebody should be allowed to make. */}
+            {/* The commitment: a centre and a spread, not two ends.
+                Nobody thinks "525 to 560" - they think "about 542, give or take
+                18" - and asking for the ends made the player do the arithmetic
+                the game is scoring. The spread is the whole decision, so it is
+                a row of taps rather than a number to type. */}
             <View style={[styles.commit, { borderColor: colors.border }]}>
-              <View style={styles.range}>
+              <View style={styles.centreRow}>
                 <TextInput
-                  style={[styles.field, { color: colors.text, borderColor: colors.border }]}
-                  value={lo}
-                  onChangeText={(t) => setLo(t.replace(/[^0-9]/g, '').slice(0, 4))}
-                  placeholder="from"
-                  placeholderTextColor={colors.textMuted}
-                  keyboardType="number-pad"
-                  inputMode="numeric"
-                />
-                <Text style={[styles.dash, { color: colors.textMuted }]}>–</Text>
-                <TextInput
-                  style={[styles.field, { color: colors.text, borderColor: colors.border }]}
-                  value={hi}
-                  onChangeText={(t) => setHi(t.replace(/[^0-9]/g, '').slice(0, 4))}
-                  placeholder="to"
+                  style={[styles.centreField, { color: colors.text, borderColor: colors.border }]}
+                  value={centre}
+                  onChangeText={(t) => setCentre(t.replace(/[^0-9]/g, '').slice(0, 4))}
+                  placeholder="your number"
                   placeholderTextColor={colors.textMuted}
                   keyboardType="number-pad"
                   inputMode="numeric"
                 />
               </View>
 
-              <Text style={[styles.worth, { color: width ? colors.text : colors.textMuted }]}>
-                {width
-                  ? width > state.maxWidth
-                    ? `${width} wide — too wide, ${state.maxWidth} is the most`
-                    : `${width} wide · worth ${101 - width}`
+              <View style={styles.spreads}>
+                {SPREADS.map((s2) => {
+                  const on = spread === s2;
+                  return (
+                    <Pressable
+                      key={s2}
+                      onPress={() => {
+                        playTap();
+                        setSpread(s2);
+                      }}
+                      style={[
+                        styles.spread,
+                        on
+                          ? { backgroundColor: colors.text }
+                          : { borderColor: colors.border, borderWidth: 1 },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.spreadText,
+                          { color: on ? colors.background : colors.textMuted },
+                        ]}
+                      >
+                        {s2 === 0 ? 'exact' : `±${s2}`}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Text style={[styles.worth, { color: span ? colors.text : colors.textMuted }]}>
+                {span
+                  ? `${span.lo}–${span.hi} · ${span.width} wide · worth ${101 - span.width}`
                   : 'A window of 1 is worth 100'}
               </Text>
 
@@ -303,23 +331,17 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
 
               <Pressable
                 onPress={commit}
-                disabled={busy || !width || width > state.maxWidth}
+                disabled={busy || !span}
                 style={({ pressed }) => [
                   styles.start,
                   {
-                    backgroundColor: width && width <= state.maxWidth ? colors.text : colors.border,
+                    backgroundColor: span ? colors.text : colors.border,
                     opacity: pressed ? 0.85 : 1,
                   },
                 ]}
               >
                 <Text
-                  style={[
-                    styles.startText,
-                    {
-                      color:
-                        width && width <= state.maxWidth ? colors.background : colors.textMuted,
-                    },
-                  ]}
+                  style={[styles.startText, { color: span ? colors.background : colors.textMuted }]}
                 >
                   Commit
                 </Text>
@@ -365,18 +387,20 @@ const styles = StyleSheet.create({
   probesLeft: { fontSize: 14, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardWrap: { flex: 1 },
   commit: { borderTopWidth: 1, paddingTop: 12, paddingBottom: 6, gap: 10 },
-  range: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'stretch' },
-  field: {
-    flex: 1,
+  centreRow: { alignSelf: 'stretch' },
+  centreField: {
+    alignSelf: 'stretch',
     minWidth: 0,
     borderWidth: 1.5,
     borderRadius: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: fonts.extraBold,
   },
-  dash: { fontSize: 20, fontFamily: fonts.bold },
+  spreads: { flexDirection: 'row', gap: 6, alignSelf: 'stretch' },
+  spread: { flex: 1, minWidth: 0, borderRadius: 10, paddingVertical: 9, alignItems: 'center' },
+  spreadText: { fontSize: 12, fontFamily: fonts.extraBold },
   worth: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
   note: { fontSize: 12, fontFamily: fonts.bold, textAlign: 'center' },
   board: { gap: 6, marginTop: 4 },
