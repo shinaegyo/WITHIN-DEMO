@@ -121,7 +121,9 @@ export function FriendsScreen({
     <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       {/* Only shown when they are around: an empty slot for everyone else
           would read as a status of its own. */}
-      <Avatar value={avatar} size={30} name={username} />
+      {/* label is whose row this is. Passing the signed-in username here put
+          your own initial on every friend in the list. */}
+      <Avatar value={avatar} size={30} name={label} />
       {online && <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />}
       {/* The name itself opens their card; the buttons beside it still act. */}
       <Pressable style={styles.rowMain} onPress={() => setLooking(label)}>
@@ -342,6 +344,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    // The old avatars were characters on transparent ground with their own
+    // margin of empty pixels. A filled disc has none, so the name sat against
+    // it the moment they became letters.
+    gap: 10,
     borderWidth: 1,
     borderRadius: 12,
     paddingVertical: 12,
