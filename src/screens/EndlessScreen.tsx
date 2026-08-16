@@ -239,15 +239,19 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                     waiting, and that is the whole reason health works. */}
                 {over.sessionOver ? 'OUT OF HEALTH!' : 'YOU TOOK DAMAGE!'}
               </Text>
+              {/* The answer is deliberately absent when the climb continues.
+                  The same number is waiting, so printing it here handed the
+                  retry over for free - the one place in the game where telling
+                  somebody the answer costs them nothing to use.
+
+                  It is still shown when the climb is over, because by then
+                  there is nothing left to spend it on. */}
               <Text style={[styles.overBody, { color: arena.muted }]}>
-                {over.answer !== null ? `The number was ${over.answer}. ` : ''}
                 {over.sessionOver
-                  ? `That was the last life. You keep ${arenaFor(over.restartsAt ?? 1).name}` +
-                    ` — the next climb starts at level ${over.restartsAt ?? 1}.`
-                  : `Down to ${over.depth * 20}% health. The same number is waiting.`}
-              </Text>
-              <Text style={[styles.overBody, { color: arena.muted }]}>
-                Everyone plays the same numbers this week, so how far you got compares directly.
+                  ? `${over.answer !== null ? `The number was ${over.answer}. ` : ''}` +
+                    `You keep ${arenaFor(over.restartsAt ?? 1).name} — the next climb starts at` +
+                    ` level ${over.restartsAt ?? 1}.`
+                  : `Down to ${over.depth * 20}% health.`}
               </Text>
               {!over.sessionOver ? (
                 <Pressable
