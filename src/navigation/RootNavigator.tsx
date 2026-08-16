@@ -306,7 +306,7 @@ function Screens({
                 {(tab) => (
                   <HomeScreen
                     onPlay={() => navigation.navigate('Game')}
-                    onEndless={() => navigation.navigate('Endless')}
+                    onEndless={() => navigation.navigate('ImpossibleBoard')}
                     onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
                     onOpenFriends={() => navigation.navigate('Friends')}
                     onOpenDuels={() => navigation.navigate('Duels')}

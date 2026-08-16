@@ -172,17 +172,23 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 Five discrete things asks you to count them; a bar you are
                 draining is read at a glance, and a percentage says what the
                 next mistake costs without anybody having to be told twice. */}
+            {/* Label, track, figure - laid out in a row rather than stacked on
+                top of each other. Absolutely positioning the bar put it over
+                the number it was meant to sit beside. */}
             <View style={styles.lives}>
-              <View style={[styles.healthTrack, { backgroundColor: arena.muted, opacity: 0.22 }]} />
-              <View
-                style={[
-                  styles.healthFill,
-                  { backgroundColor: arena.muted, width: `${(state.lives / 5) * 100}%` },
-                ]}
-              />
-              <Text style={[styles.badge, { color: arena.muted }]}>
-                {state.lives * 20}%
-              </Text>
+              <Text style={[styles.healthLabel, { color: arena.muted }]}>HEALTH</Text>
+              <View style={styles.healthTrack}>
+                {/* Siblings, not parent and child: opacity on the container
+                    would have faded the fill inside it too. */}
+                <View style={[styles.healthEmpty, { backgroundColor: arena.muted }]} />
+                <View
+                  style={[
+                    styles.healthFill,
+                    { backgroundColor: arena.muted, width: `${(state.lives / 5) * 100}%` },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.badge, { color: arena.muted }]}>{state.lives * 20}%</Text>
             </View>
           </View>
 
@@ -229,14 +235,14 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           ) : over ? (
             <View style={styles.result}>
               <Text style={[styles.overTitle, { color: arena.text }]}>
-                {over.sessionOver ? 'Climb over' : 'Life lost'}
+                {over.sessionOver ? 'You fell' : 'You fell and took damage'}
               </Text>
               <Text style={[styles.overBody, { color: arena.muted }]}>
                 {over.answer !== null ? `The number was ${over.answer}. ` : ''}
                 {over.sessionOver
                   ? `That was the last life. You keep ${arenaFor(over.restartsAt ?? 1).name}` +
                     ` — the next climb starts at level ${over.restartsAt ?? 1}.`
-                  : `Health down to ${over.depth * 20}%. The same number is waiting.`}
+                  : `Down to ${over.depth * 20}% health. The same number is waiting.`}
               </Text>
               <Text style={[styles.overBody, { color: arena.muted }]}>
                 Everyone plays the same numbers this week, so how far you got compares directly.
@@ -355,9 +361,13 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
-  lives: { flexDirection: 'row', alignItems: 'center', gap: 8, width: 104 },
-  healthTrack: { position: 'absolute', left: 0, top: 3, height: 8, width: 68, borderRadius: 4 },
-  healthFill: { position: 'absolute', left: 0, top: 3, height: 8, maxWidth: 68, borderRadius: 4 },
+  lives: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  healthLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.2 },
+  // The track is the empty state at low opacity; the fill is the same colour
+  // solid, so one hue reads as full and spent without a second colour.
+  healthTrack: { width: 62, height: 8, borderRadius: 4, overflow: 'hidden' },
+  healthEmpty: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, opacity: 0.26 },
+  healthFill: { height: 8, borderRadius: 4 },
   arenaName: { fontSize: 12, fontFamily: fonts.extraBold, letterSpacing: 2.4, marginBottom: 4 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },

@@ -227,6 +227,11 @@ export function HomeScreen({
   const roundEdge = { won: '#5E9B70', lost: '#C08074' };
   const roundInk = { won: '#2F5C3E' };
 
+  // A climb with health already spent, or a day's session already opened, is
+  // one somebody is in the middle of - Start would ask them to begin something
+  // they never stopped.
+  const climbOpen = !!modes && modes.impossible.lives > 0 && modes.impossible.sessionsLeft === 0;
+
   const impossibleState = modes
     ? modes.impossible.lives > 0 || modes.impossible.sessionsLeft > 0
       ? `Level ${modes.impossible.level} · ${modes.impossible.lives * 20}% health`
@@ -248,20 +253,23 @@ export function HomeScreen({
       go: onRush,
     },
     {
-      name: 'Window',
-      // A missed window is genuinely zero, and "0 points" with nothing beside
-      // it is bleak. The server tells us which zero this is.
-      state: !modes ? 'Ready' : modes.window.played ? (modes.window.inside ? `${modes.window.score} points` : 'Missed') : 'Ready',
-      live: false,
-      go: onWindow,
-    },
-    {
+      // Middle, between the two that need nobody. It is the odd one - it waits
+      // on another person - and sitting at the end read as third in a list of
+      // three of a kind.
       name: 'Duel',
       // Two words. A third of a phone width is not enough for a sentence, and
       // "Challenge a fri…" is worse than saying less.
       state: modes && modes.duelsWaiting > 0 ? `${modes.duelsWaiting} waiting` : 'Start one',
       live: !!modes && modes.duelsWaiting > 0,
       go: onOpenDuels,
+    },
+    {
+      name: 'Window',
+      // A missed window is genuinely zero, and "0 points" with nothing beside
+      // it is bleak. The server tells us which zero this is.
+      state: !modes ? 'Ready' : modes.window.played ? (modes.window.inside ? `${modes.window.score} points` : 'Missed') : 'Ready',
+      live: false,
+      go: onWindow,
     },
   ];
 
@@ -454,7 +462,9 @@ export function HomeScreen({
                 </Text>
               </View>
               <View style={[styles.featuredGo, { backgroundColor: colors.background }]}>
-                <Text style={[styles.featuredGoText, { color: colors.text }]}>Start</Text>
+                <Text style={[styles.featuredGoText, { color: colors.text }]}>
+                  {climbOpen ? 'Continue' : 'Start'}
+                </Text>
               </View>
             </Pressable>
 
