@@ -77,7 +77,7 @@ export function GamesScreen({
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
           ? `Level ${status.impossible.level} · back tomorrow`
           : status.impossible.sessionsLeft === 0
-            ? `Level ${status.impossible.level} · ${status.impossible.lives * 20}% health left`
+            ? `Level ${status.impossible.level} · ${status.impossible.lives * 20}% health`
             : `Level ${status.impossible.level} · ready`
         : '',
       urgent: false,
@@ -140,7 +140,10 @@ export function GamesScreen({
           ]}
         >
           <View style={styles.main}>
-            <Text style={[styles.label, { color: colors.text }]} numberOfLines={1}>
+            {/* Two lines. "The Impossible Climb" is four words and one line
+                clipped it to "The Impossibl...", which is the one row here
+                somebody has to be able to read. */}
+            <Text style={[styles.label, { color: colors.text }]} numberOfLines={2}>
               {r.label}
             </Text>
             <Text style={[styles.sub, { color: colors.textMuted }]} numberOfLines={2}>
