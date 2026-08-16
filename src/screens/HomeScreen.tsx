@@ -467,28 +467,32 @@ export function HomeScreen({
             {/* Impossible gets the width, because it is the one with unfinished
                 business - a level and lives waiting is a reason to come back,
                 where a name on a door is not. */}
-            <Pressable
-              onPress={() => {
-                playTap();
-                onEndless();
-              }}
-              style={({ pressed }) => [
-                styles.featured,
-                { backgroundColor: colors.text, opacity: pressed ? 0.88 : 1 },
-              ]}
-            >
+            {/* The row is not pressable; the button is. Tapping the name did
+                the same thing as tapping Start, which made the button
+                decorative and meant a thumb resting on the card started a
+                climb. */}
+            <View style={[styles.featured, { backgroundColor: colors.text }]}>
               <View style={styles.featuredMain}>
                 <Text style={[styles.featuredName, { color: colors.background }]}>The Impossible Climb</Text>
                 <Text style={[styles.featuredState, { color: colors.background }]}>
                   {impossibleState}
                 </Text>
               </View>
-              <View style={[styles.featuredGo, { backgroundColor: colors.background }]}>
+              <Pressable
+                onPress={() => {
+                  playTap();
+                  onEndless();
+                }}
+                style={({ pressed }) => [
+                  styles.featuredGo,
+                  { backgroundColor: colors.background, opacity: pressed ? 0.8 : 1 },
+                ]}
+              >
                 <Text style={[styles.featuredGoText, { color: colors.text }]}>
                   {climbOpen ? 'Continue' : 'Start'}
                 </Text>
-              </View>
-            </Pressable>
+              </Pressable>
+            </View>
 
             {/* One line each, and always the same kind of fact: what is true
                 for you right now. A description and a state stacked with no
