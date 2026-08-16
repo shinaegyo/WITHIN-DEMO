@@ -2,5 +2,8 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true
-  }
+  },
+  // The Edge Function is Deno, not React Native. Left in, every typecheck from
+  // here reports that Deno does not exist - true, and not about this app.
+  "exclude": ["supabase/functions"]
 }
