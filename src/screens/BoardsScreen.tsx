@@ -432,9 +432,9 @@ export function BoardsScreen() {
       )}
 
       {tab === 'today' && today?.me && (
-        // Tappable, and the sentence moves behind it. Three lines of
-        // explanation under a score is a paragraph nobody reads twice, and the
-        // question it answers only occurs to somebody who has already looked.
+        // The score is the target. No hint under it: a card holding a rank and
+        // a number is legible on its own, and a line explaining that it can be
+        // tapped costs more room than the explanation was worth.
         <Pressable
           onPress={() => {
             playTap();
@@ -459,9 +459,6 @@ export function BoardsScreen() {
               so on any day you were alone on your score, nothing on the screen
               said what AVG OFF was for. The column was there every day and the
               reason for it only some days. */}
-          <Text style={[styles.mineHint, { color: colors.textMuted }]}>
-            {today.me.avgOff} avg off ⓘ
-          </Text>
         </Pressable>
       )}
 
@@ -798,7 +795,6 @@ const styles = StyleSheet.create({
   },
   headSub: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
   headValue: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
-  mineHint: { fontSize: 11.5, fontFamily: fonts.bold, textDecorationLine: 'underline', marginTop: 2 },
   sheetLead: { fontSize: 15, fontFamily: fonts.extraBold, lineHeight: 21 },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
