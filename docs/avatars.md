@@ -15,7 +15,7 @@ by gender: simpler to build, and it excludes nobody.
 
 ## Parts
 
-Three choices, stored together.
+Four choices, stored together.
 
 **Skin** — needs real range or it is worse than not offering it. Eight to ten
 tones spanning the full spectrum, evenly stepped, none of them a token at
@@ -73,11 +73,17 @@ against five hundred animals. Still one short string.
 
 ## Build order
 
-1. The part sets — skin tones and hair silhouettes, rendered for approval
-   before any of it is wired. This is the part that has to be right.
-2. Avatar.tsx: parse three parts, render the silhouette.
-3. AvatarScreen: three rows instead of one grid.
-4. Migration for the stored format, plus the one-time prompt.
+1. The part sets — done. Ten skin tones, nine hair shapes, ten hair colours,
+   rendered and approved 15 August 2026.
+2. Avatar.tsx: the monogram, and a four-part parse that falls back to it. This
+   ships something on its own — every animal becomes a letter, which is already
+   better than what is there.
+3. The silhouette renderer: bust, hair shape, hair colour.
+4. AvatarScreen: four rows instead of one grid, with the monogram as the first
+   option so somebody can go back to it.
+
+No migration. The stored column is unchanged and unparseable values fall back,
+which is the whole reason the monogram is the default.
 
 ## Why not the alternative
 
