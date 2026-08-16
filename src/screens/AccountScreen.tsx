@@ -12,6 +12,7 @@ import {
   startLinkEmail,
   startSignIn,
 } from '../lib/auth';
+import { deleteMyAccount } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
@@ -52,6 +53,7 @@ export function AccountScreen({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [confirming, setConfirming] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
@@ -295,6 +297,72 @@ export function AccountScreen({
         )}
 
         {busy && <ActivityIndicator color={colors.accent} style={styles.spinner} />}
+
+        {/* -------- the way out --------
+
+            Required by the App Store for any app that creates an account, and
+            this one creates a silent anonymous account on first launch - so
+            every player has one whether they asked for it or not.
+
+            Two presses, and the second one says exactly what goes: a button
+            reading "Delete account" next to a Sign out button is a mis-tap
+            waiting to happen, and this one cannot be undone. */}
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        <Text style={[styles.h2, { color: colors.text }]}>Delete account</Text>
+
+        {!confirming ? (
+          <>
+            <Text style={[styles.body, { color: colors.textMuted }]}>
+              Removes your name, streak, points, climb and every board you appear on. There is no
+              way to bring it back.
+            </Text>
+            <Pressable
+              onPress={() => { setConfirming(true); setError(null); setNotice(null); }}
+              style={({ pressed }) => [
+                styles.secondary,
+                { borderColor: colors.danger, opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Text style={[styles.secondaryText, { color: colors.danger }]}>Delete my account</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Text style={[styles.body, { color: colors.text }]}>
+              {savedName
+                ? `This deletes ${savedName} for good. Are you sure?`
+                : 'This deletes everything on this account for good. Are you sure?'}
+            </Text>
+            <Pressable
+              disabled={busy}
+              onPress={() =>
+                run(
+                  async () => {
+                    await deleteMyAccount();
+                    // The account is gone, but this device still holds its
+                    // session - signing out is what makes the app forget it.
+                    await signOut();
+                  },
+                  () => { setConfirming(false); refresh(); onChanged(); },
+                )
+              }
+              style={({ pressed }) => [
+                styles.primary,
+                { backgroundColor: colors.danger, opacity: busy ? 0.4 : pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={styles.primaryText}>Yes, delete everything</Text>
+            </Pressable>
+            <Pressable
+              disabled={busy}
+              onPress={() => setConfirming(false)}
+              style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Text style={[styles.linkText, { color: colors.textMuted }]}>Keep my account</Text>
+            </Pressable>
+          </>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -240,6 +240,19 @@ export async function submitGuess(guess: number): Promise<SubmitResult> {
  * RetryOverlay. The server only checks that there is something to retry, so
  * swapping in a real ad later needs no change here.
  */
+/**
+ * Removes the player and everything attached to them.
+ *
+ * Required by the App Store for any app that creates an account, and this one
+ * creates a silent anonymous account on first launch. The server takes no
+ * arguments - it deletes whoever is calling - so there is no id to get wrong.
+ */
+export async function deleteMyAccount(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('delete_my_account');
+  unwrap<{ ok: true }>(data, error);
+}
+
 /** Ends the day deliberately, which is what makes the answer safe to show. */
 export async function giveUp(): Promise<boolean> {
   const { data, error } = await supabase.rpc('give_up');
