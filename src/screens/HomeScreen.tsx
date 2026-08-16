@@ -258,7 +258,7 @@ export function HomeScreen({
   const impossibleState = modes
     ? modes.impossible.lives > 0 || modes.impossible.sessionsLeft > 0
       ? `Level ${modes.impossible.level} · ${modes.impossible.lives * 20}% health`
-      : `Level ${modes.impossible.level} · next climb at midnight`
+      : `You are on level ${modes.impossible.level}`
     : 'A climb that keeps your place';
 
   /**
@@ -479,22 +479,24 @@ export function HomeScreen({
                   {impossibleState}
                 </Text>
               </View>
+              {/* A spent day closes the climb, not the week. The button used to
+                  say Tomorrow and refuse the press, which shut the only door to
+                  the standings at the hour somebody most wants to see where
+                  their week landed - and the whole mode rests on everybody
+                  playing the same numbers. Same destination either way; the
+                  board's own Start is what knows there is nothing left. */}
               <Pressable
                 onPress={() => {
                   playTap();
                   onEndless();
                 }}
-                disabled={climbDone}
                 style={({ pressed }) => [
                   styles.featuredGo,
-                  {
-                    backgroundColor: colors.background,
-                    opacity: climbDone ? 0.4 : pressed ? 0.8 : 1,
-                  },
+                  { backgroundColor: colors.background, opacity: pressed ? 0.8 : 1 },
                 ]}
               >
                 <Text style={[styles.featuredGoText, { color: colors.text }]}>
-                  {climbDone ? 'Tomorrow' : climbOpen ? 'Continue' : 'Start'}
+                  {climbDone ? 'Standings' : climbOpen ? 'Continue' : 'Start'}
                 </Text>
               </Pressable>
             </View>

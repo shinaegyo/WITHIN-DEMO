@@ -75,15 +75,18 @@ export function GamesScreen({
       sub: 'A climb that keeps your place all week',
       status: status
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
-          ? `Level ${status.impossible.level} · next climb at midnight`
+          ? `You are on level ${status.impossible.level}`
           : status.impossible.sessionsLeft === 0
             ? `Level ${status.impossible.level} · ${status.impossible.lives * 20}% health`
             : `Level ${status.impossible.level} · ready`
         : '',
       urgent: false,
       onPress: onImpossible,
-      spent:
-        !!status && status.impossible.sessionsLeft === 0 && status.impossible.lives === 0,
+      // Never spent, unlike Rush and Window. Their rows lead to a game and
+      // nothing else, so greying one that cannot be played is honest. This row
+      // leads to the week's standings, and a climb that is over is exactly when
+      // somebody wants to look at them.
+      spent: false,
     },
     {
       label: 'Window',

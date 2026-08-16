@@ -1324,7 +1324,7 @@ export function messageFor(code: string, guess?: number): string {
       return 'No run in progress. Start a new one.';
     case 'no_runs_left':
     case 'no_sessions_left':
-      return "That's today's climb. Your place is kept — the next one opens at midnight.";
+      return "That's today's climb. Your place is kept.";
     case 'no_probes_left':
       return 'No probes left — commit to a window.';
     case 'too_wide':

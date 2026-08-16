@@ -73,9 +73,6 @@ export function ImpossibleBoardScreen({
   if (!rows) return <StatusScreen loading />;
 
   const left = status?.impossible.sessionsLeft ?? null;
-  // From the board rather than the run: a climb that ran out of lives falls
-  // back to its arena, and the deepest level reached is what the week records.
-  const best = rows.find((e) => e.isMe)?.depth ?? status?.impossible.best ?? 0;
   const level = status?.impossible.level ?? 1;
   const lives = status?.impossible.lives ?? 0;
   // Once today's climb is started there are no sessions left, so sessionsLeft
@@ -157,9 +154,7 @@ export function ImpossibleBoardScreen({
       {/* The way in sits under the standings rather than replacing them. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
         <Text style={[styles.best, { color: colors.textMuted }]}>
-          {best > 0
-            ? `You are on level ${level}, ${best} cleared this week`
-            : 'Your climb starts at level 1'}
+          {`You are on level ${level}`}
           {left !== 0 && lives > 0 ? ` · ${lives * 20}% health` : ''}
         </Text>
         <Pressable
@@ -192,7 +187,7 @@ export function ImpossibleBoardScreen({
             style={[styles.playText, { color: canClimb ? colors.background : colors.textMuted }]}
           >
             {!canClimb
-              ? "Today's climb is done — next one at midnight"
+              ? "Today's climb is done"
               : resuming
                 ? `Resume · ${lives * 20}% health`
                 : 'Start'}
