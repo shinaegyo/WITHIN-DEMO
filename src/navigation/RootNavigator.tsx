@@ -311,6 +311,8 @@ function Screens({
                     onOpenFriends={() => navigation.navigate('Friends')}
                     onOpenDuels={() => navigation.navigate('Duels')}
                     onOpenRanked={() => navigation.navigate('Ranked')}
+                    onRush={() => navigation.navigate('Rush')}
+                    onWindow={() => navigation.navigate('Window')}
                     onOpenProfile={() => tab.navigation.navigate('You')}
                     practiceEpoch={practiceEpoch}
                     username={username}

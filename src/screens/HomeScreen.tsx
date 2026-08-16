@@ -34,6 +34,8 @@ interface Props {
   onOpenFriends: () => void;
   onOpenDuels: () => void;
   onOpenRanked: () => void;
+  onRush: () => void;
+  onWindow: () => void;
   onOpenProfile: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
@@ -47,6 +49,8 @@ export function HomeScreen({
   onOpenFriends,
   onOpenDuels,
   onOpenRanked,
+  onRush,
+  onWindow,
   onOpenProfile,
   practiceEpoch,
   username,
@@ -241,7 +245,7 @@ export function HomeScreen({
       name: 'Rush',
       state: !modes ? 'Ready' : modes.rush.running ? 'In progress' : modes.rush.played ? `${modes.rush.found} found` : 'Ready',
       live: !!modes?.rush.running,
-      go: onOpenRanked,
+      go: onRush,
     },
     {
       name: 'Window',
@@ -249,7 +253,7 @@ export function HomeScreen({
       // it is bleak. The server tells us which zero this is.
       state: !modes ? 'Ready' : modes.window.played ? (modes.window.inside ? `${modes.window.score} points` : 'Missed') : 'Ready',
       live: false,
-      go: onOpenRanked,
+      go: onWindow,
     },
     {
       name: 'Duel',
