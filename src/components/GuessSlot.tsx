@@ -27,6 +27,7 @@ export function FilledSlot({
   blindOneAway,
   surface,
   ink: inkOverride,
+  belowFill,
 }: {
   result: GuessResult;
   attemptNumber: number;
@@ -46,6 +47,15 @@ export function FilledSlot({
    */
   surface?: string;
   ink?: string;
+  /**
+   * A stage's own blue, for grounds that would swallow the standard one.
+   *
+   * Sky is a daylight blue and the tile meaning "go higher" is a blue of about
+   * the same weight, so on that stage the strongest signal in the game became
+   * the hardest to see. Only the below direction takes it; red has no ground
+   * here that competes with it.
+   */
+  belowFill?: string;
 }) {
   const { colors } = useTheme();
   const anim = useRef(new Animated.Value(0)).current;
@@ -60,7 +70,8 @@ export function FilledSlot({
   }, [anim]);
 
   const accent = getTileAccent(result.direction, result.tier);
-  const fill = getTileFill(result.direction, result.tier);
+  const base = getTileFill(result.direction, result.tier);
+  const fill = base && result.direction === 'below' && belowFill ? belowFill : base;
 
   // Filled tiles are saturated enough to carry white; unfilled ones sit on the
   // neutral surface and use normal theme text.

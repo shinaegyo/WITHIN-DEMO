@@ -24,6 +24,7 @@ import { fonts } from '../theme/fonts';
 import { arenaFor } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
+import { devStageLevel } from '../utils/devSkip';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
 
@@ -149,7 +150,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   if (!state) return <StatusScreen loading />;
 
   const myRank = board.find((e) => e.isMe);
-  const arena = arenaFor(state.level);
+  // ?stage=orbit paints the screen as that stage without an eighty-number
+  // climb to reach it. Dev and web only.
+  const arena = arenaFor(devStageLevel() ?? state.level);
   const hairline = 'rgba(255, 255, 255, 0.18)';
 
   return (
@@ -335,6 +338,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   ink={arena.text}
                   inkMuted={arena.muted}
                   tileSurface={arena.surface}
+              belowFill={arena.below}
                 />
               </View>
             </>

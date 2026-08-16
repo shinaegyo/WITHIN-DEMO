@@ -24,6 +24,8 @@ interface Props {
   inkMuted?: string;
   /** Ground for the tiles that have no saturated fill of their own. */
   tileSurface?: string;
+  /** A stage's own blue, handed to every slot. */
+  belowFill?: string;
 }
 
 /**
@@ -46,6 +48,7 @@ export function GuessBoard({
   ink,
   inkMuted,
   tileSurface,
+  belowFill,
 }: Props) {
   const { colors } = useTheme();
   const remaining = Math.max(0, attemptsAllowed - guesses.length);
@@ -72,6 +75,7 @@ export function GuessBoard({
         .reverse()
         .map(({ result, attemptNumber }) => (
           <FilledSlot
+            belowFill={belowFill}
             key={attemptNumber}
             result={result}
             attemptNumber={attemptNumber}

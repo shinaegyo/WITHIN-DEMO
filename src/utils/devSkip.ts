@@ -39,3 +39,27 @@ export async function devSkipOnboarding(): Promise<void> {
     /* the navigator's own flag still carries this session */
   }
 }
+
+/**
+ * Force a stage while looking at Impossible: ?stage=sky
+ *
+ * The four stages sit at levels 1, 20, 40 and 80, so seeing Orbit means
+ * climbing eighty numbers - which nobody is going to do to check a background.
+ * Gated the same two ways as the skip above, so no exported build can reach it.
+ *
+ * Accepts a stage key or a level: ?stage=orbit and ?stage=88 are the same ask.
+ */
+export function devStageLevel(): number | null {
+  if (!__DEV__ || Platform.OS !== 'web') return null;
+  try {
+    // eslint-disable-next-line no-undef
+    const v = new URLSearchParams(window.location.search).get('stage');
+    if (!v) return null;
+    const byKey: Record<string, number> = { ground: 1, sky: 20, strato: 40, orbit: 80 };
+    if (byKey[v] !== undefined) return byKey[v];
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
+}
