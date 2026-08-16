@@ -168,23 +168,20 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         <View style={styles.content}>
           <View style={styles.head}>
             <BackButton color={arena.text} onPress={onExit} />
+            {/* Health rather than lives, as a bar rather than five circles.
+                Five discrete things asks you to count them; a bar you are
+                draining is read at a glance, and a percentage says what the
+                next mistake costs without anybody having to be told twice. */}
             <View style={styles.lives}>
-              <Svg width={62} height={10} viewBox="0 0 62 10">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <Circle
-                    key={i}
-                    cx={5 + i * 13}
-                    cy={5}
-                    r={4}
-                    fill={i < state.lives ? arena.muted : 'none'}
-                    stroke={arena.muted}
-                    strokeWidth={1.4}
-                    opacity={i < state.lives ? 1 : 0.4}
-                  />
-                ))}
-              </Svg>
+              <View style={[styles.healthTrack, { backgroundColor: arena.muted, opacity: 0.22 }]} />
+              <View
+                style={[
+                  styles.healthFill,
+                  { backgroundColor: arena.muted, width: `${(state.lives / 5) * 100}%` },
+                ]}
+              />
               <Text style={[styles.badge, { color: arena.muted }]}>
-                {state.lives} {state.lives === 1 ? 'LIFE' : 'LIVES'}
+                {state.lives * 20}%
               </Text>
             </View>
           </View>
@@ -239,7 +236,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 {over.sessionOver
                   ? `That was the last life. You keep ${arenaFor(over.restartsAt ?? 1).name}` +
                     ` — the next climb starts at level ${over.restartsAt ?? 1}.`
-                  : `${over.depth} ${over.depth === 1 ? 'life' : 'lives'} left. The same number is waiting.`}
+                  : `Health down to ${over.depth * 20}%. The same number is waiting.`}
               </Text>
               <Text style={[styles.overBody, { color: arena.muted }]}>
                 Everyone plays the same numbers this week, so how far you got compares directly.
@@ -358,7 +355,9 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   back: { fontSize: 15, fontFamily: fonts.extraBold, letterSpacing: 1 },
   badge: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
-  lives: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  lives: { flexDirection: 'row', alignItems: 'center', gap: 8, width: 104 },
+  healthTrack: { position: 'absolute', left: 0, top: 3, height: 8, width: 68, borderRadius: 4 },
+  healthFill: { position: 'absolute', left: 0, top: 3, height: 8, maxWidth: 68, borderRadius: 4 },
   arenaName: { fontSize: 12, fontFamily: fonts.extraBold, letterSpacing: 2.4, marginBottom: 4 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },

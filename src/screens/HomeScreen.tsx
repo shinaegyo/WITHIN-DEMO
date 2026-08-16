@@ -229,7 +229,7 @@ export function HomeScreen({
 
   const impossibleState = modes
     ? modes.impossible.lives > 0 || modes.impossible.sessionsLeft > 0
-      ? `Level ${modes.impossible.level} · ${modes.impossible.lives} ${modes.impossible.lives === 1 ? 'life' : 'lives'}`
+      ? `Level ${modes.impossible.level} · ${modes.impossible.lives * 20}% health`
       : `Level ${modes.impossible.level} · back tomorrow`
     : 'A climb that keeps your place';
 

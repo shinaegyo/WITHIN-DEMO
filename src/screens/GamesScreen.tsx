@@ -77,9 +77,7 @@ export function GamesScreen({
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
           ? `Level ${status.impossible.level} · back tomorrow`
           : status.impossible.sessionsLeft === 0
-            ? `Level ${status.impossible.level} · ${status.impossible.lives} ${
-                status.impossible.lives === 1 ? 'life' : 'lives'
-              } left`
+            ? `Level ${status.impossible.level} · ${status.impossible.lives * 20}% health left`
             : `Level ${status.impossible.level} · ready`
         : '',
       urgent: false,

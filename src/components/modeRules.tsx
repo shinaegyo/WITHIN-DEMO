@@ -214,12 +214,15 @@ export function impossibleRules(): React.ReactNode[] {
     </>,
 
     <>
-      <H>Lives</H>
+      <H>Health</H>
       <P first>
-        Running out of attempts costs a life, not the climb. You have five, and the same number is
-        waiting.
+        You start each day at 100%. Running out of attempts on a number costs 20% — not the climb.
+        The same number is waiting and you try it again.
       </P>
-      <P>Lose all five and you drop back to your last checkpoint.</P>
+      <P>
+        So five mistakes is the whole of it: 100, 80, 60, 40, 20. At zero you drop back to your last
+        checkpoint and start the day again from there.
+      </P>
     </>,
 
     <>
@@ -230,8 +233,8 @@ export function impossibleRules(): React.ReactNode[] {
       </P>
       <P>Clear level 32 and stop, and tomorrow begins at 30.</P>
       <P>
-        It is also where you land if you lose all five lives, so a fall costs at most four numbers
-        however deep you are.
+        It is also where you land at zero health, so a fall costs at most four numbers however far
+        up you are.
       </P>
     </>,
 
@@ -242,8 +245,8 @@ export function impossibleRules(): React.ReactNode[] {
         you anything.
       </P>
       <P>
-        Your lives come back full every day — however many you had left when you stopped, you begin
-        the next one with all five.
+        Health goes back to 100% every day — whatever you had left when you stopped, the next day
+        starts you full.
       </P>
       <P>
         The week's board keeps the deepest level you have ever reached, so a climb that ends badly

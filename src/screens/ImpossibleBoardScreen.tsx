@@ -154,7 +154,7 @@ export function ImpossibleBoardScreen({
           {best > 0
             ? `You are on level ${level}, ${best} cleared this week`
             : 'Your climb starts at level 1'}
-          {left !== 0 && lives > 0 ? ` · ${lives} ${lives === 1 ? 'life' : 'lives'} left` : ''}
+          {left !== 0 && lives > 0 ? ` · ${lives * 20}% health` : ''}
         </Text>
         <Pressable
           onPress={async () => {
@@ -188,7 +188,7 @@ export function ImpossibleBoardScreen({
             {!canClimb
               ? "Today's climb is done — back tomorrow"
               : resuming
-                ? `Resume · ${lives} ${lives === 1 ? 'life' : 'lives'} left`
+                ? `Resume · ${lives * 20}% health`
                 : 'Climb'}
           </Text>
         </Pressable>
