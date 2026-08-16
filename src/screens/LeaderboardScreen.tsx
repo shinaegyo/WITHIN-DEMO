@@ -112,6 +112,9 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    // The last list without one. A filled disc has no built-in margin the way
+    // the old drawn characters did, so the name sat against it.
+    gap: 10,
     borderWidth: 1,
     borderRadius: 14,
     paddingVertical: 13,
