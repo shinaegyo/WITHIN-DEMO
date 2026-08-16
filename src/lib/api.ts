@@ -615,6 +615,10 @@ export interface HomeStatus {
     iHoldBelt: boolean;
   };
   impossible: { sessionsLeft: number; lives: number; level: number; best: number };
+  /** `played` means the clock ran out, not that a run exists. */
+  rush: { played: boolean; running: boolean; found: number };
+  /** `inside` separates a zero that was earned from a zero that missed. */
+  window: { played: boolean; started: boolean; score: number; inside: boolean };
 }
 
 export async function loadHomeStatus(): Promise<HomeStatus> {
@@ -637,6 +641,20 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
       lives: raw.impossible?.lives ?? 0,
       level: raw.impossible?.level ?? 1,
       best: raw.impossible?.best ?? 0,
+    },
+    // Absent until 0116 has run, and false is the honest reading of "we do not
+    // know yet" - a mode that looks available and is not costs a tap, where one
+    // that looks spent and is not costs the whole day.
+    rush: {
+      played: !!raw.rush?.played,
+      running: !!raw.rush?.running,
+      found: raw.rush?.found ?? 0,
+    },
+    window: {
+      played: !!raw.window?.played,
+      started: !!raw.window?.started,
+      score: raw.window?.score ?? 0,
+      inside: !!raw.window?.inside,
     },
   };
 }
