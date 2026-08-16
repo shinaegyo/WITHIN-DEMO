@@ -75,7 +75,7 @@ export function GamesScreen({
       sub: 'A climb that keeps your place all week',
       status: status
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
-          ? `Level ${status.impossible.level} · back tomorrow`
+          ? `Level ${status.impossible.level} · next climb at midnight`
           : status.impossible.sessionsLeft === 0
             ? `Level ${status.impossible.level} · ${status.impossible.lives * 20}% health`
             : `Level ${status.impossible.level} · ready`

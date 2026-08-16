@@ -192,7 +192,7 @@ export function ImpossibleBoardScreen({
             style={[styles.playText, { color: canClimb ? colors.background : colors.textMuted }]}
           >
             {!canClimb
-              ? "Today's climb is done — back tomorrow"
+              ? "Today's climb is done — next one at midnight"
               : resuming
                 ? `Resume · ${lives * 20}% health`
                 : 'Start'}

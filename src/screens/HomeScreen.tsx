@@ -253,11 +253,12 @@ export function HomeScreen({
   // one somebody is in the middle of - Start would ask them to begin something
   // they never stopped.
   const climbOpen = !!modes && modes.impossible.lives > 0 && modes.impossible.sessionsLeft === 0;
+  const climbDone = !!modes && modes.impossible.lives === 0 && modes.impossible.sessionsLeft === 0;
 
   const impossibleState = modes
     ? modes.impossible.lives > 0 || modes.impossible.sessionsLeft > 0
       ? `Level ${modes.impossible.level} · ${modes.impossible.lives * 20}% health`
-      : `Level ${modes.impossible.level} · back tomorrow`
+      : `Level ${modes.impossible.level} · next climb at midnight`
     : 'A climb that keeps your place';
 
   /**
@@ -483,13 +484,17 @@ export function HomeScreen({
                   playTap();
                   onEndless();
                 }}
+                disabled={climbDone}
                 style={({ pressed }) => [
                   styles.featuredGo,
-                  { backgroundColor: colors.background, opacity: pressed ? 0.8 : 1 },
+                  {
+                    backgroundColor: colors.background,
+                    opacity: climbDone ? 0.4 : pressed ? 0.8 : 1,
+                  },
                 ]}
               >
                 <Text style={[styles.featuredGoText, { color: colors.text }]}>
-                  {climbOpen ? 'Continue' : 'Start'}
+                  {climbDone ? 'Tomorrow' : climbOpen ? 'Continue' : 'Start'}
                 </Text>
               </Pressable>
             </View>
