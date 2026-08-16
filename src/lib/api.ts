@@ -957,7 +957,9 @@ export async function rushGuess(guess: number) {
 
 export async function loadRushBoard(): Promise<RushBoard> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('rush_leaderboard', { p_limit: 10 });
+  // Fifty, because the screen now shows ten and keeps the rest behind a
+  // button: a limit of 10 made "show more" a promise the server could not keep.
+  const { data, error } = await supabase.rpc('rush_leaderboard', { p_limit: 50 });
   const raw = unwrap<any>(data, error);
   return {
     entries: (raw.entries ?? []).map((e: any) => ({
@@ -1049,7 +1051,7 @@ export async function windowSubmit(lo: number, hi: number) {
 
 export async function loadWindowBoard(): Promise<WindowEntry[]> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('window_leaderboard', { p_limit: 20 });
+  const { data, error } = await supabase.rpc('window_leaderboard', { p_limit: 50 });
   const raw = unwrap<any>(data, error);
   return (raw.entries ?? []).map((e: any) => ({
     rank: e.rank,

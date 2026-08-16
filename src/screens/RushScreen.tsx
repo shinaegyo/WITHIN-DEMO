@@ -18,6 +18,7 @@ import { GuessBoard } from '../components/GuessBoard';
 import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
 import { PagedRules, RulesButton } from '../components/PagedRules';
+import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { rushRules } from '../components/modeRules';
 import {
   ApiError,
@@ -73,6 +74,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   // 3, 2, 1 before the clock starts again, so nobody comes back mid-guess.
   const [countdown, setCountdown] = useState<number | null>(null);
   const [rules, setRules] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const ended = useRef(false);
   const running = useRef(false);
 
@@ -194,7 +196,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   if (rules) return <PagedRules title="How Rush works" onBack={() => setRules(false)} sections={rushRules()} />;
 
   const rows = board?.entries ?? [];
-
+  const { shown, hidden, breakAt } = topTen(rows, expanded);
 
   const standings = (title: string) =>
     rows.length === 0 ? null : (
@@ -206,8 +208,10 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
           <Text style={[styles.colHead, { color: colors.textMuted }]}>GUESSES</Text>
           <Text style={[styles.colHeadRight, { color: colors.textMuted }]}>FOUND</Text>
         </View>
-        {rows.map((e, i) => (
-          <View key={`${e.rank}-${e.name}-${i}`} style={styles.row}>
+        {shown.map((e, i) => (
+          <React.Fragment key={`${e.rank}-${e.name}-${i}`}>
+          {i === breakAt && <StandingsBreak />}
+          <View style={styles.row}>
             {MEDALS[e.rank] ? (
               <View style={[styles.medal, { backgroundColor: MEDALS[e.rank].ring }]}>
                 <Text style={[styles.medalText, { color: MEDALS[e.rank].ink }]}>{e.rank}</Text>
@@ -227,7 +231,9 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             <Text style={[styles.guessCount, { color: colors.textMuted }]}>{e.attempts}</Text>
             <Text style={[styles.found, { color: colors.text }]}>{e.found}</Text>
           </View>
+          </React.Fragment>
         ))}
+        <ShowMore count={hidden} onPress={() => setExpanded(true)} />
       </View>
     );
 

@@ -16,6 +16,7 @@ import { NumberInput } from '../components/NumberInput';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
 import { PagedRules, RulesButton } from '../components/PagedRules';
+import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { windowRules } from '../components/modeRules';
 import {
   ApiError,
@@ -70,6 +71,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   const [centre, setCentre] = useState('');
   const [focused, setFocused] = useState(false);
   const [rules, setRules] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [spreadIdx, setSpreadIdx] = useState(DEFAULT_SPREAD);
   const spread = SPREADS[spreadIdx];
   const [result, setResult] = useState<
@@ -149,6 +151,8 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
     return { lo, hi, width: hi - lo + 1 };
   })();
 
+  const { shown, hidden, breakAt } = topTen(board, expanded);
+
   const standings = () =>
     board.length === 0 ? null : (
       <View style={styles.board}>
@@ -159,8 +163,10 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
           <Text style={[styles.colHead, { color: colors.textMuted }]}>WIDTH</Text>
           <Text style={[styles.colHeadRight, { color: colors.textMuted }]}>SCORE</Text>
         </View>
-        {board.map((e, i) => (
-          <View key={`${e.rank}-${e.name}-${i}`} style={styles.row}>
+        {shown.map((e, i) => (
+          <React.Fragment key={`${e.rank}-${e.name}-${i}`}>
+          {i === breakAt && <StandingsBreak />}
+          <View style={styles.row}>
             {MEDALS[e.rank] ? (
               <View style={[styles.medal, { backgroundColor: MEDALS[e.rank].ring }]}>
                 <Text style={[styles.medalText, { color: MEDALS[e.rank].ink }]}>{e.rank}</Text>
@@ -178,7 +184,9 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
             <Text style={[styles.width, { color: colors.textMuted }]}>{e.width}</Text>
             <Text style={[styles.score, { color: colors.text }]}>{e.score}</Text>
           </View>
+          </React.Fragment>
         ))}
+        <ShowMore count={hidden} onPress={() => setExpanded(true)} />
       </View>
     );
 

@@ -202,8 +202,16 @@ export function windowRules(): React.ReactNode[] {
   ];
 }
 
-export function impossibleRules(): React.ReactNode[] {
-  return [
+/**
+ * `tiersFirst` puts the table before the prose, for the board screen.
+ *
+ * Somebody standing on the standings has already been told what the mode is by
+ * the standings themselves - what they want is the shape of the climb: how deep
+ * the tiers go and what each one costs them in attempts. In the rulebook, where
+ * a first-time reader arrives, the paragraph still comes first.
+ */
+export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNode[] {
+  const sections: React.ReactNode[] = [
     <>
       <H>The Impossible Climb</H>
       <P first>
@@ -261,6 +269,10 @@ export function impossibleRules(): React.ReactNode[] {
       <P>Every number cleared pays 20 XP toward your level, and reaching a new tier pays 50.</P>
     </>,
   ];
+
+  if (!opts?.tiersFirst) return sections;
+  const tiers = sections[sections.length - 1];
+  return [tiers, ...sections.slice(0, -1)];
 }
 
 /** Straight from the table the game reads, so it cannot drift. */

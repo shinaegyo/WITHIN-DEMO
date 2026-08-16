@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
+import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { impossibleRules } from '../components/modeRules';
 import {
   ApiError,
@@ -50,6 +51,7 @@ export function ImpossibleBoardScreen({
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
   const [status, setStatus] = useState<HomeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -83,6 +85,7 @@ export function ImpossibleBoardScreen({
   // it is about to do. "Climb" on a session already open reads as though it
   // might spend something, and nobody should have to press it to find out.
   const resuming = left === 0 && lives > 0;
+  const { shown, hidden, breakAt } = topTen(rows, expanded);
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
@@ -99,10 +102,11 @@ export function ImpossibleBoardScreen({
           </Text>
         )}
 
-        {rows.map((e, i) => (
+        {shown.map((e, i) => (
+        <React.Fragment key={`${e.rank}-${e.name}-${i}`}>
+        {i === breakAt && <StandingsBreak />}
         <View
           // Ranks tie and names are not unique, so neither identifies a row.
-          key={`${e.rank}-${e.name}-${i}`}
           style={[
             styles.row,
             e.isMe
@@ -132,7 +136,10 @@ export function ImpossibleBoardScreen({
             {e.depth === 1 ? 'number' : 'numbers'}
           </Text>
         </View>
+        </React.Fragment>
         ))}
+
+        <ShowMore count={hidden} onPress={() => setExpanded(true)} />
 
         {/* Set out plainly rather than folded behind a disclosure. A rule
             nobody opens is a rule nobody knows, and a row of chevrons down the
@@ -144,7 +151,7 @@ export function ImpossibleBoardScreen({
             the rules to achieve that would have left the mode's rules
             unreachable from the screen you land on. */}
         <Text style={[styles.rulesHead, { color: colors.text }]}>How it works</Text>
-        {impossibleRules().map((section, i) => (
+        {impossibleRules({ tiersFirst: true }).map((section, i) => (
           <View key={i} style={i === 0 ? undefined : styles.ruleGap}>
             {section}
           </View>
@@ -201,7 +208,10 @@ export function ImpossibleBoardScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 16, gap: 8, paddingBottom: 20 },
-  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 10 },
+  // Bigger than the headings inside it. At 15 it was smaller than every
+  // section title underneath, so the thing naming the whole rulebook read as a
+  // caption on the first rule rather than as a title over all of them.
+  rulesHead: { fontSize: 24, fontFamily: fonts.extraBold, marginTop: 30, marginBottom: 14 },
   ruleGap: { marginTop: 20 },
   rule: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 10 },
   tiers: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 2, marginBottom: 12 },
