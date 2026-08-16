@@ -143,10 +143,16 @@ export function BoardsScreen() {
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
-  const [explain, setExplain] = useState<Board | null>(null);
-  // Two different questions. The header asks what the column is; the score asks
-  // what mine was. The second does not want the first one's paragraph.
-  const [mine, setMine] = useState(false);
+  /**
+   * Which sheet is open, in one value.
+   *
+   * It was two - a board for the column explanation and a boolean for your own
+   * figure - and closing set them in sequence. The modal keeps its children
+   * mounted while it fades, so for the length of the fade `mine` was false and
+   * the other branch rendered: press Got it on your score and the full
+   * explanation flashed up as it left.
+   */
+  const [sheet, setSheet] = useState<{ kind: 'mine' } | { kind: 'column'; board: Board } | null>(null);
   // Not a fourth tab: friends is a filter on all three windows, not a window of
   // its own. Today among friends is the one people check every morning.
   const [friends, setFriends] = useState(false);
@@ -441,7 +447,7 @@ export function BoardsScreen() {
         <Pressable
           onPress={() => {
             playTap();
-            setMine(true);
+            setSheet({ kind: 'mine' });
           }}
           style={[styles.mine, { borderColor: colors.border }]}
         >
@@ -579,7 +585,7 @@ export function BoardsScreen() {
           <View style={styles.head}>
             <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
             {tab !== 'alltime' && (
-              <Pressable onPress={() => { playTap(); setExplain(tab); }} hitSlop={10}>
+              <Pressable onPress={() => { playTap(); setSheet({ kind: 'column', board: tab }); }} hitSlop={10}>
                 <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
               </Pressable>
             )}
@@ -675,21 +681,12 @@ export function BoardsScreen() {
       <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
 
       <Modal
-        visible={explain !== null || mine}
+        visible={sheet !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => {
-          setExplain(null);
-          setMine(false);
-        }}
+        onRequestClose={() => setSheet(null)}
       >
-        <Pressable
-          style={styles.scrim}
-          onPress={() => {
-            setExplain(null);
-            setMine(false);
-          }}
-        >
+        <Pressable style={styles.scrim} onPress={() => setSheet(null)}>
           <Pressable
             style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => {}}
@@ -697,7 +694,7 @@ export function BoardsScreen() {
             {/* Your own figure and nothing else. The column header has the
                 explanation; repeating it here answers a question that was not
                 asked. */}
-            {mine ? (
+            {sheet?.kind === 'mine' ? (
               <Text style={[styles.sheetLead, { color: colors.text }]}>
                 Your guesses landed {today?.me?.avgOff ?? 0} away on average.
               </Text>
@@ -724,14 +721,7 @@ export function BoardsScreen() {
             </Text>
             </>
             )}
-            <Pressable
-              onPress={() => {
-                playTap();
-                setExplain(null);
-                setMine(false);
-              }}
-              style={styles.sheetClose}
-            >
+            <Pressable onPress={() => { playTap(); setSheet(null); }} style={styles.sheetClose}>
               <Text style={[styles.sheetCloseText, { color: colors.text }]}>Got it</Text>
             </Pressable>
           </Pressable>
