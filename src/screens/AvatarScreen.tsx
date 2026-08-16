@@ -2,7 +2,15 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AVATAR_COLORS, Avatar, COLOR_KEYS, parseAvatar } from '../components/Avatar';
+import {
+  AVATAR_COLORS,
+  Avatar,
+  COLOR_KEYS,
+  HAIR,
+  HAIR_COLORS,
+  SKIN_TONES,
+  parseAvatar,
+} from '../components/Avatar';
 import { setAvatar } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
@@ -10,14 +18,20 @@ import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 
 /**
- * Pick a character and a colour.
+ * Build a person, or keep your initial.
  *
- * Thirty characters and six colours rather than an upload, so nothing has to be
- * stored, resized or moderated - and everybody stays legible at the size a
- * leaderboard row actually gives them.
+ * Four choices - skin, hair, hair colour, background - drawn rather than
+ * uploaded, so nothing has to be stored, resized or moderated, and everybody
+ * stays legible at the size a leaderboard row actually gives them.
  *
  * The preview sits at the top with the player's name beside it, because that is
  * the thing being chosen: not a picture, but how they appear to everyone else.
+ * It is shown at 24px as well, which is where it will actually be seen and the
+ * size that decided which hair shapes were worth offering.
+ *
+ * The monogram is a real option rather than only a default. Somebody who does
+ * not want to be a face should be able to say so, and everybody arrives here
+ * as one.
  */
 export function AvatarScreen({
   username,
@@ -42,12 +56,16 @@ export function AvatarScreen({
   const { colors } = useTheme();
   const start = parseAvatar(current);
   const [color, setColor] = useState(start.color);
+  // Null means the monogram. The defaults are only used once somebody turns
+  // a person on, so arriving here changes nothing until they choose.
+  const [skin, setSkin] = useState<string | null>(start.skin ?? null);
+  const [hair, setHair] = useState(start.hair ?? 'crop');
+  const [hairColor, setHairColor] = useState(start.hairColor ?? 'black');
   const [busy, setBusy] = useState(false);
 
-  // A colour alone, for now. The stored value grows to
-  // "skin-hair-haircolour-colour" when the person picker lands; Avatar already
-  // parses that shape, so this is the only line that has to change.
-  const value = color;
+  // Four parts for a person, the colour alone for a monogram - the two shapes
+  // parseAvatar reads.
+  const value = skin ? `${skin}-${hair}-${hairColor}-${color}` : color;
 
   const save = async () => {
     if (busy) return;
@@ -76,9 +94,14 @@ export function AvatarScreen({
           <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
             {username}
           </Text>
-          <Text style={[styles.sub, { color: colors.textMuted }]}>
-            This is how you appear on every board.
-          </Text>
+          <View style={styles.subRow}>
+            {/* The size it is actually seen at, beside the size it is chosen
+                at. A face that only works at 78px is a face nobody sees. */}
+            <Avatar value={value} size={24} name={username} />
+            <Text style={[styles.sub, { color: colors.textMuted }]}>
+              This is how you appear on every board.
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -101,12 +124,58 @@ export function AvatarScreen({
           ))}
         </View>
 
-        {/* The fifty animals are gone and the person picker is not built, so
-            there is nothing to choose but a colour. Said out loud rather than
-            leaving the screen looking half-finished. */}
-        <Text style={[styles.note, { color: colors.textMuted }]}>
-          Your initial, on the colour you pick. Choosing a face is coming.
-        </Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>YOU</Text>
+        <View style={styles.row}>
+          {/* The monogram first, because it is where everybody starts and the
+              way back for anybody who tries a face and would rather not. */}
+          <Pressable
+            onPress={() => { playTap(); setSkin(null); }}
+            style={[styles.cell, { borderColor: skin === null ? colors.accent : 'transparent' }]}
+          >
+            <Avatar value={color} size={52} name={username} />
+          </Pressable>
+          {Object.keys(SKIN_TONES).map((key) => (
+            <Pressable
+              key={key}
+              onPress={() => { playTap(); setSkin(key); }}
+              style={[styles.cell, { borderColor: key === skin ? colors.accent : 'transparent' }]}
+            >
+              <Avatar value={`${key}-${hair}-${hairColor}-${color}`} size={52} />
+            </Pressable>
+          ))}
+        </View>
+
+        {skin && (
+          <>
+            <Text style={[styles.label, { color: colors.textMuted }]}>HAIR</Text>
+            <View style={styles.row}>
+              {HAIR.map((h) => (
+                <Pressable
+                  key={h.key}
+                  onPress={() => { playTap(); setHair(h.key); }}
+                  style={[styles.cell, { borderColor: h.key === hair ? colors.accent : 'transparent' }]}
+                >
+                  <Avatar value={`${skin}-${h.key}-${hairColor}-${color}`} size={52} />
+                </Pressable>
+              ))}
+            </View>
+
+            <Text style={[styles.label, { color: colors.textMuted }]}>HAIR COLOUR</Text>
+            <View style={styles.colors}>
+              {Object.keys(HAIR_COLORS).map((key) => (
+                <Pressable
+                  key={key}
+                  onPress={() => { playTap(); setHairColor(key); }}
+                  style={[
+                    styles.swatch,
+                    { backgroundColor: HAIR_COLORS[key] },
+                    key === hairColor && { borderColor: colors.text, borderWidth: 3 },
+                  ]}
+                />
+              ))}
+            </View>
+          </>
+        )}
       </ScrollView>
 
       <View style={styles.foot}>
@@ -140,7 +209,8 @@ const styles = StyleSheet.create({
   name: { fontSize: 22, fontFamily: fonts.extraBold },
   sub: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 2, lineHeight: 17 },
   body: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 20 },
-  note: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 19, marginTop: 18 },
+  subRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   label: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
   swatch: { width: '18%', height: 32, borderRadius: 10, borderWidth: 3, borderColor: 'transparent' },
