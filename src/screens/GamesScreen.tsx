@@ -82,11 +82,6 @@ export function GamesScreen({
         : '',
       urgent: false,
       onPress: onImpossible,
-      // Never spent, unlike Rush and Window. Their rows lead to a game and
-      // nothing else, so greying one that cannot be played is honest. This row
-      // leads to the week's standings, and a climb that is over is exactly when
-      // somebody wants to look at them.
-      spent: false,
     },
     {
       label: 'Window',
@@ -100,7 +95,6 @@ export function GamesScreen({
         : 'One a day',
       urgent: false,
       onPress: onWindow,
-      spent: !!status?.window.played,
     },
     {
       label: 'Rush',
@@ -114,7 +108,6 @@ export function GamesScreen({
           : 'One run a day',
       urgent: !!status?.rush.running,
       onPress: onRush,
-      spent: !!status?.rush.played,
     },
   ];
 
@@ -124,10 +117,16 @@ export function GamesScreen({
       contentContainerStyle={styles.content}
     >
       <ScreenTitle title="Games" />
+      {/* Every row answers a press, played or not.
+
+          They used to dim and go dead once the day's game was spent, which
+          read as "nothing here" - but behind each of these is the day's
+          standings, and finishing is exactly when somebody wants to see where
+          they landed. The status line already says it has been played; a row
+          that refuses to open takes the result away with the game. */}
       {rows.map((r) => (
         <Pressable
           key={r.label}
-          disabled={r.spent}
           onPress={() => {
             playTap();
             r.onPress();
@@ -135,11 +134,9 @@ export function GamesScreen({
           style={({ pressed }) => [
             styles.row,
             {
-              backgroundColor: pressed && !r.spent ? colors.surfaceAlt : colors.surface,
+              backgroundColor: pressed ? colors.surfaceAlt : colors.surface,
               borderColor: colors.border,
             },
-            // Spent for the day: dimmed, and it does not answer a press.
-            r.spent && styles.spent,
           ]}
         >
           <View style={styles.main}>
@@ -159,7 +156,7 @@ export function GamesScreen({
           >
             {r.status}
           </Text>
-          {!r.spent && <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>}
+          <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>
         </Pressable>
       ))}
 
@@ -204,7 +201,6 @@ export function GamesScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 18, gap: 9 },
-  spent: { opacity: 0.45 },
   screenTitle: {
     fontSize: 26,
     fontFamily: fonts.extraBold,
