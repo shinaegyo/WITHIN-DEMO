@@ -432,7 +432,16 @@ export function BoardsScreen() {
       )}
 
       {tab === 'today' && today?.me && (
-        <View style={[styles.mine, { borderColor: colors.border }]}>
+        // Tappable, and the sentence moves behind it. Three lines of
+        // explanation under a score is a paragraph nobody reads twice, and the
+        // question it answers only occurs to somebody who has already looked.
+        <Pressable
+          onPress={() => {
+            playTap();
+            setExplain('today');
+          }}
+          style={[styles.mine, { borderColor: colors.border }]}
+        >
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
             {standing(today.me, today.totalPlayers, 'TODAY')}
           </Text>
@@ -450,15 +459,10 @@ export function BoardsScreen() {
               so on any day you were alone on your score, nothing on the screen
               said what AVG OFF was for. The column was there every day and the
               reason for it only some days. */}
-          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            Your guesses landed {today.me.avgOff} away on average — closer guesses rank higher when
-            scores are level.
-            {today.me.playersOnScore > 1
-              ? ` ${today.me.playersOnScore.toLocaleString()} players finished on ${today.me.score}.`
-              : ''}
+          <Text style={[styles.mineHint, { color: colors.textMuted }]}>
+            {today.me.avgOff} avg off ⓘ
           </Text>
-
-        </View>
+        </Pressable>
       )}
 
       {error ? (
@@ -679,6 +683,11 @@ export function BoardsScreen() {
             {/* One sheet: today, the season and all time all break ties on
                 the same measure, so there is one thing to explain. */}
             <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
+            {tab === 'today' && !!today?.me && (
+              <Text style={[styles.sheetLead, { color: colors.text }]}>
+                Your guesses landed {today.me.avgOff} away on average.
+              </Text>
+            )}
             <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
               How far a typical guess landed from the answer, counting every guess you made.
             </Text>
@@ -789,6 +798,8 @@ const styles = StyleSheet.create({
   },
   headSub: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
   headValue: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
+  mineHint: { fontSize: 11.5, fontFamily: fonts.bold, textDecorationLine: 'underline', marginTop: 2 },
+  sheetLead: { fontSize: 15, fontFamily: fonts.extraBold, lineHeight: 21 },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 14, gap: 8 },
