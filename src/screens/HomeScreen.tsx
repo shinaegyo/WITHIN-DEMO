@@ -448,13 +448,13 @@ export function HomeScreen({
               ]}
             >
               <View style={styles.featuredMain}>
-                <Text style={[styles.featuredName, { color: colors.background }]}>Impossible</Text>
+                <Text style={[styles.featuredName, { color: colors.background }]}>The Impossible Climb</Text>
                 <Text style={[styles.featuredState, { color: colors.background }]}>
                   {impossibleState}
                 </Text>
               </View>
               <View style={[styles.featuredGo, { backgroundColor: colors.background }]}>
-                <Text style={[styles.featuredGoText, { color: colors.text }]}>Climb</Text>
+                <Text style={[styles.featuredGoText, { color: colors.text }]}>Start</Text>
               </View>
             </Pressable>
 

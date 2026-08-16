@@ -70,7 +70,7 @@ export function ImpossibleBoardScreen({
   }, [load]);
 
   // The rulebook takes the whole screen rather than sitting under it.
-  if (rules) return <PagedRules title="How Impossible works" onBack={() => setRules(false)} sections={impossibleRules()} />;
+  if (rules) return <PagedRules title="How The Impossible Climb works" onBack={() => setRules(false)} sections={impossibleRules()} />;
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!rows) return <StatusScreen loading />;
@@ -93,7 +93,7 @@ export function ImpossibleBoardScreen({
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       <ScreenTitle
-        title="Impossible"
+        title="The Impossible Climb"
         subtitle="Everyone plays the same numbers this week, so how far you got compares directly. It resets on Monday."
         onBack={onBack}
       />
@@ -189,7 +189,7 @@ export function ImpossibleBoardScreen({
               ? "Today's climb is done — back tomorrow"
               : resuming
                 ? `Resume · ${lives * 20}% health`
-                : 'Climb'}
+                : 'Start'}
           </Text>
         </Pressable>
       </View>

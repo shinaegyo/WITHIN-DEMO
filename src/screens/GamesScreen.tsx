@@ -71,7 +71,7 @@ export function GamesScreen({
       onPress: onDuels,
     },
     {
-      label: 'Impossible',
+      label: 'The Impossible Climb',
       sub: 'A climb that keeps your place all week',
       status: status
         ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0

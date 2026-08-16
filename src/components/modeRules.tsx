@@ -205,7 +205,7 @@ export function windowRules(): React.ReactNode[] {
 export function impossibleRules(): React.ReactNode[] {
   return [
     <>
-      <H>The climb</H>
+      <H>The Impossible Climb</H>
       <P first>
         Numbers one after another, up to 100 of them, and everyone plays the same sequence this
         week — so how far you got compares directly. It resets on Monday.
