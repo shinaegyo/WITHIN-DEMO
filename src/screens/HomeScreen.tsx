@@ -353,19 +353,18 @@ export function HomeScreen({
           <View style={styles.iconButton} />
         )}
 
-        {/* The mark travels with the name. On the finished-day screen the word
-            was sitting up here alone, which is the one place the brand is
-            small enough to need the shape doing the work.
+        {/* The mark alone. Six letters and a shape saying the same thing twice
+            crowded a row that also holds a level pill and a button, and the
+            name is on the icon, the store listing and the tab - this is the one
+            place it can be dropped without anybody losing their way.
 
             Laid over the row rather than in it. Sharing a space-between row
             with a level pill on one side and a round button on the other
-            centred it between two things of different widths, which is not the
-            middle of anything - the wordmark was already sitting right of
-            centre before the mark arrived to make it obvious. */}
+            centres a thing between two of different widths, which is not the
+            middle of anything. */}
         {started && (
           <View pointerEvents="none" style={styles.headerBrand}>
-            <Mark size={20} ink={colors.text} />
-            <Wordmark size={24} color={colors.text} />
+            <Mark size={30} ink={colors.text} />
           </View>
         )}
 
@@ -696,7 +695,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
   },
   hero: {
     alignItems: 'center',
