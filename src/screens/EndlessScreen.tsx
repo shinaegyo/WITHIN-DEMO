@@ -152,6 +152,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const myRank = board.find((e) => e.isMe);
   // ?stage=orbit paints the screen as that stage without an eighty-number
   // climb to reach it. Dev and web only.
+  // The week resets on Monday, so a climb that ends on Sunday has no tomorrow
+  // to promise - the only thing left to say is how far this week got.
+  const weekOver = new Date().getDay() === 0;
+
   const arena = arenaFor(devStageLevel() ?? state.level);
   const hairline = 'rgba(255, 255, 255, 0.18)';
 
@@ -246,12 +250,16 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
 
                   It is still shown when the climb is over, because by then
                   there is nothing left to spend it on. */}
+              {/* The answer is never printed. It used to be, and paired with
+                  "the same number is waiting" it handed the retry over free -
+                  and on the last card of the day it is simply a number nobody
+                  asked for. */}
               <Text style={[styles.overBody, { color: arena.muted }]}>
-                {over.sessionOver
-                  ? `${over.answer !== null ? `The number was ${over.answer}. ` : ''}` +
-                    `You keep ${arenaFor(over.restartsAt ?? 1).name} — the next climb starts at` +
-                    ` level ${over.restartsAt ?? 1}.`
-                  : `Down to ${over.depth * 20}% health.`}
+                {!over.sessionOver
+                  ? `Down to ${over.depth * 20}% health.`
+                  : weekOver
+                    ? `You got to level ${state.level}.`
+                    : `Your next climb starts at level ${over.restartsAt ?? 1}. See you tomorrow.`}
               </Text>
               {!over.sessionOver ? (
                 <Pressable
@@ -266,9 +274,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   </Text>
                 </Pressable>
               ) : (
-                <Text style={[styles.overBody, { color: arena.muted }]}>
-                  That is today's climb. Tomorrow you start again from there.
-                </Text>
+                // The line above already says where tomorrow starts, or that
+                // the week is done. Saying it twice was the old card's job
+                // when the first line was busy naming a number.
+                <View />
               )}
 
               {board.length > 0 && (
