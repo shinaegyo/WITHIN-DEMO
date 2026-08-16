@@ -60,51 +60,97 @@ export const HAIR_COLORS: Record<string, string> = {
 };
 
 /**
- * Nine shapes, cut from thirteen.
+ * Thirty-one shapes, in three lengths.
  *
- * Cropped, short, waves and a bob were one shape at 24px - the size a
- * leaderboard row actually gives an avatar - so four of the thirteen were
- * decoys standing in for choices that never showed. What is left is tellable
- * apart at that size, which is the only test that matters.
+ * An earlier cut took this to nine on the grounds that some pairs are
+ * indistinguishable at 24px, which was the wrong trade. Buzz and cropped do
+ * read alike that small, and so do locs and twists, braids and box braids - but
+ * somebody with box braids should find box braids, and two styles converging in
+ * a leaderboard row costs far less than a person not being in the set at all.
  *
- * Headwrap and hijab take the hair colour as their fabric, which is why the
- * palette carries blue and pink.
+ * Ordered short, medium, long, so the picker can group them rather than present
+ * thirty-one swatches in an undifferentiated block.
  */
 const BUST = 'M50 84c-18 0-30 6-30 16h60c0-10-12-16-30-16Z';
-const CAP = 'M29 56c-2-16 7-24 21-24s23 8 21 24c-2-12-9-16-21-16s-19 4-21 16Z';
 
 export const HAIR: { key: string; name: string; draw: (c: string) => React.ReactNode }[] = [
+  // Short
   { key: 'bald', name: 'Bald', draw: () => null },
+  { key: 'buzz', name: 'Buzz', draw: (c) => (
+    <Path d="M30 55a20 20 0 0 1 40 0c2-13-6-21-20-21s-22 8-20 21Z" fill={c} opacity={0.85} /> ) },
   { key: 'crop', name: 'Cropped', draw: (c) => (
     <Path d="M29 57a21 21 0 0 1 42 0c1-14-7-23-21-23s-22 9-21 23Z" fill={c} /> ) },
+  { key: 'undercut', name: 'Undercut', draw: (c) => (<G fill={c}>
+    <Path d="M31 52c-1-13 7-20 19-20s20 7 19 20c3-18-5-26-19-26s-22 8-19 26Z" />
+    <Path d="M29 58a21 21 0 0 1 42 0c0-4-1-7-2-9H31c-1 2-2 5-2 9Z" opacity={0.45} />
+  </G>) },
+  { key: 'short', name: 'Short', draw: (c) => (
+    <Path d="M28 62c-2-20 8-28 22-28s24 8 22 28c1-9-3-12-8-12-6 0-8 3-14 3s-8-3-14-3c-5 0-9 3-8 12Z" fill={c} /> ) },
+  { key: 'sidepart', name: 'Side part', draw: (c) => (
+    <Path d="M29 56c-2-16 7-24 21-24s23 8 21 24c-1-9-6-13-13-13-3 4-9 5-15 4-8-1-13 2-14 9Z" fill={c} /> ) },
+  { key: 'midpart', name: 'Middle part', draw: (c) => (
+    <Path d="M50 32c-13 0-21 9-21 24 2-10 8-14 15-16-2 4-2 8 0 12 1-8 3-14 6-18 3 4 5 10 6 18 2-4 2-8 0-12 7 2 13 6 15 16 0-15-8-24-21-24Z" fill={c} /> ) },
+  { key: 'quiff', name: 'Quiff', draw: (c) => (
+    <Path d="M29 56c-1-14 6-22 17-22 8 0 12 3 15 8 3-6-1-14-5-16-14-6-30 5-30 22 0 3 1 6 3 8Z" fill={c} /> ) },
+  { key: 'curlyshort', name: 'Curly short', draw: (c) => (<G fill={c}>
+    <Circle cx="34" cy="42" r="8" /><Circle cx="50" cy="36" r="9" /><Circle cx="66" cy="42" r="8" />
+  </G>) },
+  { key: 'waves', name: 'Waves', draw: (c) => (
+    <Path d="M29 58c-1-16 7-24 21-24s22 8 21 24c-2-5-5-3-7-6-3 4-6 1-8-3-3 5-7 4-10 1-3 4-6 5-9 1-2 4-6 3-8 7Z" fill={c} /> ) },
+  { key: 'afrofade', name: 'Afro fade', draw: (c) => (
+    <Path d="M50 24c-14 0-23 10-23 22 0 4 1 7 2 9 0-8 2-12 5-14 4-3 10-4 16-4s12 1 16 4c3 2 5 6 5 14 1-2 2-5 2-9 0-12-9-22-23-22Z" fill={c} /> ) },
+
+  // Medium
   { key: 'bob', name: 'Bob', draw: (c) => (<G fill={c}>
     <Path d="M29 58c-2-18 8-26 21-26s23 8 21 26c0-8-4-10-8-10-5 0-6 3-13 3s-8-3-13-3c-4 0-8 2-8 10Z" />
     <Path d="M22 58c-3 0-5 5-5 11s3 10 6 9Z" /><Path d="M78 58c3 0 5 5 5 11s-3 10-6 9Z" />
   </G>) },
-  { key: 'curls', name: 'Curls', draw: (c) => (<G fill={c}>
-    <Circle cx="34" cy="40" r="9" /><Circle cx="50" cy="34" r="10" /><Circle cx="66" cy="40" r="9" />
-    <Circle cx="28" cy="52" r="8" /><Circle cx="72" cy="52" r="8" />
+  { key: 'midpartmed', name: 'Mid part', draw: (c) => (
+    <Path d="M50 30c-14 0-23 10-23 26v20h8V56c0-6 2-10 6-13 3 5 6 8 9 9-3-6-4-12-3-17 3 5 6 12 3 17 3-1 6-4 9-9 4 3 6 7 6 13v20h8V56c0-16-9-26-23-26Z" fill={c} /> ) },
+  { key: 'shoulder', name: 'Shoulder', draw: (c) => (
+    <Path d="M50 30c-15 0-24 10-24 26v22h8V56c0-9 5-14 16-14s16 5 16 14v22h8V56c0-16-9-26-24-26Z" fill={c} /> ) },
+  { key: 'layered', name: 'Layered', draw: (c) => (
+    <Path d="M50 30c-15 0-24 10-24 26 0 8 2 14 4 20l6-6c-2-6-3-11-3-15 0-8 6-13 17-13s17 5 17 13c0 4-1 9-3 15l6 6c2-6 4-12 4-20 0-16-9-26-24-26Z" fill={c} /> ) },
+  { key: 'curly', name: 'Curly', draw: (c) => (<G fill={c}>
+    <Circle cx="50" cy="33" r="17" /><Circle cx="30" cy="45" r="11" /><Circle cx="70" cy="45" r="11" />
+    <Circle cx="27" cy="60" r="9" /><Circle cx="73" cy="60" r="9" />
   </G>) },
-  { key: 'coils', name: 'Coils', draw: (c) => (<G fill={c}>
-    <Circle cx="50" cy="33" r="18" /><Circle cx="30" cy="44" r="10" /><Circle cx="70" cy="44" r="10" />
-    <Circle cx="26" cy="56" r="7" /><Circle cx="74" cy="56" r="7" />
+  { key: 'undercutlong', name: 'Undercut long', draw: (c) => (<G fill={c}>
+    <Path d="M31 50c-1-14 7-22 19-22s20 8 19 22c3-18-5-26-19-26s-22 8-19 26Z" />
+    <Path d="M50 24c11 0 19 8 19 22v26h8V46c0-16-9-26-27-26Z" />
   </G>) },
-  { key: 'locs', name: 'Locs', draw: (c) => (<G fill={c}>
+  { key: 'halfup', name: 'Half-up', draw: (c) => (<G fill={c}>
+    <Path d="M29 56c-2-16 7-24 21-24s23 8 21 24c-2-12-9-16-21-16s-19 4-21 16Z" />
+    <Path d="M40 26c-4-6 2-12 10-12s14 6 10 12c-4-4-16-4-20 0Z" />
+    <Path d="M31 54c-2 12-1 22 2 30h6c-3-10-4-20-2-30Z" />
+    <Path d="M69 54c2 12 1 22-2 30h-6c3-10 4-20 2-30Z" />
+  </G>) },
+  { key: 'twists', name: 'Twists', draw: (c) => (<G fill={c}>
     <Path d="M29 54a21 21 0 0 1 42 0c1-14-7-22-21-22s-22 8-21 22Z" />
-    <Rect x="24" y="50" width="6" height="30" rx="3" /><Rect x="33" y="54" width="6" height="26" rx="3" />
-    <Rect x="61" y="54" width="6" height="26" rx="3" /><Rect x="70" y="50" width="6" height="30" rx="3" />
+    <Rect x="24" y="50" width="6" height="26" rx="3" /><Rect x="33" y="54" width="6" height="22" rx="3" />
+    <Rect x="61" y="54" width="6" height="22" rx="3" /><Rect x="70" y="50" width="6" height="26" rx="3" />
   </G>) },
+
+  // Long
   { key: 'long', name: 'Long', draw: (c) => (
     <Path d="M50 30c-16 0-24 10-24 26v28h9V56c0-8 4-12 15-12s15 4 15 12v28h9V56c0-16-8-26-24-26Z" fill={c} /> ) },
-  { key: 'bun', name: 'Bun', draw: (c) => (<G fill={c}>
-    <Circle cx="50" cy="22" r="11" /><Path d={CAP} />
+  { key: 'longmid', name: 'Long mid part', draw: (c) => (
+    <Path d="M50 30c-16 0-24 10-24 26v28h9V56c0-7 3-11 10-12-3 5-4 11-3 16 2-7 5-13 8-17 3 4 6 10 8 17 1-5 0-11-3-16 7 1 10 5 10 12v28h9V56c0-16-8-26-24-26Z" fill={c} /> ) },
+  { key: 'longcurly', name: 'Long curly', draw: (c) => (<G fill={c}>
+    <Circle cx="50" cy="32" r="18" /><Circle cx="28" cy="46" r="12" /><Circle cx="72" cy="46" r="12" />
+    <Circle cx="25" cy="64" r="10" /><Circle cx="75" cy="64" r="10" />
+    <Circle cx="27" cy="80" r="9" /><Circle cx="73" cy="80" r="9" />
   </G>) },
-  { key: 'wrap', name: 'Headwrap', draw: (c) => (<G fill={c}>
-    <Path d="M28 58c-2-18 8-26 22-26s24 8 22 26c2-6 6-4 6-10 0-14-12-22-28-22s-28 8-28 22c0 6 4 4 6 10Z" />
-    <Path d="M72 50c6 6 8 18 6 30h-10c4-10 5-22 4-30Z" />
+  { key: 'longwavy', name: 'Long wavy', draw: (c) => (
+    <Path d="M50 30c-16 0-24 10-24 26v28c0-6 3-8 5-12-3-6-3-12 0-16-3-6-2-12 4-14-2 8 1 14 6 16-4-6-4-12 0-16 3 6 6 10 9 10s6-4 9-10c4 4 4 10 0 16 5-2 8-8 6-16 6 2 7 8 4 14 3 4 3 10 0 16 2 4 5 6 5 12V56c0-16-8-26-24-26Z" fill={c} /> ) },
+  { key: 'ponytail', name: 'Ponytail', draw: (c) => (<G fill={c}>
+    <Path d="M74 46c8 2 12 12 10 24-2 10-8 14-12 12 6-12 6-24 2-32Z" />
+    <Path d="M29 56c-2-16 7-24 21-24s23 8 21 24c-2-12-9-16-21-16s-19 4-21 16Z" />
   </G>) },
-  { key: 'hijab', name: 'Hijab', draw: (c) => (
-    <Path d="M50 26c-19 0-30 14-30 34 0 16 6 28 12 40h12c-8-14-11-26-11-38 0-14 6-22 17-22s17 8 17 22c0 12-3 24-11 38h12c6-12 12-24 12-40 0-20-11-34-30-34Z" fill={c} /> ) },
+  { key: 'highbun', name: 'High bun', draw: (c) => (<G fill={c}>
+    <Circle cx="50" cy="21" r="11" />
+    <Path d="M29 56c-2-16 7-24 21-24s23 8 21 24c-2-12-9-16-21-16s-19 4-21 16Z" />
+  </G>) },
 ];
 
 const HAIR_BY_KEY = new Map(HAIR.map((h) => [h.key, h]));

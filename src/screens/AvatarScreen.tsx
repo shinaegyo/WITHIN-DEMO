@@ -124,16 +124,23 @@ export function AvatarScreen({
           ))}
         </View>
 
-        <Text style={[styles.label, { color: colors.textMuted }]}>YOU</Text>
+        {/* Out of the tone row, not in it. It is not a skin tone - it is the
+            choice not to have a face - and eleven cells in a five-wide grid
+            left one square stranded on a row of its own. Ten tones fill two
+            rows exactly. */}
+        <Pressable
+          onPress={() => { playTap(); setSkin(null); }}
+          style={[
+            styles.monogram,
+            { borderColor: skin === null ? colors.accent : colors.border },
+          ]}
+        >
+          <Avatar value={color} size={40} name={username} />
+          <Text style={[styles.monogramText, { color: colors.text }]}>Just my initial</Text>
+        </Pressable>
+
+        <Text style={[styles.label, { color: colors.textMuted }]}>SKIN</Text>
         <View style={styles.row}>
-          {/* The monogram first, because it is where everybody starts and the
-              way back for anybody who tries a face and would rather not. */}
-          <Pressable
-            onPress={() => { playTap(); setSkin(null); }}
-            style={[styles.cell, { borderColor: skin === null ? colors.accent : 'transparent' }]}
-          >
-            <Avatar value={color} size={52} name={username} />
-          </Pressable>
           {Object.keys(SKIN_TONES).map((key) => (
             <Pressable
               key={key}
@@ -210,7 +217,17 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 2, lineHeight: 17 },
   body: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 20 },
   subRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 22 },
+  monogram: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 2,
+    borderRadius: 16,
+    padding: 10,
+    marginBottom: 22,
+  },
+  monogramText: { fontSize: 14, fontFamily: fonts.extraBold },
   label: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
   swatch: { width: '18%', height: 32, borderRadius: 10, borderWidth: 3, borderColor: 'transparent' },
