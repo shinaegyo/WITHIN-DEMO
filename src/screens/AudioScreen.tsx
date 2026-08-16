@@ -31,6 +31,8 @@ import {
  * impossible.
  */
 export function AudioScreen() {
+  // Silent here alone. This screen drives the music itself, and a track of its
+  // own would fight the switch the moment somebody touched it.
   useTrack(null);
   const { colors } = useTheme();
   const [sfx, setSfx] = useState(soundEnabled());
@@ -127,6 +129,8 @@ export function AudioScreen() {
           //
           // Silence is still applied immediately, because switching music off
           // has to stop anything already playing.
+          // Silence applies at once; turning it on takes effect on the next
+          // screen, which is where music belongs.
           refreshMusic(null);
         }}
       />

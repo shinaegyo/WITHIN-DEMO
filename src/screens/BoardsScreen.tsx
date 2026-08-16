@@ -135,10 +135,9 @@ const TABS: { key: Board; label: string; note: string }[] = [
 ];
 
 export function BoardsScreen() {
-  // Silent. Music belongs to playing, not to the rooms around it - and it has
-  // to be asked for, because a screen that says nothing keeps whatever the
-  // last one started, so this kept a mode's track playing over a list.
-  useTrack(null);
+  // The calm track. Outside the games the app is not silent any more - it has
+  // its own room rather than the game's.
+  useTrack('home');
   const { colors } = useTheme();
   const [tab, setTab] = useState<Board>('today');
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});

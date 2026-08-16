@@ -13,10 +13,9 @@ const PAGE_PADDING = 40;
 
 /** Nothing in the game itself explains the colour system, so this screen does. */
 export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = {}) {
-  // Silent. Music belongs to playing, not to the rooms around it - and it has
-  // to be asked for, because a screen that says nothing keeps whatever the
-  // last one started, so this kept a mode's track playing over a list.
-  useTrack(null);
+  // The calm track. Outside the games the app is not silent any more - it has
+  // its own room rather than the game's.
+  useTrack('home');
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(0);
   const [heights, setHeights] = useState<number[]>([]);

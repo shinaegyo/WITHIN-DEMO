@@ -44,7 +44,7 @@ export function OnboardingScreen({
   // player waits for that press and starts then, which is the name field or
   // the button either way.
   useEffect(() => {
-    playTrack('game');
+    playTrack('home');
   }, []);
 
   const [step, setStep] = useState<Step>(mode === 'name' ? 'username' : 'account');
