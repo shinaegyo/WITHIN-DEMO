@@ -74,11 +74,13 @@ export function GamesScreen({
       label: 'The Impossible Climb',
       sub: 'A climb that keeps your place all week',
       status: status
-        ? status.impossible.sessionsLeft === 0 && status.impossible.lives === 0
-          ? `You are on level ${status.impossible.level}`
-          : status.impossible.sessionsLeft === 0
-            ? `Level ${status.impossible.level} · ${status.impossible.lives * 20}% health`
-            : `Level ${status.impossible.level} · ready`
+        ? status.impossible.summit
+          ? 'Topped out this week'
+          : status.impossible.sessionsLeft === 0 && status.impossible.health === 0
+            ? `You are on level ${status.impossible.level}`
+            : status.impossible.sessionsLeft === 0
+              ? `Level ${status.impossible.level} · ${status.impossible.health}% health`
+              : `Level ${status.impossible.level} · ready`
         : '',
       urgent: false,
       onPress: onImpossible,

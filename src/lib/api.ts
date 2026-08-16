@@ -614,7 +614,14 @@ export interface HomeStatus {
     beltHolder: string | null;
     iHoldBelt: boolean;
   };
-  impossible: { sessionsLeft: number; lives: number; level: number; best: number };
+  impossible: {
+    sessionsLeft: number;
+    /** 0 to 100. Zero with no sessions left is a day that is over. */
+    health: number;
+    summit: boolean;
+    level: number;
+    best: number;
+  };
   /** `played` means the clock ran out, not that a run exists. */
   rush: { played: boolean; running: boolean; found: number };
   /** `inside` separates a zero that was earned from a zero that missed. */
@@ -638,7 +645,10 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
     },
     impossible: {
       sessionsLeft: raw.impossible?.sessionsLeft ?? 0,
-      lives: raw.impossible?.lives ?? 0,
+      // 100 when the server predates 0117: a climb that looks alive and is not
+      // costs a tap, where one that looks spent and is not costs the day.
+      health: raw.impossible?.health ?? 100,
+      summit: !!raw.impossible?.summit,
       level: raw.impossible?.level ?? 1,
       best: raw.impossible?.best ?? 0,
     },
@@ -806,8 +816,17 @@ export async function duelGuess(duelId: string, guess: number) {
 export interface EndlessState {
   week: string;
   level: number;
-  /** Lives left in this session; a miss costs one and keeps your level. */
-  lives: number;
+  /**
+   * Health left today, 0 to 100. Running out of attempts costs the tier's fall
+   * - 10% on the ground, 50% in orbit - and keeps your level.
+   */
+  health: number;
+  /** What a fall costs at this level, so the screen can say so before it does. */
+  fall: number;
+  /** The climb is topped out for the week. */
+  summit: boolean;
+  /** Every guess this week, including ones spent on levels replayed. */
+  guessesUsed: number;
   sessionsLeft: number;
   inSession: boolean;
   attemptsUsed: number;
@@ -823,6 +842,9 @@ export interface EndlessEntry {
   name: string;
   avatar: string | null;
   depth: number;
+  /** Guesses spent this week — the tiebreak once people start topping out. */
+  guesses: number;
+  topped: boolean;
   isMe: boolean;
 }
 
@@ -833,7 +855,12 @@ export async function loadEndless(): Promise<EndlessState> {
   return {
     week: raw.week,
     level: raw.level,
-    lives: raw.lives ?? 0,
+    // Falls back to the old five-lives shape so a client that ships before
+    // 0117 runs still draws a health bar rather than a flat zero.
+    health: raw.health ?? (raw.lives ?? 0) * 20,
+    fall: raw.fall ?? 20,
+    summit: !!raw.summit,
+    guessesUsed: raw.guessesUsed ?? 0,
     sessionsLeft: raw.sessionsLeft ?? 0,
     inSession: !!raw.inSession,
     attemptsUsed: raw.attemptsUsed,
@@ -853,7 +880,13 @@ export async function endlessGuess(guess: number) {
   return {
     solved: !!raw.solved,
     lostLife: !!raw.lostLife,
-    lives: raw.lives ?? 0,
+    /** Health after this guess, 0 to 100. */
+    health: raw.health ?? (raw.lives ?? 0) * 20,
+    /** What the fall just cost, so the card can name the number. */
+    fall: raw.fall ?? 0,
+    /** Health handed back for a three-guess solve; 0 when none was. */
+    healed: raw.healed ?? 0,
+    summit: !!raw.summit,
     sessionOver: !!raw.sessionOver,
     /** Where the next session picks up when the last life goes: the arena floor. */
     restartsAt: (raw.restartsAt ?? null) as number | null,
@@ -1099,6 +1132,8 @@ export async function loadEndlessBoard(): Promise<EndlessEntry[]> {
     name: e.name,
     avatar: e.avatar ?? null,
     depth: e.depth,
+    guesses: e.guesses ?? 0,
+    topped: !!e.topped,
     isMe: !!e.is_me,
   }));
 }

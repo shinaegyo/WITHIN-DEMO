@@ -252,13 +252,16 @@ export function HomeScreen({
   // A climb with health already spent, or a day's session already opened, is
   // one somebody is in the middle of - Start would ask them to begin something
   // they never stopped.
-  const climbOpen = !!modes && modes.impossible.lives > 0 && modes.impossible.sessionsLeft === 0;
-  const climbDone = !!modes && modes.impossible.lives === 0 && modes.impossible.sessionsLeft === 0;
+  const climbOpen = !!modes && modes.impossible.health > 0 && modes.impossible.sessionsLeft === 0;
+  const climbDone =
+    !!modes && (modes.impossible.summit || (modes.impossible.health === 0 && modes.impossible.sessionsLeft === 0));
 
   const impossibleState = modes
-    ? modes.impossible.lives > 0 || modes.impossible.sessionsLeft > 0
-      ? `Level ${modes.impossible.level} · ${modes.impossible.lives * 20}% health`
-      : `You are on level ${modes.impossible.level}`
+    ? modes.impossible.summit
+      ? 'Topped out this week'
+      : modes.impossible.health > 0 || modes.impossible.sessionsLeft > 0
+        ? `Level ${modes.impossible.level} · ${modes.impossible.health}% health`
+        : `You are on level ${modes.impossible.level}`
     : 'A climb that keeps your place';
 
   /**

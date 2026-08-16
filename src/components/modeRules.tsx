@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
 import { ruleStyles } from './PagedRules';
-import { ARENAS } from '../theme/arenas';
+import { ARENAS, SUMMIT } from '../theme/arenas';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -215,34 +215,42 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>The Impossible Climb</H>
       <P first>
-        Numbers one after another, up to 100 of them, and everyone plays the same sequence this
-        week — so how far you got compares directly. It resets on Monday.
+        Fifty numbers, one after another, and everyone plays the same sequence this week — so how
+        far you got compares directly. It resets on Monday.
       </P>
-      <P>One clue per number, held back until only a few attempts remain.</P>
+      <P>One clue per number, and it gets sharper the higher you go.</P>
+      <P>
+        Clear level 50 and you have topped out. Everyone who finishes is ranked on guesses used,
+        so every wasted guess counts, including the ones down on the Ground.
+      </P>
     </>,
 
     <>
       <H>Health</H>
       <P first>
-        You start each day at 100%. Running out of attempts on a number costs 20% — not the climb.
-        The same number is waiting and you try it again.
+        You start each day at 100%. Running out of attempts on a number costs health — not the
+        climb. The same number is waiting and you try it again.
       </P>
       <P>
-        So five mistakes is the whole of it: 100, 80, 60, 40, 20. At zero you drop back to your last
-        checkpoint and start the day again from there.
+        What it costs depends on how high you are: 10% on the Ground, 50% in Orbit. Ten mistakes
+        down there, two up here.
+      </P>
+      <P>
+        Solve one in three guesses or fewer and you take 20% back. The easy tiers are where you
+        bank the health that carries you through the hard ones.
       </P>
     </>,
 
     <>
       <H>Checkpoints</H>
       <P first>
-        Every fifth level is a checkpoint — 5, 10, 15, 20 and so on — and the checkpoint is the
-        level you start tomorrow from.
+        Every fifth level is a checkpoint, and so is the first level of every tier — so a fall can
+        never cost you the tier you climbed into.
       </P>
-      <P>Clear level 32 and stop, and tomorrow begins at 30.</P>
+      <P>Clear level 27 and stop, and tomorrow begins at 25.</P>
       <P>
-        It is also where you land at zero health, so a fall costs at most four numbers however far
-        up you are.
+        It is also where you land at zero health. In Orbit there are only two, at 41 and 46: the
+        last stretch is the one place a fall costs more than four numbers.
       </P>
     </>,
 
@@ -263,8 +271,8 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     </>,
 
     <>
-      <H>The four tiers</H>
-      <P first>Deeper means fewer attempts.</P>
+      <H>The five tiers</H>
+      <P first>Ten levels each. Higher means fewer attempts and a costlier fall.</P>
       <TierTable />
       <P>Every number cleared pays 20 XP toward your level, and reaching a new tier pays 50.</P>
     </>,
@@ -280,6 +288,13 @@ function TierTable() {
   const { colors } = useTheme();
   return (
     <View style={[styles.table, { borderColor: colors.border }]}>
+      <View style={styles.row}>
+        <View style={styles.swatch} />
+        <Text style={[styles.tierName, { color: colors.textMuted }]}>TIER</Text>
+        <Text style={[styles.rowMid, { color: colors.textMuted }]}>LEVELS</Text>
+        <Text style={[styles.rowCol, { color: colors.textMuted }]}>TRIES</Text>
+        <Text style={[styles.rowEnd, { color: colors.textMuted }]}>FALL</Text>
+      </View>
       {ARENAS.map((a, i) => {
         const next = ARENAS[i + 1];
         return (
@@ -287,9 +302,10 @@ function TierTable() {
             <View style={[styles.swatch, { backgroundColor: a.background }]} />
             <Text style={[styles.tierName, { color: colors.text }]}>{a.name}</Text>
             <Text style={[styles.rowMid, { color: colors.textMuted }]}>
-              {a.from}–{next ? next.from - 1 : 100}
+              {a.from}–{next ? next.from - 1 : SUMMIT}
             </Text>
-            <Text style={[styles.rowEnd, { color: colors.text }]}>{a.attempts}</Text>
+            <Text style={[styles.rowCol, { color: colors.text }]}>{a.attempts}</Text>
+            <Text style={[styles.rowEnd, { color: colors.text }]}>−{a.fall}%</Text>
           </View>
         );
       })}
@@ -302,7 +318,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, gap: 10 },
   rowKey: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 62 },
   rowMid: { flex: 1, fontSize: 13.5, fontFamily: fonts.medium },
-  rowEnd: { fontSize: 14.5, fontFamily: fonts.extraBold },
+  rowCol: { width: 46, textAlign: 'right', fontSize: 13.5, fontFamily: fonts.bold },
+  rowEnd: { width: 52, textAlign: 'right', fontSize: 14.5, fontFamily: fonts.extraBold },
   swatch: { width: 14, height: 14, borderRadius: 4 },
-  tierName: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 104 },
+  tierName: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 96 },
 });

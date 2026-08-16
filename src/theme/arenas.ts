@@ -27,6 +27,17 @@ export interface Arena {
   from: number;
   attempts: number;
   /**
+   * What running out of attempts costs, as a percentage of health.
+   *
+   * The difficulty dial. Attempts only fall from 7 to 5 across the whole climb,
+   * because a tier where the colours cannot get you there is a coin toss rather
+   * than a hard tier - so what changes with altitude is the price of a mistake:
+   * ten falls on the ground, two in orbit.
+   */
+  fall: number;
+  /** The music this tier plays. One ladder for the sky and the sound. */
+  track: string;
+  /**
    * A darker blue for the stages whose ground is already blue. The standard
    * tile blue vanishes into a daylight sky, and a proximity colour that cannot
    * be seen is not a proximity colour.
@@ -56,31 +67,59 @@ export interface Arena {
 
 export const ARENAS: Arena[] = [
   {
-    key: 'ground', name: 'Ground', from: 1, attempts: 8, clueFrom: 1,
+    key: 'ground', name: 'Ground', from: 1, attempts: 7, fall: 10, clueFrom: 1,
+    track: 'climbGround',
     background: '#EDE7DC', backgroundDeep: '#DFD7C8', surface: '#FBF9F5',
     text: '#2A251C', muted: '#6F6757', accent: '#8A7A5E',
   },
   {
-    key: 'sky', name: 'Sky', from: 20, attempts: 7, clueFrom: 3,
+    key: 'sky', name: 'Sky', from: 11, attempts: 7, fall: 20, clueFrom: 1,
+    track: 'climbSky',
     background: '#C4DAF2', backgroundDeep: '#A6C6E8', surface: '#F0F6FD',
     text: '#17293A', muted: '#4A6884', accent: '#2F6BA8',
     below: '#2F5BC4',
   },
   {
-    key: 'strato', name: 'Stratosphere', from: 40, attempts: 6, clueFrom: 4,
+    key: 'strato', name: 'Stratosphere', from: 21, attempts: 6, fall: 30, clueFrom: 1,
+    track: 'climbStrato',
     background: '#2A3A72', backgroundDeep: '#1A2450', surface: '#16204A',
     text: '#EDF1FC', muted: '#9FAEDC', accent: '#7F9DEB',
     below: '#6E93FF',
   },
   {
-    key: 'orbit', name: 'Orbit', from: 80, attempts: 5, clueFrom: 5,
+    // Between the indigo and the black: the last of the colour, and the tier
+    // where a fall starts costing nearly half a day.
+    key: 'thin', name: 'Thin air', from: 31, attempts: 6, fall: 40, clueFrom: 1,
+    track: 'climbThin',
+    background: '#141C40', backgroundDeep: '#0A0F26', surface: '#101838',
+    text: '#E7ECFB', muted: '#8B99CC', accent: '#8AA4F2',
+    below: '#7EA0FF',
+  },
+  {
+    key: 'orbit', name: 'Orbit', from: 41, attempts: 5, fall: 50, clueFrom: 1,
+    track: 'climbOrbit',
     background: '#080A12', backgroundDeep: '#020306', surface: '#141A2B',
     text: '#EAEDF8', muted: '#7C86A8', accent: '#8FA6FF',
   },
 ];
 
+/** The top. Clearing it tops the climb out for the week. */
+export const SUMMIT = 50;
+
 export function arenaFor(level: number): Arena {
   let found = ARENAS[0];
   for (const a of ARENAS) if (level >= a.from) found = a;
   return found;
+}
+
+/** Where a fall puts you: every fifth level, and never out of your tier. */
+export function checkpointFor(level: number): number {
+  const every5 = level >= 46 ? 46 : level >= 41 ? 41 : Math.max(1, Math.floor(level / 5) * 5);
+  return Math.max(every5, arenaFor(level).from);
+}
+
+/** The next one up, for telling somebody what the current level is worth. */
+export function nextCheckpoint(level: number): number | null {
+  for (let n = level + 1; n <= SUMMIT; n++) if (checkpointFor(n) === n) return n;
+  return null;
 }

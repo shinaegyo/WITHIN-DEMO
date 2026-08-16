@@ -76,15 +76,16 @@ export function ImpossibleBoardScreen({
 
   const left = status?.impossible.sessionsLeft ?? null;
   const level = status?.impossible.level ?? 1;
-  const lives = status?.impossible.lives ?? 0;
+  const health = status?.impossible.health ?? 0;
+  const summit = !!status?.impossible.summit;
   // Once today's climb is started there are no sessions left, so sessionsLeft
   // alone would lock a player out of the run they are in the middle of. A day
   // is only over when the sessions and the lives are both gone.
-  const canClimb = left === null || left > 0 || lives > 0;
+  const canClimb = !summit && (left === null || left > 0 || health > 0);
   // Leaving mid-climb costs nothing, so the button has to say which of the two
   // it is about to do. "Climb" on a session already open reads as though it
   // might spend something, and nobody should have to press it to find out.
-  const resuming = left === 0 && lives > 0;
+  const resuming = left === 0 && health > 0;
   const { shown, hidden, breakAt } = topTen(rows, expanded);
 
   return (
@@ -131,10 +132,21 @@ export function ImpossibleBoardScreen({
             {e.name}
           </Text>
 
-          <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
-          <Text style={[styles.unit, { color: colors.textMuted }]}>
-            {e.depth === 1 ? 'number' : 'numbers'}
-          </Text>
+          {/* A summit is depth 50 for everybody who reaches it, so the number
+              stops separating them and the guess count starts. */}
+          {e.topped ? (
+            <>
+              <Text style={[styles.topped, { color: colors.accent }]}>TOPPED OUT</Text>
+              <Text style={[styles.unit, { color: colors.textMuted }]}>{e.guesses} guesses</Text>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
+              <Text style={[styles.unit, { color: colors.textMuted }]}>
+                {e.depth === 1 ? 'number' : 'numbers'}
+              </Text>
+            </>
+          )}
         </View>
         </React.Fragment>
         ))}
@@ -161,8 +173,8 @@ export function ImpossibleBoardScreen({
       {/* The way in sits under the standings rather than replacing them. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
         <Text style={[styles.best, { color: colors.textMuted }]}>
-          {`You are on level ${level}`}
-          {left !== 0 && lives > 0 ? ` · ${lives * 20}% health` : ''}
+          {summit ? 'You topped out this week' : `You are on level ${level}`}
+          {!summit && left !== 0 && health > 0 ? ` · ${health}% health` : ''}
         </Text>
         <Pressable
           onPress={async () => {
@@ -193,11 +205,13 @@ export function ImpossibleBoardScreen({
           <Text
             style={[styles.playText, { color: canClimb ? colors.background : colors.textMuted }]}
           >
-            {!canClimb
-              ? "Today's climb is done"
-              : resuming
-                ? `Resume · ${lives * 20}% health`
-                : 'Start'}
+            {summit
+              ? 'Topped out'
+              : !canClimb
+                ? "Today's climb is done"
+                : resuming
+                  ? `Resume · ${health}% health`
+                  : 'Start'}
           </Text>
         </Pressable>
       </View>
@@ -239,5 +253,6 @@ const styles = StyleSheet.create({
   name: { flex: 1, fontSize: 15, fontFamily: fonts.bold },
   nameMe: { fontFamily: fonts.extraBold },
   depth: { fontSize: 17, fontFamily: fonts.extraBold },
+  topped: { fontSize: 12.5, fontFamily: fonts.extraBold, letterSpacing: 0.4 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
 });

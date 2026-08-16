@@ -21,7 +21,7 @@ import {
   startEndlessSession,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
-import { arenaFor } from '../theme/arenas';
+import { arenaFor, checkpointFor, nextCheckpoint, SUMMIT } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
 import { climbTrack } from '../utils/climbTrack';
@@ -49,9 +49,12 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [over, setOver] = useState<
     {
       answer: number | null;
-      depth: number;
+      /** Health after the fall. */
+      health: number;
+      /** What the fall cost, which differs by tier: 10% down here, 50% up top. */
+      cost: number;
       sessionOver: boolean;
-      /** Set only on the last life: the level the next session starts from. */
+      /** Set only when health runs out: the level the next session starts from. */
       restartsAt: number | null;
     } | null
   >(null);
@@ -127,7 +130,8 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
           playLose();
           setOver({
             answer: res.answer,
-            depth: res.lives,
+            health: res.health,
+            cost: res.fall,
             sessionOver: res.sessionOver,
             restartsAt: res.restartsAt,
           });
@@ -162,6 +166,42 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const arena = arenaFor(devStageLevel() ?? state.level);
   const hairline = 'rgba(255, 255, 255, 0.18)';
 
+  // Topped out: there is no next number, and the screen should not pretend
+  // there is by showing an empty board with a keypad under it.
+  if (state.summit) {
+    return (
+      <SafeAreaView style={[styles.safe, { backgroundColor: arena.background }]} edges={['top', 'bottom']}>
+        <LinearGradient
+          colors={[arena.background, arena.backgroundDeep]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        <View style={styles.content}>
+          <View style={styles.head}>
+            <BackButton color={arena.text} onPress={onExit} />
+          </View>
+          <View style={styles.result}>
+            <Text style={[styles.arenaName, { color: arena.accent }]}>THE SUMMIT</Text>
+            <Text style={[styles.overHit, { color: arena.text }]}>TOPPED OUT!</Text>
+            <Text style={[styles.overBody, { color: arena.muted }]}>
+              All {SUMMIT} levels, in {state.guessesUsed} guesses. Everyone who finishes this week
+              ranks on that number, so it is the one to beat.
+            </Text>
+            <Pressable
+              onPress={onExit}
+              style={({ pressed }) => [
+                styles.again,
+                { backgroundColor: arena.text, opacity: pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Text style={[styles.againText, { color: arena.background }]}>See the board</Text>
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: arena.background }]} edges={['top', 'bottom']}>
       {/* The light drains downward rather than sitting flat, so the deep end of
@@ -191,11 +231,11 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 <View
                   style={[
                     styles.healthFill,
-                    { backgroundColor: arena.muted, width: `${(state.lives / 5) * 100}%` },
+                    { backgroundColor: arena.muted, width: `${state.health}%` },
                   ]}
                 />
               </View>
-              <Text style={[styles.badge, { color: arena.muted }]}>{state.lives * 20}%</Text>
+              <Text style={[styles.badge, { color: arena.muted }]}>{state.health}%</Text>
             </View>
           </View>
 
@@ -229,14 +269,25 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               {/* The checkpoint, said at the only moment it is about to matter.
                   It is the one rule that decides what a day is worth, and it
                   was written down once on a screen nobody reads twice. */}
+              {/* Checkpoints are no longer every fifth level flat: a tier floor
+                  is one too, so climbing into Stratosphere cannot be undone by
+                  a single fall. Asking the same function the game asks is the
+                  only way this line stays true. */}
               <Text style={[styles.checkpoint, { color: arena.text }]}>
-                {solved.level % 5 === 0
-                  ? `Checkpoint. Tomorrow starts you at level ${solved.level} — next one at ${solved.level + 5}.`
-                  : 5 - (solved.level % 5) === 1
-                    ? `One more level to the checkpoint at ${solved.level + 1}.`
-                    : `${5 - (solved.level % 5)} levels to the checkpoint at ${
-                        solved.level + (5 - (solved.level % 5))
-                      }.`}
+                {(() => {
+                  const here = checkpointFor(solved.level);
+                  const next = nextCheckpoint(solved.level);
+                  if (here === solved.level) {
+                    return next
+                      ? `Checkpoint. Tomorrow starts you at level ${solved.level} — next one at ${next}.`
+                      : `Checkpoint. Tomorrow starts you at level ${solved.level}.`;
+                  }
+                  if (!next) return `Checkpoint held at level ${here}.`;
+                  const away = next - solved.level;
+                  return away === 1
+                    ? `One more level to the checkpoint at ${next}.`
+                    : `${away} levels to the checkpoint at ${next}.`;
+                })()}
               </Text>
             </View>
           ) : over ? (
@@ -259,7 +310,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   asked for. */}
               <Text style={[styles.overBody, { color: arena.muted }]}>
                 {!over.sessionOver
-                  ? `Down to ${over.depth * 20}% health.`
+                  ? `That cost ${over.cost}%. Down to ${over.health}% health.`
                   : weekOver
                     ? `You got to level ${state.level}.`
                     : `Your next climb starts at level ${over.restartsAt ?? 1}. See you tomorrow.`}
@@ -304,7 +355,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 <Text style={[styles.level, { color: arena.text }]}>{state.level}</Text>
                 {/* "Numbers deep" was jargon. The goal and the ceiling, plainly. */}
                 <Text style={[styles.levelLabel, { color: arena.muted }]}>
-                  {arena.name.toUpperCase()} · LEVEL {state.level} OF 100
+                  {arena.name.toUpperCase()} · LEVEL {state.level} OF {SUMMIT}
                 </Text>
               </View>
 
