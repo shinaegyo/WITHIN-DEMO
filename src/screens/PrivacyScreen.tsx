@@ -5,9 +5,12 @@ import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 
-/** Fill this in before pointing any advertising at the game. */
-const CONTACT = 'within.thegame@gmail.com';
-const UPDATED = '14 August 2026';
+/**
+ * The address App Review writes to, and the one a player uses to ask for their
+ * data back. It has to be a mailbox somebody reads.
+ */
+const CONTACT = 'jamessshin4@gmail.com';
+const UPDATED = '15 August 2026';
 
 /**
  * What the game keeps, in the words a player would use.
