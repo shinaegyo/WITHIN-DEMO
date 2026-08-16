@@ -10,6 +10,8 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
+import { useContext } from 'react';
+import { NavigationContext } from '@react-navigation/native';
 import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { PRACTICE_PER_DAY, practiceRemaining } from '../utils/practiceLimit';
 import { shareInvite, shareResult } from '../utils/share';
@@ -74,6 +76,26 @@ export function HomeScreen({
   // The calm track. Outside the games the app is not silent any more - it has
   // its own room rather than the game's.
   useTrack('home');
+
+  /**
+   * Re-read the modes whenever this screen comes back.
+   *
+   * They were fetched on mount and on the day's score changing, and a tab
+   * screen mounts once - so losing all your health in a climb and coming home
+   * left the tile saying 80% and offering Continue, describing a run that had
+   * already ended. Everything on this block is somebody else's screen's state.
+   *
+   * Focus is an addition rather than a requirement, the same way useTrack does
+   * it: without a navigator above, the mount fetch still stands.
+   */
+  const nav = useContext(NavigationContext);
+  useEffect(() => {
+    if (!nav) return;
+    return nav.addListener('focus', () => {
+      loadHomeStatus().then(setModes).catch(() => {});
+      loadXp().then(setXp).catch(() => {});
+    });
+  }, [nav]);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);

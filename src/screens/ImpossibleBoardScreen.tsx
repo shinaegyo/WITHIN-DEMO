@@ -4,7 +4,6 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
-import { PagedRules, RulesButton } from '../components/PagedRules';
 import { impossibleRules } from '../components/modeRules';
 import {
   ApiError,
@@ -51,7 +50,6 @@ export function ImpossibleBoardScreen({
   const [rows, setRows] = useState<EndlessEntry[] | null>(null);
   const [status, setStatus] = useState<HomeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -70,7 +68,6 @@ export function ImpossibleBoardScreen({
   }, [load]);
 
   // The rulebook takes the whole screen rather than sitting under it.
-  if (rules) return <PagedRules title="How The Impossible Climb works" onBack={() => setRules(false)} sections={impossibleRules()} />;
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!rows) return <StatusScreen loading />;
@@ -145,7 +142,16 @@ export function ImpossibleBoardScreen({
             app is furniture standing between the player and the only thing on
             the screen worth reading. It scrolls; that is what scrolling is
             for. */}
-        <RulesButton onPress={() => setRules(true)} />
+        {/* Set out rather than hidden behind a button. Start is meant to be
+            the only thing on this screen that answers a press, and deleting
+            the rules to achieve that would have left the mode's rules
+            unreachable from the screen you land on. */}
+        <Text style={[styles.rulesHead, { color: colors.text }]}>How it works</Text>
+        {impossibleRules().map((section, i) => (
+          <View key={i} style={i === 0 ? undefined : styles.ruleGap}>
+            {section}
+          </View>
+        ))}
       </ScrollView>
 
       {/* The way in sits under the standings rather than replacing them. */}
@@ -200,7 +206,8 @@ export function ImpossibleBoardScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 16, gap: 8, paddingBottom: 20 },
-  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 8 },
+  rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 10 },
+  ruleGap: { marginTop: 20 },
   rule: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 10 },
   tiers: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 2, marginBottom: 12 },
   tierRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 12, gap: 10 },
