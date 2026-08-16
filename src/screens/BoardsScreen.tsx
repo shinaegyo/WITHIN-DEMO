@@ -144,6 +144,9 @@ export function BoardsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
   const [explain, setExplain] = useState<Board | null>(null);
+  // Two different questions. The header asks what the column is; the score asks
+  // what mine was. The second does not want the first one's paragraph.
+  const [mine, setMine] = useState(false);
   // Not a fourth tab: friends is a filter on all three windows, not a window of
   // its own. Today among friends is the one people check every morning.
   const [friends, setFriends] = useState(false);
@@ -438,7 +441,7 @@ export function BoardsScreen() {
         <Pressable
           onPress={() => {
             playTap();
-            setExplain('today');
+            setMine(true);
           }}
           style={[styles.mine, { borderColor: colors.border }]}
         >
@@ -671,20 +674,36 @@ export function BoardsScreen() {
 
       <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
 
-      <Modal visible={explain !== null} transparent animationType="fade" onRequestClose={() => setExplain(null)}>
-        <Pressable style={styles.scrim} onPress={() => setExplain(null)}>
+      <Modal
+        visible={explain !== null || mine}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setExplain(null);
+          setMine(false);
+        }}
+      >
+        <Pressable
+          style={styles.scrim}
+          onPress={() => {
+            setExplain(null);
+            setMine(false);
+          }}
+        >
           <Pressable
             style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => {}}
           >
-            {/* One sheet: today, the season and all time all break ties on
-                the same measure, so there is one thing to explain. */}
-            <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
-            {tab === 'today' && !!today?.me && (
+            {/* Your own figure and nothing else. The column header has the
+                explanation; repeating it here answers a question that was not
+                asked. */}
+            {mine ? (
               <Text style={[styles.sheetLead, { color: colors.text }]}>
-                Your guesses landed {today.me.avgOff} away on average.
+                Your guesses landed {today?.me?.avgOff ?? 0} away on average.
               </Text>
-            )}
+            ) : (
+            <>
+            <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
             <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
               How far a typical guess landed from the answer, counting every guess you made.
             </Text>
@@ -703,7 +722,16 @@ export function BoardsScreen() {
               Lower is better. When two players finish level on points, the closer guesses rank
               higher.
             </Text>
-            <Pressable onPress={() => { playTap(); setExplain(null); }} style={styles.sheetClose}>
+            </>
+            )}
+            <Pressable
+              onPress={() => {
+                playTap();
+                setExplain(null);
+                setMine(false);
+              }}
+              style={styles.sheetClose}
+            >
               <Text style={[styles.sheetCloseText, { color: colors.text }]}>Got it</Text>
             </Pressable>
           </Pressable>
