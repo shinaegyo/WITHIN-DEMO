@@ -90,16 +90,30 @@ export function GamesScreen({
     {
       label: 'Window',
       sub: 'Three probes, then how sure are you?',
-      status: 'One a day',
+      // What happened, once it has. "One a day" is a rule, and a rule is only
+      // worth saying while it still governs something you can do.
+      status: status?.window.played
+        ? status.window.inside
+          ? `${status.window.score} points`
+          : 'Missed today'
+        : 'One a day',
       urgent: false,
       onPress: onWindow,
+      spent: !!status?.window.played,
     },
     {
       label: 'Rush',
       sub: 'Three minutes, as many numbers as you can find',
-      status: 'One run a day',
-      urgent: false,
+      // A run still on the clock is the one case that must stay pressable -
+      // somebody who left mid-run has to be able to get back to it.
+      status: status?.rush.running
+        ? 'Still running'
+        : status?.rush.played
+          ? `${status.rush.found} found`
+          : 'One run a day',
+      urgent: !!status?.rush.running,
       onPress: onRush,
+      spent: !!status?.rush.played,
     },
   ];
 
