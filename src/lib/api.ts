@@ -253,6 +253,39 @@ export async function deleteMyAccount(): Promise<void> {
   unwrap<{ ok: true }>(data, error);
 }
 
+/**
+ * Where to send this player's reminder, and when they want it.
+ *
+ * The hour is the player's own, in their own timezone: one push at 3am costs
+ * the permission forever, and the permission cannot be asked for twice.
+ */
+export async function registerPushToken(token: string, platform: 'ios' | 'android'): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('register_push_token', {
+    p_token: token,
+    p_platform: platform,
+  });
+  unwrap<{ ok: true }>(data, error);
+}
+
+export interface ReminderPrefs {
+  daily: boolean;
+  /** 0-23, in the player's own timezone. */
+  hour: number;
+  streak: boolean;
+}
+
+export async function setReminders(prefs: Partial<ReminderPrefs>): Promise<ReminderPrefs> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('set_reminders', {
+    p_daily: prefs.daily ?? null,
+    p_hour: prefs.hour ?? null,
+    p_streak: prefs.streak ?? null,
+  });
+  const raw = unwrap<any>(data, error);
+  return { daily: !!raw.daily, hour: raw.hour ?? 19, streak: !!raw.streak };
+}
+
 /** Ends the day deliberately, which is what makes the answer safe to show. */
 export async function giveUp(): Promise<boolean> {
   const { data, error } = await supabase.rpc('give_up');

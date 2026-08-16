@@ -37,6 +37,7 @@ export function ProfileScreen({
   onAvatar,
   onAccount,
   onAudio,
+  onReminders,
   onHowToPlay,
   onPrivacy,
 }: {
@@ -45,6 +46,7 @@ export function ProfileScreen({
   onAvatar: () => void;
   onAccount: () => void;
   onAudio: () => void;
+  onReminders: () => void;
   onHowToPlay: () => void;
   onPrivacy: () => void;
 }) {
@@ -185,6 +187,11 @@ export function ProfileScreen({
       <View style={styles.rows}>
         <Row label="How to play" detail="The rules, in full" onPress={onHowToPlay} />
         <Row label="Audio" detail="Sound effects, music, and how loud each is" onPress={onAudio} />
+        <Row
+          label="Reminders"
+          detail="One nudge a day, at an hour you pick"
+          onPress={onReminders}
+        />
         <Pressable
           onPress={() => {
             playTap();

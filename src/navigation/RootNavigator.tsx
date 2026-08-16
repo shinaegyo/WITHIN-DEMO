@@ -41,6 +41,7 @@ import { BoardsScreen } from '../screens/BoardsScreen';
 import { DailyFirstScreen } from '../screens/DailyFirstScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
 import { AudioScreen } from '../screens/AudioScreen';
+import { RemindersScreen } from '../screens/RemindersScreen';
 import { AvatarScreen } from '../screens/AvatarScreen';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -55,6 +56,7 @@ export type RootStackParamList = {
   ImpossibleBoard: undefined;
   Privacy: undefined;
   Audio: undefined;
+  Reminders: undefined;
   Avatar: undefined;
   Endless: undefined;
   Rush: undefined;
@@ -330,6 +332,7 @@ function Screens({
                     onAvatar={() => navigation.navigate('Avatar')}
                     onAccount={() => navigation.navigate('Account')}
                     onAudio={() => navigation.navigate('Audio')}
+                    onReminders={() => navigation.navigate('Reminders')}
                     onHowToPlay={() => navigation.navigate('HowToPlay')}
                     onPrivacy={() => navigation.navigate('Privacy')}
                   />
@@ -435,6 +438,12 @@ function Screens({
           name="Audio"
           options={{ title: 'Audio', headerBackTitle: 'Back' }}
           component={AudioScreen}
+        />
+
+        <Stack.Screen
+          name="Reminders"
+          options={{ title: 'Reminders', headerBackTitle: 'Back' }}
+          component={RemindersScreen}
         />
 
         <Stack.Screen name="Ranked" options={{ title: 'Ranked', headerBackTitle: 'Back' }}>
