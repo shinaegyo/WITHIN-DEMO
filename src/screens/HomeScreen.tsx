@@ -217,6 +217,70 @@ export function HomeScreen({
 
 
 
+  // The tints. Drained a long way down from the board's own green and red, so
+  // the card reads as ink with a hint rather than as two loud bars.
+  const roundTint = { won: '#E8F1EA', lost: '#F7EAE7' };
+  const roundEdge = { won: '#5E9B70', lost: '#C08074' };
+  const roundInk = { won: '#2F5C3E' };
+
+  const impossibleState = modes
+    ? modes.impossible.lives > 0 || modes.impossible.sessionsLeft > 0
+      ? `Level ${modes.impossible.level} · ${modes.impossible.lives} ${modes.impossible.lives === 1 ? 'life' : 'lives'}`
+      : `Level ${modes.impossible.level} · back tomorrow`
+    : 'A climb that keeps your place';
+
+  /**
+   * One line each, and always the same kind of fact.
+   *
+   * Ready is doing real work: it says you can do this now, which is the only
+   * thing a shortcut has to say. What the mode *is* belongs in the Games tab
+   * and the rules, not on a home screen nobody reads four modes of.
+   */
+  const modeTiles = [
+    {
+      name: 'Rush',
+      state: !modes ? 'Ready' : modes.rush.running ? 'In progress' : modes.rush.played ? `${modes.rush.found} found` : 'Ready',
+      live: !!modes?.rush.running,
+      go: onOpenRanked,
+    },
+    {
+      name: 'Window',
+      // A missed window is genuinely zero, and "0 points" with nothing beside
+      // it is bleak. The server tells us which zero this is.
+      state: !modes ? 'Ready' : modes.window.played ? (modes.window.inside ? `${modes.window.score} points` : 'Missed') : 'Ready',
+      live: false,
+      go: onOpenRanked,
+    },
+    {
+      name: 'Duel',
+      // Two words. A third of a phone width is not enough for a sentence, and
+      // "Challenge a fri…" is worse than saying less.
+      state: modes && modes.duelsWaiting > 0 ? `${modes.duelsWaiting} waiting` : 'Start one',
+      live: !!modes && modes.duelsWaiting > 0,
+      go: onOpenDuels,
+    },
+  ];
+
+  /**
+   * One thing to try, not a list.
+   *
+   * Untried modes first, because the boards say the problem is discovery
+   * rather than appetite - the daily had twenty-four finishers today and
+   * Window had four. It disappears when there is nothing untried and nothing
+   * pending: a screen that always has an ask is one people learn to skim.
+   */
+  const suggestion = (() => {
+    if (!modes || !finished) return null;
+    if (!modes.window.played && !modes.window.started) {
+      return 'You have not tried Window yet — three probes, then say how sure you are.';
+    }
+    if (!modes.rush.played && !modes.rush.running) {
+      return 'Rush is still open today — three minutes, one run.';
+    }
+    if (modes.duelsWaiting > 0) return 'A duel is waiting on your move.';
+    return null;
+  })();
+
   const lastHour = !finished && remaining < 60 * 60 * 1000;
 
   // Finishing the day turns the button into the share, which is the only thing
@@ -293,47 +357,128 @@ export function HomeScreen({
 
         {started ? (
           <>
-            <Text style={[styles.status, { color: colors.textMuted }]}>{status}</Text>
+            {/* The day in one card. It used to be a column of small things -
+                score, chips, two stat boxes, a button - each its own island
+                with two hundred points of nothing beneath them. A centred
+                layout needs mass to hold the middle and there was none. */}
+            <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+              <View style={styles.cardHead}>
+                <Text style={[styles.cardLabel, { color: colors.textMuted }]}>{status}</Text>
+                {finished && (
+                  <Pressable onPress={onPrimary} hitSlop={8}>
+                    <Text style={[styles.shareLink, { color: colors.text }]}>Share</Text>
+                  </Pressable>
+                )}
+              </View>
 
-            {/* No denominator. It read as a shortfall against a maximum almost
-                nobody reaches, and once a Bonus day multiplies the total the
-                figure to measure against changes too — so the number stopped
-                meaning anything at a glance. The score alone is the thing
-                worth knowing. */}
-            <Text style={[styles.score, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-              {game.totalScore}
-            </Text>
-            <Text style={[styles.scoreMax, { color: colors.textMuted }]}>
-              {game.totalScore === 1 ? 'POINT' : 'POINTS'}
-            </Text>
+              <View style={styles.scoreLine}>
+                <Text style={[styles.score, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+                  {game.totalScore}
+                </Text>
+                <Text style={[styles.scoreUnit, { color: colors.textMuted }]}>
+                  {game.totalScore === 1 ? 'point' : 'points'}
+                </Text>
+              </View>
 
-            {/* Same reading as the in-game progress bar: green solved with its
-                score, red lost, grey not reached. */}
-            <View style={styles.chips}>
-              {[1, 2, 3].map((n) => {
-                const r = byRound.get(n);
-                const won = r?.status === 'won';
-                const lost = r?.status === 'lost';
-                return (
-                  <View
-                    key={n}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor: won
-                          ? feedbackColors.correct
-                          : lost
-                            ? feedbackColors.oneAway
-                            : colors.border,
-                      },
-                    ]}
+              {/* Colour drained right down, with the ink doing the reading.
+                  Blue and red already mean "go higher" and "go lower" on every
+                  tile in the game; full-strength green and red here gave red
+                  two jobs on two screens. */}
+              <View style={styles.chips}>
+                {[1, 2, 3].map((n) => {
+                  const r = byRound.get(n);
+                  const won = r?.status === 'won';
+                  const lost = r?.status === 'lost';
+                  return (
+                    <View
+                      key={n}
+                      style={[
+                        styles.chip,
+                        { backgroundColor: won ? roundTint.won : lost ? roundTint.lost : colors.surfaceAlt },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.chipEdge,
+                          { backgroundColor: won ? roundEdge.won : lost ? roundEdge.lost : colors.border },
+                        ]}
+                      />
+                      <Text style={[styles.chipText, { color: won ? roundInk.won : colors.textMuted }]}>
+                        {won ? r?.score : ''}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+
+              <View style={[styles.cardRule, { backgroundColor: colors.border }]} />
+              <View style={styles.cardFoot}>
+                <Text style={[styles.footText, { color: colors.textMuted }]}>
+                  {game.stats.currentStreak} day streak
+                </Text>
+                <Text style={[styles.footText, { color: colors.textMuted }]}>
+                  {game.stats.totalPoints.toLocaleString()} all time
+                </Text>
+              </View>
+            </View>
+
+            {/* Named, because somebody arriving for the first time reads a
+                daily puzzle and does not know there is anything else here. */}
+            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>MORE GAMES</Text>
+
+            {suggestion && (
+              <Text style={[styles.suggestion, { color: colors.text }]}>{suggestion}</Text>
+            )}
+
+            {/* Impossible gets the width, because it is the one with unfinished
+                business - a level and lives waiting is a reason to come back,
+                where a name on a door is not. */}
+            <Pressable
+              onPress={() => {
+                playTap();
+                onEndless();
+              }}
+              style={({ pressed }) => [
+                styles.featured,
+                { backgroundColor: colors.text, opacity: pressed ? 0.88 : 1 },
+              ]}
+            >
+              <View style={styles.featuredMain}>
+                <Text style={[styles.featuredName, { color: colors.background }]}>Impossible</Text>
+                <Text style={[styles.featuredState, { color: colors.background }]}>
+                  {impossibleState}
+                </Text>
+              </View>
+              <View style={[styles.featuredGo, { backgroundColor: colors.background }]}>
+                <Text style={[styles.featuredGoText, { color: colors.text }]}>Climb</Text>
+              </View>
+            </Pressable>
+
+            {/* One line each, and always the same kind of fact: what is true
+                for you right now. A description and a state stacked with no
+                grammar between them read as neither. */}
+            <View style={styles.tiles}>
+              {modeTiles.map((t) => (
+                <Pressable
+                  key={t.name}
+                  onPress={() => {
+                    playTap();
+                    t.go();
+                  }}
+                  style={({ pressed }) => [
+                    styles.tile,
+                    { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 },
+                  ]}
+                >
+                  <Text style={[styles.tileName, { color: colors.text }]}>{t.name}</Text>
+                  <Text
+                    style={[styles.tileState, { color: t.live ? colors.accent : colors.textMuted }]}
+                    numberOfLines={1}
                   >
-                    {/* A lost round is a red bar and nothing else. The cross
-                        said the same thing twice, in the harsher voice. */}
-                    <Text style={styles.chipText}>{won ? r?.score : ''}</Text>
-                  </View>
-                );
-              })}
+                    {t.state}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
           </>
         ) : (
@@ -343,45 +488,32 @@ export function HomeScreen({
               <Wordmark size={58} color={colors.text} />
             </View>
             <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
+
+            <View style={styles.statRow}>
+              <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+                <Text style={[styles.statValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
+              </View>
+              <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+                <Text style={[styles.statValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+                  {game.stats.totalPoints.toLocaleString()}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>ALL TIME</Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.primary,
+                styles.primaryWide,
+                { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+              ]}
+              onPress={onPrimary}
+            >
+              <Text style={[styles.primaryText, { color: colors.background }]}>{primaryLabel}</Text>
+            </Pressable>
           </>
         )}
-
-        {/* Three modes, each saying what is true right now rather than sitting
-            there as a door with a name on it. Whether a friend is waiting on
-            your number is the reason to open one of these, and it was the one
-            thing the screen would not tell you. */}
-
-        <View style={styles.statRow}>
-          <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-            <Text style={[styles.statValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
-          </View>
-          <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-            <Text style={[styles.statValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-              {game.stats.totalPoints.toLocaleString()}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>ALL TIME</Text>
-          </View>
-        </View>
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.primary,
-            finished ? styles.primaryHug : styles.primaryWide,
-            { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
-          ]}
-          onPress={onPrimary}
-        >
-          <Text
-            style={[
-              styles.primaryText,
-              finished && styles.primaryTextHug,
-              { color: colors.background },
-            ]}
-          >
-            {primaryLabel}
-          </Text>
-        </Pressable>
 
         {shareNote && (
           <Text
@@ -471,6 +603,42 @@ const styles = StyleSheet.create({
     // the pinned clock.
     paddingBottom: 72,
   },
+  card: {
+    alignSelf: 'stretch',
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 18,
+    gap: 12,
+  },
+  cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cardLabel: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.5 },
+  shareLink: { fontSize: 12.5, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
+  scoreLine: { flexDirection: 'row', alignItems: 'baseline', gap: 9 },
+  scoreUnit: { fontSize: 14, fontFamily: fonts.bold },
+  cardRule: { height: 1, alignSelf: 'stretch' },
+  cardFoot: { flexDirection: 'row', justifyContent: 'space-between' },
+  footText: { fontSize: 11.5, fontFamily: fonts.medium },
+  sectionLabel: { alignSelf: 'flex-start', fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.5, marginTop: 26 },
+  suggestion: { alignSelf: 'stretch', fontSize: 13, fontFamily: fonts.semiBold, lineHeight: 19, marginTop: 8 },
+  featured: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginTop: 10,
+  },
+  featuredMain: { flexShrink: 1, gap: 3 },
+  featuredName: { fontSize: 16, fontFamily: fonts.extraBold },
+  featuredState: { fontSize: 11, fontFamily: fonts.medium, opacity: 0.72 },
+  featuredGo: { borderRadius: 11, paddingHorizontal: 15, paddingVertical: 8 },
+  featuredGoText: { fontSize: 12.5, fontFamily: fonts.extraBold },
+  tiles: { alignSelf: 'stretch', flexDirection: 'row', gap: 8, marginTop: 8 },
+  tile: { flex: 1, minWidth: 0, borderWidth: 1, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 11, gap: 5 },
+  tileName: { fontSize: 13, fontFamily: fonts.extraBold },
+  tileState: { fontSize: 10, fontFamily: fonts.semiBold },
   brand: { alignItems: 'center', gap: 10 },
   headerBrand: {
     position: 'absolute',
@@ -553,12 +721,16 @@ const styles = StyleSheet.create({
   },
   chip: {
     flex: 1,
-    height: 44,
-    borderRadius: 6,
+    height: 40,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  chipText: { color: '#FFFFFF', fontSize: 11, fontFamily: fonts.extraBold },
+  // The colour is one edge rather than the whole tile, which is what lets the
+  // score be read in ink instead of in white on green.
+  chipEdge: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3.5 },
+  chipText: { fontSize: 12, fontFamily: fonts.extraBold },
   tagline: {
     fontSize: 14,
     fontFamily: fonts.medium,
