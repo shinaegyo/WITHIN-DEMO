@@ -403,7 +403,13 @@ export function BoardsScreen() {
           well - so this says how you did rather than what number you are, and
           states the tie instead of hiding it. */}
       {tab === 'season' && season && (
-        <View style={[styles.mine, { borderColor: colors.border }]}>
+        <Pressable
+          onPress={() => {
+            playTap();
+            setSheet({ kind: 'mine' });
+          }}
+          style={[styles.mine, { borderColor: colors.border }]}
+        >
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
             {season.me ? standing(season.me, season.totalPlayers, 'THIS SEASON') : 'NOT ON THIS SEASON YET'}
           </Text>
@@ -415,15 +421,17 @@ export function BoardsScreen() {
           </View>
           {/* The countdown is the whole reason a season is different from a
               running total: it is the thing that makes the last week matter. */}
-          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {seasonName(season.season)} ends in {daysLeft(season.endsOn)}
-            {season.me ? ` · ${season.me.days} played, ${season.me.avgOff} avg off` : ' · play one to join it'}
-          </Text>
-        </View>
+        </Pressable>
       )}
 
       {tab === 'alltime' && allTime?.me && (
-        <View style={[styles.mine, { borderColor: colors.border }]}>
+        <Pressable
+          onPress={() => {
+            playTap();
+            setSheet({ kind: 'mine' });
+          }}
+          style={[styles.mine, { borderColor: colors.border }]}
+        >
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
             {standing(allTime.me, allTime.totalPlayers, 'ALL TIME')}
           </Text>
@@ -433,11 +441,7 @@ export function BoardsScreen() {
             </Text>
             <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
           </View>
-          <Text style={[styles.mineNote, { color: colors.textMuted }]}>
-            {allTime.me.daysPlayed} {allTime.me.daysPlayed === 1 ? 'day' : 'days'} played, and your
-            guesses landed {allTime.me.avgOff} away on average.
-          </Text>
-        </View>
+        </Pressable>
       )}
 
       {tab === 'today' && today?.me && (
@@ -699,9 +703,36 @@ export function BoardsScreen() {
                 while it fades - so closing the personal sheet rendered the
                 column explanation on the way out. */}
             {sheet?.kind === 'mine' ? (
-              <Text style={[styles.sheetLead, { color: colors.text }]}>
-                Your guesses landed {today?.me?.avgOff ?? 0} away on average.
-              </Text>
+              <>
+                {tab === 'today' && (
+                  <Text style={[styles.sheetLead, { color: colors.text }]}>
+                    Your guesses landed {today?.me?.avgOff ?? 0} away on average.
+                  </Text>
+                )}
+                {tab === 'season' && !!season && (
+                  <>
+                    <Text style={[styles.sheetLead, { color: colors.text }]}>
+                      {seasonName(season.season)} ends in {daysLeft(season.endsOn)}.
+                    </Text>
+                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                      {season.me
+                        ? `${season.me.days} ${season.me.days === 1 ? 'day' : 'days'} played this month, and your guesses landed ${season.me.avgOff} away on average.`
+                        : 'Play one and you are on it.'}
+                    </Text>
+                  </>
+                )}
+                {tab === 'alltime' && !!allTime?.me && (
+                  <>
+                    <Text style={[styles.sheetLead, { color: colors.text }]}>
+                      {allTime.me.daysPlayed} {allTime.me.daysPlayed === 1 ? 'day' : 'days'} played.
+                    </Text>
+                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                      Your guesses landed {allTime.me.avgOff} away on average, across everything you
+                      have played.
+                    </Text>
+                  </>
+                )}
+              </>
             ) : sheet?.kind === 'column' ? (
             <>
             <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
