@@ -125,13 +125,13 @@ const TABS: { key: Board; label: string; note: string }[] = [
   // The columns are explained under the board rather than above it: nothing
   // should stand between opening this tab and seeing the standings, and the
   // question only occurs to somebody who has already looked at the rows.
-  { key: 'today', label: 'Today', note: 'Points from today’s three rounds. Finished days only.' },
-  {
-    key: 'season',
-    label: 'Season',
-    note: 'Points from this month’s dailies. It resets on the 1st, so a good month beats a long history.',
-  },
-  { key: 'alltime', label: 'All time', note: 'Points from every daily challenge played.' },
+  { key: 'today', label: 'Today', note: 'Today’s three rounds, finished days only.' },
+  // One line each. The reasoning behind a board - why a season resets, what a
+  // lifetime total is for - moved into the sheet with everything else, because
+  // two lines of explanation above a leaderboard is read once and then skipped
+  // forever.
+  { key: 'season', label: 'Season', note: 'This month’s points. Resets on the 1st.' },
+  { key: 'alltime', label: 'All time', note: 'Every daily you have played.' },
 ];
 
 export function BoardsScreen() {
@@ -719,6 +719,10 @@ export function BoardsScreen() {
                         ? `${season.me.days} ${season.me.days === 1 ? 'day' : 'days'} played this month, and your guesses landed ${season.me.avgOff} away on average.`
                         : 'Play one and you are on it.'}
                     </Text>
+                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                      It resets on the 1st, so a good month beats a long history — somebody who
+                      started last week can win this one.
+                    </Text>
                   </>
                 )}
                 {tab === 'alltime' && !!allTime?.me && (
@@ -729,6 +733,10 @@ export function BoardsScreen() {
                     <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
                       Your guesses landed {allTime.me.avgOff} away on average, across everything you
                       have played.
+                    </Text>
+                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                      This one never resets. The season board is the one to chase if you started
+                      recently.
                     </Text>
                   </>
                 )}
