@@ -1,16 +1,21 @@
 /**
- * The four arenas of a climb.
+ * The four stages of a climb: ground, sky, stratosphere, orbit.
  *
- * One hue the whole way down, losing its light: The Shallows is lit water, The
- * Edge is almost nothing. Holding a single colour makes the descent read as one
- * place getting deeper rather than four skins in a row - which is why the only
- * break in it is saved for the last tier, where red on blue says something is
- * wrong here at the exact moment the game turns brutal.
+ * They used to descend - The Shallows to The Edge, water losing its light -
+ * while the button that starts a run says Climb. The words went one way and the
+ * picture went the other, and four muddy blue-blacks sat oddly in an app that
+ * is otherwise white and black.
  *
- * Every arena is dark, and that is structural rather than taste. Everything on
- * the screen used to take its ink from the app theme, so a pale arena and a
- * dark theme put white text on near-white: the attempts count simply vanished.
- * Dark grounds and the arena's own ink means the contrast cannot drift again.
+ * Going up resolves it, and the air does the work: earth at the bottom, real
+ * daylight sky, deep indigo where it starts to thin, and black at the top -
+ * because the sky genuinely does turn black at altitude. The last stage is as
+ * dark as the old one was, but now there is a reason for it, and the blue and
+ * red tiles are the only lit things on the screen at the point the game is
+ * hardest.
+ *
+ * The first two stages are light, which the old set could not risk: everything
+ * took its ink from the app theme, so a pale stage in dark mode put white text
+ * on near-white. Each stage carries its own ink now, so a light ground is safe.
  *
  * The bands are the attempt bands, deliberately - the background changes at the
  * exact moment the allowance does, so the change announces itself before the
@@ -21,6 +26,12 @@ export interface Arena {
   name: string;
   from: number;
   attempts: number;
+  /**
+   * A darker blue for the stages whose ground is already blue. The standard
+   * tile blue vanishes into a daylight sky, and a proximity colour that cannot
+   * be seen is not a proximity colour.
+   */
+  below?: string;
   /**
    * The attempt the clue appears on, counted forward: 1 means immediately.
    *
@@ -34,10 +45,8 @@ export interface Arena {
   /** The deeper end of the vertical wash. */
   backgroundDeep: string;
   /**
-   * The ground for tiles with no saturated fill of their own. It is darker
-   * than the water for the first three tiers and lighter for the last, because
-   * the band labels are shared with the daily and cannot move: a pale label
-   * needs a dark tile, and by The Edge there is nothing darker left to use.
+   * The ground for tiles with no saturated fill of their own - lighter than the
+   * sky while the sky is dark, darker than it while the sky is light.
    */
   surface: string;
   text: string;
@@ -47,24 +56,26 @@ export interface Arena {
 
 export const ARENAS: Arena[] = [
   {
-    key: 'shallows', name: 'The Shallows', from: 1, attempts: 8, clueFrom: 1,
-    background: '#17628F', backgroundDeep: '#0F4467', surface: '#051D2C',
-    text: '#F3FAFF', muted: '#A8D6F5', accent: '#63B8F0',
+    key: 'ground', name: 'Ground', from: 1, attempts: 8, clueFrom: 1,
+    background: '#EDE7DC', backgroundDeep: '#DFD7C8', surface: '#FBF9F5',
+    text: '#2A251C', muted: '#6F6757', accent: '#8A7A5E',
   },
   {
-    key: 'depths', name: 'The Depths', from: 20, attempts: 7, clueFrom: 3,
-    background: '#0E4A78', backgroundDeep: '#092E4A', surface: '#04131F',
-    text: '#EFF7FD', muted: '#8FCDF0', accent: '#5AB0EE',
+    key: 'sky', name: 'Sky', from: 20, attempts: 7, clueFrom: 3,
+    background: '#C4DAF2', backgroundDeep: '#A6C6E8', surface: '#F0F6FD',
+    text: '#17293A', muted: '#4A6884', accent: '#2F6BA8',
+    below: '#2F5BC4',
   },
   {
-    key: 'dark', name: 'The Dark', from: 40, attempts: 6, clueFrom: 4,
-    background: '#0A2D48', backgroundDeep: '#061B2B', surface: '#020B11',
-    text: '#EAF2F8', muted: '#79ADD2', accent: '#4E93C4',
+    key: 'strato', name: 'Stratosphere', from: 40, attempts: 6, clueFrom: 4,
+    background: '#2A3A72', backgroundDeep: '#1A2450', surface: '#16204A',
+    text: '#EDF1FC', muted: '#9FAEDC', accent: '#7F9DEB',
+    below: '#6E93FF',
   },
   {
-    key: 'edge', name: 'The Edge', from: 80, attempts: 5, clueFrom: 5,
-    background: '#050A12', backgroundDeep: '#3A0A0C', surface: '#2E3339',
-    text: '#FFF1EE', muted: '#FF8A7A', accent: '#E8503C',
+    key: 'orbit', name: 'Orbit', from: 80, attempts: 5, clueFrom: 5,
+    background: '#080A12', backgroundDeep: '#020306', surface: '#141A2B',
+    text: '#EAEDF8', muted: '#7C86A8', accent: '#8FA6FF',
   },
 ];
 
