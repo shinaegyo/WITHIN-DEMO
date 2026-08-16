@@ -106,7 +106,7 @@ export function PlayerCardModal({
           ) : (
             <>
               <View style={styles.nameRow}>
-                <Avatar value={card.avatar} size={40} />
+                <Avatar value={card.avatar} size={40} name={card.name} />
                 {card.online && (
                   <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />
                 )}

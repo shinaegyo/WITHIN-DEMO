@@ -76,7 +76,7 @@ export function LeaderboardScreen() {
             ) : (
               <Text style={[styles.rank, { color: colors.textMuted }]}>{item.rank}</Text>
             )}
-            <Avatar value={item.avatar} size={30} />
+            <Avatar value={item.avatar} size={30} name={item.name} />
             <Text
               style={[styles.name, { color: colors.text }, item.isMe && styles.nameMe]}
               numberOfLines={1}

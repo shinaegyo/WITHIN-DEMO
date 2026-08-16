@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AVATAR_COLORS, Avatar, CHARACTERS, COLOR_KEYS, parseAvatar } from '../components/Avatar';
+import { AVATAR_COLORS, Avatar, COLOR_KEYS, parseAvatar } from '../components/Avatar';
 import { setAvatar } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
@@ -41,11 +41,13 @@ export function AvatarScreen({
   useTrack(null);
   const { colors } = useTheme();
   const start = parseAvatar(current);
-  const [character, setCharacter] = useState(start.character);
   const [color, setColor] = useState(start.color);
   const [busy, setBusy] = useState(false);
 
-  const value = `${character}-${color}`;
+  // A colour alone, for now. The stored value grows to
+  // "skin-hair-haircolour-colour" when the person picker lands; Avatar already
+  // parses that shape, so this is the only line that has to change.
+  const value = color;
 
   const save = async () => {
     if (busy) return;
@@ -69,7 +71,7 @@ export function AvatarScreen({
         </Text>
       )}
       <View style={styles.head}>
-        <Avatar value={value} size={78} />
+        <Avatar value={value} size={78} name={username} />
         <View style={styles.headText}>
           <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
             {username}
@@ -99,24 +101,12 @@ export function AvatarScreen({
           ))}
         </View>
 
-        <Text style={[styles.label, { color: colors.textMuted }]}>CHARACTER</Text>
-        <View style={styles.grid}>
-          {CHARACTERS.map((c) => (
-            <Pressable
-              key={c.key}
-              onPress={() => {
-                playTap();
-                setCharacter(c.key);
-              }}
-              style={[
-                styles.cell,
-                { borderColor: c.key === character ? colors.accent : 'transparent' },
-              ]}
-            >
-              <Avatar value={`${c.key}-${color}`} size={52} />
-            </Pressable>
-          ))}
-        </View>
+        {/* The fifty animals are gone and the person picker is not built, so
+            there is nothing to choose but a colour. Said out loud rather than
+            leaving the screen looking half-finished. */}
+        <Text style={[styles.note, { color: colors.textMuted }]}>
+          Your initial, on the colour you pick. Choosing a face is coming.
+        </Text>
       </ScrollView>
 
       <View style={styles.foot}>
@@ -150,6 +140,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 22, fontFamily: fonts.extraBold },
   sub: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 2, lineHeight: 17 },
   body: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 20 },
+  note: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 19, marginTop: 18 },
   label: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
   swatch: { width: '18%', height: 32, borderRadius: 10, borderWidth: 3, borderColor: 'transparent' },

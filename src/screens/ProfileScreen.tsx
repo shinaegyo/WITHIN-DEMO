@@ -119,7 +119,7 @@ export function ProfileScreen({
       contentContainerStyle={styles.content}
     >
       <Pressable style={styles.head} onPress={onAvatar}>
-        <Avatar value={avatar} size={72} />
+        <Avatar value={avatar} size={72} name={username} />
         <View style={styles.headText}>
           <View style={styles.nameRow}>
             <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>

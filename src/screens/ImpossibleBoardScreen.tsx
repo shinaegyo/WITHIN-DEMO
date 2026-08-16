@@ -124,7 +124,7 @@ export function ImpossibleBoardScreen({
             <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
           )}
 
-          <Avatar value={e.avatar} size={30} />
+          <Avatar value={e.avatar} size={30} name={e.name} />
 
           <Text
             style={[styles.name, { color: colors.text }, e.isMe && styles.nameMe]}

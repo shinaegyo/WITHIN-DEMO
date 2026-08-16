@@ -122,7 +122,7 @@ export function FriendsScreen({
     <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       {/* Only shown when they are around: an empty slot for everyone else
           would read as a status of its own. */}
-      <Avatar value={avatar} size={30} />
+      <Avatar value={avatar} size={30} name={username} />
       {online && <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />}
       {/* The name itself opens their card; the buttons beside it still act. */}
       <Pressable style={styles.rowMain} onPress={() => setLooking(label)}>

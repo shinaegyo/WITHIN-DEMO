@@ -38,7 +38,7 @@ export function DailyFirstScreen({
             of setting up and the start of playing, not a farewell. */}
         {!!username && (
           <View style={styles.who}>
-            <Avatar value={avatar} size={44} />
+            <Avatar value={avatar} size={44} name={username} />
             <Text style={[styles.whoText, { color: colors.text }]} numberOfLines={1}>
               You're set, {username}
             </Text>

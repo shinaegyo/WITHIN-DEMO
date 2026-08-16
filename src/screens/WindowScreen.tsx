@@ -168,7 +168,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
             ) : (
               <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
             )}
-            <Avatar value={e.avatar} size={24} />
+            <Avatar value={e.avatar} size={24} name={e.name} />
             <Text
               style={[styles.name, { color: colors.text }, e.isMe && styles.me]}
               numberOfLines={1}

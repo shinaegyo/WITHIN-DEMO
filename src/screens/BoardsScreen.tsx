@@ -534,7 +534,7 @@ export function BoardsScreen() {
                   }}
                   style={({ pressed }) => [styles.hintRow, { opacity: pressed ? 0.6 : 1 }]}
                 >
-                  <Avatar value={h.avatar} size={24} />
+                  <Avatar value={h.avatar} size={24} name={h.name} />
                   <Text style={[styles.hintName, { color: colors.text }]} numberOfLines={1}>
                     {h.name}
                   </Text>
@@ -604,7 +604,7 @@ export function BoardsScreen() {
                 <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
               )}
 
-              <Avatar value={e.avatar} size={30} />
+              <Avatar value={e.avatar} size={30} name={e.name} />
 
               <Text
                 style={[styles.name, { color: colors.text }, e.isMe && styles.nameMe]}
@@ -640,7 +640,7 @@ export function BoardsScreen() {
               ]}
             >
               <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
-              <Avatar value={e.avatar} size={30} />
+              <Avatar value={e.avatar} size={30} name={e.name} />
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                 {e.name}
               </Text>

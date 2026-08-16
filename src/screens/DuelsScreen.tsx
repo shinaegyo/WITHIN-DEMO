@@ -272,7 +272,7 @@ export function DuelsScreen({
               style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}
             >
               <Pressable style={styles.friendMain} onPress={() => setLooking(f.name)}>
-                <Avatar value={f.avatar} size={34} />
+                <Avatar value={f.avatar} size={34} name={f.name} />
                 <View style={styles.friendText}>
                   <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                     {f.name}

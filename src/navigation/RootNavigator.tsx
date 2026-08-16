@@ -93,7 +93,7 @@ const ICONS: Record<string, TabName> = {
  * avatar rather than an icon - which is the point of having thirty of them, and
  * something a stock tab bar cannot express.
  */
-function TabBar({ state, navigation, avatar, pending, colors }: any) {
+function TabBar({ state, navigation, avatar, username, pending, colors }: any) {
   return (
     <View style={[styles.tabBar, { backgroundColor: colors.background, borderColor: colors.border }]}>
       {state.routes.map((route: any, index: number) => {
@@ -110,7 +110,7 @@ function TabBar({ state, navigation, avatar, pending, colors }: any) {
           >
             {route.name === 'You' ? (
               <View style={[styles.tabAvatar, focused && { borderColor: colors.text }]}>
-                <Avatar value={avatar} size={24} />
+                <Avatar value={avatar} size={24} name={username} />
               </View>
             ) : (
               <TabIcon name={ICONS[route.name]} color={tint} active={focused} />
@@ -272,7 +272,7 @@ function Screens({
               // Swipe or tap, and no top bar: the bar at the bottom is drawn by
               // hand because one of its five is the player's own avatar.
               tabBar={(props) => (
-                <TabBar {...props} avatar={avatar} pending={pending} colors={colors} />
+                <TabBar {...props} avatar={avatar} username={username} pending={pending} colors={colors} />
               )}
               screenOptions={{ swipeEnabled: true, lazy: true }}
             >
