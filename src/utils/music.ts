@@ -17,8 +17,14 @@ import { musicEnabled } from './soundSettings';
 const SOURCES = {
   game: require('../../assets/music/game.mp3'),
   home: require('../../assets/music/home.mp3'),
-  // duel and impossible stay dropped - no screen reaches them. home is back:
-  // two tracks now, one for playing and one for everywhere else.
+  // The climb gets an altitude each. One loop across a hundred levels says the
+  // top of the sky is the same place as the ground, which is the one thing this
+  // mode is about. See climbTrack for where they change over.
+  climbGround: require('../../assets/music/climb-ground.mp3'),
+  climbSky: require('../../assets/music/climb-sky.mp3'),
+  climbStrato: require('../../assets/music/climb-strato.mp3'),
+  climbThin: require('../../assets/music/climb-thin.mp3'),
+  climbOrbit: require('../../assets/music/climb-orbit.mp3'),
 } as const;
 
 export type Track = keyof typeof SOURCES;
@@ -68,31 +74,88 @@ function pauseAll() {
   });
 }
 
+/** Steps in a fade. Twenty a second is smooth and costs nothing. */
+const TICK = 50;
+/** Out faster than in, so the two never pile up in the middle. */
+const OUT_MS = 500;
+const IN_MS = 900;
+
+let fader: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Hands over between two tracks instead of cutting.
+ *
+ * The climb changes music three times on the way up, and each change lands on a
+ * level-up - which is the one moment somebody is looking at the screen rather
+ * than at their guess. A hard cut there sounds like a bug.
+ */
+function handOver(from: AudioPlayer | null, to: AudioPlayer | null) {
+  if (fader) clearInterval(fader);
+  if (to) to.volume = 0;
+
+  let ms = 0;
+  fader = setInterval(() => {
+    ms += TICK;
+    if (from) {
+      try {
+        from.volume = Math.max(0, VOLUME * (1 - ms / OUT_MS));
+        if (ms >= OUT_MS) from.pause();
+      } catch {}
+    }
+    if (to) {
+      try {
+        to.volume = Math.min(VOLUME, VOLUME * (ms / IN_MS));
+      } catch {}
+    }
+    if (ms >= Math.max(OUT_MS, IN_MS)) {
+      if (fader) clearInterval(fader);
+      fader = null;
+    }
+  }, TICK);
+}
+
 export function playTrack(track: Track | null): void {
   if (!musicEnabled()) track = null;
   if (track === current) return;
 
-  pauseAll();
-
+  const leaving = current ? players[current] ?? null : null;
   current = track;
-  if (!track) return;
+
+  if (!track) {
+    handOver(leaving, null);
+    return;
+  }
 
   // Off the interaction that asked for it: the first play of a track decodes
   // it, and a screen should never wait on that.
   setTimeout(() => {
     if (current !== track) return;
     const p = player(track);
-    if (!p) return;
+    if (!p) {
+      pauseAll();
+      return;
+    }
     try {
       p.seekTo(0);
+      p.volume = 0;
       p.play();
+      handOver(leaving, p);
     } catch {}
   }, 0);
 }
 
 /** Stops everything and forgets where it was, for the settings switch. */
 export function stopMusic(): void {
+  // Before pausing: a fade left running would keep winding a paused player's
+  // volume back up, and the next play would start at whatever it reached.
+  if (fader) clearInterval(fader);
+  fader = null;
   pauseAll();
+  Object.values(players).forEach((p) => {
+    try {
+      if (p) p.volume = VOLUME;
+    } catch {}
+  });
   current = null;
 }
 

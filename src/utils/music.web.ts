@@ -20,8 +20,12 @@ import { musicEnabled, musicVolume, onVolumeChange } from './soundSettings';
 const SOURCES = {
   game: require('../../assets/music/game.mp3'),
   home: require('../../assets/music/home.mp3'),
-  // duel and impossible stay dropped - no screen reaches them. home is back:
-  // two tracks now, one for playing and one for everywhere else.
+  // The climb gets an altitude each. See climbTrack for where they change over.
+  climbGround: require('../../assets/music/climb-ground.mp3'),
+  climbSky: require('../../assets/music/climb-sky.mp3'),
+  climbStrato: require('../../assets/music/climb-strato.mp3'),
+  climbThin: require('../../assets/music/climb-thin.mp3'),
+  climbOrbit: require('../../assets/music/climb-orbit.mp3'),
 } as const;
 
 export type Track = keyof typeof SOURCES;
@@ -146,17 +150,71 @@ function watch(track: Track, p: Pair) {
   }, 120);
 }
 
-function start(track: Track) {
+function start(track: Track, fadeIn = false) {
   const p = pair(track);
   if (!p) return;
   const el = p[p.live];
   el.currentTime = 0;
-  el.volume = level();
+  el.volume = fadeIn ? 0 : level();
   play(el, track);
+  if (fadeIn) rampTo(el, level(), CHANGE_MS);
   watch(track, p);
 }
 
+/**
+ * A linear ramp on one element, used when the music changes rather than loops.
+ *
+ * The loop seam already has handOver. This is the other join: the climb swaps
+ * track three times on the way up, always on a level-up, and cutting between
+ * two pieces at that moment sounds like something broke.
+ */
+const CHANGE_MS = 900;
+// A Map rather than a WeakMap so pauseAll can cancel every ramp still running;
+// a ramp that outlives a stop would wind a silenced element back up.
+const ramps = new Map<HTMLAudioElement, ReturnType<typeof setInterval>>();
+
+function rampTo(el: HTMLAudioElement, to: number, ms: number, thenPause = false) {
+  const existing = ramps.get(el);
+  if (existing) clearInterval(existing);
+  const from = el.volume;
+  const steps = Math.max(1, Math.round(ms / TICK));
+  let step = 0;
+  const id = setInterval(() => {
+    step += 1;
+    const t = Math.min(1, step / steps);
+    el.volume = Math.max(0, Math.min(1, from + (to - from) * t));
+    if (t >= 1) {
+      clearInterval(id);
+      ramps.delete(el);
+      if (thenPause) {
+        el.pause();
+        el.currentTime = 0;
+      }
+    }
+  }, TICK);
+  ramps.set(el, id);
+}
+
+/** Fades the outgoing track out and leaves it stopped. */
+function fadeOutCurrent() {
+  const p = current ? pairs[current] : null;
+  if (!p) return;
+  if (p.watcher) clearInterval(p.watcher);
+  if (p.fader) clearInterval(p.fader);
+  p.watcher = null;
+  p.fader = null;
+  const el = p[p.live];
+  const other = p[p.live === 'a' ? 'b' : 'a'];
+  other.pause();
+  other.currentTime = 0;
+  other.volume = 0;
+  rampTo(el, 0, CHANGE_MS / 2, true);
+  p.live = 'a';
+}
+
 function pauseAll() {
+  ramps.forEach((id) => clearInterval(id));
+  ramps.clear();
   Object.entries(pairs).forEach(([, p]) => {
     if (!p) return;
     if (p.watcher) clearInterval(p.watcher);
@@ -175,9 +233,13 @@ function pauseAll() {
 export function playTrack(track: Track | null): void {
   const target = musicEnabled() ? track : null;
   if (target === current) return;
-  pauseAll();
+  // Fade the old one out rather than cutting it, unless nothing is playing -
+  // in which case there is nothing to fade and pauseAll is the honest reset.
+  if (current) fadeOutCurrent();
+  else pauseAll();
+  const changing = current !== null;
   current = target;
-  if (target) start(target);
+  if (target) start(target, changing);
 }
 
 export function stopMusic(): void {

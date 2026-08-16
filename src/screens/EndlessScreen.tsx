@@ -24,6 +24,7 @@ import { fonts } from '../theme/fonts';
 import { arenaFor } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
+import { climbTrack } from '../utils/climbTrack';
 import { devStageLevel } from '../utils/devSkip';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
@@ -74,7 +75,9 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
     }
   }, []);
 
-  useTrack('game');
+  // The music follows the altitude, and follows the same level the arena is
+  // painted from - so ?stage= moves both together and neither can drift.
+  useTrack(climbTrack(devStageLevel() ?? state?.level ?? 1));
 
   useEffect(() => {
     load();
