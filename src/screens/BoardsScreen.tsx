@@ -694,11 +694,15 @@ export function BoardsScreen() {
             {/* Your own figure and nothing else. The column header has the
                 explanation; repeating it here answers a question that was not
                 asked. */}
+            {/* Explicit on both sides. A ternary falls into its else branch
+                when sheet is null, which is exactly the state the modal is in
+                while it fades - so closing the personal sheet rendered the
+                column explanation on the way out. */}
             {sheet?.kind === 'mine' ? (
               <Text style={[styles.sheetLead, { color: colors.text }]}>
                 Your guesses landed {today?.me?.avgOff ?? 0} away on average.
               </Text>
-            ) : (
+            ) : sheet?.kind === 'column' ? (
             <>
             <Text style={[styles.sheetTitle, { color: colors.text }]}>Average off</Text>
             <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
@@ -720,7 +724,7 @@ export function BoardsScreen() {
               higher.
             </Text>
             </>
-            )}
+            ) : null}
             <Pressable onPress={() => { playTap(); setSheet(null); }} style={styles.sheetClose}>
               <Text style={[styles.sheetCloseText, { color: colors.text }]}>Got it</Text>
             </Pressable>
