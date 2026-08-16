@@ -234,8 +234,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
             </View>
           ) : over ? (
             <View style={styles.result}>
-              <Text style={[styles.overTitle, { color: arena.text }]}>
-                {over.sessionOver ? 'You fell' : 'You fell and took damage'}
+              <Text style={[styles.overHit, { color: arena.text }]}>
+                {/* Damage, not a fall. Nothing moved - the same number is
+                    waiting, and that is the whole reason health works. */}
+                {over.sessionOver ? 'OUT OF HEALTH!' : 'YOU TOOK DAMAGE!'}
               </Text>
               <Text style={[styles.overBody, { color: arena.muted }]}>
                 {over.answer !== null ? `The number was ${over.answer}. ` : ''}
@@ -383,7 +385,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   result: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 12 },
-  overTitle: { fontSize: 28, fontFamily: fonts.extraBold },
+  // Centred, because everything under it is - left-aligned it read as though
+  // it belonged to something above rather than heading the card it sits on.
+  overTitle: { fontSize: 28, fontFamily: fonts.extraBold, textAlign: 'center' },
+  // The one moment in the mode that should land like a hit: larger, in caps,
+  // and the only title here that gets an exclamation.
+  overHit: {
+    fontSize: 34,
+    fontFamily: fonts.extraBold,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    lineHeight: 39,
+  },
   overBody: { fontSize: 13, fontFamily: fonts.medium, textAlign: 'center', lineHeight: 19 },
   again: {
     marginTop: 6,
