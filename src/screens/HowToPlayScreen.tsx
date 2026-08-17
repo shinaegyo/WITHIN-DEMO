@@ -96,53 +96,20 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     </>,
 
     <>
-      <Text style={[styles.h2, { color: colors.text }]}>Clues</Text>
+      <Text style={[styles.h2, { color: colors.text }]}>Round one — call your shot</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Every round opens with one clue about its number, and one is all you get. They describe the
-        shape of the number rather than its arithmetic — what it starts or ends on, whether its
-        digits climb or fall, whether it reads the same backwards — so you can hold the clue in
-        your head while you guess.
-      </Text>
-    </>,
-
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>Rounds and attempts</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round is tighter than the last: seven attempts in round 1, six in round 2, five in
-        round 3. Solving on your final attempt costs you nothing — the next round starts where it
-        always does.
-      </Text>
-
-    </>,
-
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        The round is over and it pays 3 — turning up for a number you never found is worth more
-        than nothing. The rounds after it are unaffected: every round stands on its own, so a
-        missed number costs you that round and nothing else.
-      </Text>
-      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
-        The number is revealed once the round ends, whether you found it or not.
-      </Text>
-    </>,
-
-    <>
-      <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
-      <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round is worth up to 20, so a perfect day is 60. The sooner you find it, the more it
-        pays — and a round you never find still pays 3.
+        Before your first guess, say how many guesses you need. Make the call and take the prize.
+        Find it later than you said and it pays 5; never find it and it pays 3.
       </Text>
       <View style={[styles.scoreBox, { borderColor: colors.border }]}>
         {([
-          ['1st attempt', 20],
-          ['2nd attempt', 18],
-          ['3rd attempt', 16],
-          ['4th attempt', 14],
-          ['5th attempt', 12],
-          ['6th attempt', 10],
-          ['7th attempt', 5],
-          ['Out of attempts', 3],
+          ['1 guess', 30],
+          ['2 guesses', 20],
+          ['3 guesses', 18],
+          ['4 guesses', 16],
+          ['5 guesses', 14],
+          ['6 guesses', 12],
+          ['7 guesses', 10],
         ] as const).map(([label, points]) => (
           <View key={label} style={styles.scoreRow}>
             <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>{label}</Text>
@@ -150,6 +117,51 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
           </View>
         ))}
       </View>
+    </>,
+
+    <>
+      <Text style={[styles.h2, { color: colors.text }]}>Round two — choose your clue</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        One clue, and you pick what kind: how the number is written, what it is made of, or where
+        it sits. You only find out what it says after you choose. Six guesses, paying 16 down to 6,
+        and 3 if it gets away.
+      </Text>
+    </>,
+
+    <>
+      <Text style={[styles.h2, { color: colors.text }]}>Round three — name a range</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        Three free guesses first. They cost nothing and none of them ends the round — then you name
+        a range you believe the number is inside. The narrower it is, the more it pays; naming it
+        exactly pays most of all. Outside pays 3.
+      </Text>
+      <View style={[styles.scoreBox, { borderColor: colors.border }]}>
+        {([
+          ['exactly', 24],
+          ['1 either side', 18],
+          ['3 either side', 16],
+          ['8 either side', 12],
+          ['18 either side', 8],
+          ['35 either side', 4],
+        ] as const).map(([label, points]) => (
+          <View key={label} style={styles.scoreRow}>
+            <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>{label}</Text>
+            <Text style={[styles.scoreValue, { color: colors.text }]}>{points}</Text>
+          </View>
+        ))}
+      </View>
+    </>,
+
+    <>
+      <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
+      <Text style={[styles.body, { color: colors.textMuted }]}>
+        The round is over and it pays 3 — turning up for a number you never found is worth more
+        than nothing. Every round stands on its own, so a missed number costs you that round and
+        nothing else.
+      </Text>
+      <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
+        The number is revealed once the round ends, whether you found it or not.
+      </Text>
     </>,
 
     <>
@@ -175,8 +187,7 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
         leaderboard.
       </Text>
       {/* The modes used to be spelled out here as well: Impossible's tiers and
-          lives, the duel's rounds and ties, and eventually Rush and Window
-          too. Every one of them already explains itself on its own screen,
+          lives, the duel's rounds and ties, and eventually Rush too. Every one of them already explains itself on its own screen,
           under How it works, next to the button that starts it — so this page
           was a second copy of the same rules, kept somewhere else and going
           stale on its own schedule.

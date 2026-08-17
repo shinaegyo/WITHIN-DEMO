@@ -16,7 +16,7 @@ import { playTap } from '../utils/sound';
  * decoration to somebody who has never seen them lit.
  *
  * So it interrupts, exactly once. Every mode gets a sentence - not a name, a
- * sentence, because "Window" tells nobody anything - and the rule that governs
+ * sentence, because "Rush" tells nobody anything - and the rule that governs
  * all of them is stated plainly at the top: play the daily, and the rest of the
  * game opens for the day.
  *
@@ -33,10 +33,6 @@ const MODES: { name: string; line: string }[] = [
   {
     name: 'Rush',
     line: 'Three minutes. Find as many numbers as you can before the clock runs out.',
-  },
-  {
-    name: 'Window',
-    line: 'Three free guesses, then commit to a range the number is inside. The narrower it is, the more it scores.',
   },
   {
     name: 'Duels',

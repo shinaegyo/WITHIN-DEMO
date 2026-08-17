@@ -779,8 +779,6 @@ export interface HomeStatus {
   };
   /** `played` means the clock ran out, not that a run exists. */
   rush: { played: boolean; running: boolean; found: number };
-  /** `inside` separates a zero that was earned from a zero that missed. */
-  window: { played: boolean; started: boolean; score: number; inside: boolean };
 }
 
 export async function loadHomeStatus(): Promise<HomeStatus> {
@@ -815,12 +813,6 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
       played: !!raw.rush?.played,
       running: !!raw.rush?.running,
       found: raw.rush?.found ?? 0,
-    },
-    window: {
-      played: !!raw.window?.played,
-      started: !!raw.window?.started,
-      score: raw.window?.score ?? 0,
-      inside: !!raw.window?.inside,
     },
   };
 }
@@ -1177,81 +1169,6 @@ export async function loadRushBoard(): Promise<RushBoard> {
   };
 }
 
-export interface WindowEntry {
-  rank: number;
-  name: string;
-  avatar: string | null;
-  score: number;
-  width: number;
-  isMe: boolean;
-}
-
-export interface WindowState {
-  started: boolean;
-  submitted: boolean;
-  probesLeft: number;
-  maxWidth: number;
-  probes: GuessResult[];
-  lo: number | null;
-  hi: number | null;
-  width: number | null;
-  score: number;
-  answer: number | null;
-}
-
-export async function loadWindow(): Promise<WindowState> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('window_state');
-  const raw = unwrap<any>(data, error);
-  return {
-    started: !!raw.started,
-    submitted: !!raw.submitted,
-    probesLeft: raw.probesLeft ?? 3,
-    maxWidth: raw.maxWidth ?? 100,
-    probes: (raw.probes ?? []).map(toGuessResult),
-    lo: raw.lo ?? null,
-    hi: raw.hi ?? null,
-    width: raw.width ?? null,
-    score: raw.score ?? 0,
-    answer: raw.answer ?? null,
-  };
-}
-
-export async function windowProbe(guess: number) {
-  await ensureSignedIn();
-  const raw = await onceMore(async () => {
-    const { data, error } = await supabase.rpc('window_probe', { p_guess: guess });
-    return unwrap<any>(data, error);
-  });
-  return { probesLeft: raw.probesLeft as number, result: toGuessResult(raw.guess) };
-}
-
-export async function windowSubmit(lo: number, hi: number) {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('window_submit', { p_lo: lo, p_hi: hi });
-  const raw = unwrap<any>(data, error);
-  return {
-    inside: !!raw.inside,
-    width: raw.width as number,
-    score: raw.score as number,
-    answer: raw.answer as number,
-  };
-}
-
-export async function loadWindowBoard(): Promise<WindowEntry[]> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('window_leaderboard', { p_limit: 50 });
-  const raw = unwrap<any>(data, error);
-  return (raw.entries ?? []).map((e: any) => ({
-    rank: e.rank,
-    name: e.name,
-    avatar: e.avatar ?? null,
-    score: e.score ?? 0,
-    width: e.width ?? 0,
-    isMe: !!e.is_me,
-  }));
-}
-
 export interface XpState {
   xp: number;
   level: number;
@@ -1492,9 +1409,9 @@ export function messageFor(code: string, guess?: number): string {
     case 'name_locked':
       return 'Your name can be changed once a year. This one is set for now.';
     case 'no_probes_left':
-      return 'No probes left — commit to a window.';
+      return 'No free guesses left — name your range.';
     case 'too_wide':
-      return 'A window can be 100 wide at most.';
+      return 'That range is too wide.';
     case 'paused':
       return 'The clock is stopped.';
     case 'time_up':
@@ -1519,9 +1436,9 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_sessions_left':
       return "That's today's climb. Your place is kept.";
     case 'no_probes_left':
-      return 'No probes left — commit to a window.';
+      return 'No free guesses left — name your range.';
     case 'too_wide':
-      return 'A window can be 100 wide at most.';
+      return 'That range is too wide.';
     case 'paused':
       return 'The clock is stopped.';
     case 'time_up':

@@ -38,9 +38,9 @@ import { playTap } from '../utils/sound';
  *
  * Impossible had a tab here and its own standings on its own screen - the same
  * list in two places, and the copy under this one had to explain a weekly reset
- * that has nothing to do with the daily. Rush and Window already keep their
- * boards where they are played, which is the pattern; adding them here would
- * have made four tabs of which three were duplicates.
+ * that has nothing to do with the daily. Rush already keeps its board where it
+ * is played, which is the pattern; adding them here would have made four tabs
+ * of which three were duplicates.
  *
  * So this tab means one thing: the daily, which is the only mode that scores
  * points, keeps a streak, or places anybody.

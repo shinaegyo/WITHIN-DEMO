@@ -39,7 +39,6 @@ interface Props {
   onOpenDuels: () => void;
   onOpenRanked: () => void;
   onRush: () => void;
-  onWindow: () => void;
   onOpenProfile: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
@@ -54,7 +53,6 @@ export function HomeScreen({
   onOpenDuels,
   onOpenRanked,
   onRush,
-  onWindow,
   onOpenProfile,
   practiceEpoch,
   username,
@@ -304,14 +302,6 @@ export function HomeScreen({
       go: onRush,
     },
     {
-      name: 'Window',
-      // A missed window is genuinely zero, and "0 points" with nothing beside
-      // it is bleak. The server tells us which zero this is.
-      state: !modes ? 'Ready' : modes.window.played ? (modes.window.inside ? `${modes.window.score} points` : 'Missed') : 'Ready',
-      live: false,
-      go: onWindow,
-    },
-    {
       // Last, with the two that need nobody ahead of it. It used to sit in the
       // middle so it would not read as third in a list of three of a kind -
       // but the Games tab now groups by what each mode asks of you, and a home
@@ -333,15 +323,12 @@ export function HomeScreen({
    * One thing to try, not a list.
    *
    * Untried modes first, because the boards say the problem is discovery
-   * rather than appetite - the daily had twenty-four finishers today and
-   * Window had four. It disappears when there is nothing untried and nothing
-   * pending: a screen that always has an ask is one people learn to skim.
+   * rather than appetite - the daily had twenty-four finishers today and the
+   * side modes a handful. It disappears when there is nothing untried and
+   * nothing pending: a screen that always has an ask is one people skim.
    */
   const suggestion = (() => {
     if (!modes || !finished) return null;
-    if (!modes.window.played && !modes.window.started) {
-      return 'You have not tried Window yet — three free guesses, then commit to a range.';
-    }
     if (!modes.rush.played && !modes.rush.running) {
       return 'Rush is still open today — three minutes, one run.';
     }

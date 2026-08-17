@@ -161,47 +161,6 @@ export function rushRules(): React.ReactNode[] {
   ];
 }
 
-export function windowRules(): React.ReactNode[] {
-  return [
-    <>
-      <H>Three free guesses</H>
-      <P first>
-        Three free guesses, answered with the same colors as everywhere else: blue means aim
-        higher, red means lower, and the stronger the color the closer you are. They cost nothing
-        and none of them ends the round.
-      </P>
-    </>,
-
-    <>
-      <H>Then commit</H>
-      <P first>
-        You commit to a range the number has to be inside — say 525 to 560. Your score is 101 minus
-        the width of it.
-      </P>
-      <P>
-        Miss, and it is nothing at all, however narrow the window was. That is the whole bet: three
-        free guesses leave a range you know is safe, and halving it is worth twice as much with
-        everything at stake.
-      </P>
-    </>,
-
-    <>
-      <H>What a window pays</H>
-      <Table
-        rows={[
-          ['exact', '1 wide', '100'],
-          ['±3', '7 wide', '94'],
-          ['±5', '11 wide', '90'],
-          ['±12', '25 wide', '76'],
-          ['±25', '51 wide', '50'],
-          ['±35', '71 wide', '30'],
-        ]}
-      />
-      <P>One a day, the same number for everyone, and every point is an XP toward your level.</P>
-    </>,
-  ];
-}
-
 /**
  * `tiersFirst` puts the table before the prose, for the board screen.
  *

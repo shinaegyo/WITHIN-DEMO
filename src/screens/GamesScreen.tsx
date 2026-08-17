@@ -30,14 +30,12 @@ export function GamesScreen({
   onDuels,
   onImpossible,
   onRush,
-  onWindow,
   onPractice,
   practiceLeft,
 }: {
   onDuels: () => void;
   onImpossible: () => void;
   onRush: () => void;
-  onWindow: () => void;
   onPractice: () => void;
   practiceLeft: number | null;
 }) {
@@ -130,19 +128,6 @@ export function GamesScreen({
               : 'One run a day',
           urgent: !!status?.rush.running,
           onPress: onRush,
-        },
-        {
-          label: 'Window',
-          sub: 'Three free guesses, then commit to a range',
-          // What happened, once it has. "One a day" is a rule, and a rule is
-          // only worth saying while it still governs something you can do.
-          status: status?.window.played
-            ? status.window.inside
-              ? `${status.window.score} points`
-              : 'Missed today'
-            : 'One a day',
-          urgent: false,
-          onPress: onWindow,
         },
       ],
     },

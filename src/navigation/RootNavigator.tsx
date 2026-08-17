@@ -11,7 +11,6 @@ import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
 import { RushScreen } from '../screens/RushScreen';
-import { WindowScreen } from '../screens/WindowScreen';
 import { AccountScreen } from '../screens/AccountScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
@@ -61,7 +60,6 @@ export type RootStackParamList = {
   Avatar: undefined;
   Endless: undefined;
   Rush: undefined;
-  Window: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
   HowToPlay: undefined;
@@ -294,7 +292,6 @@ function Screens({
                     onDuels={() => navigation.navigate('Duels')}
                     onImpossible={() => navigation.navigate('ImpossibleBoard')}
                     onRush={() => navigation.navigate('Rush')}
-                    onWindow={() => navigation.navigate('Window')}
                     onPractice={startPractice}
                     practiceLeft={practiceLeft}
                   />
@@ -324,7 +321,6 @@ function Screens({
                     onOpenDuels={() => navigation.navigate('Duels')}
                     onOpenRanked={() => navigation.navigate('Ranked')}
                     onRush={() => navigation.navigate('Rush')}
-                    onWindow={() => navigation.navigate('Window')}
                     onOpenProfile={() => tab.navigation.navigate('You')}
                     practiceEpoch={practiceEpoch}
                     username={username}
@@ -383,14 +379,6 @@ function Screens({
         <Stack.Screen name="Endless" options={{ headerShown: false }}>
           {({ navigation }) => (
             <EndlessScreen
-              onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
-            />
-          )}
-        </Stack.Screen>
-
-        <Stack.Screen name="Window" options={{ headerShown: false }}>
-          {({ navigation }) => (
-            <WindowScreen
               onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
             />
           )}
