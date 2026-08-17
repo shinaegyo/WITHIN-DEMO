@@ -105,7 +105,7 @@ export function AvatarScreen({
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.label, { color: colors.textMuted }]}>COLOUR</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>COLOR</Text>
         <View style={styles.colors}>
           {COLOR_KEYS.map((key) => (
             <Pressable
@@ -166,7 +166,7 @@ export function AvatarScreen({
               ))}
             </View>
 
-            <Text style={[styles.label, { color: colors.textMuted }]}>HAIR COLOUR</Text>
+            <Text style={[styles.label, { color: colors.textMuted }]}>HAIR COLOR</Text>
             <View style={styles.colors}>
               {Object.keys(HAIR_COLORS).map((key) => (
                 <Pressable
