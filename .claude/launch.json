@@ -8,6 +8,12 @@
       "port": 8081
     },
     {
+      "name": "within-iphone",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8098", "--directory", "scripts/preview"],
+      "port": 8098
+    },
+    {
       "name": "within-dist",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8095", "--directory", "dist"],

@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>WITHIN — iPhone preview</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: radial-gradient(ellipse at 50% 0%, #2a2f3a 0%, #14161c 55%, #0b0d11 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    color: #cfd4de;
+    display: flex; flex-direction: column; align-items: center;
+    overflow: hidden;
+  }
+
+  /* ---- toolbar ---- */
+  .bar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px;
+    font-size: 12px; letter-spacing: .02em;
+  }
+  .bar select, .bar button {
+    font: inherit; font-size: 12px;
+    color: #e6eaf2;
+    background: #1e222b;
+    border: 1px solid #333947;
+    border-radius: 7px;
+    padding: 5px 9px;
+    cursor: pointer;
+  }
+  .bar button:hover, .bar select:hover { background: #262b36; }
+  .bar .dim { color: #6b7385; font-variant-numeric: tabular-nums; }
+
+  /* ---- stage ---- */
+  .stage {
+    flex: 1 1 auto;
+    width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    padding-bottom: 24px;
+  }
+  .scaler { transform-origin: center center; }
+
+  /* ---- device ---- */
+  .device {
+    position: relative;
+    padding: 11px;                       /* titanium rail thickness */
+    border-radius: 60px;
+    background:
+      linear-gradient(145deg, #8d8f95 0%, #4a4d55 18%, #2c2e34 42%, #5c5f68 62%, #2a2c32 82%, #7c7f87 100%);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.10) inset,
+      0 40px 80px -20px rgba(0,0,0,.85),
+      0 8px 24px rgba(0,0,0,.6);
+  }
+  .screen {
+    position: relative;
+    border-radius: 50px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 0 0 2px #0a0a0c inset;
+  }
+  .screen iframe {
+    display: block;
+    border: 0;
+    background: #fff;
+  }
+
+  /* dynamic island */
+  .island {
+    position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+    width: 124px; height: 35px;
+    background: #000; border-radius: 20px;
+    z-index: 5; pointer-events: none;
+  }
+  .island::after {                        /* camera lens */
+    content: ""; position: absolute;
+    right: 11px; top: 50%; transform: translateY(-50%);
+    width: 11px; height: 11px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #1d2740 0%, #080a10 70%);
+  }
+  /* SE-style notch-less bar */
+  .device[data-notch="none"] .island { display: none; }
+
+  /* home indicator */
+  .home {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 140px; height: 5px; border-radius: 3px;
+    background: rgba(0,0,0,.32);
+    z-index: 5; pointer-events: none;
+  }
+  .device[data-notch="none"] .home { display: none; }
+
+  /* side buttons */
+  .btn { position: absolute; background: linear-gradient(90deg,#3a3d45,#7a7d86,#3a3d45); border-radius: 2px; }
+  .btn.left  { left: -2px;  width: 3px; }
+  .btn.right { right: -2px; width: 3px; }
+  .b-action { top: 108px; height: 30px; }
+  .b-vup    { top: 156px; height: 56px; }
+  .b-vdown  { top: 224px; height: 56px; }
+  .b-power  { top: 172px; height: 84px; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <select id="device">
+    <option value="393,852,60,50,pro"   selected>iPhone 16 Pro — 393 × 852</option>
+    <option value="440,956,62,52,pro">iPhone 16 Pro Max — 440 × 956</option>
+    <option value="390,844,58,48,pro">iPhone 14 / 13 — 390 × 844</option>
+    <option value="375,812,54,44,pro">iPhone 13 mini — 375 × 812</option>
+    <option value="375,667,0,0,none">iPhone SE — 375 × 667</option>
+  </select>
+  <button id="reload">Reload app</button>
+  <span class="dim" id="readout"></span>
+</div>
+
+<div class="stage">
+  <div class="scaler" id="scaler">
+    <div class="device" id="dev" data-notch="pro">
+      <div class="btn left b-action"></div>
+      <div class="btn left b-vup"></div>
+      <div class="btn left b-vdown"></div>
+      <div class="btn right b-power"></div>
+      <div class="screen" id="screen">
+        <div class="island"></div>
+        <iframe id="app" src="http://localhost:8081" title="WITHIN app"></iframe>
+        <div class="home"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var sel = document.getElementById('device');
+  var dev = document.getElementById('dev');
+  var screenEl = document.getElementById('screen');
+  var frame = document.getElementById('app');
+  var scaler = document.getElementById('scaler');
+  var readout = document.getElementById('readout');
+
+  function apply() {
+    var p = sel.value.split(',');
+    var w = +p[0], h = +p[1], outerR = +p[2], innerR = +p[3], notch = p[4];
+
+    frame.style.width = w + 'px';
+    frame.style.height = h + 'px';
+    screenEl.style.borderRadius = innerR + 'px';
+    dev.style.borderRadius = (outerR || 6) + 'px';
+    dev.dataset.notch = notch;
+
+    fit();
+  }
+
+  function fit() {
+    scaler.style.transform = 'scale(1)';
+    var stage = document.querySelector('.stage').getBoundingClientRect();
+    var box = scaler.getBoundingClientRect();
+    var s = Math.min(stage.height / box.height, stage.width / box.width, 1);
+    scaler.style.transform = 'scale(' + s + ')';
+    readout.textContent = Math.round(s * 100) + '% scale';
+  }
+
+  sel.addEventListener('change', apply);
+  window.addEventListener('resize', fit);
+  document.getElementById('reload').addEventListener('click', function () {
+    frame.src = frame.src;
+  });
+
+  apply();
+</script>
+
+</body>
+</html>
