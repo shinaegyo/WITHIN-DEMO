@@ -37,15 +37,15 @@ import { playForTier, playLose, playTap, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
 
 /**
- * Window: three probes, then commit to a range.
+ * Window: three free guesses, then commit to a range.
  *
  * Every other mode asks for the number. This one asks how sure you are, and the
  * whole game is in one rule - score is 101 minus the width of the span you
- * commit to, and nothing at all if the number is outside it. Three probes leave
+ * commit to, and nothing at all if the number is outside it. Three free guesses leave
  * a range you know is safe; taking it is worth what it is worth, and halving it
  * is worth twice that with everything at stake.
  *
- * The probes are drawn on the same board as every other mode, because they are
+ * The free guesses are drawn on the same board as every other mode, because they
  * the same thing: a guess, answered by how close it was. What changes is that
  * finding the number is not the point - saying how sure you are is.
  */
@@ -204,7 +204,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
               subtitle={
                 done
                   ? undefined
-                  : 'Three probes, then commit to a range the number is inside. The narrower it is, the more it scores.'
+                  : 'Three free guesses, then commit to a range the number is inside. The narrower it is, the more it scores.'
               }
               onBack={onExit}
             />
@@ -240,7 +240,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
             {!done && (
               <View style={[styles.foot, { borderColor: colors.border }]}>
                 <Text style={[styles.footNote, { color: colors.textMuted }]}>
-                  One a day · three probes
+                  One a day · three free guesses
                 </Text>
                 <Pressable
                   onPress={() => {
@@ -265,7 +265,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
 
             <Text style={[styles.probesLeft, { color: colors.text }]}>
               {state.probesLeft > 0
-                ? `${state.probesLeft} ${state.probesLeft === 1 ? 'probe' : 'probes'} left`
+                ? `${state.probesLeft} free ${state.probesLeft === 1 ? 'guess' : 'guesses'} left`
                 : 'Commit to a window'}
             </Text>
 
@@ -280,7 +280,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
                 18" - and asking for the ends made the player do the arithmetic
                 the game is scoring.
 
-                Both halves share one outline, the same instrument the probe
+                Both halves share one outline, the same instrument the guess
                 field above is, so the commit stops reading as a form bolted to
                 the bottom of a game. What you are committing to, and what it
                 pays, is set large underneath - it is the decision, and it was

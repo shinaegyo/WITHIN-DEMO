@@ -36,7 +36,7 @@ const MODES: { name: string; line: string }[] = [
   },
   {
     name: 'Window',
-    line: 'Three probes, then commit to a range the number is inside. The narrower it is, the more it scores.',
+    line: 'Three free guesses, then commit to a range the number is inside. The narrower it is, the more it scores.',
   },
   {
     name: 'Duels',

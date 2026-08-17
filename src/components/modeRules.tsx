@@ -164,12 +164,12 @@ export function rushRules(): React.ReactNode[] {
 export function windowRules(): React.ReactNode[] {
   return [
     <>
-      <H>Three probes</H>
+      <H>Three free guesses</H>
       <P first>
-        Three probe guesses, answered with the same colours as everywhere else: blue means aim
-        higher, red means lower, and the stronger the colour the closer you are.
+        Three free guesses, answered with the same colours as everywhere else: blue means aim
+        higher, red means lower, and the stronger the colour the closer you are. They cost nothing
+        and none of them ends the round.
       </P>
-      <P>They cost nothing and none of them ends the round.</P>
     </>,
 
     <>
@@ -180,8 +180,8 @@ export function windowRules(): React.ReactNode[] {
       </P>
       <P>
         Miss, and it is nothing at all, however narrow the window was. That is the whole bet: three
-        probes leave a range you know is safe, and halving it is worth twice as much with everything
-        at stake.
+        free guesses leave a range you know is safe, and halving it is worth twice as much with
+        everything at stake.
       </P>
     </>,
 
@@ -216,54 +216,43 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <H>The Impossible Climb</H>
       <P first>
         Fifty numbers, one after another, and everyone plays the same sequence this week — so how
-        far you got compares directly. It resets on Monday.
-      </P>
-      <P>One clue per number, and it gets sharper the higher you go.</P>
-      <P>
-        Clear level 50 and you have topped out. Everyone who finishes is ranked on guesses used,
-        so every wasted guess counts, including the ones down on the Ground.
+        far you got compares directly. It resets on Monday. One clue per number, and it gets sharper
+        the higher you go. Clear level 50 and you have topped out, and everyone who finishes is
+        ranked on guesses used.
       </P>
     </>,
 
     <>
       <H>Health</H>
       <P first>
-        You start each day at 100%. Running out of attempts on a number costs health — not the
-        climb. The same number is waiting and you try it again.
-      </P>
-      <P>
-        What it costs depends on how high you are: 10% on the Ground, 50% in Orbit. Ten mistakes
-        down there, two up here.
-      </P>
-      <P>
-        Solve one in three guesses or fewer and you take 20% back. The easy tiers are where you
-        bank the health that carries you through the hard ones.
+        You start each day at 100%. Running out of attempts on a number costs health, not the climb
+        — the same number is waiting and you try it again. What it costs depends on how high you
+        are: 10% on the Ground, 50% in Orbit. Solve one in three guesses or fewer and you take 20%
+        back.
       </P>
     </>,
 
     <>
       <H>Checkpoints</H>
-      <P first>Every fifth level is a checkpoint, and so is the first level of a tier.</P>
-      <P>You never start further back than your last one. Clear level 27 and stop, and tomorrow
-        begins at 25.</P>
-      <P>It is also where you land at zero health.</P>
+      <P first>
+        Every fifth level is a checkpoint, and so is the first level of a tier. You never start
+        further back than your last one — clear level 27 and stop, and tomorrow begins at 25. It is
+        also where you land at zero health.
+      </P>
     </>,
 
     <>
       <H>One climb a day</H>
       <P first>Lose all your health and that is the day. Come back tomorrow at 100%.</P>
-      <P>
-        The day is spent on your first guess, not by opening the screen — so you can always look at
-        where you are.
-      </P>
-      <P>The board keeps the deepest level you reached, even on a day that ends in a fall.</P>
     </>,
 
     <>
       <H>The five tiers</H>
-      <P first>Ten levels each. Higher means fewer attempts and a costlier fall.</P>
+      <P first>
+        Ten levels each. Higher means fewer attempts and a costlier fall. Every number cleared pays
+        20 XP toward your level, and reaching a new tier pays 50.
+      </P>
       <TierTable />
-      <P>Every number cleared pays 20 XP toward your level, and reaching a new tier pays 50.</P>
     </>,
   ];
 

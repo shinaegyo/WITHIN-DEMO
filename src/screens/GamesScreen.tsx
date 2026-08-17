@@ -93,7 +93,7 @@ export function GamesScreen({
     },
     {
       label: 'Window',
-      sub: 'Three probes, then how sure are you?',
+      sub: 'Three free guesses, then commit to a range',
       // What happened, once it has. "One a day" is a rule, and a rule is only
       // worth saying while it still governs something you can do.
       status: status?.window.played

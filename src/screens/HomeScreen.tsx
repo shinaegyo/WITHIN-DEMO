@@ -335,7 +335,7 @@ export function HomeScreen({
   const suggestion = (() => {
     if (!modes || !finished) return null;
     if (!modes.window.played && !modes.window.started) {
-      return 'You have not tried Window yet — three probes, then say how sure you are.';
+      return 'You have not tried Window yet — three free guesses, then commit to a range.';
     }
     if (!modes.rush.played && !modes.rush.running) {
       return 'Rush is still open today — three minutes, one run.';
