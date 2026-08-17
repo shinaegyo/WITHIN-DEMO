@@ -173,6 +173,21 @@ export function ImpossibleBoardScreen({
 
         <ShowMore count={hidden} onPress={() => setExpanded(true)} />
 
+        {/* Said once under the board rather than seven times inside it.
+            A summit row carries a mountain and a number, and that number is
+            guesses where every other row's is a level - so on its own it reads
+            as a level of 228, which is not a thing. Naming the unit in the row
+            costs a long word in a tight column and repeats on every summit;
+            here it also explains the ordering, which the row never could.
+
+            Only once somebody has actually topped out. Before that it explains
+            a row nobody can see. */}
+        {rows.some((e) => e.topped) && (
+          <Text style={[styles.caption, { color: colors.textMuted }]}>
+            Topping out is level 50 for everyone, so summits rank by guesses used.
+          </Text>
+        )}
+
         {/* Set out plainly rather than folded behind a disclosure. A rule
             nobody opens is a rule nobody knows, and a row of chevrons down the
             app is furniture standing between the player and the only thing on
