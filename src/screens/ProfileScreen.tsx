@@ -8,6 +8,8 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { LEAGUE_INK } from '../theme/leagues';
 import { LeagueBadge } from '../components/LeagueBadge';
+import { StatIcon } from '../components/StatIcon';
+import { feedbackColors } from '../theme/colors';
 import { useTrack } from '../utils/useTrack';
 import { loadSeasonHistory, SeasonHistory } from '../lib/api';
 import { useTheme } from '../theme/ThemeContext';
@@ -149,17 +151,39 @@ export function ProfileScreen({
           // wanted to read. The league is the one that moves and the one worth
           // chasing - and it comes from the daily alone, which the line under
           // the row says out loud.
-          { label: 'STREAK', value: stats ? `${stats.currentStreak}` : '—' },
-          { label: 'POINTS', value: stats ? `${stats.totalPoints}` : '—' },
+          // Every card carries a glyph, including the ones with nothing to
+          // report: the row is as tall as its tallest member, so a card that
+          // skips its glyph is a card with a hole in it. A stat at zero dims
+          // its glyph to the border instead of dropping it.
+          {
+            label: 'STREAK',
+            value: stats ? `${stats.currentStreak}` : '—',
+            glyph: 'streak' as const,
+            glyphInk: stats?.currentStreak ? feedbackColors.within10 : colors.border,
+          },
+          {
+            label: 'POINTS',
+            value: stats ? `${stats.totalPoints}` : '—',
+            glyph: 'points' as const,
+            glyphInk: stats?.totalPoints ? colors.accent : colors.border,
+          },
           {
             label: 'LEAGUE',
             value: rank ? rank.league : '—',
             ink: rank ? LEAGUE_INK[rank.league] : undefined,
-            badge: rank?.league,
+            // Bronze is the shape of the bottom rung, so an unplaced player
+            // sees the silhouette of the league they are climbing towards
+            // rather than a gap where the other two have something.
+            badge: rank?.league ?? ('Bronze' as const),
+            badgeInk: rank ? undefined : colors.border,
           },
         ].map((s) => (
           <View key={s.label} style={[styles.stat, { borderColor: colors.border }]}>
-            {!!s.badge && <LeagueBadge league={s.badge} size={22} />}
+            {s.glyph ? (
+              <StatIcon glyph={s.glyph} color={s.glyphInk} size={22} />
+            ) : (
+              <LeagueBadge league={s.badge!} size={22} ink={s.badgeInk} />
+            )}
             <Text style={[styles.statValue, { color: s.ink ?? colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
               {s.value}
             </Text>
