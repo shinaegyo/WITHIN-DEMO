@@ -176,10 +176,10 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <H>The Impossible Climb</H>
       <P first>
         Seventy-five numbers, one after another, and everyone plays the same sequence this week —
-        so how far you got compares directly. It resets on Monday. The Ground and the Sky give you
-        one clue per number, and a weak one. From Stratosphere up there are none, and in Orbit a
-        guess drops from six to five — the step that ends most weeks. Clear level 75 and you have
-        topped out, and everyone who finishes is ranked on guesses used. Almost nobody will.
+        so how far you got compares directly. It resets on Monday. Five guesses a number, all the
+        way up. The Ground and the Sky hand you a clue; above them the climb takes something away
+        instead, a different thing each tier. Clear level 75 and you have topped out, and everyone
+        who finishes is ranked on guesses used. Almost nobody will.
       </P>
     </>,
 
@@ -188,9 +188,29 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <P first>
         You start every day at 100%. Running out of attempts on a number costs health, not the
         climb — the same number is waiting and you try it again. What it costs depends on how high
-        you are: 21% on the Ground, rising a point a tier to 25% in Orbit. Solve one in two guesses or fewer and you take
-        10% back, wherever you are. A fall always costs more than a clean solve returns, so a day
+        you are: 18% on the Ground, rising a point a tier to 22% in Orbit. Solve a number you have never failed in two guesses or fewer and you take 10% back. A fall always costs more than a clean solve returns, so a day
         is about four or five misses long.
+      </P>
+    </>,
+
+    <>
+      <H>What each tier takes</H>
+      <P first>
+        The Ground and the Sky hand you a clue with every number. Above them the climb starts
+        taking things away instead.
+      </P>
+      <P>
+        In Stratosphere the colour arrives late — every guess shows its arrow at once and its shade
+        only once the next guess has landed, so you commit before you know how close you were.
+      </P>
+      <P>
+        In Thin air the arrow goes. The tile still tells you how close you are and never which way,
+        so every guess leaves you two possibilities to tell apart. The colour drains out with it —
+        there is no blue or red up there, only how strong the shade is.
+      </P>
+      <P>
+        Orbit gives it all back and takes nothing. Five guesses, the full colours, no clue and no
+        trick. It is the last fifteen numbers and there is nothing to hide behind.
       </P>
     </>,
 
