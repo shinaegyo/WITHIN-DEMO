@@ -362,6 +362,14 @@ const styles = StyleSheet.create({
   introTitle: { fontSize: 25, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
   introLede: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19 },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
-  note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
+  note: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    lineHeight: 17,
+    // Centred, because it sits alone at the foot of a lot of empty space and a
+    // left edge with nothing above it reads as a paragraph that fell off.
+    textAlign: 'center',
+    paddingHorizontal: 8,
+  },
   noteStrong: { fontFamily: fonts.extraBold },
 });

@@ -6,6 +6,7 @@ import { LevelBar } from '../components/LevelBar';
 import { SeasonLeaderboard, XpState, loadRanked, loadSeasonLeaderboard, loadXp } from '../lib/api';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
+import { LEAGUE_INK } from '../theme/leagues';
 import { useTrack } from '../utils/useTrack';
 import { loadSeasonHistory, SeasonHistory } from '../lib/api';
 import { useTheme } from '../theme/ThemeContext';
@@ -142,17 +143,19 @@ export function ProfileScreen({
 
       <View style={styles.stats}>
         {[
-          // Streak, points, and how close the guesses land. A best streak is a
-          // record of a run that is already over, and next to a live one it
-          // mostly reports how long ago the good week was. Average away is the
-          // only number here that says anything about playing well - it is
-          // what separates two players on the same score on the board.
+          // Streak, points, league. A best streak is a record of a run that is
+          // already over, and average-away turned out to be a number nobody
+          // wanted to read. The league is the one that moves and the one worth
+          // chasing - and it comes from the daily alone, which the line under
+          // the row says out loud.
           { label: 'STREAK', value: stats ? `${stats.currentStreak}` : '—' },
           { label: 'POINTS', value: stats ? `${stats.totalPoints}` : '—' },
-          { label: 'AVG AWAY', value: rank ? `${rank.avgOff}` : '—' },
+          { label: 'LEAGUE', value: rank ? rank.league : '—', ink: rank ? LEAGUE_INK[rank.league] : undefined },
         ].map((s) => (
           <View key={s.label} style={[styles.stat, { borderColor: colors.border }]}>
-            <Text style={[styles.statValue, { color: colors.text }]}>{s.value}</Text>
+            <Text style={[styles.statValue, { color: s.ink ?? colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+              {s.value}
+            </Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>{s.label}</Text>
           </View>
         ))}
@@ -161,6 +164,11 @@ export function ProfileScreen({
       <Text style={[styles.line, { color: colors.textMuted }]}>
         {rank ? `#${rank.rank} this season` : 'Finish a day to reach the board'}
         {rating !== null ? ` · ${rating} ranked` : ''}
+      </Text>
+
+      {/* The one thing people get wrong about a game with five modes in it. */}
+      <Text style={[styles.line, { color: colors.textMuted }]}>
+        League and points come from the daily. The other games are for fun.
       </Text>
 
       {!!history?.best && (

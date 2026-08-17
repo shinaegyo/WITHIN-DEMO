@@ -27,9 +27,13 @@ import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
 import { Mark } from '../components/Mark';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
+import { LeagueUpOverlay } from '../components/LeagueUpOverlay';
 import { GamesUnlockedOverlay } from '../components/GamesUnlockedOverlay';
 import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
+import { lastSeenLeague, markLeagueSeen } from '../utils/leagueSeen';
+import { League, loadSeasonLeaderboard } from '../lib/api';
+import { LEAGUE_INK, promoted } from '../theme/leagues';
 
 
 interface Props {
@@ -75,6 +79,9 @@ export function HomeScreen({
   const [levelUp, setLevelUp] = useState<{ from: number; to: number } | null>(null);
   // Shown once, to somebody who has just finished their first day.
   const [unlocked, setUnlocked] = useState(false);
+  // The season's league, and the promotion card owed for reaching it.
+  const [league, setLeague] = useState<League | null>(null);
+  const [promotion, setPromotion] = useState<{ from: League; to: League } | null>(null);
 
   // The calm track. Outside the games the app is not silent any more - it has
   // its own room rather than the game's.
@@ -124,6 +131,33 @@ export function HomeScreen({
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
   }, [practiceEpoch]);
+
+  /**
+   * The league, and the card owed for climbing into it.
+   *
+   * Points cross a band mid-round, which is the worst moment to interrupt, so
+   * the promotion waits here - the screen every mode comes back to. Refetched
+   * whenever the day's score moves, because that is the only thing that can
+   * change it.
+   */
+  useEffect(() => {
+    let alive = true;
+    loadSeasonLeaderboard()
+      .then(async (b) => {
+        if (!alive || !b.me) return;
+        setLeague(b.me.league);
+        const seen = await lastSeenLeague(b.season);
+        if (!alive) return;
+        if (promoted(seen, b.me.league)) setPromotion({ from: seen!, to: b.me.league });
+        else await markLeagueSeen(b.season, b.me.league);
+      })
+      .catch(() => {
+        /* the league is decoration until it loads */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [game?.totalScore, game?.dayStatus]);
 
   // The countdown reaching zero has to actually mean something. A timer is set
   // for midnight itself rather than waiting for the next tick to notice, so the
@@ -475,9 +509,15 @@ export function HomeScreen({
 
               <View style={[styles.cardRule, { backgroundColor: colors.border }]} />
               <View style={styles.cardFoot}>
-                <Text style={[styles.footText, { color: colors.textMuted }]}>
-                  {game.stats.currentStreak} day streak
-                </Text>
+                {league ? (
+                  <Text style={[styles.footText, { color: LEAGUE_INK[league] }]}>
+                    {league} league
+                  </Text>
+                ) : (
+                  <Text style={[styles.footText, { color: colors.textMuted }]}>
+                    {game.stats.currentStreak} day streak
+                  </Text>
+                )}
                 <Text style={[styles.footText, { color: colors.textMuted }]}>
                   {game.stats.totalPoints.toLocaleString()} points
                 </Text>
@@ -665,6 +705,21 @@ export function HomeScreen({
           onDone={() => {
             markGamesIntroSeen();
             setUnlocked(false);
+          }}
+        />
+      )}
+
+      {/* One at a time: the league card waits until the level card is gone,
+          because two celebrations stacked is neither. */}
+      {promotion && !levelUp && (
+        <LeagueUpOverlay
+          from={promotion.from}
+          to={promotion.to}
+          onDone={() => {
+            void loadSeasonLeaderboard()
+              .then((b) => markLeagueSeen(b.season, promotion.to))
+              .catch(() => {});
+            setPromotion(null);
           }}
         />
       )}

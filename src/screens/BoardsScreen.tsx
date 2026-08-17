@@ -22,6 +22,7 @@ import {
 import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
 import { MEDALS } from '../theme/medals';
+import { LEAGUE_INK } from '../theme/leagues';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 
@@ -125,8 +126,9 @@ interface Row {
   avatar: string | null;
   value: string;
   unit?: string;
-  /** Shown small beside the value: today's board uses it for precision. */
+  /** Shown small beside the value: the season board names the league here. */
   sub?: string;
+  subInk?: string;
   isMe: boolean;
   crown?: boolean;
 }
@@ -180,7 +182,7 @@ export function BoardsScreen() {
     rank: number; name: string; avatar: string | null; score: number; avgOff: number; isMe: boolean;
   }): Row => ({
     rank: e.rank, name: e.name, avatar: e.avatar,
-    value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
+    value: `${e.score}`, isMe: e.isMe,
   });
 
   // From the first keystroke. A friends list is short, so one letter narrows
@@ -304,7 +306,7 @@ export function BoardsScreen() {
             ...r,
             today: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
+              value: `${e.score}`, isMe: e.isMe,
             })),
           }));
         } else if (which === 'season') {
@@ -314,7 +316,7 @@ export function BoardsScreen() {
             ...r,
             season: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
+              value: `${e.score}`, sub: e.league, subInk: LEAGUE_INK[e.league], isMe: e.isMe,
             })),
           }));
         }
@@ -580,9 +582,9 @@ export function BoardsScreen() {
               sentence. */}
           <View style={styles.head}>
             <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-            <Pressable onPress={() => { playTap(); setSheet({ kind: 'column', board: tab }); }} hitSlop={10}>
-              <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
-            </Pressable>
+            {tab === 'season' && (
+              <Text style={[styles.headSub, { color: colors.textMuted }]}>LEAGUE</Text>
+            )}
           </View>
           {!found && list.map((e) => (
             <Pressable
@@ -622,7 +624,9 @@ export function BoardsScreen() {
                   they are sorted in. The other way round you read what settles
                   a tie before you read the thing being tied. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
-              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
+              {!!e.sub && (
+                <Text style={[styles.sub, { color: e.subInk ?? colors.textMuted }]}>{e.sub}</Text>
+              )}
             </Pressable>
           ))}
 
@@ -651,7 +655,9 @@ export function BoardsScreen() {
                   block was written separately and inherited the order the
                   podium had before it was swapped. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
-              {!!e.sub && <Text style={[styles.sub, { color: colors.textMuted }]}>{e.sub}</Text>}
+              {!!e.sub && (
+                <Text style={[styles.sub, { color: e.subInk ?? colors.textMuted }]}>{e.sub}</Text>
+              )}
             </Pressable>
           ))}
 
@@ -700,7 +706,9 @@ export function BoardsScreen() {
                 {tab === 'today' && (
                   <>
                     <Text style={[styles.sheetLead, { color: colors.text }]}>
-                      Your guesses landed {today?.me?.avgOff ?? 0} away on average.
+                      {today?.me
+                      ? `${today.me.score} ${today.me.score === 1 ? 'point' : 'points'} today.`
+                      : 'Finish the three rounds to reach the board.'}
                     </Text>
                     {/* Said out loud because the board only shows the score and
                         the average, and on a day where the top score is shared
@@ -718,7 +726,7 @@ export function BoardsScreen() {
                     </Text>
                     <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
                       {season.me
-                        ? `${season.me.days} ${season.me.days === 1 ? 'day' : 'days'} played this month, and your guesses landed ${season.me.avgOff} away on average.`
+                        ? `${season.me.league} league · ${season.me.days} ${season.me.days === 1 ? 'day' : 'days'} played this month.`
                         : 'Play one and you are on it.'}
                     </Text>
                     <Text style={[styles.sheetBody, { color: colors.textMuted }]}>

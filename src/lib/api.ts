@@ -430,6 +430,15 @@ export interface AllTimeLeaderboard {
 }
 
 /** One calendar month, in the player's own timezone. */
+/**
+ * The six leagues a season can put you in.
+ *
+ * The server decides which one - the bands and the Legend gate live in
+ * season_league() so there is one copy of them, and a client that predates a
+ * change to them cannot disagree with the board it is drawing.
+ */
+export type League = 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Legend';
+
 export interface SeasonLeaderboard {
   /** First day of the month, ISO. */
   season: string;
@@ -442,6 +451,8 @@ export interface SeasonLeaderboard {
     score: number;
     avgOff: number;
     days: number;
+    /** Bronze … Legend, from the season's points. */
+    league: League;
     isMe: boolean;
   }[];
   me: {
@@ -449,6 +460,7 @@ export interface SeasonLeaderboard {
     avgOff: number;
     days: number;
     rank: number;
+    league: League;
     topPercent: number | null;
   } | null;
   totalPlayers: number;
@@ -1322,6 +1334,9 @@ export async function loadSeasonLeaderboard(friends = false): Promise<SeasonLead
       score: e.score ?? 0,
       avgOff: e.avg_off ?? 0,
       days: e.days ?? 0,
+      // Absent on a server that predates the leagues, where everybody is at
+      // the bottom of a ladder that does not exist yet.
+      league: (e.league as League) ?? 'Bronze',
       isMe: !!e.is_me,
     })),
     me: raw.me
@@ -1330,6 +1345,7 @@ export async function loadSeasonLeaderboard(friends = false): Promise<SeasonLead
           avgOff: raw.me.avgOff ?? 0,
           days: raw.me.days ?? 0,
           rank: raw.me.rank ?? 0,
+          league: (raw.me.league as League) ?? 'Bronze',
           topPercent: raw.me.topPercent ?? null,
         }
       : null,
