@@ -198,6 +198,9 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     const asksClue = live && round.kind === 'clue' && round.clue1 === null;
     const asksRange = live && round.kind === 'bet' && round.attemptsUsed >= round.attemptsAllowed;
     const asking = asksCall || asksClue || asksRange;
+    // Nothing on the board yet, so the space under the sheet is the empty
+    // board itself.
+    const centreSheet = asking && round.guesses.length === 0;
     const intro = round.kind ? INTRO[round.kind] : null;
     const used = round.attemptsUsed;
 
@@ -261,10 +264,14 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             showScore={false}
           />
 
-          {/* Not wrapped in a flex-1 centring view: that took the round
-              eyebrow and the progress rail down to zero height with it, and a
-              round that does not say which round it is costs more than the
-              empty space below a sheet was worth. */}
+          {/* A spacer rather than a wrapper. Wrapping the sheet in a flex-1
+              view gave it a height to fill and squeezed the rail out of
+              existence; an empty view has no intrinsic height at all, so it can
+              only absorb what is already spare. With the empty board below
+              also on flex 1, the two split the leftover space and the sheet
+              lands in the middle of it. */}
+          {centreSheet && <View style={styles.spacer} />}
+
           {asksCall ? (
             <CallYourShot onCall={onCall} busy={deciding} />
           ) : asksClue ? (
@@ -355,6 +362,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   boardWrap: { flex: 1 },
+  spacer: { flex: 1 },
   /** The round's terms, stated once under its name. */
   introLede: { fontSize: 12.5, fontFamily: fonts.medium, textAlign: 'center', marginBottom: 20 },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
