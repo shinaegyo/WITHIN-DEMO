@@ -271,7 +271,7 @@ function TierTable() {
         <Text style={[styles.tierName, { color: colors.textMuted }]}>TIER</Text>
         <Text style={[styles.rowMid, { color: colors.textMuted }]}>LEVELS</Text>
         <Text style={[styles.rowCol, { color: colors.textMuted }]}>TRIES</Text>
-        <Text style={[styles.rowEnd, { color: colors.textMuted }]}>FALL</Text>
+        <Text style={[styles.tierFall, { color: colors.textMuted }]}>FALL</Text>
       </View>
       {ARENAS.map((a, i) => {
         const next = ARENAS[i + 1];
@@ -283,7 +283,7 @@ function TierTable() {
               {a.from}–{next ? next.from - 1 : SUMMIT}
             </Text>
             <Text style={[styles.rowCol, { color: colors.text }]}>{a.attempts}</Text>
-            <Text style={[styles.rowEnd, { color: colors.text }]}>−{a.fall}%</Text>
+            <Text style={[styles.tierFall, { color: colors.text }]}>−{a.fall}%</Text>
           </View>
         );
       })}
@@ -295,9 +295,12 @@ const styles = StyleSheet.create({
   table: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 14 },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, gap: 10 },
   rowKey: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 62 },
-  rowMid: { flex: 1, fontSize: 13.5, fontFamily: fonts.medium },
+  rowMid: { flex: 1, fontSize: 13.5, fontFamily: fonts.medium, paddingRight: 8 },
   rowCol: { width: 46, textAlign: 'right', fontSize: 13.5, fontFamily: fonts.bold },
-  rowEnd: { width: 52, textAlign: 'right', fontSize: 14.5, fontFamily: fonts.extraBold },
+  rowEnd: { fontSize: 14.5, fontFamily: fonts.extraBold, textAlign: 'right' },
+  // The tier table's own last column, because its rows are short and want
+  // aligning. Everything else in a rules table is a phrase.
+  tierFall: { width: 54, textAlign: 'right', fontSize: 14.5, fontFamily: fonts.extraBold },
   swatch: { width: 14, height: 14, borderRadius: 4 },
   tierName: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 96 },
 });
