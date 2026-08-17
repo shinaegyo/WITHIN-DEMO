@@ -71,7 +71,9 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
 }
 
-export async function setUsername(name: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function setUsername(
+  name: string,
+): Promise<{ ok: true } | { ok: false; error: string; existing?: string }> {
   // Every other call in the app establishes a session first; this one did not,
   // and it is the very first thing a new player does. If the session was
   // missing, expired, or belonged to a deleted account, the request went up
@@ -101,6 +103,17 @@ export async function setUsername(name: string): Promise<{ ok: true } | { ok: fa
     return { ok: false, error: 'Could not save that name. Check your connection and try again.' };
   }
   if (data?.error) {
+    // A locked name comes back with the name the account actually has. Saying
+    // it is the difference between a refusal and an answer: the caller only
+    // asked because it thought there was no name, and now it knows better.
+    if (data.error === 'name_locked' && data.username) {
+      return {
+        ok: false,
+        existing: data.username,
+        error: `You're already playing as ${data.username}. A name can only be changed once a year, and yours is set for now.`,
+      };
+    }
+
     const messages: Record<string, string> = {
       bad_length: 'Use between 3 and 16 characters.',
       bad_characters: 'Letters, numbers and underscores only.',
@@ -119,14 +132,55 @@ export async function currentUsername(): Promise<string | null> {
   return (await currentProfile())?.username ?? null;
 }
 
-/** Name and avatar in one read, since every caller wants both. */
+/**
+ * Name and avatar in one read, since every caller wants both.
+ *
+ * Throws when the read fails, and that distinction is the whole point. The
+ * error used to be discarded, so a dropped request returned a null username -
+ * identical to a player who has genuinely never chosen one. The navigator
+ * reads exactly that field to decide who needs onboarding, so a blip on the
+ * wire sent established players to "Choose a username", where the server then
+ * refused every name they typed because their account already had one.
+ */
 export async function currentProfile(): Promise<{ username: string | null; avatar: string | null } | null> {
-  const { data } = await supabase.auth.getUser();
+  const { data, error: authError } = await supabase.auth.getUser();
+
+  // Asking who this is can fail on its own, and the answer used to be thrown
+  // away with the question: a failed getUser left data.user undefined, which
+  // read as "nobody is signed in" and returned a null profile — the same null
+  // that means "new player". The distinction is the entire bug, so it has to
+  // hold here too, not just on the row read below.
+  if (authError) {
+    console.error('[within] profile read failed (auth):', {
+      status: (authError as any).status,
+      name: authError.name,
+      message: authError.message,
+    });
+    throw new Error(authError.message);
+  }
   if (!data.user) return null;
-  const { data: rows } = await supabase
+
+  const { data: rows, error } = await supabase
     .from('profiles')
     .select('username, avatar')
     .eq('id', data.user.id)
     .maybeSingle();
+
+  // The line that would have identified this the first time round. Whether
+  // this read succeeds decides between showing someone their game and showing
+  // them the name picker, so the reason for a failure is worth more than the
+  // fact of one - and it has to be readable without reconstructing the session
+  // from a screenshot days later.
+  if (error) {
+    console.error('[within] profile read failed:', {
+      userId: data.user.id,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      message: error.message,
+    });
+    throw new Error(error.message);
+  }
+
   return { username: rows?.username ?? null, avatar: rows?.avatar ?? null };
 }

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../components/Avatar';
+import { StepHeader } from '../components/StepHeader';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -16,10 +17,12 @@ import { useTheme } from '../theme/ThemeContext';
  */
 export function DailyFirstScreen({
   onStart,
+  onBack,
   username,
   avatar,
 }: {
   onStart: () => void;
+  onBack?: () => void;
   username?: string;
   avatar?: string | null;
 }) {
@@ -38,6 +41,7 @@ export function DailyFirstScreen({
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      <StepHeader onBack={onBack} />
       <View style={styles.body}>
         {/* Their character, the moment before their first real round - the end
             of setting up and the start of playing, not a farewell. */}

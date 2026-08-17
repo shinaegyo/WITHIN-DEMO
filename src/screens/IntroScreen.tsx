@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { HowToPlayScreen } from './HowToPlayScreen';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { StepHeader } from '../components/StepHeader';
+import { StepProgress } from '../components/StepProgress';
 
 /**
  * The rules, shown once, before a new player's first round.
@@ -18,11 +20,23 @@ import { useTheme } from '../theme/ThemeContext';
  * rules would drift the first time one of them changed, and this one would be
  * the copy nobody remembered to update.
  */
-export function IntroScreen({ username, onNext }: { username: string; onNext: () => void }) {
+export function IntroScreen({
+  username,
+  onNext,
+  onBack,
+}: {
+  username: string;
+  onNext: () => void;
+  onBack?: () => void;
+}) {
   const { colors } = useTheme();
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      <StepHeader onBack={onBack} />
+      <View style={styles.progress}>
+        <StepProgress step={3} total={4} />
+      </View>
       <View style={styles.head}>
         {/* By name, because the app has just been told it. A tutorial that
             opens with "How it works" is a manual; one that opens with your name
@@ -54,6 +68,7 @@ export function IntroScreen({ username, onNext }: { username: string; onNext: ()
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  progress: { paddingHorizontal: 20, marginBottom: -22 },
   head: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
   title: { fontSize: 26, fontFamily: fonts.extraBold, letterSpacing: -0.5 },
   sub: { fontSize: 13, fontFamily: fonts.medium, marginTop: 2 },

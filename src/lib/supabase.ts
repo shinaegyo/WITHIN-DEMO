@@ -24,40 +24,59 @@ export const supabase = createClient(url, key, {
 });
 
 /**
- * Every player gets an account immediately, with no signup wall — anonymous
- * at first, upgradeable to a real login later without losing history.
- * Returns the user id.
+ * When the stored session was last confirmed against the server.
+ *
+ * This was a boolean, set once and never cleared, which made the check a
+ * once-per-page-load thing rather than a periodic one: a tab open for hours
+ * had confirmed its session hours ago and never asked again. Tokens last an
+ * hour, and the refresh timer does not run while a mobile tab is suspended,
+ * so a tab resumed after lunch went straight back to work holding a dead one
+ * - and the first thing it did with it was read the player's profile, which
+ * failed and looked exactly like somebody who had never chosen a name.
+ *
+ * The re-check earns its keep through its side effect rather than its answer:
+ * getUser() renews an expired token, so whatever runs next carries a live one.
  */
+let verifiedAt = 0;
+
 /**
- * Set once the stored session has been confirmed against the server, so the
- * check costs one request per launch rather than one per call.
+ * How long a confirmation is trusted before it is worth asking again. Well
+ * inside the token's own hour, and one auth request per five minutes of use
+ * is not a cost worth optimising against a session that silently stops
+ * working.
  */
-let sessionVerified = false;
+const VERIFY_TTL_MS = 5 * 60_000;
 
 /**
  * Forget that the stored session was confirmed, so the next ensureSignedIn
  * checks it against the server again. For use when a call has just failed in a
- * way that suggests the token died after we last looked.
+ * way that suggests the token died after we last looked, and when the app has
+ * been away long enough that anything it remembers about its session is worth
+ * doubting.
  */
 export function invalidateSession(): void {
-  sessionVerified = false;
+  verifiedAt = 0;
 }
 
+/**
+ * Every player gets an account immediately, with no signup wall — anonymous
+ * at first, upgradeable to a real login later without losing history.
+ * Returns the user id.
+ */
 export async function ensureSignedIn(): Promise<string> {
   const { data } = await supabase.auth.getSession();
 
   if (data.session?.user) {
-    if (sessionVerified) return data.session.user.id;
+    if (Date.now() - verifiedAt < VERIFY_TTL_MS) return data.session.user.id;
 
     // A stored token still looks valid locally after the account behind it has
     // gone — deleted by hand, or removed in a data reset. Every call then fails
     // server-side while the app believes it is signed in, which surfaces as an
     // unexplained "something went wrong" on whatever the player tried first.
-    // Confirming with the server once per launch turns that into a clean
-    // recovery.
+    // Confirming with the server turns that into a clean recovery.
     const { data: live, error } = await supabase.auth.getUser();
     if (!error && live.user) {
-      sessionVerified = true;
+      verifiedAt = Date.now();
       return live.user.id;
     }
 
@@ -75,7 +94,7 @@ export async function ensureSignedIn(): Promise<string> {
   const { data: created, error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
   if (!created.user) throw new Error('anonymous sign-in returned no user');
-  sessionVerified = true;
+  verifiedAt = Date.now();
   return created.user.id;
 }
 
@@ -88,7 +107,7 @@ export async function ensureSignedIn(): Promise<string> {
  * once-per-day rule.
  */
 export async function signOutForTesting(): Promise<void> {
-  sessionVerified = false;
+  verifiedAt = 0;
   await supabase.auth.signOut();
 }
 

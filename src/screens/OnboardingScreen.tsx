@@ -9,6 +9,8 @@ import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTrack } from '../utils/music';
+import { StepHeader } from '../components/StepHeader';
+import { StepProgress } from '../components/StepProgress';
 
 /**
  * First-run flow. Two steps, because the account and the name are separate
@@ -25,6 +27,8 @@ export function OnboardingScreen({
   step: stepOf = 1,
   total = 4,
   onSkip,
+  onBack,
+  initialName = '',
 }: {
   onDone: () => Promise<void> | void;
   /**
@@ -37,6 +41,14 @@ export function OnboardingScreen({
   step?: number;
   total?: number;
   onSkip?: () => void;
+  /** Out of this step entirely, to whatever the caller thinks precedes it. */
+  onBack?: () => void;
+  /**
+   * Fills the name field when somebody has come back to change a name they
+   * already set. An empty box would read as "your name is gone" and invite
+   * retyping it from memory, which is how a correction becomes a typo.
+   */
+  initialName?: string;
 }) {
   const { colors } = useTheme();
 
@@ -52,10 +64,14 @@ export function OnboardingScreen({
   const [flow, setFlow] = useState<'link' | 'signin'>('link');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  // Set when the server refuses a name because this account already has one.
+  // The screen asked the question on the understanding that there was no name,
+  // so the answer is not an error to correct — it is the way out.
+  const [locked, setLocked] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stepNumber = stepOf;
@@ -71,12 +87,12 @@ export function OnboardingScreen({
     }, 1000);
   };
 
-  const run = async (fn: () => Promise<void>, after?: () => void) => {
+  const run = async (fn: () => Promise<void>, after?: () => void | Promise<void>) => {
     setError(null);
     setBusy(true);
     try {
       await fn();
-      after?.();
+      await after?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
@@ -97,15 +113,36 @@ export function OnboardingScreen({
 
   const saveName = async () => {
     setError(null);
+    setLocked(null);
     setBusy(true);
     const res = await setUsername(name);
     setBusy(false);
-    if (res.ok) await onDone();
-    else setError(res.error);
+    if (res.ok) {
+      await onDone();
+      return;
+    }
+    setError(res.error);
+    if (res.existing) setLocked(res.existing);
   };
+
+  // Back means "whatever came before this", and on this screen that is
+  // sometimes another sub-step of the same screen and sometimes the step
+  // before it. Resolved in one place so the arrow never has to be reasoned
+  // about from inside the markup.
+  const back =
+    step === 'code'
+      ? () => { setStep('account'); setCode(''); setError(null); }
+      : step === 'username' && mode === 'account'
+        ? () => { setStep('account'); setError(null); setLocked(null); }
+        : step === 'account' && mode === 'name'
+          ? () => { setStep('username'); setError(null); }
+          : onBack;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      {/* Pinned above the scroll: a way out that has to be scrolled to is not
+          a way out on a screen with a keyboard covering half of it. */}
+      <StepHeader onBack={back} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
@@ -119,21 +156,7 @@ export function OnboardingScreen({
             <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
           </View>
 
-          {/* Progress */}
-          <Text style={[styles.stepLabel, { color: colors.textMuted }]}>
-            STEP {stepNumber} OF {total}
-          </Text>
-          <View style={styles.bar}>
-            {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
-              <View
-                key={n}
-                style={[
-                  styles.barSegment,
-                  { backgroundColor: n <= stepNumber ? colors.accent : colors.border },
-                ]}
-              />
-            ))}
-          </View>
+          <StepProgress step={stepNumber} total={total} />
 
           {step === 'account' && (
             <>
@@ -217,8 +240,16 @@ export function OnboardingScreen({
                 onPress={() =>
                   run(
                     () => (flow === 'signin' ? confirmSignIn(email, code) : confirmLinkEmail(email, code)),
-                    // Signing back in may already have a name; onDone re-checks.
-                    () => setStep('username'),
+                    // Signing back in usually lands on an account that already
+                    // has a name, and this is where that has to be checked.
+                    // The comment here claimed onDone re-checked and the call
+                    // was never made, so somebody recovering their account was
+                    // handed the name picker anyway — and their own name was
+                    // then refused as locked.
+                    async () => {
+                      await onDone();
+                      setStep('username');
+                    },
                   )
                 }
                 style={({ pressed }) => [
@@ -289,6 +320,39 @@ export function OnboardingScreen({
               >
                 <Text style={styles.primaryText}>Start playing</Text>
               </Pressable>
+
+              {/* The account turned out to have a name after all. Pressing this
+                  re-reads the profile, which is the thing that was wrong when
+                  this screen opened. */}
+              {locked && (
+                <Pressable
+                  disabled={busy}
+                  onPress={() => onDone()}
+                  style={({ pressed }) => [
+                    styles.secondary,
+                    { borderColor: colors.border, opacity: busy ? 0.4 : pressed ? 0.7 : 1 },
+                  ]}
+                >
+                  <Text style={[styles.secondaryText, { color: colors.text }]}>
+                    Continue as {locked}
+                  </Text>
+                </Pressable>
+              )}
+
+              {/* Promised by ensureSignedIn, which tells anyone whose session
+                  died that onboarding offers a way back to the original
+                  account. It never did: this screen opens on the name step and
+                  nothing here could reach the sign-in one, so a lost session
+                  stranded people on a new anonymous account for good. */}
+              <Pressable
+                disabled={busy}
+                onPress={() => { setStep('account'); setError(null); setLocked(null); }}
+                style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
+              >
+                <Text style={[styles.linkText, { color: colors.textMuted }]}>
+                  Already have an account? Sign in
+                </Text>
+              </Pressable>
             </>
           )}
 
@@ -306,9 +370,6 @@ const styles = StyleSheet.create({
   brand: { alignItems: 'center', marginBottom: 44 },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tagline: { fontSize: 13, fontFamily: fonts.medium, marginTop: 4 },
-  stepLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
-  bar: { flexDirection: 'row', gap: 6, marginBottom: 30 },
-  barSegment: { flex: 1, height: 4, borderRadius: 2 },
   h1: { fontSize: 26, fontFamily: fonts.logo, letterSpacing: -0.5, marginBottom: 8 },
   body: { fontSize: 15, fontFamily: fonts.medium, lineHeight: 21, marginBottom: 20 },
   input: {

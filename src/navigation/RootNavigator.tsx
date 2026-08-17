@@ -34,6 +34,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { Avatar } from '../components/Avatar';
 import { BackButton } from '../components/BackButton';
 import { TabIcon, TabName } from '../components/TabIcon';
+import { StatusScreen } from '../components/StatusScreen';
 import { GamesScreen } from '../screens/GamesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ImpossibleBoardScreen } from '../screens/ImpossibleBoardScreen';
@@ -487,12 +488,34 @@ function Screens({
   );
 }
 
+/**
+ * Shown when the profile could not be read at all. StatusScreen draws no
+ * background of its own — it has always sat inside a screen that had one — so
+ * it gets one here rather than inheriting whatever is behind the root.
+ */
+function ProfileUnreachable({ onRetry }: { onRetry: () => void }) {
+  const { colors } = useTheme();
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusScreen
+        message="Couldn't load your profile. Check your connection — your name and streak are safe."
+        onRetry={onRetry}
+      />
+    </View>
+  );
+}
+
 export function RootNavigator() {
   const profile = useProfile();
   // null until the flag has been read, so the tutorial never flashes up in
   // front of someone who has already done it.
   const [introSeen, setIntroSeen] = useState<boolean | null>(null);
   const [introStep, setIntroStep] = useState<'avatar' | 'rules' | 'practice' | 'account' | 'daily'>('avatar');
+  // Going back to step one once a name exists, which the gate below would
+  // otherwise never show again. Held separately from introStep because the
+  // name is not part of the tutorial - it is the thing the tutorial is
+  // addressed to, and it can be reached before the tutorial has started.
+  const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
     // localhost?dev lands on the home screen: name the anonymous player, mark
@@ -518,14 +541,40 @@ export function RootNavigator() {
 
   if (profile.loading || introSeen === null) return null;
 
+  // A read that failed says nothing about who this is, so it must not be
+  // allowed to answer the question below. Sending an established player to
+  // "Choose a username" on a dropped request was a trap with no way out: the
+  // screen has one button, and the server refuses every name it can send
+  // because the account already has one.
+  if (profile.failed && !profile.username) {
+    return <ProfileUnreachable onRetry={profile.refresh} />;
+  }
+
   // Name first, then the tutorial. The rules land better once the app knows who
   // it is talking to, and a stranger who has been through sign-in has already
   // decided to be here.
   // 1 name · 2 avatar · 3 the game itself · 4 an email, once there is something
   // to protect. The email used to be first, which guarded everything behind the
   // least appealing thing in the app.
-  if (!profile.username) {
-    return <OnboardingScreen mode="name" step={1} total={4} onDone={profile.refresh} />;
+  if (!profile.username || renaming) {
+    return (
+      <OnboardingScreen
+        mode="name"
+        step={1}
+        total={4}
+        // Only when they came back to it deliberately. Somebody arriving here
+        // for the first time has nothing behind them.
+        initialName={renaming ? profile.username ?? '' : ''}
+        // No arrow at all, in either direction. Nothing precedes step one, and
+        // the way on from it is saving the name - which is what the button
+        // does. An arrow next to it would either repeat the button or skip the
+        // one thing this step exists to do.
+        onDone={async () => {
+          await profile.refresh();
+          setRenaming(false);
+        }}
+      />
+    );
   }
 
   if (!introSeen) {
@@ -540,11 +589,18 @@ export function RootNavigator() {
             setIntroStep('rules');
           }}
           onSkip={() => setIntroStep('rules')}
+          onBack={() => setRenaming(true)}
         />
       );
     }
     if (introStep === 'rules') {
-      return <IntroScreen username={profile.username} onNext={() => setIntroStep('practice')} />;
+      return (
+        <IntroScreen
+          username={profile.username}
+          onNext={() => setIntroStep('practice')}
+          onBack={() => setIntroStep('avatar')}
+        />
+      );
     }
     if (introStep === 'practice') {
       return (
@@ -553,6 +609,7 @@ export function RootNavigator() {
           remainingAfterThis={0}
           onExit={() => setIntroStep('account')}
           onPlayAnother={() => setIntroStep('account')}
+          onBack={() => setIntroStep('rules')}
         />
       );
     }
@@ -567,12 +624,18 @@ export function RootNavigator() {
             setIntroStep('daily');
           }}
           onSkip={() => setIntroStep('daily')}
+          // No way back from here. Behind this step is the practice round, and
+          // returning to it means playing a second one - the tutorial gives
+          // everybody exactly one. Both ways on are already here: add an email,
+          // or skip it.
         />
       );
     }
     return (
       <DailyFirstScreen
         onStart={finishIntro}
+        // Forwards only from step four on, for the same reason step four is:
+        // everything behind this has been done once and is meant to stay done.
         username={profile.username}
         avatar={profile.avatar}
       />

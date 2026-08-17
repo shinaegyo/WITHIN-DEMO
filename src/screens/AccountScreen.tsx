@@ -57,12 +57,19 @@ export function AccountScreen({
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
-    setAccount(await currentAccount());
-    // Confirms what was passed in rather than being the first to know it: the
-    // field is already filled, so this only matters if it changed elsewhere.
-    const existing = await currentUsername();
-    setSavedName(existing);
-    if (existing) setName(existing);
+    try {
+      setAccount(await currentAccount());
+      // Confirms what was passed in rather than being the first to know it: the
+      // field is already filled, so this only matters if it changed elsewhere.
+      const existing = await currentUsername();
+      setSavedName(existing);
+      if (existing) setName(existing);
+    } catch {
+      // The read now reports its failures, and this caller has nothing to do
+      // with one: the name arrived as a prop and is already in the field.
+      // Blanking it on a dropped request would make the Save button live again
+      // and invite a change nobody asked for.
+    }
   }, []);
 
   useEffect(() => {

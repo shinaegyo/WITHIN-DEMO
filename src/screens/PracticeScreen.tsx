@@ -29,6 +29,8 @@ interface Props {
   onPlayAnother: () => void;
   /** First run, before the player has seen the real game. */
   introMode?: boolean;
+  /** Back to the rules, during the tutorial only. */
+  onBack?: () => void;
 }
 
 /**
@@ -42,6 +44,7 @@ export function PracticeScreen({
   onSpend,
   onPlayAnother,
   introMode = false,
+  onBack,
 }: Props) {
   const { colors, mode } = useTheme();
   const round: PracticeRound = useMemo(() => createPracticeRound(), []);
@@ -122,12 +125,24 @@ export function PracticeScreen({
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            {/* No way out during the tutorial. The practice round is where
-                somebody learns the colours, and a back arrow beside it is an
-                invitation to skip the only teaching the game does and meet the
-                real numbers cold. */}
-            {introMode ? <View style={styles.noBack} /> : (
-              <BackButton color={colors.text} onPress={onExit} />
+            {/* This used to be sealed for the whole tutorial round, on the
+                reasoning that a back arrow here invites somebody to skip the
+                only teaching the game does. That made the run one-way - a name
+                typed wrong at step one could not be reached again from step
+                three - so the arrow is offered, but only until the round has
+                actually started.
+
+                It closes on the first guess, because leaving after that is not
+                leaving, it is a retry: back and forward again is a fresh
+                number, and somebody one guess from losing could spend that
+                guess finding the range, step out, and come back knowing where
+                to aim. A practice round that can be abandoned the moment it
+                turns against you teaches the wrong lesson about the real one,
+                which cannot be. */}
+            {introMode && (!onBack || guesses.length > 0) ? (
+              <View style={styles.noBack} />
+            ) : (
+              <BackButton color={colors.text} onPress={introMode && onBack ? onBack : onExit} />
             )}
             <View style={[styles.badge, { borderColor: colors.border }]}>
               <Text style={[styles.badgeText, { color: colors.textMuted }]}>PRACTICE · UNRANKED</Text>

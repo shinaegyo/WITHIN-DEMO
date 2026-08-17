@@ -16,6 +16,8 @@ import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { StepHeader } from '../components/StepHeader';
+import { StepProgress } from '../components/StepProgress';
 
 /**
  * Build a person, or keep your initial.
@@ -38,6 +40,7 @@ export function AvatarScreen({
   current,
   onDone,
   onSkip,
+  onBack,
   step,
   total,
 }: {
@@ -48,6 +51,8 @@ export function AvatarScreen({
   onDone: (value: string) => void;
   /** Only offered during the tutorial, where the game has not started yet. */
   onSkip?: () => void;
+  /** Likewise: back to the name, which is the step before this one. */
+  onBack?: () => void;
 }) {
   // The calm track. Outside the games the app is not silent any more - it has
   // its own room rather than the game's.
@@ -82,10 +87,11 @@ export function AvatarScreen({
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      <StepHeader onBack={onBack} />
       {!!step && (
-        <Text style={[styles.step, { color: colors.textMuted }]}>
-          STEP {step} OF {total}
-        </Text>
+        <View style={styles.progress}>
+          <StepProgress step={step} total={total ?? 4} />
+        </View>
       )}
       <View style={styles.head}>
         <Avatar value={value} size={78} name={username} />
@@ -209,7 +215,9 @@ export function AvatarScreen({
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  step: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, paddingHorizontal: 22, paddingBottom: 6 },
+  // The inset step one uses for the same block, so the bar is the same width
+  // and in the same place across a press of the arrow.
+  progress: { paddingHorizontal: 22, marginBottom: -18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 22, paddingTop: 10 },
   headText: { flex: 1, minWidth: 0 },
   name: { fontSize: 22, fontFamily: fonts.extraBold },
