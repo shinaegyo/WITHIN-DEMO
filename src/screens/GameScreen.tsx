@@ -34,15 +34,15 @@ import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/so
 const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; lede: string }> = {
   cold: {
     kind: 'COLD',
-    lede: 'No clue. Colors only — blue means aim higher, red means lower.',
+    lede: 'No clue. Colors only.',
   },
   clue: {
     kind: 'THE CLUE',
-    lede: 'Six attempts, and one clue — but you choose which kind you get.',
+    lede: 'Six guesses, and one clue you pick.',
   },
   bet: {
     kind: 'THE BET',
-    lede: 'Three free guesses that cost nothing and end nothing. Then commit to a range.',
+    lede: 'Three free guesses, then a range.',
   },
 };
 
@@ -262,10 +262,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             showScore={false}
           />
 
-          {intro && (
-            <Text style={[styles.introLede, { color: colors.textMuted }]}>{intro.lede}</Text>
-          )}
-
           {/* A sheet with an empty board under it sat at the top of a screen
               of nothing. Centred in the space it actually has, it reads as the
               screen rather than as something that failed to load the rest.
@@ -312,7 +308,17 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             />
           </View>
 
-
+          {/* One line, at the foot. The terms are worth having on screen and
+              not worth the top of it - a round is read once and then played. */}
+          {intro && (
+            <Text
+              style={[styles.introLede, { color: colors.textMuted }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {intro.lede}
+            </Text>
+          )}
         </View>
       </KeyboardAvoidingView>
     );
@@ -358,6 +364,6 @@ const styles = StyleSheet.create({
   boardWrap: { flex: 1 },
   sheetWrap: { flex: 1, justifyContent: 'center' },
   /** The round's terms, stated once under its name. */
-  introLede: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19 },
+  introLede: { fontSize: 12.5, fontFamily: fonts.medium, textAlign: 'center', marginBottom: 20 },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
 });
