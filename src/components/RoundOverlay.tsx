@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
-import { DailyGame, SubmitResult } from '../lib/api';
+import { DailyGame, RoundSummary, SubmitResult } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { noHit } from '../theme/styles';
@@ -19,6 +19,20 @@ interface Props {
   onConcede: () => void;
   onExit: () => void;
   advancing?: boolean;
+}
+
+/**
+ * One line per round at the end of the day.
+ *
+ * Three rounds that each asked something different need three sentences that
+ * each answer the thing that was asked - a call is kept or it isn't, a range is
+ * around the number or it isn't - and none of them is "solved in 4 attempts".
+ */
+function recapFor(r: RoundSummary): string {
+  if (r.round === 3) return r.status === 'won' ? 'inside your range' : 'outside your range';
+  if (r.status !== 'won') return 'never found it';
+  if (r.called != null) return `called ${r.called}, found in ${r.attemptsUsed}`;
+  return `found in ${r.attemptsUsed}`;
 }
 
 /**
@@ -74,7 +88,35 @@ export function RoundOverlay({
   // Retry is still open, so the number must stay hidden — showing it here is
   // what let players read the answer and retype it for full marks.
   const canRetry = game.canRetry;
-  const title = roundWon ? 'CORRECT!' : 'OUT OF ATTEMPTS';
+
+  /**
+   * Three rounds, three ways to end. Round one was called out loud, so the card
+   * has to say whether the call held. Round three ends on a range rather than a
+   * guess, and "correct" is the wrong word for a range - it was either around
+   * the number or it wasn't.
+   */
+  const { kind, called, answer, betLo, betHi, attemptsUsed, score } = game.round;
+  const isBet = kind === 'bet';
+  const inside =
+    isBet &&
+    answer !== null &&
+    betLo !== null &&
+    betHi !== null &&
+    answer >= betLo &&
+    answer <= betHi;
+  const late = kind === 'cold' && roundWon && called !== null && attemptsUsed > called;
+
+  const title = isBet
+    ? inside
+      ? 'INSIDE'
+      : 'OUTSIDE'
+    : late
+      ? 'FOUND IT LATE'
+      : roundWon
+        ? called !== null
+          ? 'CALLED IT'
+          : 'CORRECT!'
+        : 'OUT OF ATTEMPTS';
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.backdrop]}>
@@ -92,25 +134,65 @@ export function RoundOverlay({
           {title}
         </Text>
 
-        {roundWon ? (
+        {isBet ? (
           <>
-            <Text style={[styles.points, { color: feedbackColors.correct }]} numberOfLines={1} adjustsFontSizeToFit>
-              +{game.round.score}
+            <Text
+              style={[styles.points, { color: inside ? feedbackColors.correct : colors.text }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              +{score}
             </Text>
             <Text style={[styles.sub, { color: colors.textMuted }]}>
-              Round {game.round.round} solved in {game.round.attemptsUsed}{' '}
-              {game.round.attemptsUsed === 1 ? 'attempt' : 'attempts'}
+              The number was {answer}.{' '}
+              {betLo === betHi ? `You named ${betLo}.` : `You said ${betLo} to ${betHi}.`}
+            </Text>
+          </>
+        ) : roundWon ? (
+          <>
+            <Text style={[styles.points, { color: feedbackColors.correct }]} numberOfLines={1} adjustsFontSizeToFit>
+              +{score}
+            </Text>
+            <Text style={[styles.sub, { color: colors.textMuted }]}>
+              {called !== null
+                ? late
+                  ? `You called ${called}, and found it in ${attemptsUsed}.`
+                  : `Called ${called}, found it in ${attemptsUsed}.`
+                : `Round ${game.round.round} solved in ${attemptsUsed} ${
+                    attemptsUsed === 1 ? 'attempt' : 'attempts'
+                  }`}
               {game.round.retried ? ' · retried, so no points' : ''}
             </Text>
           </>
-        ) : game.round.answer !== null ? (
-          <Text style={[styles.sub, { color: colors.textMuted }]}>
-            The number was {game.round.answer}.
-          </Text>
+        ) : answer !== null ? (
+          <>
+            {/* Every finished round pays something now, so the card says what
+                it paid even when the round was lost. */}
+            {score > 0 && (
+              <Text style={[styles.points, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+                +{score}
+              </Text>
+            )}
+            <Text style={[styles.sub, { color: colors.textMuted }]}>The number was {answer}.</Text>
+          </>
         ) : (
           <Text style={[styles.sub, { color: colors.textMuted }]}>
             Round {game.round.round} got away from you.
           </Text>
+        )}
+
+        {dayOver && kind !== null && (
+          <View style={styles.recap}>
+            {game.rounds.map((r) => (
+              <View key={r.round} style={styles.recapRow}>
+                <Text style={[styles.recapNum, { color: colors.textMuted }]}>{r.round}</Text>
+                <Text style={[styles.recapWhat, { color: colors.text }]} numberOfLines={1}>
+                  {recapFor(r)}
+                </Text>
+                <Text style={[styles.recapPts, { color: colors.text }]}>{r.score}</Text>
+              </View>
+            ))}
+          </View>
         )}
 
         <View style={[styles.totalRow, { borderColor: colors.border }]}>
@@ -128,7 +210,20 @@ export function RoundOverlay({
             what just happened, the allowance is a fact about what comes next.
             Kept out of the warning colour — the board already spends amber on
             proximity, and a rule being explained is not an alarm. */}
-        {moreRounds && nextAllowed !== null && (
+        {/* Each round is now a different question, so what is worth saying
+            between them is which question is coming - not a count of attempts
+            that no longer changes. */}
+        {moreRounds && kind !== null && (
+          <View style={styles.nextInfo}>
+            <Text style={[styles.warnSub, { color: colors.textMuted }]}>
+              {game.currentRound === 2
+                ? 'Next round comes with a clue, and you choose what kind.'
+                : 'Last round: three free guesses, then you name a range.'}
+            </Text>
+          </View>
+        )}
+
+        {moreRounds && kind === null && nextAllowed !== null && (
           <View style={styles.nextInfo}>
             {solvedOnLast && (
               <Text style={[styles.warn, { color: colors.text }]}>
@@ -263,6 +358,11 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1 },
   totalValue: { fontSize: 22, fontFamily: fonts.extraBold },
   totalMax: { fontSize: 13, fontFamily: fonts.bold },
+  recap: { width: '100%', marginTop: 16, gap: 6 },
+  recapRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  recapNum: { fontSize: 12, fontFamily: fonts.extraBold, width: 12 },
+  recapWhat: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold },
+  recapPts: { fontSize: 14, fontFamily: fonts.extraBold, fontVariant: ['tabular-nums'] },
   nextInfo: { alignItems: 'center', gap: 2, marginTop: 14 },
   warnSub: {
     fontSize: 12.5,

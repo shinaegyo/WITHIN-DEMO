@@ -40,14 +40,19 @@ export interface RoundSummary {
  *
  * The daily used to be three identical searches. Each round now asks something
  * different, and the screen draws itself from this rather than from the round
- * number - so a server that predates the change simply reports every round as a
- * search and the app behaves exactly as it did.
+ * number.
+ *
+ * Null means the server predates the change and is still serving three
+ * identical searches. That has to stay a distinct value rather than defaulting
+ * to 'cold': a cold round is one that demands a call before it will take a
+ * guess, and pretending an old round is one would put a betting slip in front
+ * of a player whose server has nowhere to write the bet.
  */
 export type RoundKind = 'cold' | 'clue' | 'bet';
 
 export interface CurrentRound {
   round: number;
-  kind: RoundKind;
+  kind: RoundKind | null;
   status: RoundStatus;
   attemptsUsed: number;
   attemptsAllowed: number;
@@ -173,7 +178,7 @@ function toRound(raw: any): CurrentRound {
     round: raw.round,
     // Absent on a server that predates the three-round daily, where every round
     // was a search.
-    kind: (raw.kind as RoundKind) ?? 'cold',
+    kind: (raw.kind as RoundKind) ?? null,
     status: raw.status,
     attemptsUsed: raw.attemptsUsed,
     attemptsAllowed: raw.attemptsAllowed,

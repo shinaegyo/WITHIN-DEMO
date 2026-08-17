@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CallYourShot, CALLS } from '../components/CallYourShot';
+import { ChooseYourClue } from '../components/ChooseYourClue';
 import { ClueCard } from '../components/ClueCard';
+import { CommitRange } from '../components/CommitRange';
 import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay';
 import { GuessBoard } from '../components/GuessBoard';
 import { Header } from '../components/Header';
@@ -27,6 +30,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const {
     phase, game, loadError, submitting, advancing, lastResult, lastSubmit,
     submit, advance, retry, concede, reload,
+    call, chooseClue, commitRange, deciding,
   } = useDailyGameContext();
 
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
@@ -112,6 +116,20 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
     const { round } = game;
     const canLeave = round.attemptsUsed === 0 && game.currentRound === 1;
+    const live = round.status === 'playing' && game.dayStatus === 'playing';
+
+    /**
+     * Each round asks for something before it will take a guess, and until it
+     * has that the guess board is meaningless. Round one wants the call, round
+     * two wants a clue chosen, round three wants the range - and round three
+     * asks last, once the free guesses are spent, because the range is the
+     * thing that ends it.
+     */
+    const asksCall = live && round.kind === 'cold' && round.called === null;
+    const asksClue = live && round.kind === 'clue' && round.clue1 === null;
+    const asksRange = live && round.kind === 'bet' && round.attemptsUsed >= round.attemptsAllowed;
+    const freeLeft = round.attemptsAllowed - round.attemptsUsed;
+    const calledPay = CALLS.find((c) => c.n === round.called)?.pay;
 
     return (
       <KeyboardAvoidingView
@@ -129,12 +147,32 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             totalScore={game.totalScore}
           />
 
-          <ClueCard clue={round.clue1} />
+          {asksCall ? (
+            <CallYourShot onCall={call} busy={deciding} />
+          ) : asksClue ? (
+            <ChooseYourClue onChoose={chooseClue} busy={deciding} />
+          ) : asksRange ? (
+            <CommitRange onCommit={commitRange} busy={deciding} />
+          ) : (
+            <>
+              {round.called !== null && calledPay !== undefined && (
+                <Text style={[styles.standing, { color: colors.textMuted }]}>
+                  You called {round.called} {round.called === 1 ? 'guess' : 'guesses'} · {calledPay} pts
+                </Text>
+              )}
 
-          <NumberInput
-            disabled={round.status !== 'playing' || game.dayStatus !== 'playing' || submitting}
-            onSubmit={handleSubmit}
-          />
+              <ClueCard clue={round.clue1} />
+
+              {round.kind === 'bet' && live && (
+                <Text style={[styles.standing, { color: colors.textMuted }]}>
+                  {freeLeft} free {freeLeft === 1 ? 'guess' : 'guesses'} — they cost nothing and end
+                  nothing
+                </Text>
+              )}
+
+              <NumberInput disabled={!live || submitting} onSubmit={handleSubmit} />
+            </>
+          )}
 
           <View style={styles.boardWrap}>
             <GuessBoard
@@ -187,4 +225,6 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   boardWrap: { flex: 1 },
+  /** The one line of standing state a round carries into its guesses. */
+  standing: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
 });

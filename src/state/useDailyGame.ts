@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ClueKind } from '../components/ChooseYourClue';
 import { GuessResult } from '../game/types';
 import {
   ApiError,
   DailyGame,
+  dailyBet,
+  dailyCall,
+  dailyClue,
   devResetToday,
   loadDailyGame,
   messageFor,
@@ -32,6 +36,14 @@ export interface UseDailyGameResult {
   retry: () => Promise<void>;
   /** Stop for the day and reveal the answer. */
   concede: () => Promise<void>;
+  /** Round one — say how many guesses it will take, before the first one. */
+  call: (guesses: number) => Promise<void>;
+  /** Round two — pick which kind of fact the clue will be. */
+  chooseClue: (kind: ClueKind) => Promise<void>;
+  /** Round three — name the range, which also ends the round. */
+  commitRange: (lo: number, hi: number) => Promise<void>;
+  /** True while any of the three above is in flight. */
+  deciding: boolean;
   reload: () => void;
   /** Refetch in place, without dropping the screen back to a spinner. */
   refresh: () => Promise<void>;
@@ -177,6 +189,41 @@ export function useDailyGame(): UseDailyGameResult {
     await refresh();
   }, [refresh]);
 
+  /**
+   * The three things a round can ask for before it will take a guess.
+   *
+   * Each writes the decision on the server and then refetches rather than
+   * patching state here: a call changes what the round pays, a clue changes
+   * what is on screen, and a range ends the round outright. Only the server
+   * knows what the round becomes, and a refresh is cheap next to guessing.
+   */
+  const [deciding, setDeciding] = useState(false);
+
+  const decide = useCallback(
+    async (fn: () => Promise<unknown>) => {
+      if (deciding) return;
+      setDeciding(true);
+      try {
+        await fn();
+        // The range ends round three without a guess, so the summary is held
+        // back waiting on an animation for a free guess made a minute ago.
+        setLastResult(null);
+        setLastSubmit(null);
+        await refresh();
+      } finally {
+        setDeciding(false);
+      }
+    },
+    [deciding, refresh],
+  );
+
+  const call = useCallback((n: number) => decide(() => dailyCall(n)), [decide]);
+  const chooseClue = useCallback((k: ClueKind) => decide(() => dailyClue(k)), [decide]);
+  const commitRange = useCallback(
+    (lo: number, hi: number) => decide(() => dailyBet(lo, hi)),
+    [decide],
+  );
+
   const startFreshTestPlayer = useCallback(async () => {
     setPhase('loading');
     await signOutForTesting();
@@ -203,6 +250,10 @@ export function useDailyGame(): UseDailyGameResult {
     advance,
     retry,
     concede,
+    call,
+    chooseClue,
+    commitRange,
+    deciding,
     reload: load,
     refresh,
     startFreshTestPlayer,
