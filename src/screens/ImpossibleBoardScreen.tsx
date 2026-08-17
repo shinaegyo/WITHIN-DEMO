@@ -78,10 +78,11 @@ export function ImpossibleBoardScreen({
   const level = status?.impossible.level ?? 1;
   const health = status?.impossible.health ?? 0;
   const summit = !!status?.impossible.summit;
-  // Once today's climb is started there are no sessions left, so sessionsLeft
-  // alone would lock a player out of the run they are in the middle of. A day
-  // is only over when the sessions and the lives are both gone.
-  const canClimb = !summit && (left === null || left > 0 || health > 0);
+  // Health is the gate, and the only one. It carries across the week and comes
+  // back 30 a day, so an empty bar means the week has taken everything it is
+  // going to give until tomorrow - and a full bar means there is a climb to
+  // make whatever the session counter thinks.
+  const canClimb = !summit && health > 0;
   // Leaving mid-climb costs nothing, so the button has to say which of the two
   // it is about to do. "Climb" on a session already open reads as though it
   // might spend something, and nobody should have to press it to find out.
@@ -208,10 +209,10 @@ export function ImpossibleBoardScreen({
             {summit
               ? 'Topped out'
               : !canClimb
-                ? "Today's climb is done"
+                ? 'Out of health · back tomorrow'
                 : resuming
                   ? `Resume · ${health}% health`
-                  : 'Start'}
+                  : `Start · ${health}% health`}
           </Text>
         </Pressable>
       </View>

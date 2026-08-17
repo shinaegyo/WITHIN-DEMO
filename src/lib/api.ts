@@ -1460,6 +1460,10 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_runs_left':
     case 'no_sessions_left':
       return "That's today's climb. Your place is kept.";
+    // Health carries across the week now, so an empty bar is not "come back in
+    // a minute" - it is the week's damage, and tomorrow hands back a little.
+    case 'no_health':
+      return 'No health left. Your place is kept, and tomorrow returns some.';
     case 'no_probes_left':
       return 'No free guesses left — name your range.';
     case 'too_wide':
