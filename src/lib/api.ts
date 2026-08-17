@@ -22,6 +22,9 @@ export type RoundStatus = 'playing' | 'won' | 'lost';
 
 export interface RoundSummary {
   round: number;
+  /** Round one only, and only once it has been called. */
+  called?: number | null;
+  clueKind?: string | null;
   /** One entry per guess: 'below' | 'above' | 'correct'. Drives the share grid. */
   marks: string[];
   status: RoundStatus;
@@ -32,8 +35,19 @@ export interface RoundSummary {
   retried: boolean;
 }
 
+/**
+ * What kind of question a round is asking.
+ *
+ * The daily used to be three identical searches. Each round now asks something
+ * different, and the screen draws itself from this rather than from the round
+ * number - so a server that predates the change simply reports every round as a
+ * search and the app behaves exactly as it did.
+ */
+export type RoundKind = 'cold' | 'clue' | 'bet';
+
 export interface CurrentRound {
   round: number;
+  kind: RoundKind;
   status: RoundStatus;
   attemptsUsed: number;
   attemptsAllowed: number;
@@ -42,6 +56,13 @@ export interface CurrentRound {
   answer: number | null;
   retried: boolean;
   guesses: GuessResult[];
+  /** Round one: how many guesses the player said they would need. */
+  called: number | null;
+  /** Round two: which kind of clue they asked for. */
+  clueKind: 'digits' | 'factors' | 'where' | null;
+  /** Round three: the range they committed to, once they have. */
+  betLo: number | null;
+  betHi: number | null;
 }
 
 const MAX_DAILY_SCORE_FALLBACK = 300;
@@ -150,6 +171,9 @@ async function onceMore<T>(call: () => Promise<T>): Promise<T> {
 function toRound(raw: any): CurrentRound {
   return {
     round: raw.round,
+    // Absent on a server that predates the three-round daily, where every round
+    // was a search.
+    kind: (raw.kind as RoundKind) ?? 'cold',
     status: raw.status,
     attemptsUsed: raw.attemptsUsed,
     attemptsAllowed: raw.attemptsAllowed,
@@ -158,6 +182,10 @@ function toRound(raw: any): CurrentRound {
     answer: raw.answer ?? null,
     retried: !!raw.retried,
     guesses: (raw.guesses ?? []).map(toGuessResult),
+    called: raw.called ?? null,
+    clueKind: raw.clueKind ?? null,
+    betLo: raw.betLo ?? null,
+    betHi: raw.betHi ?? null,
   };
 }
 
@@ -191,7 +219,12 @@ export async function loadDailyGame(): Promise<DailyGame> {
     gaveUp: !!raw.gaveUp,
     canRetry: !!raw.canRetry,
     round: toRound(raw.round),
-    rounds: (raw.rounds ?? []).map((r: any) => ({ ...r, marks: r.marks ?? [] })),
+    rounds: (raw.rounds ?? []).map((r: any) => ({
+      ...r,
+      marks: r.marks ?? [],
+      called: r.called ?? null,
+      clueKind: r.clueKind ?? null,
+    })),
     stats: raw.stats,
   };
 }
@@ -291,6 +324,47 @@ export async function setReminders(prefs: Partial<ReminderPrefs>): Promise<Remin
     hour: raw.hour ?? 19,
     streak: !!raw.streak,
     duel: !!raw.duel,
+  };
+}
+
+/**
+ * Call your shot: how many guesses round one will take.
+ *
+ * Binding from the first guess onward. Refused by a server that has not learned
+ * the three-round daily yet, which is why nothing calls this unless the round
+ * says it is a cold one.
+ */
+export async function dailyCall(call: number): Promise<{ called: number; pays: number }> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('daily_call', { p_call: call });
+  const raw = unwrap<any>(data, error);
+  return { called: raw.called, pays: raw.pays };
+}
+
+/** Choose which kind of clue round two gives you. */
+export async function dailyClue(
+  kind: 'digits' | 'factors' | 'where',
+): Promise<{ kind: string; clue: string }> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('daily_clue', { p_kind: kind });
+  const raw = unwrap<any>(data, error);
+  return { kind: raw.kind, clue: raw.clue };
+}
+
+/** Commit to a range in round three. The day ends on it, either way. */
+export async function dailyBet(
+  lo: number,
+  hi: number,
+): Promise<{ inside: boolean; width: number; roundScore: number; totalScore: number; answer: number }> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('daily_bet', { p_lo: lo, p_hi: hi });
+  const raw = unwrap<any>(data, error);
+  return {
+    inside: !!raw.inside,
+    width: raw.width,
+    roundScore: raw.roundScore,
+    totalScore: raw.totalScore,
+    answer: raw.answer,
   };
 }
 
