@@ -161,7 +161,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
                 </Text>
               )}
 
-              <ClueCard clue={round.clue1} />
+              {/* Round one has no clue and round three has no clue, and an
+                  empty card headed CLUE is worse than no card: it reads as a
+                  clue that failed to load. */}
+              {!!round.clue1 && <ClueCard clue={round.clue1} />}
 
               {round.kind === 'bet' && live && (
                 <Text style={[styles.standing, { color: colors.textMuted }]}>

@@ -16,7 +16,11 @@ import { DailyGame } from '../lib/api';
 const SITE = 'withindemo.vercel.app';
 
 export function buildShareText(game: DailyGame): string {
-  const lines = [`WITHIN #${game.puzzleNumber} — ${game.totalScore}/${game.maxScore}`];
+  // No denominator, for the reason the summary card dropped its own: 35/70 is
+  // a failing grade, and 35 is a good day.
+  const lines = [
+    `WITHIN #${game.puzzleNumber} — ${game.totalScore} ${game.totalScore === 1 ? 'point' : 'points'}`,
+  ];
 
   if (game.stats.currentStreak > 0) {
     lines.push(`🔥 ${game.stats.currentStreak} day streak`);

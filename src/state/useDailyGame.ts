@@ -111,12 +111,19 @@ export function useDailyGame(): UseDailyGameResult {
                 dayStatus: res.dayStatus,
                 // The server advances the round on a win; without copying it
                 // across, the summary still names the round just finished.
-                currentRound: res.currentRound,
-                totalScore: res.totalScore,
+                //
+                // Round three's free guesses answer with the guess alone - they
+                // change no score, end no round and spend no attempt the server
+                // thinks worth reporting. Taken literally that wrote undefined
+                // over the day's score and the attempt count, which printed as
+                // a blank total and "NaN free guesses", and left the range
+                // sheet waiting on a comparison against NaN that never came.
+                currentRound: res.currentRound ?? prev.currentRound,
+                totalScore: res.totalScore ?? prev.totalScore,
                 round: {
                   ...prev.round,
                   status: res.roundStatus,
-                  attemptsUsed: res.attemptsUsed,
+                  attemptsUsed: res.attemptsUsed ?? prev.round.attemptsUsed + 1,
                   score: res.roundScore,
                   answer: res.answer ?? prev.round.answer,
                   guesses: [...prev.round.guesses, res.result],
@@ -131,7 +138,7 @@ export function useDailyGame(): UseDailyGameResult {
                         ...r,
                         status: res.roundStatus,
                         score: res.roundScore,
-                        attemptsUsed: res.attemptsUsed,
+                        attemptsUsed: res.attemptsUsed ?? r.attemptsUsed + 1,
                       }
                     : r,
                 ),

@@ -476,6 +476,24 @@ export function HomeScreen({
               </View>
             </View>
 
+            {/* A day part-way through needs a door, and the card is not one.
+                The moment round one scores, the screen switches to the card
+                and the only button on it is Share, which appears when the day
+                is over - so anybody who left after a round came back to their
+                points with no way back to the next one. */}
+            {!finished && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.primary,
+                  styles.primaryWide,
+                  { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
+                ]}
+                onPress={onPrimary}
+              >
+                <Text style={[styles.primaryText, { color: colors.background }]}>{primaryLabel}</Text>
+              </Pressable>
+            )}
+
             {/* Named, because somebody arriving for the first time reads a
                 daily puzzle and does not know there is anything else here. */}
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>MORE GAMES</Text>
