@@ -188,7 +188,7 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <P first>
         You start every day at 100%. Running out of attempts on a number costs health, not the
         climb — the same number is waiting and you try it again. What it costs depends on how high
-        you are: 21% on the Ground, rising a point a tier to 25% in Orbit. Solve one in three guesses or fewer and you take
+        you are: 21% on the Ground, rising a point a tier to 25% in Orbit. Solve one in two guesses or fewer and you take
         10% back, wherever you are. A fall always costs more than a clean solve returns, so a day
         is about four or five misses long.
       </P>
