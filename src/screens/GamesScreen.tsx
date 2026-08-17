@@ -72,8 +72,14 @@ export function GamesScreen({
     {
       label: 'Duel',
       sub: 'You pick their number, they pick yours',
-      status: status && status.duelsWaiting > 0 ? `${status.duelsWaiting} waiting on you` : 'Start one',
-      urgent: !!status && status.duelsWaiting > 0,
+      // Waiting outlives the duels screen, so this is the only place most
+      // players will find out it is still going on.
+      status: status?.queued
+        ? 'Waiting for an opponent'
+        : status && status.duelsWaiting > 0
+          ? `${status.duelsWaiting} waiting on you`
+          : 'Start one',
+      urgent: !!status && (status.duelsWaiting > 0 || status.queued),
       onPress: onDuels,
     },
     {

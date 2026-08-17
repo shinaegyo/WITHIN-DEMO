@@ -13,6 +13,7 @@ import {
   Friend,
   challengeFriend,
   findStrangerDuel,
+  inviteToDuel,
   leaveDuelQueue,
   loadDuels,
   loadFriends,
@@ -361,6 +362,10 @@ export function DuelsScreen({
                   onPlay(res.duelId);
                 } else {
                   setWaiting({ online: res.online });
+                  // Nobody is here, so ask for somebody. The queue row outlives
+                  // this screen, which is what makes an invitation worth
+                  // sending - whoever answers can still find them.
+                  inviteToDuel();
                 }
               });
             }}

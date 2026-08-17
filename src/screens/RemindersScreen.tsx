@@ -32,7 +32,7 @@ const label = (h: number) =>
 export function RemindersScreen() {
   useTrack(null);
   const { colors } = useTheme();
-  const [prefs, setPrefs] = useState<ReminderPrefs>({ daily: false, hour: 19, streak: true });
+  const [prefs, setPrefs] = useState<ReminderPrefs>({ daily: false, hour: 19, streak: true, duel: false });
   const [allowed, setAllowed] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -168,6 +168,17 @@ export function RemindersScreen() {
         detail="On a run of two or more, the reminder says what is about to end."
         on={prefs.streak}
         onToggle={() => save({ streak: !prefs.streak })}
+      />
+
+      {/* Its own switch, and off by default. A duel invitation arrives about
+          somebody else's timing rather than yours, and if it becomes a
+          nuisance the mute takes the daily reminder with it - which is the one
+          that actually keeps a daily game alive. */}
+      <Row
+        label="Duel invitations"
+        detail="When somebody is waiting for an opponent. Never more than one a day."
+        on={prefs.duel}
+        onToggle={() => (prefs.duel ? save({ duel: false }) : allowed ? save({ duel: true }) : turnOn().then(() => save({ duel: true })))}
       />
 
       <Text style={[styles.footer, { color: colors.textMuted }]}>

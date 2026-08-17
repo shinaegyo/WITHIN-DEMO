@@ -273,6 +273,8 @@ export interface ReminderPrefs {
   /** 0-23, in the player's own timezone. */
   hour: number;
   streak: boolean;
+  /** Somebody is waiting for an opponent right now. Off unless asked for. */
+  duel: boolean;
 }
 
 export async function setReminders(prefs: Partial<ReminderPrefs>): Promise<ReminderPrefs> {
@@ -281,9 +283,15 @@ export async function setReminders(prefs: Partial<ReminderPrefs>): Promise<Remin
     p_daily: prefs.daily ?? null,
     p_hour: prefs.hour ?? null,
     p_streak: prefs.streak ?? null,
+    p_duel: prefs.duel ?? null,
   });
   const raw = unwrap<any>(data, error);
-  return { daily: !!raw.daily, hour: raw.hour ?? 19, streak: !!raw.streak };
+  return {
+    daily: !!raw.daily,
+    hour: raw.hour ?? 19,
+    streak: !!raw.streak,
+    duel: !!raw.duel,
+  };
 }
 
 /** Ends the day deliberately, which is what makes the answer safe to show. */
@@ -626,6 +634,26 @@ export async function findStrangerDuel(): Promise<
     : { status: 'waiting', online: raw.online ?? 0 };
 }
 
+/**
+ * Tells the people most likely to answer that somebody is waiting.
+ *
+ * Fire and forget: an invitation that fails to send is a duel that waits a
+ * little longer, and never a reason to fail the thing the player pressed.
+ */
+export async function inviteToDuel(): Promise<void> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return;
+    await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/duel-invite`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    /* no invitation this time */
+  }
+}
+
 export async function leaveDuelQueue(): Promise<void> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('duel_leave_queue');
@@ -651,6 +679,8 @@ export async function respondToDuel(duelId: string, accept: boolean): Promise<st
 /** What each mode is worth opening for, gathered in one call. */
 export interface HomeStatus {
   duelsWaiting: number;
+  /** You are in the duel queue, whatever screen you are looking at. */
+  queued: boolean;
   ranked: {
     rating: number | null;
     played: number;
@@ -680,6 +710,7 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
   const raw = unwrap<any>(data, error);
   return {
     duelsWaiting: raw.duelsWaiting ?? 0,
+    queued: !!raw.queued,
     ranked: {
       rating: raw.ranked?.rating ?? null,
       played: raw.ranked?.played ?? 0,
