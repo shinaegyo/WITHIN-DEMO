@@ -1,22 +1,29 @@
--- The session counter goes, and the home row hands out the morning's health.
+-- The session cap goes, and the home row hands out the morning's health.
 --
--- sessions_used never counts past one. endless_guess sets it to 1 on the first
--- guess of a day and nothing ever moves it again, so endless_sessions_left has
--- returned 1 of 2 for every player since the counter went in, whatever anybody
--- did. The two-a-day cap has never once bound.
+-- CORRECTED AFTER THE FACT. This header first said the session counter never
+-- moved and that five client branches reading it were dead code. Both wrong,
+-- and wrong because I read endless_sessions_per_day() out of 0064 without
+-- checking for a later override - 0069 dropped it from 2 to 1. sessions_used
+-- does go 0 to 1 on the first guess of a day, so sessionsLeft really does reach
+-- zero, and the branches reading it really did fire. The SQL below is
+-- unchanged; only this explanation of it was false.
 --
--- Nothing is quietly broken by that, but five places on the client branch on
--- sessionsLeft = 0, and all five of those branches are dead code: the home row
--- can never say a climb is in progress, the Games row says "ready" to somebody
--- with an empty bar, and the board's Climb button never reads Resume. Every one
--- of them is really asking one of two questions - is today already open, and is
--- there health left - so they are given those directly.
+-- What is true is that the cap could not bind, for a different reason. Every
+-- route to the check is intercepted above it: an open session with health left
+-- returns early as a resume, an empty bar returns no_health, and the only thing
+-- that ever sets status away from 'active' is topping out, which returns
+-- topped_out. Death leaves status 'active' with health at zero. So the check
+-- sat at the bottom of a funnel nothing could reach.
 --
--- The cap is removed rather than repaired. A limit on how much somebody may
--- play is the one thing this mode is not supposed to have; health ends a day
--- and nothing else does. sessionsLeft stays in the payload so older clients
--- keep parsing, and stays pinned above zero so their dead branches stay dead
--- rather than firing wrongly. inSession is the replacement.
+-- It is removed rather than left there, because a limit on how much somebody
+-- may play is the one thing this mode is not supposed to have; health ends a
+-- day and nothing else does. Removing it changes no behaviour today - it means
+-- the code stops describing a rule it was not enforcing.
+--
+-- sessionsLeft stays in the payload, computed exactly as before, so an older
+-- client keeps behaving exactly as it does now. inSession is added beside it
+-- because "is the day open" is what all five of those readers actually wanted;
+-- "have you guessed today" was only ever a near-enough stand-in for it.
 --
 -- Second thing, same function. home_status read endless_runs directly rather
 -- than going through endless_climb, which is where the day's health is handed
@@ -65,12 +72,12 @@ begin
     return jsonb_build_object('error', 'no_health');
   end if;
 
-  -- No session cap. It never bound in the first place - sessions_used is set
-  -- to 1 by the first guess of a day and nothing ever moves it again, so
-  -- endless_sessions_left has always returned 1 of 2 whatever anybody did -
-  -- and it should not bind: health is the day's limit and nothing else is
-  -- meant to ration how much somebody plays. Removing the check makes what
-  -- the code does match what it has always done.
+  -- No session cap. Nothing could reach the check that used to sit here: an
+  -- open session with health left returns as a resume above, an empty bar
+  -- returns no_health above, and the only thing that moves status off 'active'
+  -- is the summit, which returns topped_out above that. And it should not bind
+  -- anyway - health is the day's limit and nothing else is meant to ration how
+  -- much somebody plays.
 
   -- The board for this level belongs to the session that just ended.
   delete from public.endless_guesses
@@ -164,9 +171,9 @@ begin
     'impossible', jsonb_build_object(
       'sessionsLeft', public.endless_sessions_left(v_uid),
       -- Whether today's climb is already open, which is what the button
-      -- actually wants to know. sessionsLeft cannot answer it: the counter is
-      -- set to 1 on the first guess of a day and never moves again, so it never
-      -- reaches zero and the board never said "Resume".
+      -- actually wants to know. sessionsLeft only ever answered the near-enough
+      -- question - it flips on the first guess of a day, so a session opened
+      -- and not yet guessed in reads as closed.
       'inSession', coalesce(v_run.session_date = v_date
                             and v_run.health > 0
                             and v_run.summit_at is null, false),

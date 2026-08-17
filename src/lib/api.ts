@@ -785,10 +785,12 @@ export interface HomeStatus {
   };
   impossible: {
     /**
-     * Vestigial. The counter behind it never passed one, so this never reached
-     * zero and every screen that branched on it was reading dead code. Health
-     * says whether a day is over and `inSession` says whether it is open;
-     * between them there is nothing left for this to answer.
+     * A flag wearing a counter's clothes: 1 before the first guess of the day
+     * and 0 after, because endless_sessions_per_day() has been 1 since 0069.
+     * So it answers "have you guessed today?", which is not quite the question
+     * any of its readers were asking - none of them cared about guesses, only
+     * about whether the day was open. `inSession` asks that directly and this
+     * is kept only so an older client still parses.
      */
     sessionsLeft: number;
     /** Today's climb is already open, so the button offers Resume, not Start. */
