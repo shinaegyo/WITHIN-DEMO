@@ -140,12 +140,19 @@ export function ImpossibleBoardScreen({
               <Text style={[styles.unit, { color: colors.textMuted }]}>{e.guesses} guesses</Text>
             </>
           ) : (
-            <>
+            // "47 numbers" counted what somebody had got through; the climb is
+            // read as how high they are, and the ladder is already numbered.
+            //
+            // The number holds a fixed slot rather than sizing to its digits.
+            // Right-aligned to the row's end, a level of 6 is narrower than 49,
+            // so the word in front of it slid left and right down the column -
+            // and "Level" is the thing the eye scans for, so it was the one
+            // part that could not be allowed to move. Two digits is the whole
+            // ladder, and 50 is the top.
+            <View style={styles.levelWrap}>
+              <Text style={[styles.levelLabel, { color: colors.textMuted }]}>Level</Text>
               <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
-              <Text style={[styles.unit, { color: colors.textMuted }]}>
-                {e.depth === 1 ? 'number' : 'numbers'}
-              </Text>
-            </>
+            </View>
           )}
         </View>
         </React.Fragment>
@@ -252,7 +259,16 @@ const styles = StyleSheet.create({
   medalText: { fontSize: 11, fontFamily: fonts.extraBold },
   name: { flex: 1, fontSize: 15, fontFamily: fonts.bold },
   nameMe: { fontFamily: fonts.extraBold },
-  depth: { fontSize: 17, fontFamily: fonts.extraBold },
+  // Baseline rather than centre: the two sizes are far enough apart that
+  // centring them left the word floating against the middle of the number.
+  levelWrap: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
+  // Set at the number's size rather than a caption's. It carries its own style
+  // - muted, and two weights lighter - so it still reads as the label and not
+  // as part of the score, without being shrunk to do it. A separate style from
+  // `unit` on purpose: that one still labels the guess count on a topped row,
+  // where a caption is exactly what is wanted.
+  levelLabel: { fontSize: 17, fontFamily: fonts.semiBold },
+  depth: { fontSize: 17, fontFamily: fonts.extraBold, minWidth: 23, textAlign: 'right' },
   topped: { fontSize: 12.5, fontFamily: fonts.extraBold, letterSpacing: 0.4 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
 });
