@@ -22,6 +22,8 @@ export type RoundStatus = 'playing' | 'won' | 'lost';
 
 export interface RoundSummary {
   round: number;
+  /** Revealed once the round is over, so the day can be read back in full. */
+  answer?: number | null;
   /** Round one only, and only once it has been called. */
   called?: number | null;
   clueKind?: string | null;

@@ -19,6 +19,9 @@ interface Props {
   onConcede: () => void;
   onExit: () => void;
   advancing?: boolean;
+  /** The day's clock and total guesses, for the line under the tally. */
+  dayClock?: string | null;
+  dayGuesses?: number;
 }
 
 /**
@@ -29,10 +32,20 @@ interface Props {
  * around the number or it isn't - and none of them is "solved in 4 attempts".
  */
 function recapFor(r: RoundSummary): string {
-  if (r.round === 3) return r.status === 'won' ? 'inside your range' : 'outside your range';
-  if (r.status !== 'won') return 'never found it';
-  if (r.called != null) return `called ${r.called}, found in ${r.attemptsUsed}`;
+  if (r.round === 3) return r.status === 'won' ? 'the bet landed' : 'the bet missed';
+  if (r.status !== 'won') return 'did not get it';
+  if (r.called != null) {
+    return r.attemptsUsed <= r.called
+      ? `called ${r.called}, found in ${r.attemptsUsed}`
+      : `missed the call, found in ${r.attemptsUsed}`;
+  }
   return `found in ${r.attemptsUsed}`;
+}
+
+/** The one-guess rounds get the shout instead of the sentence. */
+function markFor(r: RoundSummary): string | null {
+  if (r.status !== 'won' || r.attemptsUsed !== 1 || r.round === 3) return null;
+  return r.round === 1 ? 'OUT OF NOWHERE' : 'READ IT COLD';
 }
 
 /**
@@ -47,6 +60,8 @@ export function RoundOverlay({
   onConcede,
   onExit,
   advancing = false,
+  dayClock,
+  dayGuesses = 0,
 }: Props) {
   const { colors } = useTheme();
   const scale = useRef(new Animated.Value(0.7)).current;
@@ -106,17 +121,48 @@ export function RoundOverlay({
     answer <= betHi;
   const late = kind === 'cold' && roundWon && called !== null && attemptsUsed > called;
 
-  const title = isBet
+  /**
+   * What happened, in the round's own words.
+   *
+   * A call is kept or it is not, a clue round is a number of guesses, a range
+   * is around the number or it is not - so the label says the thing that was
+   * actually at stake rather than CORRECT for all three.
+   */
+  const detail = isBet
     ? inside
-      ? 'INSIDE'
-      : 'OUTSIDE'
-    : late
-      ? 'FOUND IT LATE'
-      : roundWon
-        ? called !== null
-          ? 'CALLED IT'
-          : 'CORRECT!'
-        : 'OUT OF ATTEMPTS';
+      ? betLo === betHi
+        ? 'named it exactly'
+        : 'the bet landed'
+      : 'the bet missed'
+    : !roundWon
+      ? 'did not get it'
+      : called !== null
+        ? late
+          ? `missed the call, found in ${attemptsUsed}`
+          : `called ${called}, found in ${attemptsUsed}`
+        : `found in ${attemptsUsed}`;
+
+  // A first guess in round one is luck; in round two it is deduction from a
+  // clue, and the two deserve different words.
+  const firstGo = roundWon && attemptsUsed === 1 && !isBet;
+  const flash = firstGo ? (kind === 'cold' ? 'OUT OF NOWHERE' : 'READ IT COLD') : null;
+
+  // How close you actually got, which is the thing a player wants to know.
+  const closest = game.round.guesses.reduce<number | null>(
+    (best, g) =>
+      best === null || (answer !== null && Math.abs(g.guess - answer) < Math.abs(best - answer))
+        ? g.guess
+        : best,
+    null,
+  );
+  const closeLine =
+    answer === null || closest === null
+      ? null
+      : closest === answer
+        ? `You had it in ${attemptsUsed}.`
+        : `Your closest was ${closest} — ${Math.abs(closest - answer)} away in ${attemptsUsed} ${
+            attemptsUsed === 1 ? 'guess' : 'guesses'
+          }.`;
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.backdrop]}>
@@ -130,69 +176,87 @@ export function RoundOverlay({
       )}
 
       <Animated.View style={[styles.card, { backgroundColor: colors.surface, opacity, transform: [{ scale }] }]}>
-        <Text style={[styles.title, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-          {title}
+        {!!flash && (
+          <Text style={[styles.flash, { color: feedbackColors.correct }]}>{flash} · FIRST GUESS</Text>
+        )}
+
+        {kind === null ? (
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+            {roundWon ? 'CORRECT!' : 'OUT OF ATTEMPTS'}
+          </Text>
+        ) : (
+          <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1} adjustsFontSizeToFit>
+            ROUND {game.round.round} · {detail.toUpperCase()}
+          </Text>
+        )}
+
+        <Text
+          style={[
+            styles.points,
+            { color: score > 0 && (roundWon || inside) ? feedbackColors.correct : colors.text },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          +{score}
         </Text>
 
-        {isBet ? (
-          <>
-            <Text
-              style={[styles.points, { color: inside ? feedbackColors.correct : colors.text }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              +{score}
-            </Text>
-            <Text style={[styles.sub, { color: colors.textMuted }]}>
-              The number was {answer}.{' '}
-              {betLo === betHi ? `You named ${betLo}.` : `You said ${betLo} to ${betHi}.`}
-            </Text>
-          </>
-        ) : roundWon ? (
-          <>
-            <Text style={[styles.points, { color: feedbackColors.correct }]} numberOfLines={1} adjustsFontSizeToFit>
-              +{score}
-            </Text>
-            <Text style={[styles.sub, { color: colors.textMuted }]}>
-              {called !== null
-                ? late
-                  ? `You called ${called}, and found it in ${attemptsUsed}.`
-                  : `Called ${called}, found it in ${attemptsUsed}.`
-                : `Round ${game.round.round} solved in ${attemptsUsed} ${
-                    attemptsUsed === 1 ? 'attempt' : 'attempts'
-                  }`}
-              {game.round.retried ? ' · retried, so no points' : ''}
-            </Text>
-          </>
-        ) : answer !== null ? (
-          <>
-            {/* Every finished round pays something now, so the card says what
-                it paid even when the round was lost. */}
-            {score > 0 && (
-              <Text style={[styles.points, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-                +{score}
-              </Text>
-            )}
-            <Text style={[styles.sub, { color: colors.textMuted }]}>The number was {answer}.</Text>
-          </>
-        ) : (
-          <Text style={[styles.sub, { color: colors.textMuted }]}>
-            Round {game.round.round} got away from you.
+        {answer !== null && (
+          <Text style={[styles.sub, { color: colors.textMuted }]}>It was {answer}.</Text>
+        )}
+        {!!closeLine && (
+          <Text style={[styles.sub, { color: colors.textMuted, marginTop: 6 }]}>{closeLine}</Text>
+        )}
+        {game.round.retried && (
+          <Text style={[styles.sub, { color: colors.textMuted, marginTop: 6 }]}>
+            Retried, so it scores nothing.
           </Text>
         )}
 
         {dayOver && kind !== null && (
-          <View style={styles.recap}>
-            {game.rounds.map((r) => (
-              <View key={r.round} style={styles.recapRow}>
-                <Text style={[styles.recapNum, { color: colors.textMuted }]}>{r.round}</Text>
-                <Text style={[styles.recapWhat, { color: colors.text }]} numberOfLines={1}>
-                  {recapFor(r)}
-                </Text>
-                <Text style={[styles.recapPts, { color: colors.text }]}>{r.score}</Text>
-              </View>
-            ))}
-          </View>
+          <>
+            <View style={styles.recap}>
+              {game.rounds.map((r) => {
+                const mark = markFor(r);
+                return (
+                  <View key={r.round} style={styles.recapRow}>
+                    <Text style={[styles.recapNum, { color: colors.textMuted }]}>
+                      ROUND {r.round}
+                    </Text>
+                    <Text style={[styles.recapAnswer, { color: colors.text }]}>
+                      {r.answer != null ? `Answer ${r.answer}` : ''}
+                    </Text>
+                    {/* Not "correct" and "incorrect": a range that lands is
+                        neither, and the line already says what happened in the
+                        round's own words. What was missing was being able to
+                        tell the good rows from the bad at a glance, which is a
+                        colour rather than another column. */}
+                    <Text
+                      style={[
+                        styles.recapWhat,
+                        {
+                          color:
+                            r.status === 'won'
+                              ? feedbackColors.correct
+                              : feedbackColors.oneAway,
+                        },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {mark ?? recapFor(r)}
+                    </Text>
+                    <Text style={[styles.recapPts, { color: colors.text }]}>{r.score}</Text>
+                  </View>
+                );
+              })}
+            </View>
+
+            {!!dayClock && (
+              <Text style={[styles.dayLine, { color: colors.textMuted }]}>
+                {dayClock} · {dayGuesses} {dayGuesses === 1 ? 'guess' : 'guesses'}
+              </Text>
+            )}
+          </>
         )}
 
         <View style={[styles.totalRow, { borderColor: colors.border }]}>
@@ -248,7 +312,7 @@ export function RoundOverlay({
             {advancing ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.primaryText}>Start round {game.currentRound}</Text>
+              <Text style={styles.primaryText}>Next round</Text>
             )}
           </Pressable>
         )}
@@ -358,11 +422,15 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1 },
   totalValue: { fontSize: 22, fontFamily: fonts.extraBold },
   totalMax: { fontSize: 13, fontFamily: fonts.bold },
+  flash: { fontSize: 11, fontFamily: fonts.extraBold, letterSpacing: 1.2, marginBottom: 6 },
+  label: { fontSize: 12, fontFamily: fonts.extraBold, letterSpacing: 1.1, textAlign: 'center' },
   recap: { width: '100%', marginTop: 16, gap: 6 },
-  recapRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  recapNum: { fontSize: 12, fontFamily: fonts.extraBold, width: 12 },
-  recapWhat: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold },
+  recapRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  recapNum: { fontSize: 10, fontFamily: fonts.extraBold, letterSpacing: 0.8, width: 58 },
+  recapAnswer: { fontSize: 13, fontFamily: fonts.extraBold, width: 82 },
+  recapWhat: { flex: 1, fontSize: 12, fontFamily: fonts.semiBold },
   recapPts: { fontSize: 14, fontFamily: fonts.extraBold, fontVariant: ['tabular-nums'] },
+  dayLine: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center', marginTop: 12 },
   nextInfo: { alignItems: 'center', gap: 2, marginTop: 14 },
   warnSub: {
     fontSize: 12.5,

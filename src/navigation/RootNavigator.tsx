@@ -137,10 +137,13 @@ function Screens({
   username,
   avatar,
   onProfileChanged,
+  straightToGame = false,
 }: {
   username: string;
   avatar: string | null;
   onProfileChanged: () => void;
+  /** The tutorial's last button says "Play today's numbers" and should. */
+  straightToGame?: boolean;
 }) {
   const { colors, mode } = useTheme();
   const { startFreshTestPlayer, resetToday, reload, game, phase } = useDailyGameContext();
@@ -261,6 +264,9 @@ function Screens({
   return (
     <NavigationContainer theme={navTheme} ref={navRef}>
       <Stack.Navigator
+        // Somebody who has just pressed "Play today's numbers" is asking for
+        // the numbers, not for the home screen with a Play button on it.
+        initialRouteName={straightToGame ? 'Game' : undefined}
         // One back button everywhere. The stack drew the platform's own arrow
         // in its header while the mode screens drew ours, so the way back
         // changed shape depending on which screen you were leaving.
@@ -507,9 +513,14 @@ export function RootNavigator() {
     hasSeenIntro().then(setIntroSeen);
   }, []);
 
+  // Only for a run that finished the tutorial just now - reopening the app
+  // tomorrow starts at home like everybody else.
+  const [justFinishedIntro, setJustFinishedIntro] = useState(false);
+
   const finishIntro = () => {
     markIntroSeen();
     setIntroSeen(true);
+    setJustFinishedIntro(true);
   };
 
   if (profile.loading || introSeen === null) return null;
@@ -581,6 +592,7 @@ export function RootNavigator() {
         username={profile.username}
         avatar={profile.avatar}
         onProfileChanged={profile.refresh}
+        straightToGame={justFinishedIntro}
       />
     </DailyGameProvider>
   );

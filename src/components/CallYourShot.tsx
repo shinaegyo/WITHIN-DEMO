@@ -65,13 +65,9 @@ export function CallYourShot({ onCall, busy }: { onCall: (n: number) => void; bu
             ]}
           >
             {/* Numerals on both sides, so the trade reads straight across
-                rather than asking anybody to turn a word into a number. */}
-            <Text
-              style={[
-                styles.n,
-                { color: c.n === 7 ? colors.textMuted : colors.text },
-              ]}
-            >
+                rather than asking anybody to turn a word into a number. Seven
+                used to be greyed as the safe option, which read as disabled. */}
+            <Text style={[styles.n, { color: colors.text }]}>
               {c.n} {c.n === 1 ? 'guess' : 'guesses'}
             </Text>
             <View style={styles.payRow}>

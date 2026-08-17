@@ -142,7 +142,7 @@ export function PracticeScreen({
           {introMode && !finished && (
             <Text style={[styles.coach, { color: colors.textMuted }]}>
               {guesses.length === 0
-                ? 'Type any number between 1 and 1000 and press Guess.'
+                ? 'Enter any number between 1-1000'
                 : last?.isWithin10
                   ? 'Within 10 — the tile is as strong as it gets. Nudge it.'
                   : last?.direction === 'below'

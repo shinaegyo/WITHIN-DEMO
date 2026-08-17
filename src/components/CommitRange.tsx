@@ -13,7 +13,7 @@ import { playTap } from '../utils/sound';
  * than a shrug. The narrower it is the more it pays, naming it exactly pays
  * nearly double the next step down, and a miss still pays the floor.
  *
- * A centre and a spread rather than two ends: asking for "812 to 823" makes the
+ * A center and a spread rather than two ends: asking for "812 to 823" makes the
  * player do the arithmetic the game is about to score them on, and hides the
  * only number that matters - how wide they were willing to be.
  */
@@ -31,11 +31,11 @@ export function CommitRange({
   busy?: boolean;
 }) {
   const { colors } = useTheme();
-  const [centre, setCentre] = useState('');
+  const [center, setCenter] = useState('');
   const [idx, setIdx] = useState(DEFAULT_SPREAD);
 
   const spread = SPREADS[idx];
-  const c = parseInt(centre, 10);
+  const c = parseInt(center, 10);
   const valid = !!c && c >= 1 && c <= 1000;
   const lo = valid ? Math.max(1, c - spread) : null;
   const hi = valid ? Math.min(1000, c + spread) : null;
@@ -49,9 +49,9 @@ export function CommitRange({
       </Text>
 
       <TextInput
-        value={centre}
-        onChangeText={(t) => setCentre(t.replace(/[^0-9]/g, '').slice(0, 4))}
-        placeholder="Centre of your range"
+        value={center}
+        onChangeText={(t) => setCenter(t.replace(/[^0-9]/g, '').slice(0, 4))}
+        placeholder="Center of your range"
         placeholderTextColor={colors.textMuted}
         keyboardType="number-pad"
         style={[
@@ -86,7 +86,7 @@ export function CommitRange({
       </View>
 
       <Text style={[styles.range, { color: colors.text }]}>
-        {valid ? (spread === 0 ? `exactly ${c}` : `${lo} to ${hi}`) : 'Pick a centre'}
+        {valid ? (spread === 0 ? `exactly ${c}` : `${lo} to ${hi}`) : 'Pick a center'}
       </Text>
       <Text style={[styles.pays, { color: colors.textMuted }]}>
         Inside pays {SPREAD_PAYS[idx]} pts · outside pays {MISS_PAY} pts

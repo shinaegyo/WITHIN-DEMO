@@ -12,6 +12,14 @@ interface Props {
   attemptsAllowed: number;
   /** Hidden once the round is over, when the count no longer means anything. */
   showRemaining?: boolean;
+  /**
+   * What the count says, when the round wants to say it itself.
+   *
+   * The daily's three rounds each count something different - down to a call,
+   * down to the end of the round, down to the free guesses - and each says what
+   * finding it now would pay. Everywhere else still gets N GUESSES LEFT.
+   */
+  remainingText?: string;
   /** Extra line on the final guess. Round-specific, so the screen supplies it. */
   finalNote?: string;
   /** Impossible only: a one-away guess keeps its label but loses its arrow. */
@@ -43,6 +51,7 @@ export function GuessBoard({
   guesses,
   attemptsAllowed,
   showRemaining = true,
+  remainingText,
   finalNote,
   blindOneAway,
   ink,
@@ -57,7 +66,13 @@ export function GuessBoard({
 
   return (
     <View style={styles.board}>
-      {showRemaining && remaining > 0 && (
+      {showRemaining && !!remainingText && (
+        <View style={styles.header}>
+          <Text style={[styles.count, { color: strong }]}>{remainingText}</Text>
+        </View>
+      )}
+
+      {showRemaining && !remainingText && remaining > 0 && (
         <View style={styles.header}>
           {remaining === 1 ? (
             <>

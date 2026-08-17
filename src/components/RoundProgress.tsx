@@ -16,6 +16,10 @@ interface Props {
   totalRounds: number;
   rounds: RoundSummary[];
   totalScore: number;
+  /** COLD / THE CLUE / THE BET — what this round is, said next to its number. */
+  kindLabel?: string;
+  /** False when the header is already carrying the day's score. */
+  showScore?: boolean;
 }
 
 /**
@@ -69,7 +73,14 @@ function Segment({
   );
 }
 
-export function RoundProgress({ activeRound, totalRounds, rounds, totalScore }: Props) {
+export function RoundProgress({
+  activeRound,
+  totalRounds,
+  rounds,
+  totalScore,
+  kindLabel,
+  showScore = true,
+}: Props) {
   const { colors } = useTheme();
 
   const byRound = new Map(rounds.map((r) => [r.round, r]));
@@ -79,13 +90,16 @@ export function RoundProgress({ activeRound, totalRounds, rounds, totalScore }: 
       <View style={styles.headRow}>
         <Text style={[styles.label, { color: colors.textMuted }]}>
           ROUND {activeRound} OF {totalRounds}
+          {kindLabel ? ` · ${kindLabel}` : ''}
         </Text>
         {/* The number alone. A total shown against 300 turns a good day into a
             percentage of a maximum almost nobody reaches. */}
-        <Text style={[styles.score, { color: colors.text }]}>
-          {totalScore}
-          <Text style={[styles.scoreMax, { color: colors.textMuted }]}> PTS</Text>
-        </Text>
+        {showScore && (
+          <Text style={[styles.score, { color: colors.text }]}>
+            {totalScore}
+            <Text style={[styles.scoreMax, { color: colors.textMuted }]}> PTS</Text>
+          </Text>
+        )}
       </View>
 
       <View style={styles.bar}>
@@ -117,6 +131,8 @@ export function RoundProgress({ activeRound, totalRounds, rounds, totalScore }: 
 const styles = StyleSheet.create({
   wrap: { gap: 6 },
   headRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  metaRow: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
+  clock: { fontSize: 12, fontFamily: fonts.bold, fontVariant: ['tabular-nums'] },
   label: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.2 },
   score: { fontSize: 16, fontFamily: fonts.extraBold },
   scoreMax: { fontSize: 12, fontFamily: fonts.bold },

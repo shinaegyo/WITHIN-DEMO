@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StatusBar, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CallYourShot, CALLS } from '../components/CallYourShot';
+import { CallYourShot, LATE_PAY, MISS_PAY as FLOOR_PAY } from '../components/CallYourShot';
+import { CLUE_PAYS } from '../components/ChooseYourClue';
 import { ChooseYourClue } from '../components/ChooseYourClue';
 import { ClueCard } from '../components/ClueCard';
 import { CommitRange } from '../components/CommitRange';
@@ -17,10 +18,36 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
-import { playLose, playWin } from '../utils/sound';
+import { playLose, playTap, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
+import { clockText, dayStart, markDayStart } from '../utils/dayClock';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
+
+/**
+ * What each round is, at the top of it.
+ *
+ * A round that asks something different has to say so before it asks. Naming
+ * the kind in the eyebrow and the question in the heading is what turns three
+ * boards that look identical into three different days.
+ */
+const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; title: string; lede: string }> = {
+  cold: {
+    kind: 'COLD',
+    title: 'Find the number',
+    lede: 'No clue. Colors only — blue means aim higher, red means lower.',
+  },
+  clue: {
+    kind: 'THE CLUE',
+    title: 'A new number, and some help',
+    lede: 'Six attempts, and one clue — but you choose which kind you get.',
+  },
+  bet: {
+    kind: 'THE BET',
+    title: 'How sure are you?',
+    lede: 'Three free guesses that cost nothing and end nothing. Then commit to a range.',
+  },
+};
 
 /** Long enough to see the tile land, short enough not to feel stuck. */
 const RESULT_DELAY_MS = 3000;
@@ -35,6 +62,14 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
   const [feedbackTrigger, setFeedbackTrigger] = useState<FeedbackTrigger>(null);
   const [showResult, setShowResult] = useState(false);
+  // Reopening the call sheet before the first guess. The server takes a second
+  // call while the round is untouched, so this is only about getting back to
+  // the choice - nothing is undone.
+  const [recalling, setRecalling] = useState(false);
+  // The day's clock, from the first guess. Read once on mount and then ticked
+  // locally, so a day resumed on another screen picks up where it stands.
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
 
   // Only a guess made while this screen is open should play. The last result
   // stays in shared state after the screen unmounts, so returning from home
@@ -66,6 +101,35 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
       playForTier(lastResult.tier);
     }
   }, [lastResult]);
+
+  const puzzleDate = game?.puzzleDate;
+  // Every round the day has, including the one being played - the server sends
+  // a row per round and the optimistic patch keeps the live one current.
+  const guessesToday = (game?.rounds ?? []).reduce((n, r) => n + r.attemptsUsed, 0);
+
+  useEffect(() => {
+    if (!puzzleDate) return;
+    let alive = true;
+    dayStart(puzzleDate).then((t) => {
+      if (alive) setStartedAt(t);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [puzzleDate]);
+
+  // The first guess starts it, wherever that guess was made.
+  useEffect(() => {
+    if (!puzzleDate || startedAt !== null || guessesToday === 0) return;
+    markDayStart(puzzleDate).then(setStartedAt);
+  }, [puzzleDate, startedAt, guessesToday]);
+
+  const dayLive = !!game && game.dayStatus === 'playing';
+  useEffect(() => {
+    if (startedAt === null || !dayLive) return;
+    const id = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(id);
+  }, [startedAt, dayLive]);
 
   // Held back so the tile, sound and haptic land before a card covers them.
   const roundOver = !!game && game.round.status !== 'playing';
@@ -125,11 +189,47 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
      * asks last, once the free guesses are spent, because the range is the
      * thing that ends it.
      */
-    const asksCall = live && round.kind === 'cold' && round.called === null;
+    const asksCall = live && round.kind === 'cold' && (round.called === null || recalling);
     const asksClue = live && round.kind === 'clue' && round.clue1 === null;
     const asksRange = live && round.kind === 'bet' && round.attemptsUsed >= round.attemptsAllowed;
-    const freeLeft = round.attemptsAllowed - round.attemptsUsed;
-    const calledPay = CALLS.find((c) => c.n === round.called)?.pay;
+    const asking = asksCall || asksClue || asksRange;
+    const intro = round.kind ? INTRO[round.kind] : null;
+    const used = round.attemptsUsed;
+
+    /**
+     * The line under the input, which counts something different in each round.
+     *
+     * Round one counts down to the call while the call is still alive and to
+     * the end of the round once it is gone - two numbers at once read as
+     * arithmetic. Round two counts down to the end and says what finding it
+     * now would pay, because the ladder is the whole decision about whether to
+     * think longer. Round three counts free guesses, which cost nothing.
+     */
+    const countLine = (() => {
+      if (!live || !round.kind) return null;
+      if (round.kind === 'bet') {
+        const free = round.attemptsAllowed - used;
+        return `${free} free ${free === 1 ? 'guess' : 'guesses'} left`;
+      }
+      const say = (n: number, pay: number) =>
+        `${n} ${n === 1 ? 'guess' : 'guesses'} left · finding gets ${pay} points`;
+      if (round.kind === 'clue') {
+        return say(round.attemptsAllowed - used, CLUE_PAYS[used] ?? FLOOR_PAY);
+      }
+      if (round.called === null) return null;
+      // Past the call, what is left to play for is the consolation - saying the
+      // call was missed as well is telling somebody twice that they missed it.
+      if (used >= round.called) return say(round.attemptsAllowed - used, LATE_PAY);
+      const n = round.called - used;
+      return `Called ${round.called} · ${n} ${n === 1 ? 'guess' : 'guesses'} left`;
+    })();
+
+    // Picking again overwrites the call on the server, so the sheet is simply
+    // shown again rather than anything being undone.
+    const onCall = async (n: number) => {
+      setRecalling(false);
+      await call(n);
+    };
 
     return (
       <KeyboardAvoidingView
@@ -138,39 +238,46 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         keyboardVerticalOffset={12}
       >
         <View style={styles.content}>
-          <Header onBack={canLeave ? onExit : undefined} />
+          <Header
+            onBack={canLeave ? onExit : undefined}
+            points={game.totalScore}
+            clock={startedAt === null ? '0:00' : clockText(now - startedAt)}
+          />
 
           <RoundProgress
             activeRound={round.round}
             totalRounds={game.totalRounds}
             rounds={game.rounds}
             totalScore={game.totalScore}
+            kindLabel={intro?.kind}
+            showScore={false}
           />
 
+          {intro && (
+            <View style={styles.intro}>
+              <Text style={[styles.introTitle, { color: colors.text }]}>{intro.title}</Text>
+              <Text style={[styles.introLede, { color: colors.textMuted }]}>{intro.lede}</Text>
+            </View>
+          )}
+
           {asksCall ? (
-            <CallYourShot onCall={call} busy={deciding} />
+            <CallYourShot onCall={onCall} busy={deciding} />
           ) : asksClue ? (
             <ChooseYourClue onChoose={chooseClue} busy={deciding} />
           ) : asksRange ? (
             <CommitRange onCommit={commitRange} busy={deciding} />
           ) : (
             <>
-              {round.called !== null && calledPay !== undefined && (
-                <Text style={[styles.standing, { color: colors.textMuted }]}>
-                  You called {round.called} {round.called === 1 ? 'guess' : 'guesses'} · {calledPay} pts
-                </Text>
-              )}
-
               {/* Round one has no clue and round three has no clue, and an
                   empty card headed CLUE is worse than no card: it reads as a
                   clue that failed to load. */}
               {!!round.clue1 && <ClueCard clue={round.clue1} />}
 
-              {round.kind === 'bet' && live && (
-                <Text style={[styles.standing, { color: colors.textMuted }]}>
-                  {freeLeft} free {freeLeft === 1 ? 'guess' : 'guesses'} — they cost nothing and end
-                  nothing
-                </Text>
+              {/* The call is still a thought until a guess lands on it. */}
+              {live && round.kind === 'cold' && round.called !== null && round.attemptsUsed === 0 && (
+                <Pressable onPress={() => { playTap(); setRecalling(true); }} hitSlop={8}>
+                  <Text style={[styles.changeCall, { color: colors.textMuted }]}>← Change call</Text>
+                </Pressable>
               )}
 
               <NumberInput disabled={!live || submitting} onSubmit={handleSubmit} />
@@ -181,11 +288,23 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             <GuessBoard
               guesses={round.guesses}
               attemptsAllowed={round.attemptsAllowed}
-              showRemaining={round.status === 'playing' && game.dayStatus === 'playing'}
+              // A sheet is up: there is nothing to count down to yet, and a
+              // stray "7 GUESSES LEFT" under a call of one contradicts it.
+              showRemaining={live && !asking}
+              remainingText={countLine ?? undefined}
               // Only worth saying while there is a next round to lose an
               // attempt from. On round three the penalty cannot apply.
             />
           </View>
+
+          {/* The shape of the day, kept where somebody can read it without
+              leaving the round they are in. */}
+          <Text style={[styles.note, { color: colors.textMuted }]}>
+            Three rounds, three different questions:{' '}
+            <Text style={[styles.noteStrong, { color: colors.text }]}>call your shot</Text> and
+            search cold, then a search with a clue you chose from three kinds, then a bet on a
+            range. The clock starts on your first guess.
+          </Text>
 
         </View>
       </KeyboardAvoidingView>
@@ -212,6 +331,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           onRetry={retry}
           onConcede={concede}
           onExit={onExit}
+          dayClock={startedAt === null ? null : clockText(now - startedAt)}
+          dayGuesses={guessesToday}
         />
       )}
     </SafeAreaView>
@@ -228,6 +349,11 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   boardWrap: { flex: 1 },
-  /** The one line of standing state a round carries into its guesses. */
-  standing: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
+  /** The question this round is asking, before it asks it. */
+  intro: { gap: 3 },
+  introTitle: { fontSize: 25, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
+  introLede: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19 },
+  changeCall: { fontSize: 13, fontFamily: fonts.bold },
+  note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17 },
+  noteStrong: { fontFamily: fonts.extraBold },
 });

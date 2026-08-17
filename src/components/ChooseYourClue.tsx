@@ -20,6 +20,9 @@ import { playTap } from '../utils/sound';
 
 export type ClueKind = 'digits' | 'factors' | 'where';
 
+/** Six attempts, and what finding it on each one pays. */
+export const CLUE_PAYS = [16, 14, 12, 10, 8, 6];
+
 const KINDS: { kind: ClueKind; title: string; detail: string }[] = [
   {
     kind: 'digits',
@@ -34,7 +37,7 @@ const KINDS: { kind: ClueKind; title: string; detail: string }[] = [
   {
     kind: 'where',
     title: 'Where it sits',
-    detail: 'The easiest to use, and the least it tells you',
+    detail: 'Fenced between two things you already know',
   },
 ];
 
