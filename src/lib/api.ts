@@ -784,8 +784,16 @@ export interface HomeStatus {
     iHoldBelt: boolean;
   };
   impossible: {
+    /**
+     * Vestigial. The counter behind it never passed one, so this never reached
+     * zero and every screen that branched on it was reading dead code. Health
+     * says whether a day is over and `inSession` says whether it is open;
+     * between them there is nothing left for this to answer.
+     */
     sessionsLeft: number;
-    /** 0 to 100. Zero with no sessions left is a day that is over. */
+    /** Today's climb is already open, so the button offers Resume, not Start. */
+    inSession: boolean;
+    /** 0 to 100. Zero is a day that is over - it comes back in the morning. */
     health: number;
     summit: boolean;
     level: number;
@@ -813,6 +821,10 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
     },
     impossible: {
       sessionsLeft: raw.impossible?.sessionsLeft ?? 0,
+      // False against a server that predates 0150, which is the harmless way
+      // round: the button says Start on a climb already open, rather than
+      // offering Resume on one that was never begun.
+      inSession: !!raw.impossible?.inSession,
       // 100 when the server predates 0117: a climb that looks alive and is not
       // costs a tap, where one that looks spent and is not costs the day.
       health: raw.impossible?.health ?? 100,

@@ -397,7 +397,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   ]}
                 >
                   <Text style={[styles.againText, { color: arena.background }]}>
-                    {state.sessionsLeft > 0 ? "Start today's climb" : 'Back tomorrow'}
+                    {state.health > 0 ? "Start today's climb" : 'Back tomorrow'}
                   </Text>
                 </Pressable>
               )}

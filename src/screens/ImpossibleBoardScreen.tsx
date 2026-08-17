@@ -80,18 +80,16 @@ export function ImpossibleBoardScreen({
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!rows) return <StatusScreen loading />;
 
-  const left = status?.impossible.sessionsLeft ?? null;
   const level = status?.impossible.level ?? 1;
   const health = status?.impossible.health ?? 0;
   const summit = !!status?.impossible.summit;
-  // Once today's climb is started there are no sessions left, so sessionsLeft
-  // alone would lock a player out of the run they are in the middle of. A day
-  // is only over when the sessions and the lives are both gone.
-  const canClimb = !summit && (left === null || left > 0 || health > 0);
+  // Health is the whole of it. Nothing else rations the climb: play as many
+  // sessions as the bar will carry, and the bar comes back in the morning.
+  const canClimb = !summit && health > 0;
   // Leaving mid-climb costs nothing, so the button has to say which of the two
   // it is about to do. "Climb" on a session already open reads as though it
   // might spend something, and nobody should have to press it to find out.
-  const resuming = left === 0 && health > 0;
+  const resuming = !!status?.impossible.inSession;
   const { shown, hidden, breakAt } = topTen(rows, expanded);
 
   return (
@@ -208,7 +206,7 @@ export function ImpossibleBoardScreen({
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
         <Text style={[styles.best, { color: colors.textMuted }]}>
           {summit ? 'You topped out this week' : `You are on level ${level}`}
-          {!summit && left !== 0 && health > 0 ? ` · ${health}% health` : ''}
+          {!summit && health > 0 ? ` · ${health}% health` : ''}
         </Text>
         <Pressable
           onPress={async () => {

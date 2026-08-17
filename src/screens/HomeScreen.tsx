@@ -313,17 +313,15 @@ export function HomeScreen({
   const roundEdge = { won: '#5E9B70', lost: '#C08074' };
   const roundInk = { won: '#2F5C3E' };
 
-  // A climb with health already spent, or a day's session already opened, is
-  // one somebody is in the middle of - Start would ask them to begin something
-  // they never stopped.
-  const climbOpen = !!modes && modes.impossible.health > 0 && modes.impossible.sessionsLeft === 0;
-  const climbDone =
-    !!modes && (modes.impossible.summit || (modes.impossible.health === 0 && modes.impossible.sessionsLeft === 0));
+  // A climb with today's session already opened is one somebody is in the
+  // middle of - Start would ask them to begin something they never stopped.
+  const climbOpen = !!modes && modes.impossible.inSession;
+  const climbDone = !!modes && (modes.impossible.summit || modes.impossible.health === 0);
 
   const impossibleState = modes
     ? modes.impossible.summit
       ? 'Topped out this week'
-      : modes.impossible.health > 0 || modes.impossible.sessionsLeft > 0
+      : modes.impossible.health > 0
         ? `Level ${modes.impossible.level} · ${modes.impossible.health}% health`
         : `You are on level ${modes.impossible.level}`
     : 'A climb that keeps your place';

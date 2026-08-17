@@ -100,9 +100,9 @@ export function GamesScreen({
           status: status
             ? status.impossible.summit
               ? 'Topped out this week'
-              : status.impossible.sessionsLeft === 0 && status.impossible.health === 0
+              : status.impossible.health === 0
                 ? `You are on level ${status.impossible.level}`
-                : status.impossible.sessionsLeft === 0
+                : status.impossible.inSession
                   ? `Level ${status.impossible.level} · ${status.impossible.health}% health`
                   : `Level ${status.impossible.level} · ready`
             : '',
