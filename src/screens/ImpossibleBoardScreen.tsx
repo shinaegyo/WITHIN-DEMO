@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
+import { StatIcon } from '../components/StatIcon';
 import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { impossibleRules } from '../components/modeRules';
 import {
@@ -135,10 +136,22 @@ export function ImpossibleBoardScreen({
           {/* A summit is depth 50 for everybody who reaches it, so the number
               stops separating them and the guess count starts. */}
           {e.topped ? (
-            <>
-              <Text style={[styles.topped, { color: colors.accent }]}>TOPPED OUT</Text>
-              <Text style={[styles.unit, { color: colors.textMuted }]}>{e.guesses} guesses</Text>
-            </>
+            // A summit is level 50 for everybody who reaches it, so the level
+            // stops separating them and the guess count starts.
+            //
+            // "TOPPED OUT · 228 guesses" answered that in three parts while
+            // every other row answered it in two, and the finished players -
+            // the ones worth looking at - had the busiest rows on the board.
+            // The mountain says they went all the way without a word, which is
+            // how the league badges already work, and the number keeps the slot
+            // the level would have used.
+            <View
+              style={styles.levelWrap}
+              accessibilityLabel={`Topped out in ${e.guesses} guesses`}
+            >
+              <StatIcon glyph="summit" color={colors.accent} size={18} />
+              <Text style={[styles.depth, { color: colors.text }]}>{e.guesses}</Text>
+            </View>
           ) : (
             // "47 numbers" counted what somebody had got through; the climb is
             // read as how high they are, and the ladder is already numbered.
@@ -269,11 +282,6 @@ const styles = StyleSheet.create({
   // beside an extra-bold number looked like two typefaces that had failed to
   // match. Abbreviating carries the label on its own - LVL is plainly not a
   // score - so nothing else has to.
-  //
-  // A separate style from `unit` on purpose: that one still labels the guess
-  // count on a topped row, where a small grey caption is exactly right.
   levelLabel: { fontSize: 17, fontFamily: fonts.extraBold, letterSpacing: 0.3 },
   depth: { fontSize: 17, fontFamily: fonts.extraBold, minWidth: 23, textAlign: 'right' },
-  topped: { fontSize: 12.5, fontFamily: fonts.extraBold, letterSpacing: 0.4 },
-  unit: { fontSize: 11, fontFamily: fonts.medium },
 });
