@@ -146,27 +146,15 @@ export function ProfileScreen({
 
       <View style={styles.stats}>
         {[
-          // Streak, points, league. A best streak is a record of a run that is
+          // League, points, streak. A best streak is a record of a run that is
           // already over, and average-away turned out to be a number nobody
-          // wanted to read. The league is the one that moves and the one worth
-          // chasing - and it comes from the daily alone, which the line under
-          // the row says out loud.
+          // wanted to read. The league leads because it is the one that moves
+          // and the one worth chasing - and it comes from the daily alone,
+          // which the line under the row says out loud.
           // Every card carries a glyph, including the ones with nothing to
           // report: the row is as tall as its tallest member, so a card that
           // skips its glyph is a card with a hole in it. A stat at zero dims
           // its glyph to the border instead of dropping it.
-          {
-            label: 'STREAK',
-            value: stats ? `${stats.currentStreak}` : '—',
-            glyph: 'streak' as const,
-            glyphInk: stats?.currentStreak ? feedbackColors.within10 : colors.border,
-          },
-          {
-            label: 'POINTS',
-            value: stats ? `${stats.totalPoints}` : '—',
-            glyph: 'points' as const,
-            glyphInk: stats?.totalPoints ? colors.accent : colors.border,
-          },
           {
             label: 'LEAGUE',
             value: rank ? rank.league : '—',
@@ -176,6 +164,18 @@ export function ProfileScreen({
             // rather than a gap where the other two have something.
             badge: rank?.league ?? ('Bronze' as const),
             badgeInk: rank ? undefined : colors.border,
+          },
+          {
+            label: 'POINTS',
+            value: stats ? `${stats.totalPoints}` : '—',
+            glyph: 'points' as const,
+            glyphInk: stats?.totalPoints ? colors.accent : colors.border,
+          },
+          {
+            label: 'STREAK',
+            value: stats ? `${stats.currentStreak}` : '—',
+            glyph: 'streak' as const,
+            glyphInk: stats?.currentStreak ? feedbackColors.within10 : colors.border,
           },
         ].map((s) => (
           <View key={s.label} style={[styles.stat, { borderColor: colors.border }]}>
