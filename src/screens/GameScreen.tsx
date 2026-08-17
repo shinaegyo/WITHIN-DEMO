@@ -220,8 +220,11 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         const free = round.attemptsAllowed - used;
         return `${free} free ${free === 1 ? 'guess' : 'guesses'} left`;
       }
+      // "worth 10 points" rather than "10 points remaining": nothing is being
+      // spent down from a pot the player owns - ten is what the round pays if
+      // the next guess lands, and it falls again after that.
       const say = (n: number, pay: number) =>
-        `${n} ${n === 1 ? 'guess' : 'guesses'} left · finding gets ${pay} points`;
+        `${n} ${n === 1 ? 'guess' : 'guesses'} left · worth ${pay} points`;
       if (round.kind === 'clue') {
         return say(round.attemptsAllowed - used, CLUE_PAYS[used] ?? FLOOR_PAY);
       }
