@@ -45,13 +45,23 @@ import { playTap } from '../utils/sound';
  * So this tab means one thing: the daily, which is the only mode that scores
  * points, keeps a streak, or places anybody.
  */
-type Board = 'today' | 'season' | 'alltime';
+/**
+ * Two boards, not three.
+ *
+ * All time never reset, so the gap between somebody who started in week one
+ * and somebody who started today only ever widened - it ranked length of
+ * service and called it skill. Season does the same job on a horizon a new
+ * player can actually win, and today is the only board where showing up today
+ * is enough. A lifetime total is still a fact about a player; it lives on
+ * their profile, where a fact belongs, rather than in a league nobody can
+ * enter.
+ */
+type Board = 'today' | 'season';
 
 /** "today" | "this season" | "all time" — the window, said in a sentence. */
 const WHEN: Record<Board, string> = {
   today: 'today',
   season: 'this season',
-  alltime: 'all time',
 };
 
 /** 7th, not 7 — a bare number beside a field size reads as a score. */
@@ -131,7 +141,6 @@ const TABS: { key: Board; label: string; note: string }[] = [
   // two lines of explanation above a leaderboard is read once and then skipped
   // forever.
   { key: 'season', label: 'Season', note: 'This month’s points. Resets on the 1st.' },
-  { key: 'alltime', label: 'All time', note: 'Every daily you have played.' },
 ];
 
 export function BoardsScreen() {
@@ -171,7 +180,7 @@ export function BoardsScreen() {
     rank: number; name: string; avatar: string | null; score: number; avgOff: number; isMe: boolean;
   }): Row => ({
     rank: e.rank, name: e.name, avatar: e.avatar,
-    value: `${e.score}`, sub: tab === 'alltime' ? undefined : `${e.avgOff}`, isMe: e.isMe,
+    value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
   });
 
   // From the first keystroke. A friends list is short, so one letter narrows
@@ -268,7 +277,6 @@ export function BoardsScreen() {
   // Today's board carries more than a list: where you came as a share of the
   // field, how many people are level with you, and the shape of the day.
   const [today, setToday] = useState<Leaderboard | null>(null);
-  const [allTime, setAllTime] = useState<AllTimeLeaderboard | null>(null);
   const [season, setSeason] = useState<SeasonLeaderboard | null>(null);
 
   /**
@@ -278,10 +286,7 @@ export function BoardsScreen() {
    * button appearing for a moment is a smaller fault than a board that cannot
    * be paged because a count had not arrived.
    */
-  const totalPlayers =
-    tab === 'today' ? today?.totalPlayers
-    : tab === 'season' ? season?.totalPlayers
-    : allTime?.totalPlayers;
+  const totalPlayers = tab === 'today' ? today?.totalPlayers : season?.totalPlayers;
   const shownAll =
     totalPlayers === undefined
       ? false
@@ -310,16 +315,6 @@ export function BoardsScreen() {
             season: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
               value: `${e.score}`, sub: `${e.avgOff}`, isMe: e.isMe,
-            })),
-          }));
-        } else if (which === 'alltime') {
-          const b = await loadAllTimeLeaderboard(friends);
-          setAllTime(b);
-          setRows((r) => ({
-            ...r,
-            alltime: b.entries.map((e) => ({
-              rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, isMe: e.isMe, crown: e.hasBelt,
             })),
           }));
         }
@@ -364,7 +359,6 @@ export function BoardsScreen() {
               resetBrowse();
                   setToday(null);
                   setSeason(null);
-                  setAllTime(null);
                 }}
                 style={[
                   styles.filterTab,
@@ -441,25 +435,6 @@ export function BoardsScreen() {
         </Pressable>
       )}
 
-      {tab === 'alltime' && allTime?.me && (
-        <Pressable
-          onPress={() => {
-            playTap();
-            setSheet({ kind: 'mine' });
-          }}
-          style={[styles.mine, { borderColor: colors.border }]}
-        >
-          <Text style={[styles.mineLead, { color: colors.textMuted }]}>
-            {standing(allTime.me, allTime.totalPlayers, 'ALL TIME')}
-          </Text>
-          <View style={styles.mineLine}>
-            <Text style={[styles.mineScore, { color: colors.text }]}>
-              {allTime.me.score.toLocaleString()}
-            </Text>
-            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
-          </View>
-        </Pressable>
-      )}
 
       {tab === 'today' && today?.me && (
         // The score is the target. No hint under it: a card holding a rank and
@@ -605,11 +580,9 @@ export function BoardsScreen() {
               sentence. */}
           <View style={styles.head}>
             <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
-            {tab !== 'alltime' && (
-              <Pressable onPress={() => { playTap(); setSheet({ kind: 'column', board: tab }); }} hitSlop={10}>
-                <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
-              </Pressable>
-            )}
+            <Pressable onPress={() => { playTap(); setSheet({ kind: 'column', board: tab }); }} hitSlop={10}>
+              <Text style={[styles.headSub, { color: colors.textMuted }]}>AVG OFF ⓘ</Text>
+            </Pressable>
           </View>
           {!found && list.map((e) => (
             <Pressable
@@ -751,21 +724,6 @@ export function BoardsScreen() {
                     <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
                       It resets on the 1st, so a good month beats a long history — somebody who
                       started last week can win this one.
-                    </Text>
-                  </>
-                )}
-                {tab === 'alltime' && !!allTime?.me && (
-                  <>
-                    <Text style={[styles.sheetLead, { color: colors.text }]}>
-                      {allTime.me.daysPlayed} {allTime.me.daysPlayed === 1 ? 'day' : 'days'} played.
-                    </Text>
-                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                      Your guesses landed {allTime.me.avgOff} away on average, across everything you
-                      have played.
-                    </Text>
-                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
-                      This one never resets. The season board is the one to chase if you started
-                      recently.
                     </Text>
                   </>
                 )}

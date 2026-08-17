@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { LevelBar } from '../components/LevelBar';
-import { AllTimeEntry, XpState, loadAllTimeLeaderboard, loadRanked, loadXp } from '../lib/api';
+import { SeasonLeaderboard, XpState, loadRanked, loadSeasonLeaderboard, loadXp } from '../lib/api';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
@@ -68,7 +68,9 @@ export function ProfileScreen({
 
   const { colors, mode, toggle } = useTheme();
   const { game } = useDailyGameContext();
-  const [rank, setRank] = useState<AllTimeEntry | null>(null);
+  // The season, not a lifetime: the all-time board is gone, and standing in a
+  // league nobody new can enter was the reason it went.
+  const [rank, setRank] = useState<SeasonLeaderboard['me']>(null);
   const [rating, setRating] = useState<number | null>(null);
   const [crown, setCrown] = useState(false);
   const [xp, setXp] = useState<XpState | null>(null);
@@ -77,8 +79,8 @@ export function ProfileScreen({
     loadXp()
       .then(setXp)
       .catch(() => {});
-    loadAllTimeLeaderboard()
-      .then((b) => setRank(b.entries.find((e) => e.isMe) ?? null))
+    loadSeasonLeaderboard()
+      .then((b) => setRank(b.me))
       .catch(() => {});
     loadRanked()
       .then((r) => {
@@ -141,7 +143,7 @@ export function ProfileScreen({
       <View style={styles.stats}>
         {[
           { label: 'DAY STREAK', value: stats ? `${stats.currentStreak}` : '—' },
-          { label: 'ALL TIME', value: stats ? `${stats.totalPoints}` : '—' },
+          { label: 'POINTS', value: stats ? `${stats.totalPoints}` : '—' },
           { label: 'BEST STREAK', value: stats ? `${stats.maxStreak}` : '—' },
         ].map((s) => (
           <View key={s.label} style={[styles.stat, { borderColor: colors.border }]}>
@@ -152,7 +154,7 @@ export function ProfileScreen({
       </View>
 
       <Text style={[styles.line, { color: colors.textMuted }]}>
-        {rank ? `#${rank.rank} all time` : 'Finish a day to reach the board'}
+        {rank ? `#${rank.rank} this season` : 'Finish a day to reach the board'}
         {rating !== null ? ` · ${rating} ranked` : ''}
       </Text>
 

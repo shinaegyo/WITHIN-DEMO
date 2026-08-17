@@ -49,7 +49,6 @@ export type RootStackParamList = {
   Home: undefined;
   Game: undefined;
   Practice: { remainingAfterThis: number };
-  Leaderboard: undefined;
   Friends: undefined;
   Duels: undefined;
   Ranked: undefined;
@@ -322,7 +321,7 @@ function Screens({
                   <HomeScreen
                     onPlay={() => navigation.navigate('Game')}
                     onEndless={() => navigation.navigate('ImpossibleBoard')}
-                    onOpenLeaderboard={() => navigation.navigate('Leaderboard')}
+                    onOpenLeaderboard={() => tab.navigation.navigate('Rank')}
                     onOpenFriends={() => navigation.navigate('Friends')}
                     onOpenDuels={() => navigation.navigate('Duels')}
                     onOpenRanked={() => navigation.navigate('Ranked')}
@@ -475,12 +474,6 @@ function Screens({
             />
           )}
         </Stack.Screen>
-
-        <Stack.Screen
-          name="Leaderboard"
-          component={BoardsScreen}
-          options={{ title: 'Boards', headerBackTitle: 'Back' }}
-        />
 
         <Stack.Screen
           name="HowToPlay"

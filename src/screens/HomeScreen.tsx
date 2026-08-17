@@ -479,7 +479,7 @@ export function HomeScreen({
                   {game.stats.currentStreak} day streak
                 </Text>
                 <Text style={[styles.footText, { color: colors.textMuted }]}>
-                  {game.stats.totalPoints.toLocaleString()} all time
+                  {game.stats.totalPoints.toLocaleString()} points
                 </Text>
               </View>
             </View>
@@ -605,7 +605,7 @@ export function HomeScreen({
                 <Text style={[styles.statValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
                   {game.stats.totalPoints.toLocaleString()}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>ALL TIME</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>POINTS</Text>
               </View>
             </View>
 
