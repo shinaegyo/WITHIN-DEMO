@@ -1234,6 +1234,10 @@ export interface PlayerCard {
   online: boolean;
   /** Everything they have played, in one number. */
   level: number;
+  /** This season's league, and the two numbers behind it. */
+  league: League;
+  seasonPoints: number;
+  seasonDays: number;
   points: number;
   daysPlayed: number;
   streak: number;
@@ -1266,6 +1270,9 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
     friendship: raw.friendship ?? 'none',
     online: !!raw.online,
     level: raw.level ?? 1,
+    league: (raw.league as League) ?? 'Bronze',
+    seasonPoints: raw.seasonPoints ?? 0,
+    seasonDays: raw.seasonDays ?? 0,
     points: raw.points ?? 0,
     daysPlayed: raw.daysPlayed ?? 0,
     streak: raw.streak ?? 0,

@@ -13,6 +13,7 @@ import {
 import { Avatar } from './Avatar';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
+import { LEAGUE_INK } from '../theme/leagues';
 import { useTheme } from '../theme/ThemeContext';
 
 /**
@@ -71,9 +72,15 @@ export function PlayerCardModal({
     }
   };
 
-  const Stat = ({ label, value }: { label: string; value: string }) => (
+  const Stat = ({ label, value, ink }: { label: string; value: string; ink?: string }) => (
     <View style={styles.stat}>
-      <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
+      <Text
+        style={[styles.statValue, { color: ink ?? colors.text }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
+        {value}
+      </Text>
       <Text style={[styles.statLabel, { color: colors.textMuted }]}>{label}</Text>
     </View>
   );
@@ -133,7 +140,9 @@ export function PlayerCardModal({
 
               <View style={styles.stats}>
                 <Stat label="LEVEL" value={`${card.level}`} />
-                <Stat label="POINTS" value={`${card.points}`} />
+                {/* The season, not the lifetime: the question anybody opening
+                    a card is asking is how this month is going. */}
+                <Stat label="LEAGUE" value={card.league} ink={LEAGUE_INK[card.league]} />
                 <Stat label="STREAK" value={`${card.streak}`} />
                 <Stat label="BEST" value={`${card.bestStreak}`} />
               </View>
