@@ -27,24 +27,21 @@ import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/so
 /**
  * What each round is, at the top of it.
  *
- * A round that asks something different has to say so before it asks. Naming
- * the kind in the eyebrow and the question in the heading is what turns three
- * boards that look identical into three different days.
+ * A round that asks something different has to say so before it asks. The kind
+ * is named in the eyebrow and the terms are stated once underneath - a heading
+ * on top of both was a third way of saying what the round already said twice.
  */
-const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; title: string; lede: string }> = {
+const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; lede: string }> = {
   cold: {
     kind: 'COLD',
-    title: 'Find the number',
     lede: 'No clue. Colors only — blue means aim higher, red means lower.',
   },
   clue: {
     kind: 'THE CLUE',
-    title: 'Find it with help',
     lede: 'Six attempts, and one clue — but you choose which kind you get.',
   },
   bet: {
     kind: 'THE BET',
-    title: 'How sure are you?',
     lede: 'Three free guesses that cost nothing and end nothing. Then commit to a range.',
   },
 };
@@ -266,10 +263,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           />
 
           {intro && (
-            <View style={styles.intro}>
-              <Text style={[styles.introTitle, { color: colors.text }]}>{intro.title}</Text>
-              <Text style={[styles.introLede, { color: colors.textMuted }]}>{intro.lede}</Text>
-            </View>
+            <Text style={[styles.introLede, { color: colors.textMuted }]}>{intro.lede}</Text>
           )}
 
           {/* A sheet with an empty board under it sat at the top of a screen
@@ -363,9 +357,7 @@ const styles = StyleSheet.create({
   },
   boardWrap: { flex: 1 },
   sheetWrap: { flex: 1, justifyContent: 'center' },
-  /** The question this round is asking, before it asks it. */
-  intro: { gap: 3 },
-  introTitle: { fontSize: 25, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
+  /** The round's terms, stated once under its name. */
   introLede: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19 },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
 });
