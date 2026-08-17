@@ -18,6 +18,14 @@ import { playTap } from '../utils/sound';
  * it is, how many runs are left, who holds the crown. That status is the reason
  * to open one of these, and it was the one thing a list of names could not say.
  */
+interface Row {
+  label: string;
+  sub: string;
+  status: string;
+  urgent: boolean;
+  onPress: () => void;
+}
+
 export function GamesScreen({
   onDuels,
   onImpossible,
@@ -74,60 +82,88 @@ export function GamesScreen({
         ? 'One number, played like the daily. None left today.'
         : `One number, played like the daily. ${practiceLeft} left today.`;
 
-  const rows = [
+  /**
+   * Grouped by what each one asks of you, rather than listed.
+   *
+   * The old order opened with Duel - the one mode a player on their own cannot
+   * start - which is the worst possible first row on a screen somebody is
+   * scanning to find something to do. And four modes in a flat list read as
+   * four of the same thing, when the actual difference between them is what
+   * they cost you: a week of attention, three minutes, or another person.
+   *
+   * The headings carry that, so the shape of the game is legible without
+   * opening a rulebook.
+   */
+  const groups: { label: string; rows: Row[] }[] = [
     {
-      label: 'Duel',
-      sub: 'You pick their number, they pick yours',
-      // Waiting outlives the duels screen, so this is the only place most
-      // players will find out it is still going on.
-      status: status?.queued
-        ? 'Waiting for an opponent'
-        : status && status.duelsWaiting > 0
-          ? `${status.duelsWaiting} waiting on you`
-          : 'Start one',
-      urgent: !!status && (status.duelsWaiting > 0 || status.queued),
-      onPress: onDuels,
+      label: 'ALL WEEK',
+      rows: [
+        {
+          label: 'The Impossible Climb',
+          sub: 'Fifty numbers. Your place is kept between days',
+          status: status
+            ? status.impossible.summit
+              ? 'Topped out this week'
+              : status.impossible.sessionsLeft === 0 && status.impossible.health === 0
+                ? `You are on level ${status.impossible.level}`
+                : status.impossible.sessionsLeft === 0
+                  ? `Level ${status.impossible.level} · ${status.impossible.health}% health`
+                  : `Level ${status.impossible.level} · ready`
+            : '',
+          urgent: false,
+          onPress: onImpossible,
+        },
+      ],
     },
     {
-      label: 'The Impossible Climb',
-      sub: 'A climb that keeps your place all week',
-      status: status
-        ? status.impossible.summit
-          ? 'Topped out this week'
-          : status.impossible.sessionsLeft === 0 && status.impossible.health === 0
-            ? `You are on level ${status.impossible.level}`
-            : status.impossible.sessionsLeft === 0
-              ? `Level ${status.impossible.level} · ${status.impossible.health}% health`
-              : `Level ${status.impossible.level} · ready`
-        : '',
-      urgent: false,
-      onPress: onImpossible,
+      label: 'ONE A DAY',
+      rows: [
+        {
+          label: 'Rush',
+          sub: 'Three minutes, as many numbers as you can find',
+          // A run still on the clock is the one case that must stay pressable -
+          // somebody who left mid-run has to be able to get back to it.
+          status: status?.rush.running
+            ? 'Still running'
+            : status?.rush.played
+              ? `${status.rush.found} found`
+              : 'One run a day',
+          urgent: !!status?.rush.running,
+          onPress: onRush,
+        },
+        {
+          label: 'Window',
+          sub: 'Three free guesses, then commit to a range',
+          // What happened, once it has. "One a day" is a rule, and a rule is
+          // only worth saying while it still governs something you can do.
+          status: status?.window.played
+            ? status.window.inside
+              ? `${status.window.score} points`
+              : 'Missed today'
+            : 'One a day',
+          urgent: false,
+          onPress: onWindow,
+        },
+      ],
     },
     {
-      label: 'Window',
-      sub: 'Three free guesses, then commit to a range',
-      // What happened, once it has. "One a day" is a rule, and a rule is only
-      // worth saying while it still governs something you can do.
-      status: status?.window.played
-        ? status.window.inside
-          ? `${status.window.score} points`
-          : 'Missed today'
-        : 'One a day',
-      urgent: false,
-      onPress: onWindow,
-    },
-    {
-      label: 'Rush',
-      sub: 'Three minutes, as many numbers as you can find',
-      // A run still on the clock is the one case that must stay pressable -
-      // somebody who left mid-run has to be able to get back to it.
-      status: status?.rush.running
-        ? 'Still running'
-        : status?.rush.played
-          ? `${status.rush.found} found`
-          : 'One run a day',
-      urgent: !!status?.rush.running,
-      onPress: onRush,
+      // Not "with a friend" any more: the queue pairs you with whoever is here.
+      label: 'PLAY SOMEBODY',
+      rows: [
+        {
+          label: 'Duel',
+          sub: 'A friend or a stranger. You pick their number, they pick yours',
+          // Waiting outlives the duels screen, so this is the only place most
+          // players will find out it is still going on.
+          status: status?.queued
+            ? 'Waiting for an opponent'
+            : status && status.duelsWaiting > 0
+              ? `${status.duelsWaiting} waiting on you`
+              : 'Start one',
+          urgent: !!status && (status.duelsWaiting > 0 || status.queued),
+          onPress: onDuels,
+        },
+      ],
     },
   ];
 
@@ -150,7 +186,10 @@ export function GamesScreen({
         </Text>
       )}
 
-      {rows.map((r) => (
+      {groups.map((group) => (
+        <React.Fragment key={group.label}>
+          <Text style={[styles.group, { color: colors.textMuted }]}>{group.label}</Text>
+          {group.rows.map((r) => (
         <Pressable
           key={r.label}
           disabled={locked}
@@ -186,6 +225,8 @@ export function GamesScreen({
           </Text>
           {!locked && <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>}
         </Pressable>
+          ))}
+        </React.Fragment>
       ))}
 
       {/* An action, so it looks like one. A left-aligned line of bold text was
@@ -236,6 +277,7 @@ const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 18, gap: 9 },
   dim: { opacity: 0.4 },
+  group: { fontSize: 11.5, fontFamily: fonts.extraBold, letterSpacing: 1, marginTop: 12, marginBottom: 1 },
   locked: { fontSize: 13, fontFamily: fonts.semiBold, lineHeight: 19, paddingHorizontal: 2 },
   screenTitle: {
     fontSize: 26,

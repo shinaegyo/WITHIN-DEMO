@@ -304,23 +304,28 @@ export function HomeScreen({
       go: onRush,
     },
     {
-      // Middle, between the two that need nobody. It is the odd one - it waits
-      // on another person - and sitting at the end read as third in a list of
-      // three of a kind.
-      name: 'Duel',
-      // Two words. A third of a phone width is not enough for a sentence, and
-      // "Challenge a fri…" is worse than saying less.
-      state: modes && modes.duelsWaiting > 0 ? `${modes.duelsWaiting} waiting` : 'Start one',
-      live: !!modes && modes.duelsWaiting > 0,
-      go: onOpenDuels,
-    },
-    {
       name: 'Window',
       // A missed window is genuinely zero, and "0 points" with nothing beside
       // it is bleak. The server tells us which zero this is.
       state: !modes ? 'Ready' : modes.window.played ? (modes.window.inside ? `${modes.window.score} points` : 'Missed') : 'Ready',
       live: false,
       go: onWindow,
+    },
+    {
+      // Last, with the two that need nobody ahead of it. It used to sit in the
+      // middle so it would not read as third in a list of three of a kind -
+      // but the Games tab now groups by what each mode asks of you, and a home
+      // screen contradicting that order is a third arrangement to learn.
+      name: 'Duel',
+      // Two words. A third of a phone width is not enough for a sentence, and
+      // "Challenge a fri…" is worse than saying less.
+      state: modes?.queued
+        ? 'Waiting'
+        : modes && modes.duelsWaiting > 0
+          ? `${modes.duelsWaiting} waiting`
+          : 'Start one',
+      live: !!modes && (modes.duelsWaiting > 0 || modes.queued),
+      go: onOpenDuels,
     },
   ];
 
