@@ -7,6 +7,7 @@ import { SeasonLeaderboard, XpState, loadRanked, loadSeasonLeaderboard, loadXp }
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { LEAGUE_INK } from '../theme/leagues';
+import { LeagueBadge } from '../components/LeagueBadge';
 import { useTrack } from '../utils/useTrack';
 import { loadSeasonHistory, SeasonHistory } from '../lib/api';
 import { useTheme } from '../theme/ThemeContext';
@@ -150,9 +151,15 @@ export function ProfileScreen({
           // the row says out loud.
           { label: 'STREAK', value: stats ? `${stats.currentStreak}` : '—' },
           { label: 'POINTS', value: stats ? `${stats.totalPoints}` : '—' },
-          { label: 'LEAGUE', value: rank ? rank.league : '—', ink: rank ? LEAGUE_INK[rank.league] : undefined },
+          {
+            label: 'LEAGUE',
+            value: rank ? rank.league : '—',
+            ink: rank ? LEAGUE_INK[rank.league] : undefined,
+            badge: rank?.league,
+          },
         ].map((s) => (
           <View key={s.label} style={[styles.stat, { borderColor: colors.border }]}>
+            {!!s.badge && <LeagueBadge league={s.badge} size={22} />}
             <Text style={[styles.statValue, { color: s.ink ?? colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
               {s.value}
             </Text>

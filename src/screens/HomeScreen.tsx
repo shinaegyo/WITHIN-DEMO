@@ -28,6 +28,7 @@ import { Avatar } from '../components/Avatar';
 import { Mark } from '../components/Mark';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { LeagueUpOverlay } from '../components/LeagueUpOverlay';
+import { LeagueBadge } from '../components/LeagueBadge';
 import { GamesUnlockedOverlay } from '../components/GamesUnlockedOverlay';
 import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
@@ -510,9 +511,10 @@ export function HomeScreen({
               <View style={[styles.cardRule, { backgroundColor: colors.border }]} />
               <View style={styles.cardFoot}>
                 {league ? (
-                  <Text style={[styles.footText, { color: LEAGUE_INK[league] }]}>
-                    {league} league
-                  </Text>
+                  <View style={styles.leagueFoot}>
+                    <LeagueBadge league={league} size={16} />
+                    <Text style={[styles.footText, { color: LEAGUE_INK[league] }]}>{league}</Text>
+                  </View>
                 ) : (
                   <Text style={[styles.footText, { color: colors.textMuted }]}>
                     {game.stats.currentStreak} day streak
@@ -795,6 +797,7 @@ const styles = StyleSheet.create({
   scoreLine: { flexDirection: 'row', alignItems: 'baseline', gap: 9 },
   scoreUnit: { fontSize: 14, fontFamily: fonts.bold },
   cardRule: { height: 1, alignSelf: 'stretch' },
+  leagueFoot: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   cardFoot: { flexDirection: 'row', justifyContent: 'space-between' },
   footText: { fontSize: 11.5, fontFamily: fonts.medium },
   sectionLabel: { alignSelf: 'flex-start', fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.5, marginTop: 26 },

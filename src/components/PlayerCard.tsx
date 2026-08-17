@@ -14,6 +14,7 @@ import { Avatar } from './Avatar';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { LEAGUE_INK } from '../theme/leagues';
+import { LeagueBadge } from './LeagueBadge';
 import { useTheme } from '../theme/ThemeContext';
 
 /**
@@ -127,24 +128,48 @@ export function PlayerCardModal({
                     <Text style={[styles.beltText, { color: colors.accent }]}>CROWN</Text>
                   </View>
                 )}
+
+                {/* A crest, in the corner. The league is an identity rather
+                    than a measurement, and it was being cut to "Br…" in a
+                    column built for numbers. */}
+                <View style={styles.crest}>
+                  <LeagueBadge league={card.league} size={30} />
+                  <Text style={[styles.crestName, { color: LEAGUE_INK[card.league] }]}>
+                    {card.league}
+                  </Text>
+                </View>
               </View>
               {/* No "last played" here. Nobody is playing every day yet, and a
                   card that opens with how long someone has been away makes a
                   quiet week look like a lapsed player. Someone with nothing yet
                   gets no line at all rather than a sentence about it. */}
+              {/* The season, because there is no all-time board to be second
+                  on any more. Points and days are the two numbers the league
+                  is made of, so the line explains the crest above it. */}
               {card.daysPlayed > 0 && (
                 <Text style={[styles.sub, { color: colors.textMuted }]}>
-                  #{card.rank} of {card.of} all time
+                  {card.seasonPoints} {card.seasonPoints === 1 ? 'point' : 'points'} this season
+                  {card.seasonDays > 0
+                    ? ` · ${card.seasonDays} ${card.seasonDays === 1 ? 'day' : 'days'}`
+                    : ''}
                 </Text>
               )}
 
               <View style={styles.stats}>
-                <Stat label="LEVEL" value={`${card.level}`} />
-                {/* The season, not the lifetime: the question anybody opening
-                    a card is asking is how this month is going. */}
-                <Stat label="LEAGUE" value={card.league} ink={LEAGUE_INK[card.league]} />
+                {/* The daily first, because the daily is the game: what they
+                    have scored and how many days in a row. Then the level,
+                    which every mode feeds, and then the climb, which is one
+                    mode and one week. Reading left to right should go from the
+                    thing that counts to the thing that is for fun. */}
+                <Stat label="POINTS" value={`${card.points}`} />
                 <Stat label="STREAK" value={`${card.streak}`} />
-                <Stat label="BEST" value={`${card.bestStreak}`} />
+                <Stat label="LEVEL" value={`${card.level}`} />
+                {/* A best streak is a record of a run already over. How far
+                    they have climbed this week is a thing still happening. */}
+                <Stat
+                  label="CLIMB"
+                  value={card.impossible !== null && card.impossible > 0 ? `${card.impossible}` : '—'}
+                />
               </View>
 
               {/* The day itself: one bar per round, green for found and red for
@@ -179,9 +204,6 @@ export function PlayerCardModal({
                     label="Ranked"
                     value={`${card.ranked.rating} · ${card.ranked.won}W ${card.ranked.lost}L`}
                   />
-                )}
-                {card.impossible !== null && card.impossible > 0 && (
-                  <Row label="Impossible this week" value={`${card.impossible}`} />
                 )}
                 {card.duels && card.duels.won + card.duels.lost + card.duels.drawn > 0 && (
                   <Row
@@ -275,6 +297,8 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4 },
   name: { fontSize: 24, fontFamily: fonts.extraBold, flexShrink: 1 },
   belt: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3 },
+  crest: { marginLeft: 'auto', alignItems: 'center', gap: 2 },
+  crestName: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 0.8 },
   beltText: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1.1 },
   sub: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 2 },
   stats: { flexDirection: 'row', marginTop: 18, marginBottom: 4 },

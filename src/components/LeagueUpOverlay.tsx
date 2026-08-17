@@ -9,6 +9,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect } from '../utils/haptics';
 import { playWin } from '../utils/sound';
 import { Confetti } from './Confetti';
+import { LeagueBadge } from './LeagueBadge';
 import { Rings } from './effects/Rings';
 
 /**
@@ -78,6 +79,16 @@ export function LeagueUpOverlay({
         ]}
       >
         <Text style={[styles.label, { color: colors.textMuted }]}>PROMOTED</Text>
+
+        <Animated.View
+          style={{
+            marginTop: 14,
+            opacity: swap.interpolate({ inputRange: [0.4, 1], outputRange: [0, 1] }),
+            transform: [{ scale: swap.interpolate({ inputRange: [0.4, 1], outputRange: [0.7, 1] }) }],
+          }}
+        >
+          <LeagueBadge league={to} size={64} />
+        </Animated.View>
 
         <View style={styles.swapWrap}>
           <Animated.Text

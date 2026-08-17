@@ -7,7 +7,7 @@ import { PlayerCardModal } from '../components/PlayerCard';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
-  loadAllTimeLeaderboard,
+  League,
   loadLeaderboard,
   loadSeasonLeaderboard,
   loadBoardWindow,
@@ -16,13 +16,12 @@ import {
   PlayerSuggestion,
   Leaderboard,
   SeasonLeaderboard,
-  AllTimeLeaderboard,
   messageFor,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
 import { MEDALS } from '../theme/medals';
-import { LEAGUE_INK } from '../theme/leagues';
+import { LeagueBadge } from '../components/LeagueBadge';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 
@@ -126,9 +125,11 @@ interface Row {
   avatar: string | null;
   value: string;
   unit?: string;
-  /** Shown small beside the value: the season board names the league here. */
+  /** Shown small beside the value. */
   sub?: string;
   subInk?: string;
+  /** The season board wears the league rather than saying it. */
+  league?: League;
   isMe: boolean;
   crown?: boolean;
 }
@@ -316,7 +317,7 @@ export function BoardsScreen() {
             ...r,
             season: b.entries.map((e) => ({
               rank: e.rank, name: e.name, avatar: e.avatar,
-              value: `${e.score}`, sub: e.league, subInk: LEAGUE_INK[e.league], isMe: e.isMe,
+              value: `${e.score}`, league: e.league, isMe: e.isMe,
             })),
           }));
         }
@@ -624,6 +625,7 @@ export function BoardsScreen() {
                   they are sorted in. The other way round you read what settles
                   a tie before you read the thing being tied. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
+              {!!e.league && <LeagueBadge league={e.league} size={18} />}
               {!!e.sub && (
                 <Text style={[styles.sub, { color: e.subInk ?? colors.textMuted }]}>{e.sub}</Text>
               )}
@@ -655,6 +657,7 @@ export function BoardsScreen() {
                   block was written separately and inherited the order the
                   podium had before it was swapped. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
+              {!!e.league && <LeagueBadge league={e.league} size={18} />}
               {!!e.sub && (
                 <Text style={[styles.sub, { color: e.subInk ?? colors.textMuted }]}>{e.sub}</Text>
               )}
