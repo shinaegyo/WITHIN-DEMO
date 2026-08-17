@@ -66,7 +66,7 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.h2, { color: colors.text }]}>Which way to go</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         Blue means the answer is higher than your guess — aim up. Red means it's lower — aim down.
-        The arrow says the same thing, so you can play by colour or by arrow.
+        The arrow says the same thing, so you can play by color or by arrow.
       </Text>
 
       <View style={styles.group}>
@@ -90,8 +90,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       </View>
 
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 14 }]}>
-        The stronger the colour, the closer you are. A faint tile with only a coloured edge means
-        you're still a long way off; a fully coloured tile means you're nearly there.
+        The stronger the color, the closer you are. A faint tile with only a colored edge means
+        you're still a long way off; a fully colored tile means you're nearly there.
       </Text>
     </>,
 

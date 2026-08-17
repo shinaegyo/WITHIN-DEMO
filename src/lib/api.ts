@@ -1401,7 +1401,7 @@ export function messageFor(code: string, guess?: number): string {
     case 'no_such_player':
       return "No player with that name. Names are exact, apart from capitals.";
     case 'bad_avatar':
-      return 'Pick a character and a colour.';
+      return 'Pick a character and a color.';
     case 'thats_you':
       return "That's your own name.";
     case 'no_such_request':

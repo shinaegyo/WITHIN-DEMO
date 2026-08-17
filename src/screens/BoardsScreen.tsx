@@ -220,7 +220,7 @@ export function BoardsScreen() {
   };
 
   /** Centre the list on somebody: you, or whoever was searched for. */
-  const centreOn = async (id: string, name: string) => {
+  const centerOn = async (id: string, name: string) => {
     setBusy(true);
     try {
       const w = await loadBoardWindow(tab, friends, { around: id, limit: 7 });
@@ -257,7 +257,7 @@ export function BoardsScreen() {
         // note below says whose window this is.
         setQuery('');
         setHints([]);
-        await centreOn(r.userId, r.name!);
+        await centerOn(r.userId, r.name!);
       }
     } catch {
       setFound('Could not search just now.');
@@ -560,7 +560,7 @@ export function BoardsScreen() {
                     setQuery('');
                     setHints([]);
                     if (h.rank === null) setFound(`${h.name} has not played this one.`);
-                    else centreOn(h.userId, h.name);
+                    else centerOn(h.userId, h.name);
                   }}
                   style={({ pressed }) => [styles.hintRow, { opacity: pressed ? 0.6 : 1 }]}
                 >

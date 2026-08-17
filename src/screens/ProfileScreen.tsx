@@ -178,7 +178,7 @@ export function ProfileScreen({
         <Row label="Profile & sign in" detail="Your name, and an email to keep your streak" onPress={onAccount} />
         <Row
           label="Avatar"
-          detail={avatar ? 'Change your character or colour' : 'Pick a character and a colour'}
+          detail={avatar ? 'Change your character or color' : 'Pick a character and a color'}
           tag={avatar ? undefined : 'NEW'}
           onPress={onAvatar}
         />

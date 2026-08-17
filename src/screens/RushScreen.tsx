@@ -315,7 +315,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
               </View>
             </View>
           ) : state.paused || countdown !== null ? (
-            <View style={styles.centre}>
+            <View style={styles.center}>
               <Text style={[styles.bigScore, { color: colors.text }]}>{countdown ?? '❙❙'}</Text>
               <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>
                 {countdown !== null ? 'RESUMING' : 'CLOCK STOPPED'}
@@ -340,7 +340,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             </View>
           ) : over ? (
             <ScrollView
-              contentContainerStyle={styles.centre}
+              contentContainerStyle={styles.center}
               showsVerticalScrollIndicator={false}
             >
               {/* The score is the headline. "Time" was the largest thing on the
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   clock: { fontSize: 22, fontFamily: fonts.extraBold, letterSpacing: 1 },
   // flexGrow rather than flex: as a scroll content container it has to be free
   // to grow past the viewport now that the rules sit under the result.
-  centre: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', gap: 12, paddingBottom: 24 },
+  center: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', gap: 12, paddingBottom: 24 },
   // The rules range against the margin; everything above them is centred, and
   // alignItems would otherwise shrink each paragraph to its own width.
   rulesWrap: { alignSelf: 'stretch', marginTop: 10 },

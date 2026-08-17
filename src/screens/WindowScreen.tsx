@@ -68,7 +68,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
-  const [centre, setCentre] = useState('');
+  const [center, setCenter] = useState('');
   const [focused, setFocused] = useState(false);
   const [rules, setRules] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -144,7 +144,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
   // of the range, which can only ever narrow it - and a narrower window scores
   // more, so the edge case pays rather than punishes.
   const span = (() => {
-    const c = parseInt(centre, 10);
+    const c = parseInt(center, 10);
     if (!c || c < 1 || c > 1000) return null;
     const lo = Math.max(1, c - spread);
     const hi = Math.min(1000, c + spread);
@@ -302,9 +302,9 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
                       { color: colors.text },
                       Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null,
                     ]}
-                    value={centre}
+                    value={center}
                     onChangeText={(t) => {
-                      setCentre(t.replace(/[^0-9]/g, '').slice(0, 4));
+                      setCenter(t.replace(/[^0-9]/g, '').slice(0, 4));
                       if (note) setNote(null);
                     }}
                     onFocus={() => setFocused(true)}
@@ -316,7 +316,7 @@ export function WindowScreen({ onExit }: { onExit: () => void }) {
                     inputMode="numeric"
                     maxLength={4}
                   />
-                  {!centre && (
+                  {!center && (
                     <View
                       pointerEvents="none"
                       style={[StyleSheet.absoluteFill, styles.placeholderWrap]}

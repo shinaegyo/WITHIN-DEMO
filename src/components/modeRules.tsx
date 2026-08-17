@@ -120,20 +120,20 @@ export function rushRules(): React.ReactNode[] {
         rows={[
           ['3:00', 'on the clock', 'once a day'],
           ['∞', 'guesses', 'no limit'],
-          ['0', 'clues', 'colours only'],
+          ['0', 'clues', 'colors only'],
           ['15 XP', 'a number', 'found'],
         ]}
       />
     </>,
 
     <>
-      <H>Reading the colours</H>
+      <H>Reading the colors</H>
       <P first>
         No clues, and no limit on guesses — the clock is the only thing you spend.
       </P>
       <P>
-        The colours work as they do everywhere else: blue means aim higher, red means lower, and the
-        stronger the colour the closer you are.
+        The colors work as they do everywhere else: blue means aim higher, red means lower, and the
+        stronger the color the closer you are.
       </P>
     </>,
 
@@ -155,7 +155,7 @@ export function rushRules(): React.ReactNode[] {
       <P first>Equal scores break on guesses used.</P>
       <P>
         Two people who both found seven are separated by who spent fewer guesses getting there,
-        because reading the colours quickly is the whole skill of the mode.
+        because reading the colors quickly is the whole skill of the mode.
       </P>
     </>,
   ];
@@ -166,8 +166,8 @@ export function windowRules(): React.ReactNode[] {
     <>
       <H>Three free guesses</H>
       <P first>
-        Three free guesses, answered with the same colours as everywhere else: blue means aim
-        higher, red means lower, and the stronger the colour the closer you are. They cost nothing
+        Three free guesses, answered with the same colors as everywhere else: blue means aim
+        higher, red means lower, and the stronger the color the closer you are. They cost nothing
         and none of them ends the round.
       </P>
     </>,

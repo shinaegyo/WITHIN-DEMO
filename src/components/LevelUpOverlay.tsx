@@ -115,12 +115,12 @@ export function LevelUpOverlay({ from, to, needed, onDone }: Props) {
 
         <View style={styles.numbers}>
           <Animated.View
-            style={[StyleSheet.absoluteFill, styles.centre, { opacity: oldOpacity, transform: [{ translateY: oldY }] }]}
+            style={[StyleSheet.absoluteFill, styles.center, { opacity: oldOpacity, transform: [{ translateY: oldY }] }]}
           >
             <Text style={[styles.number, { color: colors.textMuted }]}>{from}</Text>
           </Animated.View>
           <Animated.View
-            style={[styles.centre, { opacity: newOpacity, transform: [{ translateY: newY }] }]}
+            style={[styles.center, { opacity: newOpacity, transform: [{ translateY: newY }] }]}
           >
             <Text style={[styles.number, { color: colors.text }]}>{to}</Text>
           </Animated.View>
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   card: { alignSelf: 'stretch', alignItems: 'center', paddingHorizontal: 44, gap: 10 },
   title: { fontSize: 12, fontFamily: fonts.bold, letterSpacing: 3, marginTop: 6 },
   numbers: { height: 118, justifyContent: 'center', alignSelf: 'stretch' },
-  centre: { alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center', justifyContent: 'center' },
   number: { fontSize: 104, fontFamily: fonts.extraBold, letterSpacing: -5, lineHeight: 114 },
   track: { height: 8, borderRadius: 4, alignSelf: 'stretch', overflow: 'hidden', marginTop: 4 },
   bar: { height: 8, borderRadius: 4 },
