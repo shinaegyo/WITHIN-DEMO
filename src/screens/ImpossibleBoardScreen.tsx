@@ -150,7 +150,7 @@ export function ImpossibleBoardScreen({
             // part that could not be allowed to move. Two digits is the whole
             // ladder, and 50 is the top.
             <View style={styles.levelWrap}>
-              <Text style={[styles.levelLabel, { color: colors.text }]}>Level</Text>
+              <Text style={[styles.levelLabel, { color: colors.text }]}>LVL</Text>
               <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
             </View>
           )}
@@ -262,16 +262,17 @@ const styles = StyleSheet.create({
   // Baseline rather than centre: the two sizes are far enough apart that
   // centring them left the word floating against the middle of the number.
   levelWrap: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
-  // The number's size and the number's colour, two weights lighter.
+  // The number's size, colour and weight. Nothing about it is set apart.
   //
-  // It was muted while it was small, where size and colour said "label"
-  // together. At full size the colour was saying it alone, which split one
-  // phrase into two tones - the eye read "Level" and "37" as separate things
-  // rather than as one reading. Weight is enough to keep the hierarchy.
+  // Every difference tried here read as a different font rather than as a
+  // quieter one: muted split the phrase into two tones, and a lighter weight
+  // beside an extra-bold number looked like two typefaces that had failed to
+  // match. Abbreviating carries the label on its own - LVL is plainly not a
+  // score - so nothing else has to.
   //
   // A separate style from `unit` on purpose: that one still labels the guess
   // count on a topped row, where a small grey caption is exactly right.
-  levelLabel: { fontSize: 17, fontFamily: fonts.semiBold },
+  levelLabel: { fontSize: 17, fontFamily: fonts.extraBold, letterSpacing: 0.3 },
   depth: { fontSize: 17, fontFamily: fonts.extraBold, minWidth: 23, textAlign: 'right' },
   topped: { fontSize: 12.5, fontFamily: fonts.extraBold, letterSpacing: 0.4 },
   unit: { fontSize: 11, fontFamily: fonts.medium },
