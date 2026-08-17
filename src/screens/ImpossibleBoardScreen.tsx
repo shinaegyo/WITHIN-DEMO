@@ -150,7 +150,7 @@ export function ImpossibleBoardScreen({
             // part that could not be allowed to move. Two digits is the whole
             // ladder, and 50 is the top.
             <View style={styles.levelWrap}>
-              <Text style={[styles.levelLabel, { color: colors.textMuted }]}>Level</Text>
+              <Text style={[styles.levelLabel, { color: colors.text }]}>Level</Text>
               <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
             </View>
           )}
@@ -262,11 +262,15 @@ const styles = StyleSheet.create({
   // Baseline rather than centre: the two sizes are far enough apart that
   // centring them left the word floating against the middle of the number.
   levelWrap: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
-  // Set at the number's size rather than a caption's. It carries its own style
-  // - muted, and two weights lighter - so it still reads as the label and not
-  // as part of the score, without being shrunk to do it. A separate style from
-  // `unit` on purpose: that one still labels the guess count on a topped row,
-  // where a caption is exactly what is wanted.
+  // The number's size and the number's colour, two weights lighter.
+  //
+  // It was muted while it was small, where size and colour said "label"
+  // together. At full size the colour was saying it alone, which split one
+  // phrase into two tones - the eye read "Level" and "37" as separate things
+  // rather than as one reading. Weight is enough to keep the hierarchy.
+  //
+  // A separate style from `unit` on purpose: that one still labels the guess
+  // count on a topped row, where a small grey caption is exactly right.
   levelLabel: { fontSize: 17, fontFamily: fonts.semiBold },
   depth: { fontSize: 17, fontFamily: fonts.extraBold, minWidth: 23, textAlign: 'right' },
   topped: { fontSize: 12.5, fontFamily: fonts.extraBold, letterSpacing: 0.4 },
