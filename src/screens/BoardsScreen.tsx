@@ -134,16 +134,20 @@ interface Row {
   crown?: boolean;
 }
 
-const TABS: { key: Board; label: string; note: string }[] = [
+// A tab is a label. The line that used to sit under it explained a rule
+// nobody had asked about yet, on a screen somebody opened to see where they
+// came - and the sheet behind the header explains both boards properly for
+// anyone who does ask.
+const TABS: { key: Board; label: string }[] = [
   // The columns are explained under the board rather than above it: nothing
   // should stand between opening this tab and seeing the standings, and the
   // question only occurs to somebody who has already looked at the rows.
-  { key: 'today', label: 'Today', note: 'Today’s three rounds, finished days only.' },
+  { key: 'today', label: 'Today' },
   // One line each. The reasoning behind a board - why a season resets, what a
   // lifetime total is for - moved into the sheet with everything else, because
   // two lines of explanation above a leaderboard is read once and then skipped
   // forever.
-  { key: 'season', label: 'Season', note: 'This month’s points. Resets on the 1st.' },
+  { key: 'season', label: 'Season' },
 ];
 
 export function BoardsScreen() {
@@ -333,7 +337,6 @@ export function BoardsScreen() {
   }, [tab, rows, load]);
 
   const list = rows[tab];
-  const note = TABS.find((t) => t.key === tab)!.note;
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.background }]}>
@@ -409,7 +412,6 @@ export function BoardsScreen() {
         ))}
       </View>
 
-      <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>
 
       {/* Your day, before the podium.
           A position is the wrong instrument once there are thousands of
@@ -584,7 +586,9 @@ export function BoardsScreen() {
           <View style={styles.head}>
             <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
             {tab === 'season' && (
-              <Text style={[styles.headSub, { color: colors.textMuted }]}>LEAGUE</Text>
+              <Text style={[styles.headLeague, { color: colors.textMuted }]} numberOfLines={1}>
+                LEAGUE
+              </Text>
             )}
           </View>
           {!found && list.map((e) => (
@@ -625,7 +629,11 @@ export function BoardsScreen() {
                   they are sorted in. The other way round you read what settles
                   a tie before you read the thing being tied. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
-              {!!e.league && <LeagueBadge league={e.league} size={18} />}
+              {!!e.league && (
+                <View style={styles.leagueCell}>
+                  <LeagueBadge league={e.league} size={18} />
+                </View>
+              )}
               {!!e.sub && (
                 <Text style={[styles.sub, { color: e.subInk ?? colors.textMuted }]}>{e.sub}</Text>
               )}
@@ -657,7 +665,11 @@ export function BoardsScreen() {
                   block was written separately and inherited the order the
                   podium had before it was swapped. */}
               <Text style={[styles.value, { color: colors.text }]}>{e.value}</Text>
-              {!!e.league && <LeagueBadge league={e.league} size={18} />}
+              {!!e.league && (
+                <View style={styles.leagueCell}>
+                  <LeagueBadge league={e.league} size={18} />
+                </View>
+              )}
               {!!e.sub && (
                 <Text style={[styles.sub, { color: e.subInk ?? colors.textMuted }]}>{e.sub}</Text>
               )}
@@ -791,6 +803,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     marginHorizontal: 20,
+    // The line under the tabs used to hold this off them. With the line gone
+    // the card sat against the tab row with nothing between the two.
+    marginTop: 14,
     marginBottom: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -853,6 +868,10 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   headSub: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
+  /** The league column: a shape centred under its label rather than a number
+      pushed against the right edge. */
+  headLeague: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 52, textAlign: 'center' },
+  leagueCell: { width: 52, alignItems: 'center' },
   headValue: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 46, textAlign: 'right' },
   sheetLead: { fontSize: 15, fontFamily: fonts.extraBold, lineHeight: 21 },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
