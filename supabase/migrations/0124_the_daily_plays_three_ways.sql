@@ -1,6 +1,7 @@
 -- The daily's three rounds, played. Part two of the rebuild.
 --
--- STILL DO NOT RUN. The client half has to ship with it.
+-- Runs immediately after 0123, and only once the three-round client is live.
+-- On its own it makes every round demand a call the old client cannot make.
 --
 -- 0123 laid down the columns and the scoring. This is the game: making a game,
 -- calling your shot, choosing a clue, guessing, betting, and reading the state

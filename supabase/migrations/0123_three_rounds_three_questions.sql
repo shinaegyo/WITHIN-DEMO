@@ -1,8 +1,11 @@
 -- The daily becomes three different questions.
 --
--- DO NOT RUN THIS UNTIL THE CLIENT SHIPS. It changes what game_state returns
--- and what submit_guess expects; an app built before it will not understand the
--- answers. The build is staged deliberately - this is half of it.
+-- RUN ORDER: deploy the client first, then this, then 0124, then 0127. It
+-- changes what game_state returns and what submit_guess expects, and an app
+-- built before the three-round client cannot read the answers - which is how
+-- this got run early once, and made the daily unplayable until 0125 undid it.
+-- The client that ships now reads a missing round kind as the old daily, so
+-- deploying it ahead of this is safe in a way the reverse has never been.
 --
 -- Three rounds of the same search was the game's oldest compromise: one round
 -- was over in seven seconds, so it became three, and three identical searches
