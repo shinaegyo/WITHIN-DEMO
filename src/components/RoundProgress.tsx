@@ -129,7 +129,9 @@ export function RoundProgress({
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 6 },
+  // flexShrink 0: the centred sheet beside it is flex 1, and a sibling with
+  // no floor gets squeezed to nothing by it.
+  wrap: { gap: 6, flexShrink: 0 },
   headRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   metaRow: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
   clock: { fontSize: 12, fontFamily: fonts.bold, fontVariant: ['tabular-nums'] },

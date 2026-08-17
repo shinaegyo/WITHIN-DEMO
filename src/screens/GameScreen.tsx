@@ -34,7 +34,7 @@ import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/so
 const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; lede: string }> = {
   cold: {
     kind: 'COLD',
-    lede: 'No clue. Colors only.',
+    lede: 'No clue. Colors only — blue means aim higher, red means lower.',
   },
   clue: {
     kind: 'THE CLUE',
@@ -42,7 +42,7 @@ const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; lede: string }> = {
   },
   bet: {
     kind: 'THE BET',
-    lede: 'Three free guesses, then a range.',
+    lede: 'Three free guesses that cost nothing and end nothing. Then commit to a range.',
   },
 };
 
@@ -313,8 +313,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           {intro && (
             <Text
               style={[styles.introLede, { color: colors.textMuted }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
+              numberOfLines={2}
             >
               {intro.lede}
             </Text>
