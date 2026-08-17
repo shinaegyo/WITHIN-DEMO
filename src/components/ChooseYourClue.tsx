@@ -20,8 +20,19 @@ import { playTap } from '../utils/sound';
 
 export type ClueKind = 'digits' | 'factors' | 'where';
 
-/** Six attempts, and what finding it on each one pays. */
-export const CLUE_PAYS = [16, 14, 12, 10, 8, 6];
+/**
+ * Six guesses, and what finding it on each one pays.
+ *
+ * Where-it-sits fences the number between two round hundreds: the least work
+ * and the most immediately useful, so it tops out lower. The other two are
+ * scattered through the range and take working out, and they keep the full
+ * ladder. That is what makes the choice a decision rather than a preference.
+ */
+export const CLUE_PAYS: Record<ClueKind, number[]> = {
+  digits: [16, 14, 12, 10, 8, 6],
+  factors: [16, 14, 12, 10, 8, 6],
+  where: [12, 10, 9, 8, 7, 6],
+};
 
 const KINDS: { kind: ClueKind; title: string; detail: string }[] = [
   {
@@ -74,7 +85,14 @@ export function ChooseYourClue({
               },
             ]}
           >
-            <Text style={[styles.title, { color: colors.text }]}>{k.title}</Text>
+            <View style={styles.head}>
+              <Text style={[styles.title, { color: colors.text }]}>{k.title}</Text>
+              {/* The ceiling, said on the card. The choice is only a decision
+                  if the price of the easy one is visible before it is made. */}
+              <Text style={[styles.upTo, { color: colors.textMuted }]}>
+                up to {CLUE_PAYS[k.kind][0]}
+              </Text>
+            </View>
             <Text style={[styles.detail, { color: colors.textMuted }]}>{k.detail}</Text>
           </Pressable>
         ))}
@@ -89,6 +107,8 @@ const styles = StyleSheet.create({
   lede: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, marginTop: 6 },
   choices: { gap: 9, marginTop: 12 },
   choice: { borderWidth: 1.5, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 16 },
-  title: { fontSize: 15.5, fontFamily: fonts.extraBold },
+  head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
+  title: { fontSize: 15.5, fontFamily: fonts.extraBold, flexShrink: 1 },
+  upTo: { fontSize: 11.5, fontFamily: fonts.bold },
   detail: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 3, lineHeight: 17 },
 });

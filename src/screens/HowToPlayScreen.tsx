@@ -123,8 +123,9 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
       <Text style={[styles.h2, { color: colors.text }]}>Round two — choose your clue</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
         One clue, and you pick what kind: how the number is written, what it is made of, or where
-        it sits. You only find out what it says after you choose. Six guesses, paying 16 down to 6,
-        and 3 if it gets away.
+        it sits. You only find out what it says after you choose. Six guesses, and the clue you
+        pick sets the ceiling: digits and factors pay up to 16, where-it-sits up to 12 because it
+        is the easiest to use. A round that gets away pays 3.
       </Text>
     </>,
 

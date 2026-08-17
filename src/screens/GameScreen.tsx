@@ -225,7 +225,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
       const say = (n: number, pay: number) =>
         `${n} ${n === 1 ? 'guess' : 'guesses'} left · worth ${pay} points`;
       if (round.kind === 'clue') {
-        return say(round.attemptsAllowed - used, CLUE_PAYS[used] ?? FLOOR_PAY);
+        const table = round.clueKind ? CLUE_PAYS[round.clueKind] : CLUE_PAYS.digits;
+        return say(round.attemptsAllowed - used, table[used] ?? FLOOR_PAY);
       }
       if (round.called === null) return null;
       // Past the call, what is left to play for is the consolation - saying the
