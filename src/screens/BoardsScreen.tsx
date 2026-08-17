@@ -271,6 +271,23 @@ export function BoardsScreen() {
   const [allTime, setAllTime] = useState<AllTimeLeaderboard | null>(null);
   const [season, setSeason] = useState<SeasonLeaderboard | null>(null);
 
+  /**
+   * Whether the list already holds everybody.
+
+   * Null when the total is not known yet, which reads as "maybe more" - the
+   * button appearing for a moment is a smaller fault than a board that cannot
+   * be paged because a count had not arrived.
+   */
+  const totalPlayers =
+    tab === 'today' ? today?.totalPlayers
+    : tab === 'season' ? season?.totalPlayers
+    : allTime?.totalPlayers;
+  const shownAll =
+    totalPlayers === undefined
+      ? false
+      : (rows[tab]?.length ?? 0) + more.length >= Math.min(totalPlayers, 500);
+
+
   const load = useCallback(
     async (which: Board) => {
       setError(null);
@@ -665,7 +682,10 @@ export function BoardsScreen() {
             </Pressable>
           ))}
 
-          {!ended && (
+          {/* Only when there is more. The button used to show until a page
+              came back empty, so a board with two players on it offered to
+              fetch a third. */}
+          {!ended && shownAll === false && (
             <Pressable
               onPress={() => { playTap(); showMore(); }}
               disabled={busy}

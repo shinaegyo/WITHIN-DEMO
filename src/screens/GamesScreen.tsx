@@ -5,6 +5,7 @@ import { ScreenTitle } from '../components/ScreenTitle';
 import { HomeStatus, loadHomeStatus } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { useTrack } from '../utils/useTrack';
+import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
@@ -36,6 +37,11 @@ export function GamesScreen({
   // arriving back from Rush, which is the worst of both.
   useTrack('game');
   const { colors } = useTheme();
+  // The daily is the game; these are what it unlocks. Reaching them without
+  // playing it - the Games tab is one swipe from Home - let somebody spend
+  // their evening on Rush and never see the thing everybody else played.
+  const { game } = useDailyGameContext();
+  const locked = !game || game.dayStatus === 'playing';
   const [status, setStatus] = useState<HomeStatus | null>(null);
 
   const load = useCallback(() => {
@@ -126,9 +132,16 @@ export function GamesScreen({
           standings, and finishing is exactly when somebody wants to see where
           they landed. The status line already says it has been played; a row
           that refuses to open takes the result away with the game. */}
+      {locked && (
+        <Text style={[styles.locked, { color: colors.textMuted }]}>
+          Play today's three rounds first. These open when the daily is done.
+        </Text>
+      )}
+
       {rows.map((r) => (
         <Pressable
           key={r.label}
+          disabled={locked}
           onPress={() => {
             playTap();
             r.onPress();
@@ -136,9 +149,10 @@ export function GamesScreen({
           style={({ pressed }) => [
             styles.row,
             {
-              backgroundColor: pressed ? colors.surfaceAlt : colors.surface,
+              backgroundColor: pressed && !locked ? colors.surfaceAlt : colors.surface,
               borderColor: colors.border,
             },
+            locked && styles.dim,
           ]}
         >
           <View style={styles.main}>
@@ -158,7 +172,7 @@ export function GamesScreen({
           >
             {r.status}
           </Text>
-          <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>
+          {!locked && <Text style={[styles.arrow, { color: colors.textMuted }]}>›</Text>}
         </Pressable>
       ))}
 
@@ -167,14 +181,16 @@ export function GamesScreen({
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
       <Pressable
-        disabled={practiceLeft === 0}
+        disabled={locked || practiceLeft === 0}
         onPress={() => {
           playTap();
           onPractice();
         }}
         style={({ pressed }) => [
           styles.practice,
-          practiceLeft === 0
+          // Locked and spent look the same, because they are the same to a
+          // thumb: a black button that refuses a press reads as broken.
+          locked || practiceLeft === 0
             ? { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: 1 }
             : { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
         ]}
@@ -182,14 +198,18 @@ export function GamesScreen({
         <Text
           style={[
             styles.practiceText,
-            { color: practiceLeft === 0 ? colors.textMuted : colors.background },
+            { color: locked || practiceLeft === 0 ? colors.textMuted : colors.background },
           ]}
         >
           Practice the Daily
         </Text>
       </Pressable>
       <Text style={[styles.practiceSub, { color: colors.textMuted }]}>
-        {practiceLeft === 0 ? 'All three played today · new numbers at midnight' : practiceLabel}
+        {locked
+          ? 'Opens once you have played the daily'
+          : practiceLeft === 0
+            ? 'All three played today · new numbers at midnight'
+            : practiceLabel}
       </Text>
 
       <Text style={[styles.note, { color: colors.textMuted }]}>
@@ -203,6 +223,8 @@ export function GamesScreen({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   content: { padding: 18, gap: 9 },
+  dim: { opacity: 0.4 },
+  locked: { fontSize: 13, fontFamily: fonts.semiBold, lineHeight: 19, paddingHorizontal: 2 },
   screenTitle: {
     fontSize: 26,
     fontFamily: fonts.extraBold,

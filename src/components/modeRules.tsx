@@ -243,31 +243,20 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
 
     <>
       <H>Checkpoints</H>
-      <P first>
-        Every fifth level is a checkpoint, and so is the first level of every tier — so a fall can
-        never cost you the tier you climbed into.
-      </P>
-      <P>Clear level 27 and stop, and tomorrow begins at 25.</P>
-      <P>
-        It is also where you land at zero health. In Orbit there are only two, at 41 and 46: the
-        last stretch is the one place a fall costs more than four numbers.
-      </P>
+      <P first>Every fifth level is a checkpoint, and so is the first level of a tier.</P>
+      <P>You never start further back than your last one. Clear level 27 and stop, and tomorrow
+        begins at 25.</P>
+      <P>It is also where you land at zero health.</P>
     </>,
 
     <>
       <H>One climb a day</H>
-      <P first>
-        Spent on your first guess rather than by opening it, so looking at the screen never costs
-        you anything.
-      </P>
+      <P first>Lose all your health and that is the day. Come back tomorrow at 100%.</P>
       <P>
-        Health goes back to 100% every day — whatever you had left when you stopped, the next day
-        starts you full.
+        The day is spent on your first guess, not by opening the screen — so you can always look at
+        where you are.
       </P>
-      <P>
-        The week's board keeps the deepest level you have ever reached, so a climb that ends badly
-        still counts for everything it got through.
-      </P>
+      <P>The board keeps the deepest level you reached, even on a day that ends in a fall.</P>
     </>,
 
     <>
