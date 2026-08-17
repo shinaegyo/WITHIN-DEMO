@@ -3,6 +3,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollVie
 import { Text } from '../components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Wordmark } from '../components/Wordmark';
+import { Mark } from '../components/Mark';
 import { confirmLinkEmail, confirmSignIn, setUsername, startLinkEmail, startSignIn } from '../lib/auth';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -108,7 +109,13 @@ export function OnboardingScreen({
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
-            <Wordmark size={44} color={colors.text} />
+            {/* The mark travels with the name. A stranger's first screen is
+                where the two arrows closing on a point have the most work to
+                do - the word alone says nothing about what the game is. */}
+            <View style={styles.brandRow}>
+              <Mark size={34} ink={colors.text} />
+              <Wordmark size={44} color={colors.text} />
+            </View>
             <Text style={[styles.tagline, { color: colors.textMuted }]}>Three rounds. One number each.</Text>
           </View>
 
@@ -297,6 +304,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: 28, paddingTop: 48, flexGrow: 1 },
   brand: { alignItems: 'center', marginBottom: 44 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tagline: { fontSize: 13, fontFamily: fonts.medium, marginTop: 4 },
   stepLabel: { fontSize: 10, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
   bar: { flexDirection: 'row', gap: 6, marginBottom: 30 },

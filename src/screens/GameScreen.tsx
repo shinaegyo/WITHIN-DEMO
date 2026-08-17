@@ -20,7 +20,7 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playLose, playTap, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
-import { clockText, dayStart, markDayStart } from '../utils/dayClock';
+import { clearDayStart, clockText, dayStart, markDayStart } from '../utils/dayClock';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
 
@@ -110,13 +110,21 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   useEffect(() => {
     if (!puzzleDate) return;
     let alive = true;
+    // A day with no guesses in it has not started. The record is kept per date
+    // rather than per player, so signing in as somebody else inherited their
+    // clock - fifteen minutes elapsed on a board with nothing on it.
+    if (guessesToday === 0) {
+      clearDayStart(puzzleDate);
+      setStartedAt(null);
+      return;
+    }
     dayStart(puzzleDate).then((t) => {
       if (alive) setStartedAt(t);
     });
     return () => {
       alive = false;
     };
-  }, [puzzleDate]);
+  }, [puzzleDate, guessesToday]);
 
   // The first guess starts it, wherever that guess was made.
   useEffect(() => {

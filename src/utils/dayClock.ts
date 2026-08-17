@@ -25,6 +25,15 @@ export async function dayStart(date: string): Promise<number | null> {
   }
 }
 
+/** A day with no guesses in it has not started, whoever left this behind. */
+export async function clearDayStart(date: string): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(KEY(date));
+  } catch {
+    /* nothing to do about it */
+  }
+}
+
 /** First guess of the day wins; later calls leave the original start alone. */
 export async function markDayStart(date: string): Promise<number> {
   const already = await dayStart(date);

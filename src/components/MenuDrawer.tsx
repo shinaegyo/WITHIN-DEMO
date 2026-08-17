@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
 import { Wordmark } from './Wordmark';
+import { Mark } from './Mark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
@@ -73,7 +74,10 @@ export function MenuDrawer({
             },
           ]}
         >
-          <View style={styles.brand}><Wordmark size={32} color={colors.text} /></View>
+          <View style={styles.brand}>
+            <Mark size={26} ink={colors.text} />
+            <Wordmark size={32} color={colors.text} />
+          </View>
 
           {items.map((item) => (
             <Pressable
@@ -137,9 +141,9 @@ const styles = StyleSheet.create({
     elevation: 16,
   },
   brand: {
-    fontSize: 32,
-    fontFamily: fonts.logo,
-    letterSpacing: -1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     paddingHorizontal: 14,
     marginBottom: 18,
   },
