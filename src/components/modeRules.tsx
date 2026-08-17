@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
 import { ruleStyles } from './PagedRules';
 import { ARENAS, SUMMIT } from '../theme/arenas';
+import { TierGlyph, Tier } from './TierGlyph';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -187,7 +188,7 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <P first>
         You start every day at 100%. Running out of attempts on a number costs health, not the
         climb — the same number is waiting and you try it again. What it costs depends on how high
-        you are: 20% on the Ground, rising a point a tier to 24% in Orbit. Solve one in three guesses or fewer and you take
+        you are: 21% on the Ground, rising a point a tier to 25% in Orbit. Solve one in three guesses or fewer and you take
         10% back, wherever you are. A fall always costs more than a clean solve returns, so a day
         is about four or five misses long.
       </P>
@@ -213,9 +214,9 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>The five tiers</H>
       <P first>
-        Fifteen levels each. Six guesses a number up to level 45, five above it — and that one step
-        is most of the difficulty. Every number cleared pays 20 XP toward your level, and reaching a
-        new tier pays 50.
+        Fifteen levels each. Five guesses a number, all the way up — what changes is what a miss
+        costs and whether a clue arrives at all. Every number cleared pays 20 XP toward your level,
+        and reaching a new tier pays 50.
       </P>
       <TierTable />
     </>,
@@ -233,18 +234,28 @@ function TierTable() {
     <View style={[styles.table, { borderColor: colors.border }]}>
       <View style={styles.row}>
         <View style={styles.swatch} />
-        <Text style={[styles.tierName, { color: colors.textMuted }]}>TIER</Text>
-        <Text style={[styles.rowMid, { color: colors.textMuted }]}>LEVELS</Text>
-        <Text style={[styles.rowCol, { color: colors.textMuted }]}>TRIES</Text>
-        <Text style={[styles.tierFall, { color: colors.textMuted }]}>FALL</Text>
+        <Text style={[styles.tierName, styles.head, { color: colors.textMuted }]}>TIER</Text>
+        <Text style={[styles.rowMid, styles.head, { color: colors.textMuted }]}>LEVELS</Text>
+        <Text style={[styles.rowCol, styles.head, { color: colors.textMuted }]}>TRIES</Text>
+        <Text style={[styles.tierFall, styles.head, { color: colors.textMuted }]}>FALL</Text>
       </View>
       {ARENAS.map((a, i) => {
         const next = ARENAS[i + 1];
         return (
           <View key={a.key} style={styles.row}>
-            <View style={[styles.swatch, { backgroundColor: a.background }]} />
+            {/* The glyph rather than a colour chip, because the glyph is what
+                a player meets on the board - three of the five arena colours
+                are the same pale blue at this size, so a swatch column taught
+                nothing and this one is a legend. */}
+            {/* The glyph rather than a colour chip: it is what a player meets
+                on the board, so the table doubles as its legend. The colour is
+                the arena's own, which is the one place the five are shown
+                together and can actually be told apart. */}
+            <View style={styles.swatch}>
+              <TierGlyph tier={a.key as Tier} color={a.accent} size={20} />
+            </View>
             <Text style={[styles.tierName, { color: colors.text }]}>{a.name}</Text>
-            <Text style={[styles.rowMid, { color: colors.textMuted }]}>
+            <Text style={[styles.rowMid, { color: colors.text }]}>
               {a.from}–{next ? next.from - 1 : SUMMIT}
             </Text>
             <Text style={[styles.rowCol, { color: colors.text }]}>{a.attempts}</Text>
@@ -260,12 +271,16 @@ const styles = StyleSheet.create({
   table: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 14 },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, gap: 10 },
   rowKey: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 62 },
-  rowMid: { flex: 1, fontSize: 13.5, fontFamily: fonts.medium, paddingRight: 8 },
-  rowCol: { width: 46, textAlign: 'right', fontSize: 13.5, fontFamily: fonts.bold },
+  rowMid: { flex: 1, fontSize: 14.5, fontFamily: fonts.extraBold, paddingRight: 8 },
+  rowCol: { width: 46, textAlign: 'right', fontSize: 14.5, fontFamily: fonts.extraBold },
   rowEnd: { fontSize: 14.5, fontFamily: fonts.extraBold, textAlign: 'right' },
   // The tier table's own last column, because its rows are short and want
   // aligning. Everything else in a rules table is a phrase.
   tierFall: { width: 54, textAlign: 'right', fontSize: 14.5, fontFamily: fonts.extraBold },
-  swatch: { width: 14, height: 14, borderRadius: 4 },
+  swatch: { width: 22, alignItems: 'center', justifyContent: 'center' },
   tierName: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 96 },
+  // The header row is the same shape as the rows under it, only quieter -
+  // four columns that each announced themselves differently read as four
+  // separate tables sharing a border.
+  head: { fontSize: 11, letterSpacing: 1 },
 });

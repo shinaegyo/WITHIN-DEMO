@@ -67,20 +67,20 @@ export interface Arena {
 
 export const ARENAS: Arena[] = [
   {
-    key: 'ground', name: 'Ground', from: 1, attempts: 6, fall: 20, clueFrom: 1,
+    key: 'ground', name: 'Ground', from: 1, attempts: 5, fall: 21, clueFrom: 1,
     track: 'climbGround',
     background: '#EDE7DC', backgroundDeep: '#DFD7C8', surface: '#FBF9F5',
     text: '#2A251C', muted: '#6F6757', accent: '#8A7A5E',
   },
   {
-    key: 'sky', name: 'Sky', from: 16, attempts: 6, fall: 21, clueFrom: 1,
+    key: 'sky', name: 'Sky', from: 16, attempts: 5, fall: 22, clueFrom: 1,
     track: 'climbSky',
     background: '#C4DAF2', backgroundDeep: '#A6C6E8', surface: '#F0F6FD',
     text: '#17293A', muted: '#4A6884', accent: '#2F6BA8',
     below: '#2F5BC4',
   },
   {
-    key: 'strato', name: 'Stratosphere', from: 31, attempts: 6, fall: 22, clueFrom: 0,
+    key: 'strato', name: 'Stratosphere', from: 31, attempts: 5, fall: 23, clueFrom: 0,
     track: 'climbStrato',
     background: '#2A3A72', backgroundDeep: '#1A2450', surface: '#16204A',
     text: '#EDF1FC', muted: '#9FAEDC', accent: '#7F9DEB',
@@ -89,14 +89,14 @@ export const ARENAS: Arena[] = [
   {
     // Between the indigo and the black: the last of the colour, and the tier
     // where a fall starts costing nearly half a day.
-    key: 'thin', name: 'Thin air', from: 46, attempts: 6, fall: 23, clueFrom: 0,
+    key: 'thin', name: 'Thin air', from: 46, attempts: 5, fall: 24, clueFrom: 0,
     track: 'climbThin',
     background: '#141C40', backgroundDeep: '#0A0F26', surface: '#101838',
     text: '#E7ECFB', muted: '#8B99CC', accent: '#8AA4F2',
     below: '#7EA0FF',
   },
   {
-    key: 'orbit', name: 'Orbit', from: 61, attempts: 5, fall: 24, clueFrom: 0,
+    key: 'orbit', name: 'Orbit', from: 61, attempts: 5, fall: 25, clueFrom: 0,
     track: 'climbOrbit',
     background: '#080A12', backgroundDeep: '#020306', surface: '#141A2B',
     text: '#EAEDF8', muted: '#7C86A8', accent: '#8FA6FF',

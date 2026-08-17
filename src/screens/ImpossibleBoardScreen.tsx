@@ -17,7 +17,7 @@ import {
   messageFor,
   startEndlessSession,
 } from '../lib/api';
-import { ARENAS, SUMMIT } from '../theme/arenas';
+import { ARENAS, SUMMIT, arenaFor } from '../theme/arenas';
 import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
@@ -153,14 +153,19 @@ export function ImpossibleBoardScreen({
               number to print - they are at the top, and the mountain says so.
               The guess count that separates two summiters lives on the card
               behind the row, because on the board it sat in the slot every
-              other row uses for a level and read as a level of 228. */}
+              other row uses for a level and read as a level of 228.
+
+              The glyph wears its arena's own colour. Three of the five are
+              close enough to be one colour at this size, so the shape is
+              still what tells the tiers apart - the colour is warmth, not
+              information. */}
           {e.topped ? (
             <View style={styles.value} accessibilityLabel="Topped out">
               <TierGlyph tier="summit" color={colors.accent} size={20} />
             </View>
           ) : (
             <View style={styles.value} accessibilityLabel={`Level ${e.depth}`}>
-              <TierGlyph tier={tierFor(e.depth)} color={colors.textMuted} size={18} />
+              <TierGlyph tier={tierFor(e.depth)} color={arenaFor(e.depth).accent} size={18} />
               <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
             </View>
           )}
