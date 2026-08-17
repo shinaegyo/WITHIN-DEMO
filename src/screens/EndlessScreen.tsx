@@ -48,7 +48,6 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [over, setOver] = useState<
     {
-      answer: number | null;
       /** Health after the fall. */
       health: number;
       /** What the fall cost, which differs by tier: 10% down here, 50% up top. */
@@ -129,7 +128,6 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
         if (res.lostLife) {
           playLose();
           setOver({
-            answer: res.answer,
             health: res.health,
             cost: res.fall,
             sessionOver: res.sessionOver,
@@ -297,17 +295,12 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                     waiting, and that is the whole reason health works. */}
                 {over.sessionOver ? 'OUT OF HEALTH!' : 'YOU TOOK DAMAGE!'}
               </Text>
-              {/* The answer is deliberately absent when the climb continues.
-                  The same number is waiting, so printing it here handed the
-                  retry over for free - the one place in the game where telling
-                  somebody the answer costs them nothing to use.
-
-                  It is still shown when the climb is over, because by then
-                  there is nothing left to spend it on. */}
-              {/* The answer is never printed. It used to be, and paired with
-                  "the same number is waiting" it handed the retry over free -
-                  and on the last card of the day it is simply a number nobody
-                  asked for. */}
+              {/* The answer is never printed, and as of 0151 it is not sent
+                  either. It used to be shown here, and paired with "the same
+                  number is waiting" that handed the retry over free; taking it
+                  off the screen left it sitting in the reply body, which is the
+                  same gift to anybody who opens the network tab. Neither half
+                  of the fall notice has the number now. */}
               <Text style={[styles.overBody, { color: arena.muted }]}>
                 {!over.sessionOver
                   ? `That cost ${over.cost}%. Down to ${over.health}% health.`
