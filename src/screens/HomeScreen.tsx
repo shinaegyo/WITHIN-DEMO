@@ -599,7 +599,7 @@ export function HomeScreen({
             <View style={styles.statRow}>
               <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
                 <Text style={[styles.statValue, { color: colors.text }]}>{game.stats.currentStreak}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>DAY STREAK</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>STREAK</Text>
               </View>
               <View style={[styles.stat, { borderColor: colors.border, backgroundColor: colors.surface }]}>
                 <Text style={[styles.statValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>

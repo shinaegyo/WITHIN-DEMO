@@ -142,9 +142,14 @@ export function ProfileScreen({
 
       <View style={styles.stats}>
         {[
-          { label: 'DAY STREAK', value: stats ? `${stats.currentStreak}` : '—' },
+          // Streak, points, and how close the guesses land. A best streak is a
+          // record of a run that is already over, and next to a live one it
+          // mostly reports how long ago the good week was. Average away is the
+          // only number here that says anything about playing well - it is
+          // what separates two players on the same score on the board.
+          { label: 'STREAK', value: stats ? `${stats.currentStreak}` : '—' },
           { label: 'POINTS', value: stats ? `${stats.totalPoints}` : '—' },
-          { label: 'BEST STREAK', value: stats ? `${stats.maxStreak}` : '—' },
+          { label: 'AVG AWAY', value: rank ? `${rank.avgOff}` : '—' },
         ].map((s) => (
           <View key={s.label} style={[styles.stat, { borderColor: colors.border }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>{s.value}</Text>
