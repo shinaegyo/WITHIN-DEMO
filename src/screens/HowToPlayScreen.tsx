@@ -57,8 +57,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       {showTitle && <Text style={[styles.h1, { color: colors.text }]}>How to play</Text>}
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Three numbers between 1 and 1000 are chosen each day. Everyone in the world gets the same
-        three — only the order differs — and you play them one round at a time.
+        Three numbers between 1 and 1000 are chosen each day. Everyone gets the same three, in the
+        same order, and each round asks for them a different way.
       </Text>
     </>,
 

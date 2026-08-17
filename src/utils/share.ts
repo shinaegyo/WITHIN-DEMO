@@ -6,8 +6,9 @@ import { DailyGame } from '../lib/api';
  *
  * A grid of coloured blocks was the obvious thing to copy from Wordle, and it
  * does not survive the trip: five rows of squares arrive in a message as a
- * shape nobody can read, and unlike Wordle's it says almost nothing - round
- * order is per player, so the columns do not even line up between two people.
+ * shape nobody can read, and unlike Wordle's it says almost nothing - the three
+ * rounds now ask three different questions, so a column of blocks would not
+ * even mean the same thing twice within one person's day.
  *
  * What travels is the score and where to play. Nothing here reveals a number or
  * how close a guess was, so it is safe to send before friends have played.

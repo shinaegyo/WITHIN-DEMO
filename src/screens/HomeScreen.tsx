@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { Wordmark } from '../components/Wordmark';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusScreen } from '../components/StatusScreen';
+import { POINTS_EPOCH } from '../game/constants';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -239,6 +240,13 @@ export function HomeScreen({
 
   const finished = game.dayStatus !== 'playing';
   const eliminated = game.dayStatus === 'eliminated';
+  // The same rule the Games tab enforces, for the same reason: the daily is
+  // the game and these are what it unlocks. Home showed them open while the
+  // Games tab refused them, which made the rule read as a bug on whichever
+  // screen you met second. Days before the points start are exempt there and
+  // exempt here - a day that scores toward nothing cannot charge for entry.
+  const beforeScoring = game.puzzleDate < POINTS_EPOCH;
+  const modesLocked = !finished && !beforeScoring;
   const inProgress =
     game.dayStatus === 'playing' && (game.currentRound > 1 || game.round.attemptsUsed > 0);
   // The score leads only once there is one to lead with. Part-way through the
@@ -498,6 +506,12 @@ export function HomeScreen({
                 daily puzzle and does not know there is anything else here. */}
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>MORE GAMES</Text>
 
+            {modesLocked && (
+              <Text style={[styles.suggestion, { color: colors.textMuted }]}>
+                Play today's three rounds first. These open when the daily is done.
+              </Text>
+            )}
+
             {suggestion && (
               <Text style={[styles.suggestion, { color: colors.text }]}>{suggestion}</Text>
             )}
@@ -523,13 +537,17 @@ export function HomeScreen({
                   playing the same numbers. Same destination either way; the
                   board's own Start is what knows there is nothing left. */}
               <Pressable
+                disabled={modesLocked}
                 onPress={() => {
                   playTap();
                   onEndless();
                 }}
                 style={({ pressed }) => [
                   styles.featuredGo,
-                  { backgroundColor: colors.background, opacity: pressed ? 0.8 : 1 },
+                  {
+                    backgroundColor: colors.background,
+                    opacity: modesLocked ? 0.4 : pressed ? 0.8 : 1,
+                  },
                 ]}
               >
                 <Text style={[styles.featuredGoText, { color: colors.text }]}>
@@ -545,13 +563,18 @@ export function HomeScreen({
               {modeTiles.map((t) => (
                 <Pressable
                   key={t.name}
+                  disabled={modesLocked}
                   onPress={() => {
                     playTap();
                     t.go();
                   }}
                   style={({ pressed }) => [
                     styles.tile,
-                    { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 },
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: colors.surface,
+                      opacity: modesLocked ? 0.45 : pressed ? 0.7 : 1,
+                    },
                   ]}
                 >
                   <Text style={[styles.tileName, { color: colors.text }]}>{t.name}</Text>
