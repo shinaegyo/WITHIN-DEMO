@@ -198,7 +198,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     const asksClue = live && round.kind === 'clue' && round.clue1 === null;
     const asksRange = live && round.kind === 'bet' && round.attemptsUsed >= round.attemptsAllowed;
     const asking = asksCall || asksClue || asksRange;
-    const centreSheet = asking && round.guesses.length === 0;
     const intro = round.kind ? INTRO[round.kind] : null;
     const used = round.attemptsUsed;
 
@@ -262,19 +261,14 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             showScore={false}
           />
 
-          {/* A sheet with an empty board under it sat at the top of a screen
-              of nothing. Centred in the space it actually has, it reads as the
-              screen rather than as something that failed to load the rest.
-              Round three keeps its sheet at the top, because the three free
-              guesses are underneath it and they are worth reading. */}
+          {/* Not wrapped in a flex-1 centring view: that took the round
+              eyebrow and the progress rail down to zero height with it, and a
+              round that does not say which round it is costs more than the
+              empty space below a sheet was worth. */}
           {asksCall ? (
-            <View style={centreSheet ? styles.sheetWrap : undefined}>
-              <CallYourShot onCall={onCall} busy={deciding} />
-            </View>
+            <CallYourShot onCall={onCall} busy={deciding} />
           ) : asksClue ? (
-            <View style={centreSheet ? styles.sheetWrap : undefined}>
-              <ChooseYourClue onChoose={chooseClue} busy={deciding} />
-            </View>
+            <ChooseYourClue onChoose={chooseClue} busy={deciding} />
           ) : asksRange ? (
             <CommitRange onCommit={commitRange} busy={deciding} />
           ) : (
@@ -361,7 +355,6 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   boardWrap: { flex: 1 },
-  sheetWrap: { flex: 1, justifyContent: 'center' },
   /** The round's terms, stated once under its name. */
   introLede: { fontSize: 12.5, fontFamily: fonts.medium, textAlign: 'center', marginBottom: 20 },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
