@@ -175,23 +175,21 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <H>The Impossible Climb</H>
       <P first>
         Seventy-five numbers, one after another, and everyone plays the same sequence this week —
-        so how far you got compares directly. It resets on Monday. The Ground gives you no clue at
-        all: the colours are the whole of it, and learning to read them is what the first fifteen
-        levels are for. Above that a clue arrives with every number, and it tells you less the
-        higher you go. Clear level 75 and you have topped out, and everyone who finishes is ranked
-        on guesses used.
+        so how far you got compares directly. It resets on Monday. The Ground and the Sky give you
+        one clue per number, and a weak one. From Stratosphere up there are none, and in Orbit a
+        guess drops from six to five — the step that ends most weeks. Clear level 75 and you have
+        topped out, and everyone who finishes is ranked on guesses used. Almost nobody will.
       </P>
     </>,
 
     <>
       <H>Health</H>
       <P first>
-        Health carries across the whole week, and each morning gives you 30% back. Running out of
-        attempts on a number costs health, not the climb — the same number is waiting and you try
-        it again. What it costs depends on how high you are: 10% on the Ground, 50% in Orbit. Solve
-        one in three guesses or fewer and you take half of that back. A fall always costs more than
-        a clean solve returns, so the low tiers are where you bank what the top will take off
-        you.
+        You start every day at 100%. Running out of attempts on a number costs health, not the
+        climb — the same number is waiting and you try it again. What it costs depends on how high
+        you are: 20% on the Ground, 22% everywhere above it. Solve one in three guesses or fewer and you take
+        10% back, wherever you are. A fall always costs more than a clean solve returns, so a day
+        is about four or five misses long.
       </P>
     </>,
 
@@ -207,16 +205,17 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>Running out</H>
       <P first>
-        Lose all your health and that is the day. Come back tomorrow with 30% — not a full bar, so
-        a bad day follows you into the next one. Nothing limits how long you play.
+        Lose all your health and that is the day. Come back tomorrow at 100%. Nothing limits how
+        long you play, and nothing carries over — every day is a clean attempt.
       </P>
     </>,
 
     <>
       <H>The five tiers</H>
       <P first>
-        Fifteen levels each. Higher means fewer attempts, a weaker clue and a costlier fall. Every
-        number cleared pays 20 XP toward your level, and reaching a new tier pays 50.
+        Fifteen levels each. Six guesses a number up to level 45, five above it — and that one step
+        is most of the difficulty. Every number cleared pays 20 XP toward your level, and reaching a
+        new tier pays 50.
       </P>
       <TierTable />
     </>,
