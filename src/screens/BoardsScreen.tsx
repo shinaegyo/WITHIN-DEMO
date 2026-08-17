@@ -725,9 +725,18 @@ export function BoardsScreen() {
             {sheet?.kind === 'mine' ? (
               <>
                 {tab === 'today' && (
-                  <Text style={[styles.sheetLead, { color: colors.text }]}>
-                    Your guesses landed {today?.me?.avgOff ?? 0} away on average.
-                  </Text>
+                  <>
+                    <Text style={[styles.sheetLead, { color: colors.text }]}>
+                      Your guesses landed {today?.me?.avgOff ?? 0} away on average.
+                    </Text>
+                    {/* Said out loud because the board only shows the score and
+                        the average, and on a day where the top score is shared
+                        the order comes from a number that is not on screen. */}
+                    <Text style={[styles.sheetBody, { color: colors.textMuted }]}>
+                      Same score, higher place: fewest guesses wins it, and if that ties too, it
+                      goes to whoever landed closest.
+                    </Text>
+                  </>
                 )}
                 {tab === 'season' && !!season && (
                   <>
