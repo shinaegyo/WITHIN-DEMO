@@ -25,10 +25,15 @@ export function DailyFirstScreen({
 }) {
   const { colors } = useTheme();
 
+  // The four that exist, in the order the Games tab lists them. Ranked and
+  // Challenge were named here long after Ranked stopped being reachable and
+  // Challenge became Duel - a first screen promising two modes the game does
+  // not have is a worse introduction than no list at all.
   const modes = [
-    { name: 'Ranked', detail: 'Play strangers for a rating and the crown' },
-    { name: 'Challenge', detail: 'Duel a friend, picking each other’s numbers' },
-    { name: 'Impossible', detail: 'Numbers one after another until you miss' },
+    { name: 'The Impossible Climb', detail: 'Fifty numbers over a week. Your place is kept between days' },
+    { name: 'Rush', detail: 'Three minutes, as many numbers as you can find' },
+    { name: 'Window', detail: 'Three free guesses, then commit to a range' },
+    { name: 'Duel', detail: 'A friend or a stranger, picking each other’s numbers' },
   ];
 
   return (

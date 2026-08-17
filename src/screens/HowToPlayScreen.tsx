@@ -118,8 +118,9 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>If you run out of attempts</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        The round is over and it scores nothing. The rounds after it are unaffected — every round
-        stands on its own, so a missed number costs you that round and nothing else.
+        The round is over and it pays 3 — turning up for a number you never found is worth more
+        than nothing. The rounds after it are unaffected: every round stands on its own, so a
+        missed number costs you that round and nothing else.
       </Text>
       <Text style={[styles.body, { color: colors.textMuted, marginTop: 10 }]}>
         The number is revealed once the round ends, whether you found it or not.
@@ -129,18 +130,19 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>Scoring</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Each round is worth up to 100, so a perfect day is 300.
+        Each round is worth up to 20, so a perfect day is 60. The sooner you find it, the more it
+        pays — and a round you never find still pays 3.
       </Text>
       <View style={[styles.scoreBox, { borderColor: colors.border }]}>
         {([
-          ['1st attempt', 100],
-          ['2nd attempt', 90],
-          ['3rd attempt', 80],
-          ['4th attempt', 70],
-          ['5th attempt', 60],
-          ['6th attempt', 50],
-          ['7th attempt', 40],
-          ['Out of attempts', 0],
+          ['1st attempt', 20],
+          ['2nd attempt', 18],
+          ['3rd attempt', 16],
+          ['4th attempt', 14],
+          ['5th attempt', 12],
+          ['6th attempt', 10],
+          ['7th attempt', 5],
+          ['Out of attempts', 3],
         ] as const).map(([label, points]) => (
           <View key={label} style={styles.scoreRow}>
             <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>{label}</Text>
