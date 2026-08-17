@@ -5,11 +5,6 @@ import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 
-/**
- * The address App Review writes to, and the one a player uses to ask for their
- * data back. It has to be a mailbox somebody reads.
- */
-const CONTACT = 'jamessshin4@gmail.com';
 const UPDATED = '15 August 2026';
 
 /**
@@ -88,19 +83,16 @@ export function PrivacyBody() {
 
       <H>Removing your data</H>
       <P>
-        Email {CONTACT} from the address on your account, or with your username if you never added
-        one, and everything tied to it is deleted: account, scores, streak, friends and duel
-        history. Deletion is permanent — there is no way to restore a streak afterwards.
+        In the app: Profile, then Delete account. Everything tied to you goes with it — account,
+        scores, streak, friends and duel history — and it happens immediately rather than on
+        request. Deletion is permanent; there is no way to restore a streak afterwards.
       </P>
 
       <H>Children</H>
       <P>
         The game is not aimed at children under 13 and asks for no personal details beyond an
-        optional email. If a child has given one, email the address above and it will be removed.
+        optional email. An account made by a child can be removed the same way, from Profile.
       </P>
-
-      <H>Questions</H>
-      <P>Anything at all: {CONTACT}.</P>
     </View>
   );
 }

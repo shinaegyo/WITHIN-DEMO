@@ -26,6 +26,8 @@ import { MEDALS } from '../theme/medals';
 import { Avatar } from '../components/Avatar';
 import { Mark } from '../components/Mark';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
+import { GamesUnlockedOverlay } from '../components/GamesUnlockedOverlay';
+import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
 
 
@@ -72,6 +74,8 @@ export function HomeScreen({
   // Set only when this device has not yet congratulated the player for the
   // level they are now on.
   const [levelUp, setLevelUp] = useState<{ from: number; to: number } | null>(null);
+  // Shown once, to somebody who has just finished their first day.
+  const [unlocked, setUnlocked] = useState(false);
 
   // The calm track. Outside the games the app is not silent any more - it has
   // its own room rather than the game's.
@@ -96,6 +100,27 @@ export function HomeScreen({
       loadXp().then(setXp).catch(() => {});
     });
   }, [nav]);
+
+  /**
+   * What the daily unlocks, said the first time it unlocks anything.
+   *
+   * The Games tab is locked until the day's rounds are done, which teaches a
+   * new player nothing: four modes quietly become available on a tab they have
+   * no reason to open. gamesPlayed of 1 is the first finished day, and the
+   * device flag keeps it to one showing - a player on their ninth day does not
+   * need to be told what Rush is.
+   */
+  useEffect(() => {
+    if (!game || game.dayStatus === 'playing') return;
+    if (game.stats.gamesPlayed > 1) return;
+    let alive = true;
+    gamesIntroSeen().then((seen) => {
+      if (alive && !seen) setUnlocked(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [game?.dayStatus, game?.stats.gamesPlayed]);
 
   useEffect(() => {
     practiceRemaining().then(setPracticeLeft);
@@ -593,6 +618,23 @@ export function HomeScreen({
         </Text>
         <Text style={[styles.countdown, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
       </View>
+
+      {/* Ahead of the level card in the tree and behind it in practice: a
+          first day rarely levels anybody, and if it does, the level card is
+          the one that should be read first. */}
+      {unlocked && !levelUp && (
+        <GamesUnlockedOverlay
+          onClimb={() => {
+            markGamesIntroSeen();
+            setUnlocked(false);
+            onEndless();
+          }}
+          onDone={() => {
+            markGamesIntroSeen();
+            setUnlocked(false);
+          }}
+        />
+      )}
 
       {levelUp && xp && (
         <LevelUpOverlay
