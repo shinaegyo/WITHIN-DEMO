@@ -201,6 +201,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     const asksClue = live && round.kind === 'clue' && round.clue1 === null;
     const asksRange = live && round.kind === 'bet' && round.attemptsUsed >= round.attemptsAllowed;
     const asking = asksCall || asksClue || asksRange;
+    const centreSheet = asking && round.guesses.length === 0;
     const intro = round.kind ? INTRO[round.kind] : null;
     const used = round.attemptsUsed;
 
@@ -268,10 +269,19 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             </View>
           )}
 
+          {/* A sheet with an empty board under it sat at the top of a screen
+              of nothing. Centred in the space it actually has, it reads as the
+              screen rather than as something that failed to load the rest.
+              Round three keeps its sheet at the top, because the three free
+              guesses are underneath it and they are worth reading. */}
           {asksCall ? (
-            <CallYourShot onCall={onCall} busy={deciding} />
+            <View style={centreSheet ? styles.sheetWrap : undefined}>
+              <CallYourShot onCall={onCall} busy={deciding} />
+            </View>
           ) : asksClue ? (
-            <ChooseYourClue onChoose={chooseClue} busy={deciding} />
+            <View style={centreSheet ? styles.sheetWrap : undefined}>
+              <ChooseYourClue onChoose={chooseClue} busy={deciding} />
+            </View>
           ) : asksRange ? (
             <CommitRange onCommit={commitRange} busy={deciding} />
           ) : (
@@ -356,6 +366,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   boardWrap: { flex: 1 },
+  sheetWrap: { flex: 1, justifyContent: 'center' },
   /** The question this round is asking, before it asks it. */
   intro: { gap: 3 },
   introTitle: { fontSize: 25, fontFamily: fonts.extraBold, letterSpacing: -0.6 },

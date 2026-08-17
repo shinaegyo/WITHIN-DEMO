@@ -6,7 +6,6 @@ import { HomeStatus, loadHomeStatus } from '../lib/api';
 import { feedbackColors } from '../theme/colors';
 import { useTrack } from '../utils/useTrack';
 import { useDailyGameContext } from '../state/DailyGameContext';
-import { POINTS_EPOCH } from '../game/constants';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
@@ -48,12 +47,11 @@ export function GamesScreen({
   // playing it - the Games tab is one swipe from Home - let somebody spend
   // their evening on Rush and never see the thing everybody else played.
   const { game } = useDailyGameContext();
-  // Until the points start, the games are open. Today scores toward nothing,
-  // so asking for three rounds before unlocking Rush would charge somebody for
-  // a day the game has already discounted. It expires at their own midnight,
-  // with no flag left behind to remove.
-  const beforeScoring = !!game && game.puzzleDate < POINTS_EPOCH;
-  const locked = !game || (game.dayStatus === 'playing' && !beforeScoring);
+  // No exemption. There was one for days before the points started, on the
+  // grounds that a day scoring toward nothing should not charge admission -
+  // but it made the rule untestable on the only day anybody wanted to test it,
+  // and it expires on its own anyway. Finish the three rounds, or come back.
+  const locked = !game || game.dayStatus === 'playing';
   const [status, setStatus] = useState<HomeStatus | null>(null);
 
   const load = useCallback(() => {

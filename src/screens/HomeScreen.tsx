@@ -4,7 +4,6 @@ import { Text } from '../components/AppText';
 import { Wordmark } from '../components/Wordmark';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusScreen } from '../components/StatusScreen';
-import { POINTS_EPOCH } from '../game/constants';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -278,10 +277,9 @@ export function HomeScreen({
   // The same rule the Games tab enforces, for the same reason: the daily is
   // the game and these are what it unlocks. Home showed them open while the
   // Games tab refused them, which made the rule read as a bug on whichever
-  // screen you met second. Days before the points start are exempt there and
-  // exempt here - a day that scores toward nothing cannot charge for entry.
-  const beforeScoring = game.puzzleDate < POINTS_EPOCH;
-  const modesLocked = !finished && !beforeScoring;
+  // screen you met second. No exemption on either - three rounds, then the
+  // rest of the game.
+  const modesLocked = !finished;
   const inProgress =
     game.dayStatus === 'playing' && (game.currentRound > 1 || game.round.attemptsUsed > 0);
   // The score leads only once there is one to lead with. Part-way through the
@@ -794,7 +792,9 @@ const styles = StyleSheet.create({
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardLabel: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.5 },
   shareLink: { fontSize: 12.5, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
-  scoreLine: { flexDirection: 'row', alignItems: 'baseline', gap: 9 },
+  // Centred over the round chips, which are a symmetric full-width row. Left
+  // against the edge, the hero number lined up with nothing and left a hole.
+  scoreLine: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: 9 },
   scoreUnit: { fontSize: 14, fontFamily: fonts.bold },
   cardRule: { height: 1, alignSelf: 'stretch' },
   leagueFoot: { flexDirection: 'row', alignItems: 'center', gap: 5 },
