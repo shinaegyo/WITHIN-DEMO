@@ -5,6 +5,7 @@ import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
 import { StatIcon } from '../components/StatIcon';
+import { PlayerCardModal } from '../components/PlayerCard';
 import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { impossibleRules } from '../components/modeRules';
 import {
@@ -53,6 +54,10 @@ export function ImpossibleBoardScreen({
   const [status, setStatus] = useState<HomeStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  // Whose card is open. A name on this board used to be a dead end; the same
+  // modal every other board uses now answers it, and it is the only place the
+  // guess count behind a summit is written down.
+  const [looking, setLooking] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -104,11 +109,22 @@ export function ImpossibleBoardScreen({
           </Text>
         )}
 
+        {/* The word once, over the column, instead of on every row. Six copies
+            of LVL down the right edge was the label shouting louder than the
+            numbers it was labelling. */}
+        {rows.length > 0 && (
+          <Text style={[styles.columnHead, { color: colors.textMuted }]}>LEVEL</Text>
+        )}
+
         {shown.map((e, i) => (
         <React.Fragment key={`${e.rank}-${e.name}-${i}`}>
         {i === breakAt && <StandingsBreak />}
-        <View
+        <Pressable
           // Ranks tie and names are not unique, so neither identifies a row.
+          onPress={() => {
+            playTap();
+            setLooking(e.name);
+          }}
           style={[
             styles.row,
             e.isMe
@@ -133,58 +149,33 @@ export function ImpossibleBoardScreen({
             {e.name}
           </Text>
 
-          {/* A summit is depth 50 for everybody who reaches it, so the number
-              stops separating them and the guess count starts. */}
+          {/* One column, one meaning: how high they are. A summit has no
+              number to print - they are at the top, and the mountain says so.
+              The guess count that separates two summiters lives on the card
+              behind the row, because on the board it sat in the slot every
+              other row uses for a level and read as a level of 228. */}
           {e.topped ? (
-            // A summit is level 50 for everybody who reaches it, so the level
-            // stops separating them and the guess count starts.
-            //
-            // "TOPPED OUT · 228 guesses" answered that in three parts while
-            // every other row answered it in two, and the finished players -
-            // the ones worth looking at - had the busiest rows on the board.
-            // The mountain says they went all the way without a word, which is
-            // how the league badges already work, and the number keeps the slot
-            // the level would have used.
-            <View
-              style={styles.levelWrap}
-              accessibilityLabel={`Topped out in ${e.guesses} guesses`}
-            >
-              <StatIcon glyph="summit" color={colors.accent} size={18} />
-              <Text style={[styles.depth, { color: colors.text }]}>{e.guesses}</Text>
+            <View style={styles.value} accessibilityLabel="Topped out">
+              <StatIcon glyph="summit" color={colors.accent} size={19} />
             </View>
           ) : (
-            // "47 numbers" counted what somebody had got through; the climb is
-            // read as how high they are, and the ladder is already numbered.
-            //
-            // The number holds a fixed slot rather than sizing to its digits.
-            // Right-aligned to the row's end, a level of 6 is narrower than 49,
-            // so the word in front of it slid left and right down the column -
-            // and "Level" is the thing the eye scans for, so it was the one
-            // part that could not be allowed to move. Two digits is the whole
-            // ladder, and 50 is the top.
-            <View style={styles.levelWrap}>
-              <Text style={[styles.levelLabel, { color: colors.text }]}>LVL</Text>
-              <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
-            </View>
+            <Text style={[styles.value, styles.depth, { color: colors.text }]}>{e.depth}</Text>
           )}
-        </View>
+        </Pressable>
         </React.Fragment>
         ))}
 
         <ShowMore count={hidden} onPress={() => setExpanded(true)} />
 
-        {/* Said once under the board rather than seven times inside it.
-            A summit row carries a mountain and a number, and that number is
-            guesses where every other row's is a level - so on its own it reads
-            as a level of 228, which is not a thing. Naming the unit in the row
-            costs a long word in a tight column and repeats on every summit;
-            here it also explains the ordering, which the row never could.
-
-            Only once somebody has actually topped out. Before that it explains
-            a row nobody can see. */}
+        {/* The one thing the column cannot say. Every summit is level 50, so
+            the mountain is the same on all of them and nothing on the board
+            explains why one sits above another. Said once, underneath, and
+            only once somebody has actually topped out - before that it
+            describes a row nobody can see. */}
         {rows.some((e) => e.topped) && (
           <Text style={[styles.caption, { color: colors.textMuted }]}>
-            Topping out is level 50 for everyone, so summits rank by guesses used.
+            Topping out is level 50 for everyone, so summits rank by fewest guesses.
+            Tap anyone to see theirs.
           </Text>
         )}
 
@@ -250,6 +241,8 @@ export function ImpossibleBoardScreen({
           </Text>
         </Pressable>
       </View>
+
+      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
     </View>
   );
 }
@@ -289,7 +282,18 @@ const styles = StyleSheet.create({
   nameMe: { fontFamily: fonts.extraBold },
   // Baseline rather than centre: the two sizes are far enough apart that
   // centring them left the word floating against the middle of the number.
-  levelWrap: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
+  // One slot, whatever goes in it: a level, or the mountain that means there
+  // is no level left to reach. Fixed and right-aligned so the column holds its
+  // edge whether the number is 6, 37 or a glyph.
+  value: { minWidth: 30, alignItems: 'flex-end' },
+  columnHead: {
+    fontSize: 9.5,
+    fontFamily: fonts.bold,
+    letterSpacing: 1.2,
+    textAlign: 'right',
+    marginBottom: 6,
+    paddingRight: 14,
+  },
   // The number's size, colour and weight. Nothing about it is set apart.
   //
   // Every difference tried here read as a different font rather than as a
@@ -297,6 +301,5 @@ const styles = StyleSheet.create({
   // beside an extra-bold number looked like two typefaces that had failed to
   // match. Abbreviating carries the label on its own - LVL is plainly not a
   // score - so nothing else has to.
-  levelLabel: { fontSize: 17, fontFamily: fonts.extraBold, letterSpacing: 0.3 },
-  depth: { fontSize: 17, fontFamily: fonts.extraBold, minWidth: 23, textAlign: 'right' },
+  depth: { fontSize: 17, fontFamily: fonts.extraBold, textAlign: 'right' },
 });

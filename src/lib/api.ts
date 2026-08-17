@@ -1255,6 +1255,15 @@ export interface PlayerCard {
   todayRounds: { round: number; status: 'won' | 'lost'; score: number }[];
   /** Numbers cleared in this week's Impossible, or null if they haven't run it. */
   impossible: number | null;
+  /**
+   * The same climb, in the detail a summit needs. Null until they have run it.
+   *
+   * `impossible` is a bare level count and cannot say whether somebody
+   * finished, or in how many guesses - and guesses are the only thing that
+   * separates two players who both topped out, so the board's ordering is
+   * unreadable without them.
+   */
+  climb: { level: number; guesses: number; topped: boolean } | null;
   /** The head-to-head, from your side. Null when the card is your own. */
   duels: { won: number; lost: number; drawn: number; streak: number } | null;
 }
@@ -1285,6 +1294,15 @@ export async function loadPlayerCard(username: string): Promise<PlayerCard> {
     todayScore: raw.today?.score ?? null,
     todayRounds: raw.todayRounds ?? [],
     impossible: raw.impossible ?? null,
+    // Absent on a server that predates the field, which is the same as never
+    // having run the climb as far as this card is concerned.
+    climb: raw.climb
+      ? {
+          level: raw.climb.level ?? 0,
+          guesses: raw.climb.guesses ?? 0,
+          topped: !!raw.climb.topped,
+        }
+      : null,
     duels: raw.duels
       ? {
           won: raw.duels.won ?? 0,

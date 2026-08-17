@@ -156,19 +156,36 @@ export function PlayerCardModal({
               )}
 
               <View style={styles.stats}>
-                {/* The daily first, because the daily is the game: what they
-                    have scored and how many days in a row. Then the level,
-                    which every mode feeds, and then the climb, which is one
-                    mode and one week. Reading left to right should go from the
-                    thing that counts to the thing that is for fun. */}
+                {/* Two totals, then two things in play.
+                    Points and level only ever grow - one from the daily, one
+                    from every mode. Streak and climb are both live: a run that
+                    is still going, and a week that has not finished. The old
+                    order put the daily's two first, which read well until you
+                    noticed it crossed from all-time to current and back again
+                    across four numbers. */}
                 <Stat label="POINTS" value={`${card.points}`} />
-                <Stat label="STREAK" value={`${card.streak}`} />
                 <Stat label="LEVEL" value={`${card.level}`} />
+                <Stat label="STREAK" value={`${card.streak}`} />
                 {/* A best streak is a record of a run already over. How far
                     they have climbed this week is a thing still happening. */}
+                {/* A summit is level 50 for everybody who gets there, so the
+                    level stops saying anything and the guess count starts.
+                    This is the only place it is written down now that the
+                    board keeps its rows to a single number. */}
+                {/* Labelled GUESSES rather than SUMMIT, because a number under
+                    the word "summit" is the same puzzle the board just had:
+                    228 of what. The accent carries the achievement instead,
+                    and the word carries the unit. */}
                 <Stat
-                  label="CLIMB"
-                  value={card.impossible !== null && card.impossible > 0 ? `${card.impossible}` : '—'}
+                  label={card.climb?.topped ? 'GUESSES' : 'CLIMB'}
+                  ink={card.climb?.topped ? colors.accent : undefined}
+                  value={
+                    card.climb?.topped
+                      ? `${card.climb.guesses}`
+                      : card.impossible !== null && card.impossible > 0
+                        ? `${card.impossible}`
+                        : '—'
+                  }
                 />
               </View>
 
