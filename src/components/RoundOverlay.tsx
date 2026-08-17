@@ -25,27 +25,16 @@ interface Props {
 }
 
 /**
- * One line per round at the end of the day.
+ * One word per round at the end of the day.
  *
- * Three rounds that each asked something different need three sentences that
- * each answer the thing that was asked - a call is kept or it isn't, a range is
- * around the number or it isn't - and none of them is "solved in 4 attempts".
+ * The three rounds end in three different ways and each has its own phrase for
+ * it - found in four, read it cold, the bet landed - which is right on the card
+ * for that round and wrong in a list of three. Stacked, the different
+ * vocabularies read as three unrelated games. The tally answers one question
+ * for all of them.
  */
 function recapFor(r: RoundSummary): string {
-  if (r.round === 3) return r.status === 'won' ? 'the bet landed' : 'the bet missed';
-  if (r.status !== 'won') return 'did not get it';
-  if (r.called != null) {
-    return r.attemptsUsed <= r.called
-      ? `called ${r.called}, found in ${r.attemptsUsed}`
-      : `missed the call, found in ${r.attemptsUsed}`;
-  }
-  return `found in ${r.attemptsUsed}`;
-}
-
-/** The one-guess rounds get the shout instead of the sentence. */
-function markFor(r: RoundSummary): string | null {
-  if (r.status !== 'won' || r.attemptsUsed !== 1 || r.round === 3) return null;
-  return r.round === 1 ? 'OUT OF NOWHERE' : 'READ IT COLD';
+  return r.status === 'won' ? 'Correct' : 'Incorrect';
 }
 
 /**
@@ -216,9 +205,7 @@ export function RoundOverlay({
         {dayOver && kind !== null && (
           <>
             <View style={styles.recap}>
-              {game.rounds.map((r) => {
-                const mark = markFor(r);
-                return (
+              {game.rounds.map((r) => (
                   <View key={r.round} style={styles.recapRow}>
                     <Text style={[styles.recapNum, { color: colors.textMuted }]}>
                       ROUND {r.round}
@@ -226,11 +213,6 @@ export function RoundOverlay({
                     <Text style={[styles.recapAnswer, { color: colors.text }]}>
                       {r.answer != null ? `Answer ${r.answer}` : ''}
                     </Text>
-                    {/* Not "correct" and "incorrect": a range that lands is
-                        neither, and the line already says what happened in the
-                        round's own words. What was missing was being able to
-                        tell the good rows from the bad at a glance, which is a
-                        colour rather than another column. */}
                     <Text
                       style={[
                         styles.recapWhat,
@@ -243,12 +225,11 @@ export function RoundOverlay({
                       ]}
                       numberOfLines={1}
                     >
-                      {mark ?? recapFor(r)}
+                      {recapFor(r)}
                     </Text>
                     <Text style={[styles.recapPts, { color: colors.text }]}>{r.score}</Text>
                   </View>
-                );
-              })}
+              ))}
             </View>
 
             {!!dayClock && (
