@@ -51,7 +51,7 @@ export function CommitRange({
       <TextInput
         value={center}
         onChangeText={(t) => setCenter(t.replace(/[^0-9]/g, '').slice(0, 4))}
-        placeholder="Center of your range"
+        placeholder="Enter number"
         placeholderTextColor={colors.textMuted}
         keyboardType="number-pad"
         style={[
