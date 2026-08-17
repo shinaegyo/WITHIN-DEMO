@@ -12,9 +12,11 @@ import {
   DuelSummary,
   Friend,
   challengeFriend,
-  challengeRandom,
+  findStrangerDuel,
+  leaveDuelQueue,
   loadDuels,
   loadFriends,
+  loadPlayersOnline,
   messageFor,
   respondToDuel,
 } from '../lib/api';
@@ -49,10 +51,12 @@ export function DuelsScreen({
   const { colors } = useTheme();
   const [all, setAll] = useState<DuelSummary[] | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [online, setOnline] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState<{ online: number } | null>(null);
   const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
@@ -66,6 +70,9 @@ export function DuelsScreen({
     // screen down with them.
     loadFriends()
       .then((f) => setFriends(f.friends))
+      .catch(() => {});
+    loadPlayersOnline()
+      .then(setOnline)
       .catch(() => {});
   }, []);
 
@@ -323,12 +330,38 @@ export function DuelsScreen({
       {/* The way in sits under everything rather than on top of it: the list
           answers who, this answers what if nobody. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
-        <Pressable
+        {waiting ? (
+          // Two centred lines rather than one wrapping paragraph with a link
+          // trailing off the end of it: the state, then the way out of it.
+          <View style={styles.waiting}>
+            <Text style={[styles.waitingLine, { color: colors.text }]} numberOfLines={1}>
+              {waiting.online === 0 ? 'Nobody else is here' : 'Waiting for someone to join…'}
+            </Text>
+            <Pressable
+              onPress={() => {
+                playTap();
+                run(async () => {
+                  await leaveDuelQueue();
+                  setWaiting(null);
+                });
+              }}
+              hitSlop={8}
+            >
+              <Text style={[styles.stopWaiting, { color: colors.textMuted }]}>Stop waiting</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable
             onPress={() => {
               playTap();
               run(async () => {
-                const res = await challengeRandom();
-                setNote(`Challenge sent to ${res.opponent}. They play when they next open the app.`);
+                const res = await findStrangerDuel();
+                if (res.status === 'matched') {
+                  setWaiting(null);
+                  onPlay(res.duelId);
+                } else {
+                  setWaiting({ online: res.online });
+                }
               });
             }}
             style={({ pressed }) => [
@@ -336,15 +369,16 @@ export function DuelsScreen({
               { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
             ]}
           >
-            <Text style={[styles.strangerText, { color: colors.background }]}>Play a random</Text>
-            {/* No count of who is online, because nobody has to be. The old
-                button paired two people in the same minute and therefore
-                never paired anybody; this one leaves a challenge in somebody's
-                list the way a friend's does. */}
+            <Text style={[styles.strangerText, { color: colors.background }]}>Play a stranger</Text>
             <Text style={[styles.strangerSub, { color: colors.background }]}>
-              Someone who plays. They answer in their own time.
+              {online === null
+                ? ' '
+                : online === 0
+                  ? 'Nobody else is here'
+                  : `${online} ${online === 1 ? 'player' : 'players'} online`}
             </Text>
           </Pressable>
+        )}
       </View>
 
       <PlayerCardModal

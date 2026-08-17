@@ -544,8 +544,6 @@ export interface DuelSummary {
   theirDone: number;
   /** A ranked match rather than a friendly. */
   ranked: boolean;
-  /** The server picked the opponent, so neither of you chose the other. */
-  randomMatch: boolean;
   /** A number is owed for the next round. */
   needsNumber: boolean;
   /** A round is open and waiting to be played. */
@@ -609,7 +607,6 @@ export async function loadDuels(): Promise<DuelSummary[]> {
     myDone: d.my_done ?? 0,
     theirDone: d.their_done ?? 0,
     ranked: !!d.ranked,
-    randomMatch: !!d.random_match,
     needsNumber: !!d.needs_number,
     needsPlay: !!d.needs_play,
     outcome: d.outcome ?? null,
@@ -617,19 +614,22 @@ export async function loadDuels(): Promise<DuelSummary[]> {
   }));
 }
 
-/**
- * Challenge somebody the server picks.
- *
- * Replaces the live queue, which needed two people waiting in the same minute
- * and therefore never matched anybody. A duel is played a round at a time over
- * days, so there was never a reason for both players to be present at once -
- * this lands in a stranger's list exactly as a friend's challenge does.
- */
-export async function challengeRandom(): Promise<{ duelId: string; opponent: string }> {
+/** Pair with a stranger who is here now, or join the queue and wait. */
+export async function findStrangerDuel(): Promise<
+  { status: 'matched'; duelId: string } | { status: 'waiting'; online: number }
+> {
   await ensureSignedIn();
-  const { data, error } = await supabase.rpc('challenge_random');
+  const { data, error } = await supabase.rpc('duel_find_stranger');
   const raw = unwrap<any>(data, error);
-  return { duelId: raw.duelId, opponent: raw.opponent ?? 'someone' };
+  return raw.status === 'matched'
+    ? { status: 'matched', duelId: raw.duelId }
+    : { status: 'waiting', online: raw.online ?? 0 };
+}
+
+export async function leaveDuelQueue(): Promise<void> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('duel_leave_queue');
+  unwrap<any>(data, error);
 }
 
 /** Returns the duel it created, so the caller can open it. */
