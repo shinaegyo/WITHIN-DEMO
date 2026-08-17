@@ -96,7 +96,7 @@ export function GamesScreen({
       rows: [
         {
           label: 'The Impossible Climb',
-          sub: 'Fifty numbers. Your place is kept between days',
+          sub: 'Seventy-five numbers. Your place is kept between days',
           status: status
             ? status.impossible.summit
               ? 'Topped out this week'

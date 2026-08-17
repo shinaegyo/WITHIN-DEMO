@@ -168,7 +168,7 @@ export function PlayerCardModal({
                 <Stat label="STREAK" value={`${card.streak}`} />
                 {/* A best streak is a record of a run already over. How far
                     they have climbed this week is a thing still happening. */}
-                {/* A summit is level 50 for everybody who gets there, so the
+                {/* A summit is the same level for everybody who gets there, so the
                     level stops saying anything and the guess count starts.
                     This is the only place it is written down now that the
                     board keeps its rows to a single number. */}

@@ -28,7 +28,7 @@ import { playTap } from '../utils/sound';
 const MODES: { name: string; line: string }[] = [
   {
     name: 'The Impossible Climb',
-    line: 'Fifty numbers, one week. Everybody climbs the same ones, and your place is kept between days.',
+    line: 'Seventy-five numbers, one week. Everybody climbs the same ones, and your place is kept between days.',
   },
   {
     name: 'Rush',

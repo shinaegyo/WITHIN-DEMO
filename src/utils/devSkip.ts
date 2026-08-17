@@ -57,7 +57,7 @@ export function devStageLevel(): number | null {
     if (!v) return null;
     // thin is not an arena - it is where the music changes inside Stratosphere,
     // and there is no other way to jump to it.
-    const byKey: Record<string, number> = { ground: 1, sky: 20, strato: 40, thin: 60, orbit: 80 };
+    const byKey: Record<string, number> = { ground: 1, sky: 16, strato: 31, thin: 46, orbit: 61 };
     if (byKey[v] !== undefined) return byKey[v];
     const n = parseInt(v, 10);
     return Number.isFinite(n) ? n : null;

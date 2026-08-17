@@ -174,20 +174,24 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>The Impossible Climb</H>
       <P first>
-        Fifty numbers, one after another, and everyone plays the same sequence this week — so how
-        far you got compares directly. It resets on Monday. One clue per number, and it gets sharper
-        the higher you go. Clear level 50 and you have topped out, and everyone who finishes is
-        ranked on guesses used.
+        Seventy-five numbers, one after another, and everyone plays the same sequence this week —
+        so how far you got compares directly. It resets on Monday. The Ground gives you no clue at
+        all: the colours are the whole of it, and learning to read them is what the first fifteen
+        levels are for. Above that a clue arrives with every number, and it tells you less the
+        higher you go. Clear level 75 and you have topped out, and everyone who finishes is ranked
+        on guesses used.
       </P>
     </>,
 
     <>
       <H>Health</H>
       <P first>
-        You start each day at 100%. Running out of attempts on a number costs health, not the climb
-        — the same number is waiting and you try it again. What it costs depends on how high you
-        are: 10% on the Ground, 50% in Orbit. Solve one in three guesses or fewer and you take 20%
-        back.
+        Health carries across the whole week, and each morning gives you 30% back. Running out of
+        attempts on a number costs health, not the climb — the same number is waiting and you try
+        it again. What it costs depends on how high you are: 10% on the Ground, 50% in Orbit. Solve
+        one in three guesses or fewer and you take half of that back. A fall always costs more than
+        a clean solve returns, so the low tiers are where you bank what the top will take off
+        you.
       </P>
     </>,
 
@@ -195,21 +199,24 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
       <H>Checkpoints</H>
       <P first>
         Every fifth level is a checkpoint, and so is the first level of a tier. You never start
-        further back than your last one — clear level 27 and stop, and tomorrow begins at 25. It is
+        further back than your last one — clear level 37 and stop, and tomorrow begins at 35. It is
         also where you land at zero health.
       </P>
     </>,
 
     <>
-      <H>One climb a day</H>
-      <P first>Lose all your health and that is the day. Come back tomorrow at 100%.</P>
+      <H>Running out</H>
+      <P first>
+        Lose all your health and that is the day. Come back tomorrow with 30% — not a full bar, so
+        a bad day follows you into the next one. Nothing limits how long you play.
+      </P>
     </>,
 
     <>
       <H>The five tiers</H>
       <P first>
-        Ten levels each. Higher means fewer attempts and a costlier fall. Every number cleared pays
-        20 XP toward your level, and reaching a new tier pays 50.
+        Fifteen levels each. Higher means fewer attempts, a weaker clue and a costlier fall. Every
+        number cleared pays 20 XP toward your level, and reaching a new tier pays 50.
       </P>
       <TierTable />
     </>,

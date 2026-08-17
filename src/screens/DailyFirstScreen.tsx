@@ -34,7 +34,7 @@ export function DailyFirstScreen({
   // screen promising modes the game does not have is a worse introduction
   // than no list at all.
   const modes = [
-    { name: 'The Impossible Climb', detail: 'Fifty numbers over a week. Your place is kept between days' },
+    { name: 'The Impossible Climb', detail: 'Seventy-five numbers over a week. Your place is kept between days' },
     { name: 'Rush', detail: 'Three minutes, as many numbers as you can find' },
     { name: 'Duel', detail: 'A friend or a stranger, picking each other’s numbers' },
   ];

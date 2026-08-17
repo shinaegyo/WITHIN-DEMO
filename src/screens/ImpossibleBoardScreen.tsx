@@ -17,7 +17,7 @@ import {
   messageFor,
   startEndlessSession,
 } from '../lib/api';
-import { ARENAS } from '../theme/arenas';
+import { ARENAS, SUMMIT } from '../theme/arenas';
 import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
@@ -167,14 +167,14 @@ export function ImpossibleBoardScreen({
 
         <ShowMore count={hidden} onPress={() => setExpanded(true)} />
 
-        {/* The one thing the column cannot say. Every summit is level 50, so
+        {/* The one thing the column cannot say. Every summit is the top level, so
             the mountain is the same on all of them and nothing on the board
             explains why one sits above another. Said once, underneath, and
             only once somebody has actually topped out - before that it
             describes a row nobody can see. */}
         {rows.some((e) => e.topped) && (
           <Text style={[styles.caption, { color: colors.textMuted }]}>
-            Topping out is level 50 for everyone, so summits rank by fewest guesses.
+            Topping out is level {SUMMIT} for everyone, so summits rank by fewest guesses.
             Tap anyone to see theirs.
           </Text>
         )}

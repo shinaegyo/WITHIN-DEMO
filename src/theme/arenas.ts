@@ -67,20 +67,20 @@ export interface Arena {
 
 export const ARENAS: Arena[] = [
   {
-    key: 'ground', name: 'Ground', from: 1, attempts: 7, fall: 10, clueFrom: 1,
+    key: 'ground', name: 'Ground', from: 1, attempts: 7, fall: 10, clueFrom: 0,
     track: 'climbGround',
     background: '#EDE7DC', backgroundDeep: '#DFD7C8', surface: '#FBF9F5',
     text: '#2A251C', muted: '#6F6757', accent: '#8A7A5E',
   },
   {
-    key: 'sky', name: 'Sky', from: 11, attempts: 7, fall: 20, clueFrom: 1,
+    key: 'sky', name: 'Sky', from: 16, attempts: 7, fall: 20, clueFrom: 1,
     track: 'climbSky',
     background: '#C4DAF2', backgroundDeep: '#A6C6E8', surface: '#F0F6FD',
     text: '#17293A', muted: '#4A6884', accent: '#2F6BA8',
     below: '#2F5BC4',
   },
   {
-    key: 'strato', name: 'Stratosphere', from: 21, attempts: 6, fall: 30, clueFrom: 1,
+    key: 'strato', name: 'Stratosphere', from: 31, attempts: 6, fall: 30, clueFrom: 1,
     track: 'climbStrato',
     background: '#2A3A72', backgroundDeep: '#1A2450', surface: '#16204A',
     text: '#EDF1FC', muted: '#9FAEDC', accent: '#7F9DEB',
@@ -89,14 +89,14 @@ export const ARENAS: Arena[] = [
   {
     // Between the indigo and the black: the last of the colour, and the tier
     // where a fall starts costing nearly half a day.
-    key: 'thin', name: 'Thin air', from: 31, attempts: 6, fall: 40, clueFrom: 1,
+    key: 'thin', name: 'Thin air', from: 46, attempts: 5, fall: 40, clueFrom: 1,
     track: 'climbThin',
     background: '#141C40', backgroundDeep: '#0A0F26', surface: '#101838',
     text: '#E7ECFB', muted: '#8B99CC', accent: '#8AA4F2',
     below: '#7EA0FF',
   },
   {
-    key: 'orbit', name: 'Orbit', from: 41, attempts: 5, fall: 50, clueFrom: 1,
+    key: 'orbit', name: 'Orbit', from: 61, attempts: 5, fall: 50, clueFrom: 1,
     track: 'climbOrbit',
     background: '#080A12', backgroundDeep: '#020306', surface: '#141A2B',
     text: '#EAEDF8', muted: '#7C86A8', accent: '#8FA6FF',
@@ -104,7 +104,7 @@ export const ARENAS: Arena[] = [
 ];
 
 /** The top. Clearing it tops the climb out for the week. */
-export const SUMMIT = 50;
+export const SUMMIT = 75;
 
 export function arenaFor(level: number): Arena {
   let found = ARENAS[0];
@@ -114,8 +114,10 @@ export function arenaFor(level: number): Arena {
 
 /** Where a fall puts you: every fifth level, and never out of your tier. */
 export function checkpointFor(level: number): number {
-  const every5 = level >= 46 ? 46 : level >= 41 ? 41 : Math.max(1, Math.floor(level / 5) * 5);
-  return Math.max(every5, arenaFor(level).from);
+  // Mirrors endless_checkpoint: every fifth level, never below the tier floor.
+  // The tiers are fifteen deep and the checkpoints five apart, so without the
+  // floor, reaching 46 and falling would drop you back into Stratosphere.
+  return Math.max(Math.max(1, Math.floor(level / 5) * 5), arenaFor(level).from);
 }
 
 /** The next one up, for telling somebody what the current level is worth. */
