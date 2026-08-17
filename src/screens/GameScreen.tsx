@@ -318,13 +318,6 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             />
           </View>
 
-          {/* The shape of the day, kept where somebody can read it without
-              leaving the round they are in. */}
-          <Text style={[styles.note, { color: colors.textMuted }]}>
-            Three rounds, three different questions: call your shot and search cold, then a search
-            with a clue you chose from three kinds, then a bet on a range. The clock starts on your
-            first guess.
-          </Text>
 
         </View>
       </KeyboardAvoidingView>
@@ -375,16 +368,4 @@ const styles = StyleSheet.create({
   introTitle: { fontSize: 25, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
   introLede: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19 },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
-  note: {
-    fontSize: 12,
-    fontFamily: fonts.medium,
-    lineHeight: 17,
-    // Centred, because it sits alone at the foot of a lot of empty space and a
-    // left edge with nothing above it reads as a paragraph that fell off.
-    textAlign: 'center',
-    paddingHorizontal: 8,
-    // Off the bottom edge. Pinned right against it, it read as chrome the
-    // screen had run out of room for.
-    marginBottom: 22,
-  },
 });
