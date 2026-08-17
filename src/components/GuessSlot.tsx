@@ -79,13 +79,25 @@ export function FilledSlot({
   // On an unfilled tile the accent is the only colour, so it does the work of
   // signalling direction and closeness.
   const bandInk = fill ? '#FFFFFF' : getTileInk(result.direction, result.tier);
-  const arrow = result.direction === 'correct' ? '✓' : result.direction === 'below' ? '▲' : '▼';
+  // Thin air withholds the arrow entirely - a dot, because an empty space
+  // reads as a tile that failed to render rather than one that is keeping
+  // something from you.
+  const arrow =
+    result.direction === 'correct'
+      ? '✓'
+      : result.direction === 'hidden'
+        ? '•'
+        : result.direction === 'below'
+          ? '▲'
+          : '▼';
   const arrowLabel =
     result.direction === 'correct'
       ? 'Correct'
-      : result.direction === 'below'
-        ? 'Guess too low'
-        : 'Guess too high';
+      : result.direction === 'hidden'
+        ? 'Direction withheld'
+        : result.direction === 'below'
+          ? 'Guess too low'
+          : 'Guess too high';
 
   return (
     <Animated.View

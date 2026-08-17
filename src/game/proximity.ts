@@ -25,6 +25,11 @@ function tierForDistance(distance: number): ProximityTier {
  */
 export function getBandLabel(result: GuessResult): string {
   if (result.isCorrect) return 'CORRECT';
+  // Stratosphere owes this tile its colour until the next guess lands. The
+  // server blanks the proximity flags to match, so this has to come first -
+  // below it, a withheld tile would fall through to 500+ AWAY and read as the
+  // worst guess of the round rather than an unanswered one.
+  if (result.tier === 'pending') return '· · ·';
   if (result.isOneAway) return 'ONE AWAY';
   if (result.isWithin10) return 'WITHIN 10';
   // Falls back to the tier when the flags are absent. Without this an

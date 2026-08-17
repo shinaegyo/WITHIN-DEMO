@@ -107,6 +107,24 @@ function withAlpha(hex: string, alpha: number): string {
  */
 export const wordmarkGradient = ['#5B92DF', '#E5412F'] as const;
 
+/**
+ * Thin air, where the arrow is withheld.
+ *
+ * Greyscale rather than a third hue. Blue and red mean "aim up" and "aim down"
+ * everywhere else in the game, so reusing either to mean nothing but distance
+ * would actively mislead - and colors.ts is explicit that the palette has two
+ * hues on purpose. Draining the colour out is the honest reading: intensity
+ * still says how close, and there is no hue left to say which way.
+ */
+export const hiddenColors = {
+  vast: '#DCDFE6',
+  distant: '#C6CAD4',
+  light: '#AEB4C1',
+  medium: '#7C8698',
+  dark: '#4A5364',
+  intense: '#2B3240',
+};
+
 export const feedbackColors = {
   within10: '#FFA51F',
   oneAway: '#E8452C',
@@ -122,14 +140,22 @@ export const feedbackColors = {
  * carries on. The distance is still stated in words on the same row, so nothing
  * is lost by holding the colour steady.
  */
-export function getTileInk(direction: 'below' | 'above' | 'correct', tier: string): string {
+export function getTileInk(direction: string, tier: string): string {
   const floored = tier === 'vast' || tier === 'distant' ? 'light' : tier;
   return getTileAccent(direction, floored);
 }
 
 /** Full-saturation colour for the tier — used for the accent bar and labels. */
-export function getTileAccent(direction: 'below' | 'above' | 'correct', tier: string): string {
+export function getTileAccent(direction: string, tier: string): string {
   if (direction === 'correct') return proximityColors.correct;
+  if (direction === 'hidden') {
+    return (hiddenColors as Record<string, string>)[tier] ?? hiddenColors.light;
+  }
+  // Withheld, not absent: the palest rung of the direction's own scale, so the
+  // arrow still reads and the shade says nothing yet.
+  if (tier === 'pending') {
+    return direction === 'below' ? proximityColors.below.vast : proximityColors.above.vast;
+  }
   const scale = direction === 'below' ? proximityColors.below : proximityColors.above;
   return (scale as Record<string, string>)[tier] ?? scale.light;
 }
@@ -138,9 +164,15 @@ export function getTileAccent(direction: 'below' | 'above' | 'correct', tier: st
  * Tile fill. Returns null for the far tiers, meaning "use the neutral surface"
  * — see TIER_ALPHA for why they aren't tinted.
  */
-export function getTileFill(direction: 'below' | 'above' | 'correct', tier: string): string | null {
+export function getTileFill(direction: string, tier: string): string | null {
   // The winning tile stays fully opaque — it's the payoff, it should shout.
   if (direction === 'correct') return proximityColors.correct;
+  // No fill while the colour is still owed.
+  if (tier === 'pending') return null;
+  if (direction === 'hidden') {
+    const alpha = TIER_ALPHA[tier] ?? 0;
+    return alpha === 0 ? null : withAlpha(getTileAccent(direction, tier), alpha);
+  }
   const alpha = TIER_ALPHA[tier] ?? 0;
   if (alpha === 0) return null;
   return withAlpha(getTileAccent(direction, tier), alpha);
