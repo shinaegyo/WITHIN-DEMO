@@ -113,7 +113,7 @@ export function ImpossibleBoardScreen({
             of LVL down the right edge was the label shouting louder than the
             numbers it was labelling. */}
         {rows.length > 0 && (
-          <Text style={[styles.columnHead, { color: colors.textMuted }]}>LEVEL</Text>
+          <Text style={[styles.columnHead, { color: colors.text }]}>LEVEL</Text>
         )}
 
         {shown.map((e, i) => (
@@ -286,9 +286,13 @@ const styles = StyleSheet.create({
   // is no level left to reach. Fixed and right-aligned so the column holds its
   // edge whether the number is 6, 37 or a glyph.
   value: { minWidth: 30, alignItems: 'flex-end' },
+  // Small, but not faint. It is the only thing on the screen that says what
+  // the column of numbers means, and at a muted 9.5 it was the quietest
+  // element above the loudest one. Kept to a header's size and given a
+  // header's weight instead.
   columnHead: {
-    fontSize: 9.5,
-    fontFamily: fonts.bold,
+    fontSize: 10.5,
+    fontFamily: fonts.extraBold,
     letterSpacing: 1.2,
     textAlign: 'right',
     marginBottom: 6,
