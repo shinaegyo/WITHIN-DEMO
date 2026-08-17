@@ -4,7 +4,7 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
-import { StatIcon } from '../components/StatIcon';
+import { TierGlyph, tierFor } from '../components/TierGlyph';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { impossibleRules } from '../components/modeRules';
@@ -156,10 +156,13 @@ export function ImpossibleBoardScreen({
               other row uses for a level and read as a level of 228. */}
           {e.topped ? (
             <View style={styles.value} accessibilityLabel="Topped out">
-              <StatIcon glyph="summit" color={colors.accent} size={19} />
+              <TierGlyph tier="summit" color={colors.accent} size={20} />
             </View>
           ) : (
-            <Text style={[styles.value, styles.depth, { color: colors.text }]}>{e.depth}</Text>
+            <View style={styles.value} accessibilityLabel={`Level ${e.depth}`}>
+              <TierGlyph tier={tierFor(e.depth)} color={colors.textMuted} size={18} />
+              <Text style={[styles.depth, { color: colors.text }]}>{e.depth}</Text>
+            </View>
           )}
         </Pressable>
         </React.Fragment>
@@ -285,7 +288,11 @@ const styles = StyleSheet.create({
   // One slot, whatever goes in it: a level, or the mountain that means there
   // is no level left to reach. Fixed and right-aligned so the column holds its
   // edge whether the number is 6, 37 or a glyph.
-  value: { minWidth: 30, alignItems: 'flex-end' },
+  // Glyph then number, right-aligned as one block. The glyph says which
+  // arena they are standing in, the number says where in it - and the shape
+  // carries the tier because three of the five arena accents are the same
+  // pale blue at eighteen pixels.
+  value: { flexDirection: 'row', alignItems: 'center', gap: 7, minWidth: 30, justifyContent: 'flex-end' },
   // Small, but not faint. It is the only thing on the screen that says what
   // the column of numbers means, and at a muted 9.5 it was the quietest
   // element above the loudest one. Kept to a header's size and given a
@@ -305,5 +312,5 @@ const styles = StyleSheet.create({
   // beside an extra-bold number looked like two typefaces that had failed to
   // match. Abbreviating carries the label on its own - LVL is plainly not a
   // score - so nothing else has to.
-  depth: { fontSize: 17, fontFamily: fonts.extraBold, textAlign: 'right' },
+  depth: { fontSize: 17, fontFamily: fonts.extraBold, textAlign: 'right', minWidth: 23 },
 });

@@ -81,24 +81,34 @@ $fn$;
 /**
  * What running out of attempts costs, as a share of health.
  *
- * Twenty on the Ground and twenty-two everywhere above it. Nearly flat, and
- * never falling, because the thing that actually rises with altitude is how
- * often you fall rather than what a fall costs: at 21% failure a level costs
- * about 4.6 health in expectation, and at Orbit's 71% the same 22 costs 15.6.
- * The curve is in the frequency.
+ * One more point a tier, twenty through twenty-four. Falling out of Orbit
+ * ought to cost more than falling off the Ground, and a table reading -22%
+ * four times over says nothing about altitude at all.
+ *
+ * A single point rather than two, because cost at the top is multiplied by
+ * frequency: Orbit already misses 71% of the time against 21% below it, so a
+ * level there costs about 17 health in expectation at 24% and 20 at 28%.
+ * Against a hundred-point bar that is the difference between four attempts in
+ * a day and three. Modelled over thirty thousand weeks, 20-21-22-23-24 tops
+ * out at 77 in ten thousand and 20-22-24-26-28 at 15 - same shape, four
+ * fifths of the summits gone.
  *
  * The old 10-to-50 spread meant the Ground could not kill anybody and Orbit
  * killed everybody in two, so the number being tuned was never the one that
- * mattered. Modelling a rising 20-22-24-26-28 put the summit out of reach for
- * all but thirteen in ten thousand; holding it at 22 lands on eighty-four,
- * with the same median finish.
+ * mattered.
  */
 create or replace function public.endless_fall(p_level integer)
 returns smallint
 language sql
 immutable
 as $fn$
-  select (case when p_level <= 15 then 20 else 22 end)::smallint;
+  select (case
+    when p_level <= 15 then 20
+    when p_level <= 30 then 21
+    when p_level <= 45 then 22
+    when p_level <= 60 then 23
+    else 24
+  end)::smallint;
 $fn$;
 
 /** Every fifth level, and never below the tier you are standing in. */

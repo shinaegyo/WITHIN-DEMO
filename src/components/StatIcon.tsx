@@ -15,7 +15,7 @@ import Svg, { Path } from 'react-native-svg';
  * given there: an outline at this size is a smudge, and these are drawn at
  * twenty-two pixels.
  */
-export type StatGlyph = 'streak' | 'points' | 'summit';
+export type StatGlyph = 'streak' | 'points';
 
 const PATHS: Record<StatGlyph, string> = {
   // A flame. The shoulder notch is what stops it reading as a leaf once the
@@ -25,10 +25,6 @@ const PATHS: Record<StatGlyph, string> = {
   // Four points rather than five, because Gold's badge is a five-pointed star
   // and two stars in a row of three cards would read as a matching pair.
   points: 'M15 3l2.7 9.3L27 15l-9.3 2.7L15 27l-2.7-9.3L3 15l9.3-2.7z',
-  // Two peaks, the taller one off centre. A single symmetrical triangle reads
-  // as a play button or a warning sign at this size; the second peak is what
-  // makes it a mountain at a glance.
-  summit: 'M1 25L10.5 6.5 16.5 17.5 20.5 10.5 29 25z',
 };
 
 export function StatIcon({
