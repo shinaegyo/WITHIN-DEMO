@@ -200,13 +200,13 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
         taking things away instead.
       </P>
       <P>
-        In Stratosphere the colour arrives late — every guess shows its arrow at once and its shade
-        only once the next guess has landed, so you commit before you know how close you were.
+        In Stratosphere the arrow goes. The tile still tells you how close you are and never which
+        way, so every guess leaves you two possibilities to tell apart. The colour drains out with
+        it — there is no blue or red up there, only how strong the shade is.
       </P>
       <P>
-        In Thin air the arrow goes. The tile still tells you how close you are and never which way,
-        so every guess leaves you two possibilities to tell apart. The colour drains out with it —
-        there is no blue or red up there, only how strong the shade is.
+        In Thin air the colour arrives late — every guess shows its arrow at once and its shade
+        only once the next guess has landed, so you commit before you know how close you were.
       </P>
       <P>
         Orbit gives it all back and takes nothing. Five guesses, the full colours, no clue and no
