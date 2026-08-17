@@ -23,6 +23,7 @@ import { PracticeScreen } from '../screens/PracticeScreen';
 import { DailyGameProvider, useDailyGameContext } from '../state/DailyGameContext';
 import { useProfile } from '../state/useProfile';
 import { clearPresence, loadFriends, touchPresence } from '../lib/api';
+import { reloadIfStale } from '../utils/version';
 import { playTap, warmSounds } from '../utils/sound';
 import { fonts } from '../theme/fonts';
 import { practiceRemaining, consumePracticeRound } from '../utils/practiceLimit';
@@ -174,9 +175,18 @@ function Screens({
     };
 
     start();
+    // Coming back is also the moment to find out whether this is still the
+    // current build. reloadIfStale has existed since the version stamp went in
+    // and was never called from anywhere, so every fix shipped since then has
+    // waited for players to refresh a tab they had no reason to refresh.
+    reloadIfStale();
     const sub = AppState.addEventListener('change', (next) => {
-      if (next === 'active') start();
-      else stop();
+      if (next === 'active') {
+        start();
+        reloadIfStale();
+      } else {
+        stop();
+      }
     });
 
     return () => {
