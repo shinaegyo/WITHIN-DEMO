@@ -110,26 +110,6 @@ export function RoundOverlay({
     answer <= betHi;
   const late = kind === 'cold' && roundWon && called !== null && attemptsUsed > called;
 
-  /**
-   * What happened, in the round's own words.
-   *
-   * A call is kept or it is not, a clue round is a number of guesses, a range
-   * is around the number or it is not - so the label says the thing that was
-   * actually at stake rather than CORRECT for all three.
-   */
-  const detail = isBet
-    ? inside
-      ? betLo === betHi
-        ? 'named it exactly'
-        : 'the bet landed'
-      : 'the bet missed'
-    : !roundWon
-      ? 'did not get it'
-      : called !== null
-        ? late
-          ? `missed the call, found in ${attemptsUsed}`
-          : `called ${called}, found in ${attemptsUsed}`
-        : `found in ${attemptsUsed}`;
 
   // A first guess in round one is luck; in round two it is deduction from a
   // clue, and the two deserve different words.
@@ -148,7 +128,7 @@ export function RoundOverlay({
     answer === null || closest === null
       ? null
       : closest === answer
-        ? `You had it in ${attemptsUsed}.`
+        ? `You had it in ${attemptsUsed} ${attemptsUsed === 1 ? 'guess' : 'guesses'}.`
         : `Your closest was ${closest} — ${Math.abs(closest - answer)} away in ${attemptsUsed} ${
             attemptsUsed === 1 ? 'guess' : 'guesses'
           }.`;
@@ -174,8 +154,11 @@ export function RoundOverlay({
             {roundWon ? 'CORRECT!' : 'OUT OF ATTEMPTS'}
           </Text>
         ) : (
-          <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1} adjustsFontSizeToFit>
-            ROUND {game.round.round} · {detail.toUpperCase()}
+          // The round number, and nothing else. What happened is the two
+          // lines under it - it was 367, you had it in four - and saying it
+          // twice is what pushed the label off the card.
+          <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1}>
+            ROUND {game.round.round}
           </Text>
         )}
 

@@ -39,7 +39,7 @@ const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; title: string; lede
   },
   clue: {
     kind: 'THE CLUE',
-    title: 'A new number, and some help',
+    title: 'Find it with help',
     lede: 'Six attempts, and one clue — but you choose which kind you get.',
   },
   bet: {
@@ -308,10 +308,9 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           {/* The shape of the day, kept where somebody can read it without
               leaving the round they are in. */}
           <Text style={[styles.note, { color: colors.textMuted }]}>
-            Three rounds, three different questions:{' '}
-            <Text style={[styles.noteStrong, { color: colors.text }]}>call your shot</Text> and
-            search cold, then a search with a clue you chose from three kinds, then a bet on a
-            range. The clock starts on your first guess.
+            Three rounds, three different questions: call your shot and search cold, then a search
+            with a clue you chose from three kinds, then a bet on a range. The clock starts on your
+            first guess.
           </Text>
 
         </View>
@@ -370,6 +369,8 @@ const styles = StyleSheet.create({
     // left edge with nothing above it reads as a paragraph that fell off.
     textAlign: 'center',
     paddingHorizontal: 8,
+    // Off the bottom edge. Pinned right against it, it read as chrome the
+    // screen had run out of room for.
+    marginBottom: 22,
   },
-  noteStrong: { fontFamily: fonts.extraBold },
 });
