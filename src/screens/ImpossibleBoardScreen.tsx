@@ -25,7 +25,7 @@ import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
-import { radius, border, type, numeral } from '../theme/tokens';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Where Impossible starts: how far everybody got, and then the button.
@@ -215,25 +215,21 @@ export function ImpossibleBoardScreen({
 
       {/* The way in sits under the standings rather than replacing them. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
-        {/* The level as a figure, with everything about it in the line above.
-            "You are on level 1 · 100% health" buried the one number this
-            screen exists to tell you inside a sentence, at twelve points, in
-            the muted grey used for captions - smaller than the levels of the
-            people on the board above it.
+        {/* A line, not a figure.
+            The level was set as a display number here and it was wrong three
+            ways: the health was already in the button directly beneath, so it
+            was said twice; a single digit ranged left in a full-width bar is
+            an orphan; and two left-ranged lines over a centred button is two
+            alignments in three inches.
 
-            Modest rather than enormous: this is an action bar with a button
-            under it, and a display-sized figure would take the room the
-            standings are using. */}
-        {summit ? (
-          <Text style={[styles.best, { color: colors.textMuted }]}>TOPPED OUT THIS WEEK</Text>
-        ) : (
-          <>
-            <Text style={[styles.best, { color: colors.textMuted }]}>
-              YOUR LEVEL{health > 0 ? ` · ${health}% HEALTH` : ''}
-            </Text>
-            <Text style={[styles.bestLevel, { color: colors.text }]}>{level}</Text>
-          </>
-        )}
+            An action bar states a status and gets out of the way. The number
+            is not the subject here - the button is - and the level is set as a
+            figure on the climb screen, where it is. */}
+        <Text style={[styles.best, { color: colors.textMuted }]}>
+          {summit ? 'You topped out this week' : `You are on level ${level}`}
+          {!summit && health > 0 ? ` · ${health}% health` : ''}
+        </Text>
+
         <Pressable
           onPress={async () => {
             playTap();
@@ -303,9 +299,8 @@ const styles = StyleSheet.create({
   tierName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
   tierRange: { fontSize: 11.5, fontFamily: fonts.bold, width: 46, textAlign: 'right' },
   tierAttempts: { fontSize: 11.5, fontFamily: fonts.medium, width: 74, textAlign: 'right' },
-  foot: { borderTopWidth: border.hairline, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 14, gap: 6 },
-  best: { fontSize: type.caption, fontFamily: fonts.bold, letterSpacing: 1.2 },
-  bestLevel: { ...numeral(30), fontFamily: fonts.extraBold },
+  foot: { borderTopWidth: border.hairline, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 8 },
+  best: { fontSize: 12, fontFamily: fonts.medium, textAlign: 'center' },
   play: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   playText: { fontSize: 16, fontFamily: fonts.extraBold },
   caption: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 6 },
