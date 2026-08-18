@@ -602,6 +602,12 @@ export function BoardsScreen() {
               and a full screen for one column is far too much room for one
               sentence. */}
           <View style={styles.head}>
+            {/* The column that had no label. Two headings sat over the right
+                edge and the names they belong to ran along under nothing, so
+                the row read as a caption for the numbers rather than for the
+                board. Same size, weight and ink as the other two - they are
+                three headings on one line, not a title and two labels. */}
+            <Text style={[styles.headBoard, { color: colors.textMuted }]}>LEADERBOARD</Text>
             <Text style={[styles.headValue, { color: colors.textMuted }]}>POINTS</Text>
             {tab === 'season' && (
               <Text style={[styles.headLeague, { color: colors.textMuted }]} numberOfLines={1}>
@@ -891,8 +897,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: 10,
+    paddingLeft: 13,
     paddingRight: 13,
     paddingBottom: 5,
+  },
+  /** Takes the slack, so the other two stay pinned where the rows put them. */
+  headBoard: {
+    flex: 1,
+    fontSize: 8.5,
+    lineHeight: 14,
+    fontFamily: fonts.bold,
+    letterSpacing: 0.6,
   },
   headSub: { fontSize: 8.5, lineHeight: 14, fontFamily: fonts.bold, letterSpacing: 0.6, width: 56, textAlign: 'right' },
   /** The league column: a shape centred under its label rather than a number
