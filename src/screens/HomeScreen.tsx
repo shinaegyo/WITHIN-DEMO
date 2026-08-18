@@ -468,16 +468,19 @@ export function HomeScreen({
           empty room rather than a standing, and that is the first thing anyone
           sees. The leaderboard still has it for whoever goes looking. */}
 
-      {/* One screen, and it stays one screen.
-          The hero is already sized to the viewport, so scrolling only ever
-          moved a screen that had nothing under it - a few points of travel
-          that read as a page half-loaded. Home says what today did and offers
-          the ways in; anything that does not fit belongs on another tab. */}
+      {/* Scrolls, and has to.
+          It was locked to one screen on the reasoning that the hero is sized
+          to the viewport so there was nothing underneath to reach. There is:
+          minHeight guarantees the hero is at LEAST a screen tall, not at most,
+          and on a shorter phone the mode cards sit below the fold. Locking the
+          scroll made the duel unreachable on an iPhone.
+
+          The measure of "one screen" is the shortest screen it runs on, not
+          the one it was designed on. */}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
         <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
