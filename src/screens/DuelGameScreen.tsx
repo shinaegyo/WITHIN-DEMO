@@ -12,7 +12,6 @@ import {
   DuelState,
   challengeFriend,
   duelGuess,
-  findRankedMatch,
   forfeitDuel,
   loadDuel,
   messageFor,
@@ -143,20 +142,12 @@ export function DuelGameScreen({
 
   // The number this player sets for the other. Same input as a guess, so it
   // reads as the same kind of act - which it is, from the other side.
-  // A friendly rematch is a fresh challenge; a ranked one is the queue.
+  // A rematch is a fresh challenge to the same person.
   const rematch = async () => {
     if (busy || !duel) return;
     setBusy(true);
     try {
-      if (duel.ranked) {
-        const res = await findRankedMatch();
-        if (res.status === 'matched' && res.duelId) {
-          onExit();
-          return;
-        }
-      } else {
-        await challengeFriend(duel.opponent);
-      }
+      await challengeFriend(duel.opponent);
       onExit();
     } catch {
       onExit();

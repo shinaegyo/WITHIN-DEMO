@@ -34,6 +34,7 @@ import { GamesUnlockedOverlay } from '../components/GamesUnlockedOverlay';
 import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
 import { lastSeenLeague, markLeagueSeen } from '../utils/leagueSeen';
+import { lastSeenRank, markRankSeen } from '../utils/rankSeen';
 import { League, loadSeasonLeaderboard } from '../lib/api';
 import { promoted } from '../theme/leagues';
 import { radius, border, type, numeral } from '../theme/tokens';
@@ -45,7 +46,6 @@ interface Props {
   onOpenLeaderboard: () => void;
   onOpenFriends: () => void;
   onOpenDuels: () => void;
-  onOpenRanked: () => void;
   onOpenProfile: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
@@ -58,7 +58,6 @@ export function HomeScreen({
   onOpenLeaderboard,
   onOpenFriends,
   onOpenDuels,
-  onOpenRanked,
   onOpenProfile,
   practiceEpoch,
   username,
@@ -86,6 +85,9 @@ export function HomeScreen({
   // the all-time total, and using that would put somebody in Bronze while the
   // strip above it claimed nine hundred.
   const [seasonPoints, setSeasonPoints] = useState<number | null>(null);
+  // Where today left you: your place this season, and how far it moved since
+  // the last day this device saw finished.
+  const [standing, setStanding] = useState<{ rank: number; of: number; moved: number | null } | null>(null);
   const [ladderOpen, setLadderOpen] = useState(false);
   // Which league's roster is open. The ladder hands this over and closes
   // itself, so the two sheets never stack.
@@ -156,6 +158,26 @@ export function HomeScreen({
         if (!alive || !b.me) return;
         setLeague(b.me.league);
         setSeasonPoints(b.me.score);
+
+        // The movement, which needs a before. A rank is a fact about now; the
+        // server has no memory of where you stood yesterday, so the device
+        // keeps the last place it showed and the difference is the story.
+        const seenRank = await lastSeenRank(b.season);
+        if (!alive) return;
+        setStanding({
+          rank: b.me.rank,
+          of: b.totalPlayers,
+          // A smaller number is a better place, so the subtraction is this way
+          // round: seen 12, now 9, moved 3.
+          moved: seenRank === null ? null : seenRank - b.me.rank,
+        });
+        // Only once the day is done. Recording mid-day would spend the
+        // comparison on a score still being played.
+        //
+        // Read from the game rather than the `finished` const, which is
+        // declared below this effect: the closure would reach it fine on a
+        // normal render and throw on any render that returned early.
+        if (game && game.dayStatus !== 'playing') await markRankSeen(b.season, b.me.rank);
         const seen = await lastSeenLeague(b.season);
         if (!alive) return;
         if (promoted(seen, b.me.league)) setPromotion({ from: seen!, to: b.me.league });
@@ -365,32 +387,6 @@ export function HomeScreen({
         : 'A friend or a stranger';
   const duelWaiting = !!modes && (modes.duelsWaiting > 0 || modes.queued);
 
-  /**
-   * The ladder, which had no door.
-   *
-   * The screen, the queue, the rating and the belt have all been built and
-   * working; onOpenRanked was handed to this component and never rendered, so
-   * nothing ever asked the navigator to go there. A finished mode nobody could
-   * reach.
-   *
-   * The line leads with whichever fact is most urgent: your move first, then a
-   * match you are in, then the queue, then the belt, and a rating when none of
-   * those apply.
-   */
-  const rankedState = !modes
-    ? 'A rating and a belt'
-    : modes.ranked.needsMe
-      ? 'Your move'
-      : modes.ranked.inMatch
-        ? 'Match in progress'
-        : modes.ranked.queued
-          ? 'Looking for an opponent'
-          : modes.ranked.iHoldBelt
-            ? 'You hold the belt'
-            : modes.ranked.beltHolder
-              ? `${modes.ranked.beltHolder} holds the belt`
-              : `Rating ${modes.ranked.rating}`;
-  const rankedLive = !!modes && (modes.ranked.needsMe || modes.ranked.queued);
 
 
   /**
@@ -546,11 +542,58 @@ export function HomeScreen({
               </View>
 
               <View style={[styles.cardRule, { backgroundColor: colors.border }]} />
+
+              {/* What the day did, not only what it scored.
+                  A finished day used to end on its own number and two totals -
+                  a streak and a lifetime score, both true and neither about
+                  today. The question somebody has when the third round lands
+                  is where it left them, and every line here answers a piece of
+                  that from what the screen already loaded. */}
+              {finished && standing && (
+                <View style={styles.outcome}>
+                  <Text style={[styles.outcomeLead, { color: colors.textMuted }]}>
+                    #{standing.rank} of {standing.of} this season
+                  </Text>
+                  {standing.moved !== null && standing.moved !== 0 && (
+                    <Text
+                      style={[
+                        styles.outcomeMove,
+                        { color: standing.moved > 0 ? feedbackColors.correct : colors.textMuted },
+                      ]}
+                    >
+                      {standing.moved > 0
+                        ? `Up ${standing.moved} ${standing.moved === 1 ? 'place' : 'places'}`
+                        : `Down ${-standing.moved} ${standing.moved === -1 ? 'place' : 'places'}`}
+                    </Text>
+                  )}
+                </View>
+              )}
+
+              {finished && xp && (
+                <View style={styles.outcome}>
+                  <View style={styles.outcomeRow}>
+                    <Text style={[styles.outcomeLead, { color: colors.textMuted }]}>
+                      LEVEL {xp.level}
+                    </Text>
+                    <Text style={[styles.outcomeLead, { color: colors.textMuted }]}>
+                      {xp.into} / {xp.needed} XP
+                    </Text>
+                  </View>
+                  <View style={[styles.xpTrack, { backgroundColor: colors.border }]}>
+                    <View
+                      style={[
+                        styles.xpFill,
+                        {
+                          width: `${Math.max(0, Math.min(1, xp.into / Math.max(1, xp.needed))) * 100}%`,
+                          backgroundColor: colors.accent,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              )}
+
               <View style={styles.cardFoot}>
-                {/* The streak, not the league. The strip below this card now
-                    carries the league properly - with the points and the
-                    distance to the next one - and two crests on one screen
-                    read as two different facts. */}
                 <Text style={[styles.footText, { color: colors.textMuted }]}>
                   {game.stats.currentStreak} day streak
                 </Text>
@@ -675,35 +718,6 @@ export function HomeScreen({
               </Pressable>
             </View>
 
-            <View style={[styles.featured, { backgroundColor: colors.surface, borderWidth: border.hairline, borderColor: colors.border }]}>
-              <View style={styles.featuredMain}>
-                <Text style={[styles.featuredName, { color: colors.text }]}>Ranked</Text>
-                <Text
-                  style={[styles.featuredState, { color: rankedLive ? colors.accent : colors.textMuted }]}
-                  numberOfLines={1}
-                >
-                  {rankedState}
-                </Text>
-              </View>
-              <Pressable
-                disabled={modesLocked}
-                onPress={() => {
-                  playTap();
-                  onOpenRanked();
-                }}
-                style={({ pressed }) => [
-                  styles.featuredGo,
-                  {
-                    backgroundColor: colors.text,
-                    opacity: modesLocked ? 0.4 : pressed ? 0.8 : 1,
-                  },
-                ]}
-              >
-                <Text style={[styles.featuredGoText, { color: colors.background }]}>
-                  {modes?.ranked.needsMe ? 'Play' : 'Enter'}
-                </Text>
-              </Pressable>
-            </View>
           </>
         ) : (
           <>
@@ -900,6 +914,12 @@ const styles = StyleSheet.create({
   scoreUnit: { fontSize: type.caption, fontFamily: fonts.bold, letterSpacing: 1.2 },
   cardRule: { height: 1, alignSelf: 'stretch' },
   cardFoot: { flexDirection: 'row', justifyContent: 'space-between' },
+  outcome: { gap: 4 },
+  outcomeRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  outcomeLead: { fontSize: type.caption, fontFamily: fonts.bold, letterSpacing: 1.1 },
+  outcomeMove: { fontSize: 15, fontFamily: fonts.extraBold },
+  xpTrack: { height: 5, borderRadius: 3, overflow: 'hidden' },
+  xpFill: { height: '100%', borderRadius: 3 },
   footText: { fontSize: 11.5, fontFamily: fonts.medium },
   sectionLabel: { alignSelf: 'flex-start', fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.5, marginTop: 26 },
   suggestion: { alignSelf: 'stretch', fontSize: 13, fontFamily: fonts.semiBold, lineHeight: 19, marginTop: 8 },

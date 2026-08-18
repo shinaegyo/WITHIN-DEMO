@@ -14,7 +14,6 @@ import { AccountScreen } from '../screens/AccountScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
 import { DuelGameScreen } from '../screens/DuelGameScreen';
-import { RankedScreen } from '../screens/RankedScreen';
 import { EndlessScreen } from '../screens/EndlessScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
@@ -59,7 +58,6 @@ export type RootStackParamList = {
   Practice: { remainingAfterThis: number };
   Friends: undefined;
   Duels: undefined;
-  Ranked: undefined;
   ImpossibleBoard: undefined;
   Privacy: undefined;
   Audio: undefined;
@@ -340,7 +338,6 @@ function Screens({
                     onOpenLeaderboard={() => tab.navigation.navigate('Rank')}
                     onOpenFriends={() => navigation.navigate('Friends')}
                     onOpenDuels={() => navigation.navigate('Duels')}
-                    onOpenRanked={() => navigation.navigate('Ranked')}
                     onOpenProfile={() => tab.navigation.navigate('You')}
                     practiceEpoch={practiceEpoch}
                     username={username}
@@ -455,12 +452,6 @@ function Screens({
           options={{ title: 'Reminders', headerBackTitle: 'Back' }}
           component={RemindersScreen}
         />
-
-        <Stack.Screen name="Ranked" options={{ title: 'Ranked', headerBackTitle: 'Back' }}>
-          {({ navigation }) => (
-            <RankedScreen onPlay={(duelId) => navigation.navigate('DuelGame', { duelId })} />
-          )}
-        </Stack.Screen>
 
         <Stack.Screen name="DuelGame" options={{ headerShown: false }}>
           {({ navigation, route }) => (

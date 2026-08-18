@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { LevelBar } from '../components/LevelBar';
-import { SeasonLeaderboard, XpState, loadRanked, loadSeasonLeaderboard, loadXp } from '../lib/api';
+import { SeasonLeaderboard, XpState, loadSeasonLeaderboard, loadXp } from '../lib/api';
 import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { LEAGUE_INK } from '../theme/leagues';
@@ -76,7 +76,6 @@ export function ProfileScreen({
   // The season, not a lifetime: the all-time board is gone, and standing in a
   // league nobody new can enter was the reason it went.
   const [rank, setRank] = useState<SeasonLeaderboard['me']>(null);
-  const [rating, setRating] = useState<number | null>(null);
   const [crown, setCrown] = useState(false);
   const [xp, setXp] = useState<XpState | null>(null);
 
@@ -86,12 +85,6 @@ export function ProfileScreen({
       .catch(() => {});
     loadSeasonLeaderboard()
       .then((b) => setRank(b.me))
-      .catch(() => {});
-    loadRanked()
-      .then((r) => {
-        setRating(r.played > 0 ? r.rating : null);
-        setCrown(r.iHoldBelt);
-      })
       .catch(() => {});
   }, []);
 
@@ -195,7 +188,6 @@ export function ProfileScreen({
 
       <Text style={[styles.line, { color: colors.textMuted }]}>
         {rank ? `#${rank.rank} this season` : 'Finish a day to reach the board'}
-        {rating !== null ? ` · ${rating} ranked` : ''}
       </Text>
 
       {/* The one thing people get wrong about a game with five modes in it. */}

@@ -781,15 +781,6 @@ export interface HomeStatus {
   duelWaiting: { duelId: string; name: string; avatar: string | null; pending: boolean } | null;
   /** You are in the duel queue, whatever screen you are looking at. */
   queued: boolean;
-  ranked: {
-    rating: number | null;
-    played: number;
-    queued: boolean;
-    inMatch: boolean;
-    needsMe: boolean;
-    beltHolder: string | null;
-    iHoldBelt: boolean;
-  };
   impossible: {
     /**
      * A flag wearing a counter's clothes: 1 before the first guess of the day
@@ -827,15 +818,6 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
         }
       : null,
     queued: !!raw.queued,
-    ranked: {
-      rating: raw.ranked?.rating ?? null,
-      played: raw.ranked?.played ?? 0,
-      queued: !!raw.ranked?.queued,
-      inMatch: !!raw.ranked?.inMatch,
-      needsMe: !!raw.ranked?.needsMe,
-      beltHolder: raw.ranked?.beltHolder ?? null,
-      iHoldBelt: !!raw.ranked?.iHoldBelt,
-    },
     impossible: {
       sessionsLeft: raw.impossible?.sessionsLeft ?? 0,
       // False against a server that predates 0150, which is the harmless way
@@ -855,78 +837,6 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
   };
 }
 
-export interface RankedEntry {
-  rank: number;
-  name: string;
-  rating: number;
-  won: number;
-  lost: number;
-  isMe: boolean;
-  hasBelt: boolean;
-}
-
-export interface RankedState {
-  rating: number;
-  played: number;
-  won: number;
-  lost: number;
-  drawn: number;
-  /** Still in placement matches, where the rating swings hardest. */
-  placing: boolean;
-  rank: number;
-  of: number;
-  queued: boolean;
-  /** Others waiting, so an empty queue can say so. */
-  waiting: number;
-  beltHolder: string | null;
-  iHoldBelt: boolean;
-  match: { id: string; opponent: string } | null;
-  board: RankedEntry[];
-}
-
-export async function loadRanked(): Promise<RankedState> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('ranked_state');
-  const raw = unwrap<any>(data, error);
-  return {
-    rating: raw.rating ?? 1000,
-    played: raw.played ?? 0,
-    won: raw.won ?? 0,
-    lost: raw.lost ?? 0,
-    drawn: raw.drawn ?? 0,
-    placing: !!raw.placing,
-    rank: raw.rank ?? 0,
-    of: raw.of ?? 0,
-    queued: !!raw.queued,
-    waiting: raw.waiting ?? 0,
-    beltHolder: raw.beltHolder ?? null,
-    iHoldBelt: !!raw.iHoldBelt,
-    match: raw.match ?? null,
-    board: (raw.board ?? []).map((e: any) => ({
-      rank: e.rank,
-      name: e.name,
-      rating: e.rating,
-      won: e.won ?? 0,
-      lost: e.lost ?? 0,
-      isMe: !!e.is_me,
-      hasBelt: !!e.has_belt,
-    })),
-  };
-}
-
-/** Queue for a match, or take one if somebody is already waiting. */
-export async function findRankedMatch(): Promise<{ status: 'queued' | 'matched'; duelId?: string }> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('ranked_find');
-  const raw = unwrap<any>(data, error);
-  return { status: raw.status, duelId: raw.duelId };
-}
-
-export async function leaveRankedQueue(): Promise<void> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('ranked_leave_queue');
-  unwrap<any>(data, error);
-}
 
 /**
  * Leave a duel. An accepted one goes to the other player; a challenge nobody

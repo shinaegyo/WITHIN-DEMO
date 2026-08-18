@@ -133,11 +133,6 @@ export function PlayerCardModal({
                 </Text>
                 {/* One of these exists in the whole game, so it goes next to
                     the name rather than into a row of statistics. */}
-                {card.hasBelt && (
-                  <View style={[styles.belt, { borderColor: colors.accent }]}>
-                    <Text style={[styles.beltText, { color: colors.accent }]}>CROWN</Text>
-                  </View>
-                )}
 
                 {/* A crest, in the corner. The league is an identity rather
                     than a measurement, and it was being cut to "Br…" in a
@@ -225,12 +220,6 @@ export function PlayerCardModal({
                 )}
                 {/* Only ever a finished day - a day in progress stays theirs. */}
                 {card.todayScore !== null && <Row label="Today's points" value={`${card.todayScore}`} />}
-                {card.ranked && (
-                  <Row
-                    label="Ranked"
-                    value={`${card.ranked.rating} · ${card.ranked.won}W ${card.ranked.lost}L`}
-                  />
-                )}
                 {card.duels && card.duels.won + card.duels.lost + card.duels.drawn > 0 && (
                   <Row
                     label="Duels"
