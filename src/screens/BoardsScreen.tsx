@@ -25,7 +25,7 @@ import { MEDALS } from '../theme/medals';
 import { LeagueBadge } from '../components/LeagueBadge';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
-import { radius, border } from '../theme/tokens';
+import { radius, border, numeral } from '../theme/tokens';
 
 /**
  * Every board in one place.
@@ -446,14 +446,17 @@ export function BoardsScreen() {
           style={[styles.mine, { borderColor: colors.border }]}
         >
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
-            {season.me ? standing(season.me, season.totalPlayers, 'THIS SEASON') : 'NOT ON THIS SEASON YET'}
+            {season.me
+              ? `${standing(season.me, season.totalPlayers, 'THIS SEASON')} · POINTS`
+              : 'NOT ON THIS SEASON YET'}
           </Text>
-          <View style={styles.mineLine}>
-            <Text style={[styles.mineScore, { color: colors.text }]}>
-              {(season.me?.score ?? 0).toLocaleString()}
-            </Text>
-            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>points</Text>
-          </View>
+          {/* The unit moves up into the lead, so the figure holds its own
+              line. "24 points" put a 46-point number on one baseline with a
+              15-point word, which reads as a statistic with a caption rather
+              than as the number the screen is about. */}
+          <Text style={[styles.mineScore, { color: colors.text }]}>
+            {(season.me?.score ?? 0).toLocaleString()}
+          </Text>
           {/* The countdown is the whole reason a season is different from a
               running total: it is the thing that makes the last week matter. */}
         </Pressable>
@@ -471,18 +474,15 @@ export function BoardsScreen() {
           }}
           style={[styles.mine, { borderColor: colors.border }]}
         >
+          {/* The unit rides in the lead rather than on the figure's baseline,
+              the same as the season panel. Stacking it as its own line was the
+              old problem - a third label in a card that already had two - and
+              putting it beside the number was the other one. Above, in the
+              line that already names the standing, it is neither. */}
           <Text style={[styles.mineLead, { color: colors.textMuted }]}>
-            {standing(today.me, today.totalPlayers, 'TODAY')}
+            {standing(today.me, today.totalPlayers, 'TODAY')} · {today.me.score === 1 ? 'POINT' : 'POINTS'}
           </Text>
-          {/* One line. Stacked, the unit read as a third label in a card that
-              already had two, and put a line break between a number and the
-              word that says what it is. */}
-          <View style={styles.mineLine}>
-            <Text style={[styles.mineScore, { color: colors.text }]}>{today.me.score}</Text>
-            <Text style={[styles.mineUnit, { color: colors.textMuted }]}>
-              {today.me.score === 1 ? 'point' : 'points'}
-            </Text>
-          </View>
+          <Text style={[styles.mineScore, { color: colors.text }]}>{today.me.score}</Text>
           {/* The explanation is unconditional. It used to ride along with the
               tie - "4 players on this score, the closer guesses rank higher" -
               so on any day you were alone on your score, nothing on the screen
@@ -844,9 +844,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   mineLead: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 1.8 },
-  mineScore: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -2, lineHeight: 52 },
-  mineLine: { flexDirection: 'row', alignItems: 'baseline', gap: 7 },
-  mineUnit: { fontSize: 15, fontFamily: fonts.bold },
+  mineScore: { ...numeral(46), fontFamily: fonts.extraBold },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: 26 },
   sheet: { borderWidth: border.hairline, borderRadius: radius.panel, padding: 22, gap: 10, maxWidth: 420, width: '100%' },
   sheetTitle: { fontSize: 21, fontFamily: fonts.extraBold, letterSpacing: -0.4 },

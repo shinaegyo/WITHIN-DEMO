@@ -1013,10 +1013,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   nextLabelUrgent: { fontFamily: fonts.extraBold },
+  // Positive tracking on a heavy figure pushed the digits apart, so a clock
+  // meant to be read at a glance read as eight separate characters.
   countdown: {
-    fontSize: 32,
+    ...numeral(32),
     fontFamily: fonts.extraBold,
-    letterSpacing: 1,
     marginTop: 2,
   },
 });
