@@ -330,9 +330,18 @@ const styles = StyleSheet.create({
   crestName: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 0.8 },
   beltText: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1.1 },
   stats: { flexDirection: 'row', marginTop: 18, marginBottom: 4 },
-  stat: { flex: 1 },
-  statValue: { fontSize: 26, fontFamily: fonts.extraBold },
-  statLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.3, marginTop: -1 },
+  // Centred in the column rather than ranged left. The labels are four
+  // different lengths, so a left-ranged number sat hard against POINTS and
+  // adrift over CLIMB - four columns that never lined up with each other.
+  stat: { flex: 1, alignItems: 'center' },
+  statValue: { fontSize: 26, fontFamily: fonts.extraBold, textAlign: 'center' },
+  statLabel: {
+    fontSize: 9,
+    fontFamily: fonts.bold,
+    letterSpacing: 1.3,
+    marginTop: -1,
+    textAlign: 'center',
+  },
   today: { flexDirection: 'row', gap: 6, marginTop: 16 },
   todayBar: { flex: 1, height: 40, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   todayScore: { color: '#FFFFFF', fontSize: 13, fontFamily: fonts.extraBold },
