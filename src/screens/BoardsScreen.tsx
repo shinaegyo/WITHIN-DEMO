@@ -625,9 +625,8 @@ export function BoardsScreen() {
               }}
               style={({ pressed }) => [
                 styles.row,
-                e.isMe
-                  ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
-                  : { borderColor: colors.border, borderWidth: border.hairline, backgroundColor: colors.surface },
+                { borderBottomColor: colors.border },
+                e.isMe && { backgroundColor: colors.surfaceAlt },
                 { opacity: pressed ? 0.7 : 1 },
               ]}
             >
@@ -676,9 +675,8 @@ export function BoardsScreen() {
               }}
               style={[
                 styles.row,
-                e.isMe
-                  ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
-                  : { borderColor: colors.border, backgroundColor: colors.surface },
+                { borderBottomColor: colors.border },
+                e.isMe && { backgroundColor: colors.surfaceAlt },
               ]}
             >
               <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
@@ -919,12 +917,24 @@ const styles = StyleSheet.create({
   sheetLead: { fontSize: 15, fontFamily: fonts.extraBold, lineHeight: 21 },
   mineNote: { fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'center', paddingHorizontal: 16 },
   note: { fontSize: 11.5, fontFamily: fonts.medium, lineHeight: 16, paddingHorizontal: 16, paddingTop: 10 },
-  list: { padding: 14, gap: 8 },
+  // No gap. The rows are separated by their own hairline now, and 8 points
+  // between them would leave each line floating in space instead of dividing
+  // one row from the next.
+  list: { padding: 14 },
+  // A list, not nineteen boxes.
+  //
+  // Every row was a bordered, rounded, filled card - so a leaderboard of
+  // nineteen people was nineteen identical pills stacked up, which is a lot of
+  // furniture around what is really just names and numbers. One hairline
+  // between rows carries the same separation and lets the type do the work.
+  //
+  // Your own row keeps a fill, because it is the one row somebody is scanning
+  // for and a hairline cannot mark it.
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: radius.card,
-    paddingVertical: 12,
+    borderBottomWidth: border.hairline,
+    paddingVertical: 13,
     paddingHorizontal: 13,
     gap: 10,
   },
