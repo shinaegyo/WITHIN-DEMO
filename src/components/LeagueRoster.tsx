@@ -6,7 +6,7 @@ import { LeagueBadge } from './LeagueBadge';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { League, LeagueBoard, loadLeagueBoard, messageFor, ApiError } from '../lib/api';
-import { LEAGUE_FLOOR, LEAGUE_INK } from '../theme/leagues';
+
 import { playTap } from '../utils/sound';
 
 /**
@@ -56,9 +56,12 @@ export function LeagueRoster({
             <View style={styles.head}>
               <LeagueBadge league={league} size={22} />
               <Text style={[styles.name, { color: colors.text }]}>{league}</Text>
+              {/* Just the count. The floor was tacked on here as well as being
+                  stated on every row of the ladder that opens this, and "from
+                  0" against Bronze is the least useful thing on the screen -
+                  a threshold nobody has to clear. */}
               <Text style={[styles.count, { color: colors.textMuted }]}>
                 {board ? `${board.total} ${board.total === 1 ? 'player' : 'players'}` : ''}
-                {league === 'Legend' ? '' : ` · from ${LEAGUE_FLOOR[league]}`}
               </Text>
             </View>
           )}
