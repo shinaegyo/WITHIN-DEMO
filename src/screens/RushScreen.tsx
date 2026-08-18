@@ -198,17 +198,25 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   const standings = (title: string) =>
     rows.length === 0 ? null : (
       <View style={styles.board}>
-        <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
-        <View style={styles.row}>
-          <Text style={[styles.rank, { color: 'transparent' }]}>0</Text>
-          <View style={styles.headSpacer} />
+        {/* One line of headings, like the climb: what the board is on the
+            left, what its columns are on the right. The title used to float
+            centred on a line of its own above them. */}
+        <View style={styles.headRow}>
+          <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
           <Text style={[styles.colHead, { color: colors.textMuted }]}>GUESSES</Text>
           <Text style={[styles.colHeadRight, { color: colors.textMuted }]}>FOUND</Text>
         </View>
         {shown.map((e, i) => (
           <React.Fragment key={`${e.rank}-${e.name}-${i}`}>
           {i === breakAt && <StandingsBreak />}
-          <View style={styles.row}>
+          <View
+            style={[
+              styles.row,
+              e.isMe
+                ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
+                : { borderColor: colors.border, backgroundColor: colors.surface },
+            ]}
+          >
             {MEDALS[e.rank] ? (
               <View style={[styles.medal, { backgroundColor: MEDALS[e.rank].ring }]}>
                 <Text style={[styles.medalText, { color: MEDALS[e.rank].ink }]}>{e.rank}</Text>
@@ -216,7 +224,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             ) : (
               <Text style={[styles.rank, { color: colors.textMuted }]}>{e.rank}</Text>
             )}
-            <Avatar value={e.avatar} size={24} name={e.name} />
+            <Avatar value={e.avatar} size={30} name={e.name} />
             <Text
               style={[styles.name, { color: colors.text }, e.isMe && styles.me]}
               numberOfLines={1}
@@ -538,23 +546,34 @@ const styles = StyleSheet.create({
   counterLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.6, marginTop: -4 },
   gotIt: { fontSize: 13, fontFamily: fonts.extraBold, textAlign: 'center' },
   boardWrap: { flex: 1 },
-  board: { alignSelf: 'stretch', marginTop: 18, gap: 6 },
+  board: { alignSelf: 'stretch', marginTop: 18, gap: 8 },
   boardTitle: {
+    flex: 1,
     fontSize: 9.5,
     fontFamily: fonts.bold,
     letterSpacing: 1.4,
-    marginBottom: 2,
-    textAlign: 'center',
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  rank: { width: 20, fontSize: 12, fontFamily: fonts.extraBold, textAlign: 'center' },
-  medal: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  medalText: { fontSize: 10, fontFamily: fonts.extraBold },
-  name: { flex: 1, fontSize: 13.5, fontFamily: fonts.bold },
-  me: { textDecorationLine: 'underline' },
+  // A card per player, at the climb's measurements: same corner, same padding,
+  // same avatar, same type. Rush drew its standings as bare flex rows a size
+  // smaller than the climb's - two boards in the same app disagreeing about
+  // what a player on a leaderboard looks like.
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  /** The column heads sit above the cards, so they take none of the box. */
+  headRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14 },
+  rank: { width: 20, fontSize: 13, fontFamily: fonts.extraBold },
+  medal: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  medalText: { fontSize: 11, fontFamily: fonts.extraBold },
+  name: { flex: 1, fontSize: 15, fontFamily: fonts.bold },
+  me: { fontFamily: fonts.extraBold },
   found: { fontSize: 15, fontFamily: fonts.extraBold, width: 42, textAlign: 'right' },
   guessCount: { fontSize: 12, fontFamily: fonts.bold, width: 54, textAlign: 'right' },
-  headSpacer: { flex: 1 },
   colHead: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1, width: 54, textAlign: 'right' },
   colHeadRight: {
     fontSize: 8.5,

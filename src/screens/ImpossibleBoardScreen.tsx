@@ -114,7 +114,15 @@ export function ImpossibleBoardScreen({
             of LVL down the right edge was the label shouting louder than the
             numbers it was labelling. */}
         {rows.length > 0 && (
-          <Text style={[styles.columnHead, { color: colors.text }]}>LEVEL</Text>
+          <View style={styles.columnHeads}>
+            {/* The name column had no heading, so the line read as a caption
+                over the numbers rather than a heading over the board. Same
+                size, weight and ink as LEVEL - two headings on one line. */}
+            <Text style={[styles.columnHead, styles.columnHeadLeft, { color: colors.text }]}>
+              STANDINGS
+            </Text>
+            <Text style={[styles.columnHead, { color: colors.text }]}>LEVEL</Text>
+          </View>
         )}
 
         {shown.map((e, i) => (
@@ -312,6 +320,7 @@ const styles = StyleSheet.create({
   // the column of numbers means, and at a muted 9.5 it was the quietest
   // element above the loudest one. Kept to a header's size and given a
   // header's weight instead.
+  columnHeads: { flexDirection: 'row', alignItems: 'center' },
   columnHead: {
     fontSize: 10.5,
     fontFamily: fonts.extraBold,
@@ -320,6 +329,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     paddingRight: 14,
   },
+  /** Takes the slack so LEVEL stays where the rows put it. */
+  columnHeadLeft: { flex: 1, textAlign: 'left', paddingRight: 0, paddingLeft: 14 },
   // The number's size, colour and weight. Nothing about it is set apart.
   //
   // Every difference tried here read as a different font rather than as a
