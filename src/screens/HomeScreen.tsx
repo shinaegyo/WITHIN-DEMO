@@ -28,6 +28,8 @@ import { Mark } from '../components/Mark';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { LeagueUpOverlay } from '../components/LeagueUpOverlay';
 import { LeagueBadge } from '../components/LeagueBadge';
+import { LeagueStrip } from '../components/LeagueStrip';
+import { LeagueLadder } from '../components/LeagueLadder';
 import { GamesUnlockedOverlay } from '../components/GamesUnlockedOverlay';
 import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
@@ -81,6 +83,11 @@ export function HomeScreen({
   const [unlocked, setUnlocked] = useState(false);
   // The season's league, and the promotion card owed for reaching it.
   const [league, setLeague] = useState<League | null>(null);
+  // The season's points, which is what the ladder measures. game.stats holds
+  // the all-time total, and using that would put somebody in Bronze while the
+  // strip above it claimed nine hundred.
+  const [seasonPoints, setSeasonPoints] = useState<number | null>(null);
+  const [ladderOpen, setLadderOpen] = useState(false);
   const [promotion, setPromotion] = useState<{ from: League; to: League } | null>(null);
 
   // The calm track. Outside the games the app is not silent any more - it has
@@ -146,6 +153,7 @@ export function HomeScreen({
       .then(async (b) => {
         if (!alive || !b.me) return;
         setLeague(b.me.league);
+        setSeasonPoints(b.me.score);
         const seen = await lastSeenLeague(b.season);
         if (!alive) return;
         if (promoted(seen, b.me.league)) setPromotion({ from: seen!, to: b.me.league });
@@ -647,6 +655,17 @@ export function HomeScreen({
               </View>
             </View>
 
+            {/* Under the day's two numbers and above the way in: the league is
+                a season-long thing and reads wrong beside a streak, but it is
+                the only place that says what the next rung costs. */}
+            {league && seasonPoints !== null && (
+              <LeagueStrip
+                league={league}
+                points={seasonPoints}
+                onPress={() => setLadderOpen(true)}
+              />
+            )}
+
             <Pressable
               style={({ pressed }) => [
                 styles.primary,
@@ -733,6 +752,13 @@ export function HomeScreen({
           }}
         />
       )}
+
+      <LeagueLadder
+        visible={ladderOpen}
+        onClose={() => setLadderOpen(false)}
+        league={league}
+        points={seasonPoints}
+      />
     </SafeAreaView>
   );
 }
