@@ -18,6 +18,7 @@ import { fonts } from '../theme/fonts';
 import { LEAGUE_INK } from '../theme/leagues';
 import { LeagueBadge } from './LeagueBadge';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Who somebody is, from a name on a board.
@@ -320,11 +321,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
-  sheet: { borderWidth: 1, borderRadius: 20, padding: 22, gap: 2 },
+  sheet: { borderWidth: border.hairline, borderRadius: radius.panel, padding: 22, gap: 2 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   name: { fontSize: 24, fontFamily: fonts.extraBold, flexShrink: 1 },
-  belt: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 9, paddingVertical: 3 },
+  belt: { borderWidth: border.selectable, borderRadius: radius.panel, paddingHorizontal: 9, paddingVertical: 3 },
   crest: { marginLeft: 'auto', alignItems: 'center', gap: 2 },
   crestName: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 0.8 },
   beltText: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1.1 },

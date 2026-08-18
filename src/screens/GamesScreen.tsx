@@ -9,6 +9,7 @@ import { useDailyGameContext } from '../state/DailyGameContext';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Everything that is not the daily.
@@ -227,7 +228,7 @@ export function GamesScreen({
           // Locked and spent look the same, because they are the same to a
           // thumb: a black button that refuses a press reads as broken.
           locked || practiceLeft === 0
-            ? { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: 1 }
+            ? { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: border.hairline }
             : { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
         ]}
       >
@@ -272,8 +273,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 18,
+    borderWidth: border.hairline,
+    borderRadius: radius.sheet,
     // Twice the height: four rows and a note left most of the screen empty, and
     // a row you can hit without looking is worth more than the space it saves.
     paddingVertical: 30,
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   divider: { height: 1, marginTop: 20, marginHorizontal: 40 },
   practice: {
     marginTop: 18,
-    borderRadius: 16,
+    borderRadius: radius.button,
     paddingVertical: 14,
     alignItems: 'center',
   },

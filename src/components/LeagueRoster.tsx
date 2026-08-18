@@ -8,6 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { League, LeagueBoard, loadLeagueBoard, messageFor, ApiError } from '../lib/api';
 
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * The people standing in one league.
@@ -112,7 +113,7 @@ export function LeagueRoster({
 
 const styles = StyleSheet.create({
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', padding: 22 },
-  sheet: { borderRadius: 18, borderWidth: 1, padding: 18 },
+  sheet: { borderRadius: radius.sheet, borderWidth: border.hairline, padding: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   name: { fontSize: 16, fontFamily: fonts.bold },
   count: { flex: 1, fontSize: 12, fontFamily: fonts.medium, textAlign: 'right' },

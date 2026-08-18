@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /**
  * The round's clue.
@@ -24,8 +25,8 @@ export function ClueCard({ clue }: { clue: string }) {
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1,
-    borderRadius: 16,
+    borderWidth: border.hairline,
+    borderRadius: radius.button,
     paddingVertical: 14,
     paddingHorizontal: 16,
     alignItems: 'center',

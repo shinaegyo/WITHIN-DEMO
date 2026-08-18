@@ -10,6 +10,7 @@ import { formatCountdown, msUntilLocalMidnight } from '../utils/countdown';
 import { shareResult } from '../utils/share';
 import { Confetti } from './Confetti';
 import { Rings } from './effects/Rings';
+import { radius, border } from '../theme/tokens';
 
 interface Props {
   game: DailyGame;
@@ -366,7 +367,7 @@ const styles = StyleSheet.create({
   rings: { alignItems: 'center', justifyContent: 'center' },
   card: {
     width: '88%',
-    borderRadius: 24,
+    borderRadius: radius.modal,
     paddingVertical: 26,
     paddingHorizontal: 22,
     alignItems: 'center',
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
   },
   warn: { fontSize: 13, fontFamily: fonts.bold, textAlign: 'center' },
   primary: {
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 14,
     alignSelf: 'stretch',
     alignItems: 'center',
@@ -414,8 +415,8 @@ const styles = StyleSheet.create({
   },
   primaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.bold },
   secondary: {
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 12,
     paddingHorizontal: 22,
     marginTop: 10,

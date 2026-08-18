@@ -3,6 +3,7 @@ import { PanResponder, StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { border } from '../theme/tokens';
 
 /**
  * A line you drag.
@@ -105,5 +106,5 @@ const styles = StyleSheet.create({
   trackArea: { height: 20, justifyContent: 'center' },
   track: { height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
-  knob: { position: 'absolute', width: 20, height: 20, borderRadius: 10, borderWidth: 2 },
+  knob: { position: 'absolute', width: 20, height: 20, borderRadius: 10, borderWidth: border.marked },
 });

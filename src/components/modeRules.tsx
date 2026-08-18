@@ -6,6 +6,7 @@ import { ARENAS, SUMMIT } from '../theme/arenas';
 import { TierGlyph, Tier } from './TierGlyph';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Every mode's rules, written as pages rather than paragraphs.
@@ -242,7 +243,7 @@ function TierTable() {
 }
 
 const styles = StyleSheet.create({
-  table: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 14 },
+  table: { borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 4, marginTop: 14 },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, gap: 10 },
   rowKey: { fontSize: 14.5, fontFamily: fonts.extraBold, minWidth: 62 },
   rowMid: { flex: 1, fontSize: 14.5, fontFamily: fonts.extraBold, paddingRight: 8 },

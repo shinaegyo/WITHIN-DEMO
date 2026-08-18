@@ -25,6 +25,7 @@ import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Where Impossible starts: how far everybody got, and then the button.
@@ -137,7 +138,7 @@ export function ImpossibleBoardScreen({
           style={[
             styles.row,
             e.isMe
-              ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
+              ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
               : { borderColor: colors.border, backgroundColor: colors.surface },
           ]}
         >
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
   rulesHead: { fontSize: 24, fontFamily: fonts.extraBold, marginTop: 30, marginBottom: 14 },
   ruleGap: { marginTop: 20 },
   rule: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 10 },
-  tiers: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 2, marginBottom: 12 },
+  tiers: { borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 4, marginTop: 2, marginBottom: 12 },
   tierRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 12, gap: 10 },
   swatch: { width: 12, height: 12, borderRadius: 3 },
   tierName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
@@ -290,13 +291,13 @@ const styles = StyleSheet.create({
   tierAttempts: { fontSize: 11.5, fontFamily: fonts.medium, width: 74, textAlign: 'right' },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 8 },
   best: { fontSize: 12, fontFamily: fonts.medium, textAlign: 'center' },
-  play: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
+  play: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   playText: { fontSize: 16, fontFamily: fonts.extraBold },
   caption: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 6 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 13,
     paddingHorizontal: 14,
     gap: 10,

@@ -28,6 +28,7 @@ import { climbTrack } from '../utils/climbTrack';
 import { devStageLevel } from '../utils/devSkip';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * The week's endless run: the same sequence of numbers for everyone, played
@@ -433,7 +434,7 @@ const styles = StyleSheet.create({
   arenaName: { fontSize: 12, fontFamily: fonts.extraBold, letterSpacing: 2.4, marginBottom: 4 },
   levelRow: { alignItems: 'center' },
   level: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },
-  noClue: { borderWidth: 1, borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
+  noClue: { borderWidth: border.hairline, borderRadius: radius.button, paddingVertical: 14, alignItems: 'center' },
   noClueText: { fontSize: 12.5, fontFamily: fonts.medium },
   levelLabel: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 1.4, marginTop: -2 },
   boardWrap: { flex: 1 },
@@ -460,7 +461,7 @@ const styles = StyleSheet.create({
   overBody: { fontSize: 13, fontFamily: fonts.medium, textAlign: 'center', lineHeight: 19 },
   again: {
     marginTop: 6,
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 13,
     paddingHorizontal: 32,
     alignItems: 'center',

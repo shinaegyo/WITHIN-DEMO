@@ -5,6 +5,7 @@ import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /** Space between two sections sharing a page. */
 const GAP = 26;
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 46,
-    borderRadius: 12,
+    borderRadius: radius.tile,
     paddingLeft: 18,
     paddingRight: 14,
     marginBottom: 7,
@@ -338,7 +339,7 @@ const styles = StyleSheet.create({
   tileGuess: { flex: 1, fontSize: 18, fontFamily: fonts.extraBold },
   tileBand: { fontSize: 10, fontFamily: fonts.extraBold, letterSpacing: 0.6 },
   tileArrow: { fontSize: 14, marginLeft: 10 },
-  scoreBox: { borderWidth: 1, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 6, marginTop: 12 },
+  scoreBox: { borderWidth: border.hairline, borderRadius: radius.card, paddingHorizontal: 16, paddingVertical: 6, marginTop: 12 },
   scoreRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7 },
   scoreLabel: { fontSize: 14, fontFamily: fonts.medium },
   scoreValue: { fontSize: 15, fontFamily: fonts.extraBold },

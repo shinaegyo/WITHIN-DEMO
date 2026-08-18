@@ -26,6 +26,7 @@ function monthName(iso: string): string {
   return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 }
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * You, and the settings that describe how you play rather than how you are
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12, fontFamily: fonts.medium, marginTop: 2 },
   levelWrap: { marginTop: 20 },
   stats: { flexDirection: 'row', gap: 8, marginTop: 20 },
-  stat: { flex: 1, borderWidth: 1, borderRadius: 14, paddingVertical: 12, alignItems: 'center' },
+  stat: { flex: 1, borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 12, alignItems: 'center' },
   statValue: { fontSize: 20, fontFamily: fonts.extraBold },
   statLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1.1, marginTop: 1 },
   line: { fontSize: 12, fontFamily: fonts.medium, marginTop: 10, textAlign: 'center' },
@@ -285,8 +286,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 13,
     paddingHorizontal: 15,
     gap: 10,

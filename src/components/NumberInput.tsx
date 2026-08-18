@@ -4,6 +4,7 @@ import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 type SubmitOutcome = { ok: true } | { ok: false; error: string };
 
@@ -142,8 +143,8 @@ const styles = StyleSheet.create({
   shell: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: 16,
+    borderWidth: border.selectable,
+    borderRadius: radius.button,
     padding: 5,
   },
   fieldWrap: {
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignSelf: 'stretch',
-    borderRadius: 12,
+    borderRadius: radius.tile,
     paddingHorizontal: 20,
     justifyContent: 'center',
     alignItems: 'center',

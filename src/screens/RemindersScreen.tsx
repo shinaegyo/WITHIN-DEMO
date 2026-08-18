@@ -8,6 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 import { setReminders, type ReminderPrefs } from '../lib/api';
 import { enablePush, pushAllowed } from '../utils/push';
+import { radius, border } from '../theme/tokens';
 
 /**
  * One reminder a day, at an hour you choose.
@@ -194,8 +195,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 16,
+    borderWidth: border.hairline,
+    borderRadius: radius.button,
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 12,
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   state: { fontSize: 13, fontFamily: fonts.extraBold, letterSpacing: 0.5 },
   section: { fontSize: 11.5, fontFamily: fonts.extraBold, letterSpacing: 1, marginTop: 14 },
   hours: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  hour: { borderWidth: 1, borderRadius: 12, paddingVertical: 9, paddingHorizontal: 14 },
+  hour: { borderWidth: border.hairline, borderRadius: radius.tile, paddingVertical: 9, paddingHorizontal: 14 },
   hourText: { fontSize: 13.5, fontFamily: fonts.bold },
   note: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, paddingHorizontal: 2 },
   footer: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 16 },

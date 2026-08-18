@@ -4,6 +4,7 @@ import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Round two hands over a fact, and lets you choose what kind of fact it is.
@@ -107,11 +108,11 @@ export function ChooseYourClue({
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: 18, padding: 16 },
+  card: { borderWidth: border.hairline, borderRadius: radius.sheet, padding: 16 },
   label: { fontSize: 10.5, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
   lede: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, marginTop: 6 },
   choices: { gap: 9, marginTop: 12 },
-  choice: { borderWidth: 1.5, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 16 },
+  choice: { borderWidth: border.selectable, borderRadius: radius.button, paddingVertical: 13, paddingHorizontal: 16 },
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
   title: { fontSize: 15.5, fontFamily: fonts.extraBold, flexShrink: 1 },
   upTo: { fontSize: 11.5, fontFamily: fonts.bold },

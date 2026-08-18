@@ -7,6 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { League } from '../lib/api';
 import { LEAGUE_FLOOR, LEAGUE_INK, nextLeague } from '../theme/leagues';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Where you are on the ladder, and how far the next rung is.
@@ -77,8 +78,8 @@ const styles = StyleSheet.create({
   // above it - the only element on the screen not sharing the same margins.
   wrap: {
     alignSelf: 'stretch',
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     padding: 12,
     marginBottom: 14,
   },

@@ -38,6 +38,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { hapticCorrect, hapticForTier, hapticInvalid } from '../utils/haptics';
 import { playCorrect, playForTier, playLose, playTap } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Three minutes, as many numbers as you can find.
@@ -216,7 +217,7 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             style={[
               styles.row,
               e.isMe
-                ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
+                ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
                 : { borderColor: colors.border, backgroundColor: colors.surface },
             ]}
           >
@@ -519,7 +520,7 @@ const styles = StyleSheet.create({
   rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 16, marginBottom: 2 },
   // Same shape as Impossible's tier table: a bordered block of rows, the value
   // first and the reading of it alongside.
-  facts: { borderWidth: 1, borderRadius: 14, paddingVertical: 4, marginTop: 6, marginBottom: 4 },
+  facts: { borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 4, marginTop: 6, marginBottom: 4 },
   factRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 12, gap: 10 },
   factValue: { width: 52, fontSize: 15, fontFamily: fonts.extraBold },
   factLabel: { fontSize: 13, fontFamily: fonts.bold },
@@ -536,7 +537,7 @@ const styles = StyleSheet.create({
   note: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
   start: {
     alignSelf: 'stretch',
-    borderRadius: 16,
+    borderRadius: radius.button,
     paddingVertical: 15,
     alignItems: 'center',
     marginTop: 6,
@@ -563,7 +564,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 13,
     paddingHorizontal: 14,
     gap: 10,

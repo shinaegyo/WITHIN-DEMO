@@ -8,6 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { VolumeSlider } from '../components/VolumeSlider';
 import { refreshMusic } from '../utils/music';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 import {
   loadMusicSetting,
   loadSoundSetting,
@@ -160,8 +161,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 12,

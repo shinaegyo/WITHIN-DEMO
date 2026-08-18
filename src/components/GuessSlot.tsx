@@ -6,6 +6,7 @@ import { GuessResult } from '../game/types';
 import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 // Slots flex to share the available board height, but never grow so tall
 // they stop reading as a row of boxes.
@@ -13,7 +14,7 @@ const slotBase = {
   flex: 1,
   minHeight: 44,
   maxHeight: 84,
-  borderRadius: 14,
+  borderRadius: radius.card,
   flexDirection: 'row',
   alignItems: 'center',
   paddingLeft: 20,
@@ -129,7 +130,7 @@ export function FilledSlot({
 const styles = StyleSheet.create({
   slot: slotBase,
   empty: {
-    borderWidth: 1.5,
+    borderWidth: border.selectable,
     justifyContent: 'space-between',
   },
   finalSlot: {

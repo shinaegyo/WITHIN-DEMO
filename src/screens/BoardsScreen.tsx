@@ -25,6 +25,7 @@ import { MEDALS } from '../theme/medals';
 import { LeagueBadge } from '../components/LeagueBadge';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Every board in one place.
@@ -415,7 +416,7 @@ export function BoardsScreen() {
               styles.segment,
               t.key === tab
                 ? { backgroundColor: colors.text }
-                : { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 },
+                : { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: border.hairline },
             ]}
           >
             <Text
@@ -625,8 +626,8 @@ export function BoardsScreen() {
               style={({ pressed }) => [
                 styles.row,
                 e.isMe
-                  ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
-                  : { borderColor: colors.border, borderWidth: 1, backgroundColor: colors.surface },
+                  ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
+                  : { borderColor: colors.border, borderWidth: border.hairline, backgroundColor: colors.surface },
                 { opacity: pressed ? 0.7 : 1 },
               ]}
             >
@@ -676,7 +677,7 @@ export function BoardsScreen() {
               style={[
                 styles.row,
                 e.isMe
-                  ? { borderColor: colors.accent, borderWidth: 2, backgroundColor: colors.surfaceAlt }
+                  ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
                   : { borderColor: colors.border, backgroundColor: colors.surface },
               ]}
             >
@@ -833,8 +834,8 @@ const styles = StyleSheet.create({
   segmentText: { fontSize: 12, fontFamily: fonts.extraBold },
   // Your own day, set apart from the podium above it.
   mine: {
-    borderWidth: 1,
-    borderRadius: 16,
+    borderWidth: border.hairline,
+    borderRadius: radius.button,
     marginHorizontal: 20,
     // The line under the tabs used to hold this off them. With the line gone
     // the card sat against the tab row with nothing between the two.
@@ -849,10 +850,10 @@ const styles = StyleSheet.create({
   mineLine: { flexDirection: 'row', alignItems: 'baseline', gap: 7 },
   mineUnit: { fontSize: 15, fontFamily: fonts.bold },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: 26 },
-  sheet: { borderWidth: 1, borderRadius: 20, padding: 22, gap: 10, maxWidth: 420, width: '100%' },
+  sheet: { borderWidth: border.hairline, borderRadius: radius.panel, padding: 22, gap: 10, maxWidth: 420, width: '100%' },
   sheetTitle: { fontSize: 21, fontFamily: fonts.extraBold, letterSpacing: -0.4 },
   sheetBody: { fontSize: 14, fontFamily: fonts.medium, lineHeight: 21 },
-  sheetSum: { borderWidth: 1, borderRadius: 12, paddingVertical: 11, alignItems: 'center', marginVertical: 2 },
+  sheetSum: { borderWidth: border.hairline, borderRadius: radius.tile, paddingVertical: 11, alignItems: 'center', marginVertical: 2 },
   sheetSumText: { fontSize: 15, fontFamily: fonts.extraBold },
   sheetClose: { alignSelf: 'flex-end', paddingTop: 6, paddingHorizontal: 4 },
   sheetCloseText: { fontSize: 14, fontFamily: fonts.extraBold },
@@ -868,29 +869,29 @@ const styles = StyleSheet.create({
   // taller glyph than any letter beside it, so the cell containing it built a
   // taller line box - and with nothing saying how to align them vertically,
   // the two labels sat at different heights.
-  filter: { flexShrink: 0, flexDirection: 'row', borderRadius: 999, padding: 3 },
-  filterTab: { borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6 },
+  filter: { flexShrink: 0, flexDirection: 'row', borderRadius: radius.pill, padding: 3 },
+  filterTab: { borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 6 },
   filterText: { fontSize: 11.5, fontFamily: fonts.extraBold },
   tools: { flexDirection: 'row', gap: 8, paddingBottom: 10 },
   search: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: border.hairline,
+    borderRadius: radius.tile,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
   },
-  searchBtn: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
+  searchBtn: { borderWidth: border.hairline, borderRadius: radius.tile, paddingHorizontal: 14, justifyContent: 'center' },
   searchBtnText: { fontSize: 13, fontFamily: fonts.extraBold },
-  hints: { borderWidth: 1, borderRadius: 12, marginBottom: 10, overflow: 'hidden' },
+  hints: { borderWidth: border.hairline, borderRadius: radius.tile, marginBottom: 10, overflow: 'hidden' },
   hintRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 9 },
   hintName: { flex: 1, fontSize: 13.5, fontFamily: fonts.bold },
   hintRank: { fontSize: 12, fontFamily: fonts.bold },
   foundRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8 },
   foundClear: { fontSize: 12, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
   foundNote: { flex: 1, fontSize: 12, fontFamily: fonts.bold },
-  showMore: { borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
+  showMore: { borderWidth: border.hairline, borderRadius: radius.tile, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   showMoreText: { fontSize: 13, fontFamily: fonts.extraBold },
   head: {
     flexDirection: 'row',
@@ -922,7 +923,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 12,
     paddingHorizontal: 13,
     gap: 10,

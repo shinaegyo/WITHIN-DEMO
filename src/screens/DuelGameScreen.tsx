@@ -25,6 +25,7 @@ import { playCorrect, playForTier } from '../utils/sound';
 import { useTheme } from '../theme/ThemeContext';
 import { playLose, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
+import { radius, border } from '../theme/tokens';
 
 /**
  * A duel round, played the same way as a daily one.
@@ -432,11 +433,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 26,
   },
-  ask: { borderWidth: 1, borderRadius: 18, padding: 22, gap: 10 },
+  ask: { borderWidth: border.hairline, borderRadius: radius.sheet, padding: 22, gap: 10 },
   askTitle: { fontSize: 19, fontFamily: fonts.extraBold, lineHeight: 25 },
   askBody: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 19, marginBottom: 6 },
-  askButton: { borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
-  askButtonQuiet: { backgroundColor: 'transparent', borderWidth: 1.5 },
+  askButton: { borderRadius: radius.card, paddingVertical: 14, alignItems: 'center' },
+  askButtonQuiet: { backgroundColor: 'transparent', borderWidth: border.selectable },
   askButtonText: { fontSize: 15.5, fontFamily: fonts.extraBold },
   roundTitle: {
     fontSize: 15,
@@ -446,13 +447,13 @@ const styles = StyleSheet.create({
   },
   clock: { fontSize: 26, fontFamily: fonts.extraBold, textAlign: 'center', letterSpacing: 1 },
   endActions: { alignSelf: 'stretch', gap: 10, marginTop: 22, paddingHorizontal: 8 },
-  endButton: { borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
-  endButtonQuiet: { backgroundColor: 'transparent', borderWidth: 1.5 },
+  endButton: { borderRadius: radius.card, paddingVertical: 15, alignItems: 'center' },
+  endButtonQuiet: { backgroundColor: 'transparent', borderWidth: border.selectable },
   endButtonText: { fontSize: 15.5, fontFamily: fonts.extraBold },
   leave: { fontSize: 12.5, fontFamily: fonts.extraBold },
   picker: { flex: 1, justifyContent: 'center', gap: 10, paddingHorizontal: 4 },
   scoreRow: { flexDirection: 'row', gap: 8 },
-  scoreCell: { flex: 1, borderWidth: 1, borderRadius: 10, paddingVertical: 7, alignItems: 'center' },
+  scoreCell: { flex: 1, borderWidth: border.hairline, borderRadius: 10, paddingVertical: 7, alignItems: 'center' },
   scoreRound: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 1 },
   scoreMine: { fontSize: 17, fontFamily: fonts.extraBold },
   scoreTheirs: { fontSize: 12, fontFamily: fonts.bold },

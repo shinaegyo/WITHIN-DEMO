@@ -6,6 +6,7 @@ import { Avatar } from '../components/Avatar';
 import { StepHeader } from '../components/StepHeader';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /**
  * The last thing before a first real day: the daily comes first.
@@ -97,11 +98,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 30, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
   lede: { fontSize: 15, fontFamily: fonts.medium, lineHeight: 22, marginTop: 8 },
   list: { marginTop: 26, gap: 8 },
-  row: { borderWidth: 1, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 15 },
+  row: { borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 12, paddingHorizontal: 15 },
   rowName: { fontSize: 15, fontFamily: fonts.extraBold },
   rowDetail: { fontSize: 12, fontFamily: fonts.medium, marginTop: 2 },
   foot: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginTop: 20 },
   footer: { paddingHorizontal: 20, paddingBottom: 8 },
-  button: { borderRadius: 16, paddingVertical: 16, alignItems: 'center' },
+  button: { borderRadius: radius.button, paddingVertical: 16, alignItems: 'center' },
   buttonText: { fontSize: 16, fontFamily: fonts.extraBold },
 });

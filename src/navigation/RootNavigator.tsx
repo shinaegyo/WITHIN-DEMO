@@ -52,6 +52,7 @@ import { AudioScreen } from '../screens/AudioScreen';
 import { RemindersScreen } from '../screens/RemindersScreen';
 import { AvatarScreen } from '../screens/AvatarScreen';
 import { useTheme } from '../theme/ThemeContext';
+import { border } from '../theme/tokens';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -680,7 +681,7 @@ const styles = StyleSheet.create({
   },
   tab: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 2 },
   tabLabel: { fontSize: 8.5, fontFamily: fonts.bold, letterSpacing: 0.9 },
-  tabAvatar: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
+  tabAvatar: { width: 26, height: 26, borderRadius: 13, borderWidth: border.marked, borderColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
   tabDot: {
     position: 'absolute',
     top: -2,

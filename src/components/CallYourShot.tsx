@@ -4,6 +4,7 @@ import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Round one asks for a bet before it asks for a guess.
@@ -82,10 +83,10 @@ export function CallYourShot({ onCall, busy }: { onCall: (n: number) => void; bu
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: 18, padding: 16 },
+  card: { borderWidth: border.hairline, borderRadius: radius.sheet, padding: 16 },
   label: { fontSize: 10.5, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
   lede: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, marginTop: 6 },
-  list: { borderWidth: 1.5, borderRadius: 16, overflow: 'hidden', marginTop: 12 },
+  list: { borderWidth: border.selectable, borderRadius: radius.button, overflow: 'hidden', marginTop: 12 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

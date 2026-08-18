@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /**
  * The top ten, and you, however far down you are.
@@ -63,8 +64,8 @@ const styles = StyleSheet.create({
   break: { alignItems: 'center', paddingVertical: 4 },
   breakText: { fontSize: 15, fontFamily: fonts.bold, letterSpacing: 2 },
   more: {
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 11,
     alignItems: 'center',
     marginTop: 8,

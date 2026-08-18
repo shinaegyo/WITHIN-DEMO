@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
 import { noHit } from '../../theme/styles';
+import { border } from '../../theme/tokens';
 
 interface Props {
   color: string;
@@ -70,6 +71,6 @@ function Ring({
 const styles = StyleSheet.create({
   ring: {
     position: 'absolute',
-    borderWidth: 3,
+    borderWidth: border.heavy,
   },
 });

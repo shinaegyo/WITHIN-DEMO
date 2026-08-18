@@ -11,6 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { playTrack } from '../utils/music';
 import { StepHeader } from '../components/StepHeader';
 import { StepProgress } from '../components/StepProgress';
+import { radius, border } from '../theme/tokens';
 
 /**
  * First-run flow. Two steps, because the account and the name are separate
@@ -373,8 +374,8 @@ const styles = StyleSheet.create({
   h1: { fontSize: 26, fontFamily: fonts.logo, letterSpacing: -0.5, marginBottom: 8 },
   body: { fontSize: 15, fontFamily: fonts.medium, lineHeight: 21, marginBottom: 20 },
   input: {
-    borderWidth: 1.5,
-    borderRadius: 14,
+    borderWidth: border.selectable,
+    borderRadius: radius.card,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
@@ -383,9 +384,9 @@ const styles = StyleSheet.create({
   },
   note: { fontSize: 13, fontFamily: fonts.semiBold, marginBottom: 10 },
   hint: { fontSize: 12, fontFamily: fonts.medium, marginBottom: 10 },
-  primary: { borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
+  primary: { borderRadius: radius.card, paddingVertical: 15, alignItems: 'center' },
   primaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.bold },
-  secondary: { borderWidth: 1, borderRadius: 14, paddingVertical: 13, alignItems: 'center', marginTop: 10 },
+  secondary: { borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 13, alignItems: 'center', marginTop: 10 },
   secondaryText: { fontSize: 14, fontFamily: fonts.bold },
   link: { paddingVertical: 13, alignItems: 'center' },
   linkText: { fontSize: 13, fontFamily: fonts.medium, textDecorationLine: 'underline' },

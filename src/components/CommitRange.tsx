@@ -4,6 +4,7 @@ import { Text } from './AppText';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Round three stops asking what the number is and asks how sure you are.
@@ -110,11 +111,11 @@ export function CommitRange({
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: 18, padding: 16, gap: 12 },
+  card: { borderWidth: border.hairline, borderRadius: radius.sheet, padding: 16, gap: 12 },
   label: { fontSize: 10.5, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
   lede: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   input: {
-    borderWidth: 2,
+    borderWidth: border.marked,
     borderRadius: 15,
     paddingHorizontal: 15,
     paddingVertical: 13,
@@ -122,13 +123,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  step: { borderRadius: 14, paddingVertical: 9, paddingHorizontal: 20 },
+  step: { borderRadius: radius.card, paddingVertical: 9, paddingHorizontal: 20 },
   stepText: { fontSize: 20, fontFamily: fonts.extraBold },
   middle: { alignItems: 'center' },
   spread: { fontSize: 28, fontFamily: fonts.extraBold, letterSpacing: -0.5 },
   width: { fontSize: 12, fontFamily: fonts.semiBold, marginTop: 2 },
   range: { fontSize: 15, fontFamily: fonts.bold, textAlign: 'center' },
   pays: { fontSize: 12.5, fontFamily: fonts.bold, textAlign: 'center' },
-  commit: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
+  commit: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   commitText: { fontSize: 16, fontFamily: fonts.extraBold },
 });

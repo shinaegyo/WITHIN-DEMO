@@ -5,6 +5,7 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { Wordmark } from './Wordmark';
 import { Mark } from './Mark';
+import { radius, border } from '../theme/tokens';
 
 /**
  * `onBack` is only supplied while a game can still be abandoned — see
@@ -81,8 +82,8 @@ const styles = StyleSheet.create({
   },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   pill: {
-    borderWidth: 1,
-    borderRadius: 999,
+    borderWidth: border.hairline,
+    borderRadius: radius.pill,
     paddingHorizontal: 13,
     paddingVertical: 6,
     minWidth: 62,
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.panel,
     justifyContent: 'center',
     alignItems: 'center',
   },

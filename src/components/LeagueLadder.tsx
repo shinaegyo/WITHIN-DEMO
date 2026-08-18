@@ -7,6 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { League } from '../lib/api';
 import { LEAGUES, LEAGUE_FLOOR, LEAGUE_INK } from '../theme/leagues';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * The ladder, written down.
@@ -108,13 +109,13 @@ export function LeagueLadder({
 
 const styles = StyleSheet.create({
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', padding: 22 },
-  sheet: { borderRadius: 18, borderWidth: 1, padding: 18 },
+  sheet: { borderRadius: radius.sheet, borderWidth: border.hairline, padding: 18 },
   label: { fontSize: 11, fontFamily: fonts.bold, letterSpacing: 1.1, marginBottom: 12 },
   list: { maxHeight: 340 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingVertical: 10, paddingHorizontal: 10,
-    borderRadius: 10, borderWidth: 1, borderColor: 'transparent', marginBottom: 4,
+    borderRadius: 10, borderWidth: border.hairline, borderColor: 'transparent', marginBottom: 4,
   },
   names: { flex: 1 },
   name: { fontSize: 14, fontFamily: fonts.semiBold },

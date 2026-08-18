@@ -18,6 +18,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 import { StepHeader } from '../components/StepHeader';
 import { StepProgress } from '../components/StepProgress';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Build a person, or keep your initial.
@@ -123,7 +124,7 @@ export function AvatarScreen({
               style={[
                 styles.swatch,
                 { backgroundColor: AVATAR_COLORS[key] },
-                key === color && { borderColor: colors.text, borderWidth: 3 },
+                key === color && { borderColor: colors.text, borderWidth: border.heavy },
               ]}
             />
           ))}
@@ -181,7 +182,7 @@ export function AvatarScreen({
                   style={[
                     styles.swatch,
                     { backgroundColor: HAIR_COLORS[key] },
-                    key === hairColor && { borderColor: colors.text, borderWidth: 3 },
+                    key === hairColor && { borderColor: colors.text, borderWidth: border.heavy },
                   ]}
                 />
               ))}
@@ -229,26 +230,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    borderWidth: 2,
-    borderRadius: 16,
+    borderWidth: border.marked,
+    borderRadius: radius.button,
     padding: 10,
     marginBottom: 22,
   },
   monogramText: { fontSize: 14, fontFamily: fonts.extraBold },
   label: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.4, marginBottom: 8 },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
-  swatch: { width: '18%', height: 32, borderRadius: 10, borderWidth: 3, borderColor: 'transparent' },
+  swatch: { width: '18%', height: 32, borderRadius: 10, borderWidth: border.heavy, borderColor: 'transparent' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   cell: {
     width: '18%',
     aspectRatio: 1,
-    borderRadius: 14,
-    borderWidth: 2,
+    borderRadius: radius.card,
+    borderWidth: border.marked,
     alignItems: 'center',
     justifyContent: 'center',
   },
   foot: { paddingHorizontal: 20, paddingBottom: 10, gap: 4 },
-  button: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
+  button: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   buttonText: { fontSize: 16, fontFamily: fonts.extraBold },
   skip: { alignSelf: 'center', paddingVertical: 10 },
   skipText: { fontSize: 13, fontFamily: fonts.bold },

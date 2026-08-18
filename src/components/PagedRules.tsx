@@ -5,6 +5,7 @@ import { ScreenTitle } from './ScreenTitle';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /** Space between two sections sharing a page. */
 const GAP = 26;
@@ -185,8 +186,8 @@ export function RulesButton({ onPress }: { onPress: () => void }) {
 
 const buttonStyles = StyleSheet.create({
   button: {
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 13,
     alignItems: 'center',
     alignSelf: 'stretch',

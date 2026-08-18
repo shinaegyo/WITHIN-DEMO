@@ -17,6 +17,7 @@ import { fonts } from '../theme/fonts';
 import { useTrack } from '../utils/useTrack';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Ranked.
@@ -231,12 +232,12 @@ const styles = StyleSheet.create({
   headRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   rating: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1 },
   ratingLabel: { fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.3, marginTop: -2 },
-  belt: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 },
+  belt: { borderWidth: border.selectable, borderRadius: radius.panel, paddingHorizontal: 12, paddingVertical: 5 },
   beltText: { fontSize: 10, fontFamily: fonts.extraBold, letterSpacing: 1.2 },
   beltLine: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 18, marginTop: 12 },
-  primary: { borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 16 },
+  primary: { borderRadius: radius.card, paddingVertical: 14, alignItems: 'center', marginTop: 16 },
   primaryText: { fontSize: 15, fontFamily: fonts.extraBold },
-  queued: { borderWidth: 1, borderRadius: 14, padding: 16, marginTop: 16 },
+  queued: { borderWidth: border.hairline, borderRadius: radius.card, padding: 16, marginTop: 16 },
   queuedText: { fontSize: 15, fontFamily: fonts.extraBold },
   queuedSub: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 4 },
   cancel: { alignSelf: 'center', marginTop: 10 },
@@ -247,8 +248,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: border.hairline,
+    borderRadius: radius.tile,
     paddingVertical: 11,
     paddingHorizontal: 14,
     marginBottom: 8,

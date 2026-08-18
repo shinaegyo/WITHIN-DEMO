@@ -5,6 +5,7 @@ import { Mark } from './Mark';
 import { Wordmark } from './Wordmark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius } from '../theme/tokens';
 
 /** Full-screen loading and failure states for the daily fetch. */
 export function StatusScreen({
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 13,
     paddingHorizontal: 26,
     marginTop: 4,

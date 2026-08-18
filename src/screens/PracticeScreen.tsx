@@ -17,6 +17,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useTrack } from '../utils/useTrack';
 import { hapticCorrect, hapticForTier, hapticInvalid, hapticOneAway, hapticWithin10 } from '../utils/haptics';
 import { playCorrect, playForTier, playOneAway, playWithin10 } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /** Matches the daily game so both feel the same. */
 const RESULT_DELAY_MS = 3000;
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   noBack: { width: 40, height: 40 },
   back: { fontSize: 16, fontFamily: fonts.extraBold, letterSpacing: 1 },
-  badge: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
+  badge: { borderWidth: border.hairline, borderRadius: radius.panel, paddingHorizontal: 10, paddingVertical: 5 },
   badgeText: { fontSize: 9, fontFamily: fonts.bold, letterSpacing: 0.8 },
   boardWrap: { flex: 1 },
   backdrop: {
@@ -249,12 +250,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 30,
   },
-  card: { width: '88%', borderRadius: 24, paddingVertical: 28, paddingHorizontal: 22, alignItems: 'center' },
+  card: { width: '88%', borderRadius: radius.modal, paddingVertical: 28, paddingHorizontal: 22, alignItems: 'center' },
   title: { fontSize: 25, fontFamily: fonts.logo, letterSpacing: -0.4, textAlign: 'center' },
   sub: { fontSize: 15, fontFamily: fonts.medium, marginTop: 6, textAlign: 'center' },
   unranked: { fontSize: 12, fontFamily: fonts.medium, marginTop: 10, textAlign: 'center' },
   primary: {
-    borderRadius: 14,
+    borderRadius: radius.card,
     paddingVertical: 14,
     paddingHorizontal: 20,
     alignSelf: 'stretch',
@@ -264,8 +265,8 @@ const styles = StyleSheet.create({
   primaryText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.bold },
   noneLeft: { fontSize: 13, fontFamily: fonts.bold, marginTop: 20, textAlign: 'center' },
   secondary: {
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 12,
     paddingHorizontal: 22,
     marginTop: 12,

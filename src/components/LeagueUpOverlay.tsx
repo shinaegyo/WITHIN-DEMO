@@ -11,6 +11,7 @@ import { playWin } from '../utils/sound';
 import { Confetti } from './Confetti';
 import { LeagueBadge } from './LeagueBadge';
 import { Rings } from './effects/Rings';
+import { radius } from '../theme/tokens';
 
 /**
  * Moving up a league, said once, on the way in.
@@ -160,6 +161,6 @@ const styles = StyleSheet.create({
   league: { fontSize: 40, fontFamily: fonts.extraBold, letterSpacing: -1, textAlign: 'center' },
   incoming: { position: 'absolute', left: 0, right: 0 },
   sub: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, textAlign: 'center', marginTop: 10 },
-  button: { marginTop: 20, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 34 },
+  button: { marginTop: 20, borderRadius: radius.button, paddingVertical: 14, paddingHorizontal: 34 },
   buttonText: { fontSize: 15, fontFamily: fonts.extraBold },
 });

@@ -5,6 +5,7 @@ import { Mark } from './Mark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * What the daily unlocks, said once, to somebody who has just finished it.
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
-  card: { borderWidth: 1, borderRadius: 24, padding: 22, maxHeight: '88%' },
+  card: { borderWidth: border.hairline, borderRadius: radius.modal, padding: 22, maxHeight: '88%' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   title: { fontSize: 23, fontFamily: fonts.extraBold },
   lead: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 20, marginBottom: 16 },
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
   modeName: { fontSize: 15.5, fontFamily: fonts.extraBold, marginBottom: 3 },
   modeLine: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   foot: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginTop: 2, marginBottom: 16 },
-  primary: { borderRadius: 16, paddingVertical: 15, alignItems: 'center' },
+  primary: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   primaryText: { fontSize: 16, fontFamily: fonts.extraBold },
   later: { paddingVertical: 13, alignItems: 'center' },
   laterText: { fontSize: 13.5, fontFamily: fonts.bold },

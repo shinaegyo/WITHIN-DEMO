@@ -6,6 +6,7 @@ import { Mark } from './Mark';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius } from '../theme/tokens';
 
 export interface MenuItem {
   label: string;
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     paddingHorizontal: 14,
-    borderRadius: 14,
+    borderRadius: radius.card,
   },
   itemLabel: { flex: 1, fontSize: 16, fontFamily: fonts.semiBold },
   tag: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 1.1, marginRight: 8 },

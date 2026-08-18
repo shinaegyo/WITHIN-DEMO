@@ -27,6 +27,7 @@ import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Duels are asynchronous, so this screen is mostly about whose turn it is -
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     textAlign: 'center',
   },
-  stranger: { borderRadius: 16, paddingVertical: 13, alignItems: 'center' },
+  stranger: { borderRadius: radius.button, paddingVertical: 13, alignItems: 'center' },
   strangerText: { fontSize: 16, fontFamily: fonts.extraBold },
   strangerSub: { fontSize: 10.5, fontFamily: fonts.bold, letterSpacing: 0.6, opacity: 0.6, marginTop: 2 },
   friendMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
@@ -467,8 +468,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: border.hairline,
+    borderRadius: radius.tile,
     paddingVertical: 11,
     paddingHorizontal: 14,
     marginBottom: 8,
@@ -479,7 +480,7 @@ const styles = StyleSheet.create({
   meta: { fontSize: 11, fontFamily: fonts.medium, marginTop: 1 },
   rowActions: { flexDirection: 'row', gap: 14 },
   action: { fontSize: 12.5, fontFamily: fonts.bold },
-  primary: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
+  primary: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill },
   primaryText: { fontSize: 13 },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, marginTop: 24 },
 });

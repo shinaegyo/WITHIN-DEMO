@@ -36,6 +36,7 @@ import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
 import { lastSeenLeague, markLeagueSeen } from '../utils/leagueSeen';
 import { League, loadSeasonLeaderboard } from '../lib/api';
 import { promoted } from '../theme/leagues';
+import { radius, border } from '../theme/tokens';
 
 
 interface Props {
@@ -801,7 +802,7 @@ const styles = StyleSheet.create({
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.panel,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -809,7 +810,7 @@ const styles = StyleSheet.create({
     height: 28,
     minWidth: 52,
     paddingHorizontal: 10,
-    borderRadius: 14,
+    borderRadius: radius.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -822,7 +823,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    borderWidth: 2,
+    borderWidth: border.marked,
   },
   iconText: { fontSize: 17 },
   scroll: { flex: 1 },
@@ -834,8 +835,8 @@ const styles = StyleSheet.create({
   },
   card: {
     alignSelf: 'stretch',
-    borderWidth: 1,
-    borderRadius: 20,
+    borderWidth: border.hairline,
+    borderRadius: radius.panel,
     padding: 18,
     gap: 12,
   },
@@ -856,7 +857,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 16,
+    borderRadius: radius.button,
     paddingVertical: 14,
     paddingHorizontal: 16,
     marginTop: 10,
@@ -867,7 +868,7 @@ const styles = StyleSheet.create({
   featuredGo: { borderRadius: 11, paddingHorizontal: 15, paddingVertical: 8 },
   featuredGoText: { fontSize: 12.5, fontFamily: fonts.extraBold },
   tiles: { alignSelf: 'stretch', flexDirection: 'row', gap: 8, marginTop: 8 },
-  tile: { flex: 1, minWidth: 0, borderWidth: 1, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 11, gap: 5 },
+  tile: { flex: 1, minWidth: 0, borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 12, paddingHorizontal: 11, gap: 5 },
   tileName: { fontSize: 13, fontFamily: fonts.extraBold },
   tileState: { fontSize: 10, fontFamily: fonts.semiBold },
   brand: { alignItems: 'center', gap: 10 },
@@ -905,7 +906,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    borderWidth: 1,
+    borderWidth: border.hairline,
     borderRadius: 11,
     paddingVertical: 9,
     paddingHorizontal: 11,
@@ -986,8 +987,8 @@ const styles = StyleSheet.create({
   },
   stat: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: border.hairline,
+    borderRadius: radius.tile,
     paddingVertical: 10,
     alignItems: 'center',
   },
@@ -1000,8 +1001,8 @@ const styles = StyleSheet.create({
   mode: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 11,
     paddingHorizontal: 14,
     gap: 10,

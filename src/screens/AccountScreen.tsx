@@ -17,6 +17,7 @@ import { feedbackColors } from '../theme/colors';
 import { useTrack } from '../utils/useTrack';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Signing in is optional. An anonymous player already owns a streak and a
@@ -381,8 +382,8 @@ const styles = StyleSheet.create({
   h2: { fontSize: 19, fontFamily: fonts.extraBold, marginBottom: 4 },
   body: { fontSize: 14, fontFamily: fonts.medium, lineHeight: 20, marginBottom: 14 },
   input: {
-    borderWidth: 1.5,
-    borderRadius: 14,
+    borderWidth: border.selectable,
+    borderRadius: radius.card,
     paddingHorizontal: 16,
     paddingVertical: 13,
     fontSize: 16,
@@ -391,11 +392,11 @@ const styles = StyleSheet.create({
   },
   note: { fontSize: 13, fontFamily: fonts.semiBold, marginBottom: 10 },
   hint: { fontSize: 12, fontFamily: fonts.medium, marginBottom: 10 },
-  primary: { borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  primary: { borderRadius: radius.card, paddingVertical: 14, alignItems: 'center' },
   primaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.bold },
   secondary: {
-    borderWidth: 1,
-    borderRadius: 14,
+    borderWidth: border.hairline,
+    borderRadius: radius.card,
     paddingVertical: 13,
     alignItems: 'center',
     marginTop: 10,

@@ -24,6 +24,7 @@ import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
 import { shareInvite } from '../utils/share';
+import { radius, border } from '../theme/tokens';
 
 /**
  * Friendships are mutual, so this screen has three lists rather than one: who
@@ -385,8 +386,8 @@ const styles = StyleSheet.create({
   addRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: 14,
+    borderWidth: border.selectable,
+    borderRadius: radius.card,
     padding: 5,
   },
   input: {
@@ -414,8 +415,8 @@ const styles = StyleSheet.create({
   hintName: { flex: 1, fontSize: 14, fontFamily: fonts.semiBold },
   hintScore: { fontSize: 12.5, fontFamily: fonts.medium },
   invite: {
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: border.hairline,
+    borderRadius: radius.tile,
     paddingVertical: 11,
     alignItems: 'center',
     marginTop: 12,
@@ -435,8 +436,8 @@ const styles = StyleSheet.create({
     // margin of empty pixels. A filled disc has none, so the name sat against
     // it the moment they became letters.
     gap: 10,
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: border.hairline,
+    borderRadius: radius.tile,
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginBottom: 8,
