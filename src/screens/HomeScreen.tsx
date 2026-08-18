@@ -343,31 +343,28 @@ export function HomeScreen({
    * thing a shortcut has to say. What the mode *is* belongs in the Games tab
    * and the rules, not on a home screen nobody reads four modes of.
    */
-  const modeTiles = [
-    {
-      // Last, with the two that need nobody ahead of it. It used to sit in the
-      // middle so it would not read as third in a list of three of a kind -
-      // but the Games tab now groups by what each mode asks of you, and a home
-      // screen contradicting that order is a third arrangement to learn.
-      name: 'Duel',
-      // Two words. A third of a phone width is not enough for a sentence, and
-      // "Challenge a fri…" is worse than saying less.
-      //
-      // A name rather than a number when there is exactly one. "1 waiting" is
-      // a quantity of nothing in particular; "kristina waiting" is a person,
-      // and it is the same two words. Past one, the count is the honest
-      // summary again - naming the first of three would say less, not more.
-      state: modes?.queued
-        ? 'Waiting'
-        : modes && modes.duelsWaiting === 1 && modes.duelWaiting
-          ? `${modes.duelWaiting.name} waiting`
-          : modes && modes.duelsWaiting > 0
-            ? `${modes.duelsWaiting} waiting`
-            : 'Start one',
-      live: !!modes && (modes.duelsWaiting > 0 || modes.queued),
-      go: onOpenDuels,
-    },
-  ];
+  /**
+   * The duel, said the way the climb says itself.
+   *
+   * It was half of a pair of tiles until Rush came out, and alone a tile is a
+   * third of a phone holding two words with a gap beside it - which reads as
+   * something missing rather than as the mode this app now leans on. Two side
+   * modes, one card each, equal weight.
+   *
+   * A name rather than a number when there is exactly one waiting. "1 waiting"
+   * is a quantity of nothing in particular; "kristina waiting" is a person.
+   * Past one the count is the honest summary again - naming the first of three
+   * would say less, not more.
+   */
+  const duelState = modes?.queued
+    ? 'Waiting for an opponent'
+    : modes && modes.duelsWaiting === 1 && modes.duelWaiting
+      ? `${modes.duelWaiting.name} challenged you`
+      : modes && modes.duelsWaiting > 0
+        ? `${modes.duelsWaiting} waiting on you`
+        : 'A friend or a stranger';
+  const duelWaiting = !!modes && (modes.duelsWaiting > 0 || modes.queued);
+
 
   /**
    * One thing to try, not a list.
@@ -612,36 +609,34 @@ export function HomeScreen({
               </Pressable>
             </View>
 
-            {/* One line each, and always the same kind of fact: what is true
-                for you right now. A description and a state stacked with no
-                grammar between them read as neither. */}
-            <View style={styles.tiles}>
-              {modeTiles.map((t) => (
-                <Pressable
-                  key={t.name}
-                  disabled={modesLocked}
-                  onPress={() => {
-                    playTap();
-                    t.go();
-                  }}
-                  style={({ pressed }) => [
-                    styles.tile,
-                    {
-                      borderColor: colors.border,
-                      backgroundColor: colors.surface,
-                      opacity: modesLocked ? 0.45 : pressed ? 0.7 : 1,
-                    },
-                  ]}
+            <View style={[styles.featured, { backgroundColor: colors.surface, borderWidth: border.hairline, borderColor: colors.border }]}>
+              <View style={styles.featuredMain}>
+                <Text style={[styles.featuredName, { color: colors.text }]}>Duel</Text>
+                <Text
+                  style={[styles.featuredState, { color: duelWaiting ? colors.accent : colors.textMuted }]}
+                  numberOfLines={1}
                 >
-                  <Text style={[styles.tileName, { color: colors.text }]}>{t.name}</Text>
-                  <Text
-                    style={[styles.tileState, { color: t.live ? colors.accent : colors.textMuted }]}
-                    numberOfLines={1}
-                  >
-                    {t.state}
-                  </Text>
-                </Pressable>
-              ))}
+                  {duelState}
+                </Text>
+              </View>
+              <Pressable
+                disabled={modesLocked}
+                onPress={() => {
+                  playTap();
+                  onOpenDuels();
+                }}
+                style={({ pressed }) => [
+                  styles.featuredGo,
+                  {
+                    backgroundColor: colors.text,
+                    opacity: modesLocked ? 0.4 : pressed ? 0.8 : 1,
+                  },
+                ]}
+              >
+                <Text style={[styles.featuredGoText, { color: colors.background }]}>
+                  {duelWaiting ? 'Play' : 'Start'}
+                </Text>
+              </Pressable>
             </View>
           </>
         ) : (
@@ -858,8 +853,6 @@ const styles = StyleSheet.create({
   featuredGoText: { fontSize: 12.5, fontFamily: fonts.extraBold },
   tiles: { alignSelf: 'stretch', flexDirection: 'row', gap: 8, marginTop: 8 },
   tile: { flex: 1, minWidth: 0, borderWidth: border.hairline, borderRadius: radius.card, paddingVertical: 12, paddingHorizontal: 11, gap: 5 },
-  tileName: { fontSize: 13, fontFamily: fonts.extraBold },
-  tileState: { fontSize: 10, fontFamily: fonts.semiBold },
   brand: { alignItems: 'center', gap: 10 },
   headerBrand: {
     position: 'absolute',
