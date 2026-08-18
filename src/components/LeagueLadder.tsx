@@ -93,12 +93,8 @@ export function LeagueLadder({
             })}
           </ScrollView>
 
-          {/* The rate on Legend is not a footnote - it is the whole reason the
-              top of the ladder cannot be ground out, and it belongs in words
-              somewhere rather than only as "40 a day" squeezed onto a row. */}
           <Text style={[styles.note, { color: colors.textMuted }]}>
-            Points are this season only, and reset when it ends. Legend also needs an average of 40 a
-            day.
+            Points are this season only, and reset when it ends.
           </Text>
 
           <Pressable onPress={() => { playTap(); onClose(); }} style={styles.close}>
