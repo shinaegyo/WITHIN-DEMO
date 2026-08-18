@@ -351,6 +351,17 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 <Text style={[styles.levelLabel, { color: arena.muted }]}>
                   {arena.name.toUpperCase()} · LEVEL {state.level} OF {SUMMIT}
                 </Text>
+                {/* The one line that explains why this is not where they left
+                    off. A new day starts at your last checkpoint, and opening
+                    on a lower number than yesterday with nothing said about it
+                    reads as lost progress - the boards still show the best, so
+                    the app looks like it remembers and the game looks like it
+                    forgot. */}
+                {state.best > state.level && (
+                  <Text style={[styles.levelLabel, { color: arena.accent }]}>
+                    BACK AT YOUR CHECKPOINT · {state.best} REACHED
+                  </Text>
+                )}
               </View>
 
               {/* Held back until the allowance is nearly gone, and then about

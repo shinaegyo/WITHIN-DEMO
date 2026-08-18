@@ -87,6 +87,13 @@ export function ImpossibleBoardScreen({
   const level = status?.impossible.level ?? 1;
   const health = status?.impossible.health ?? 0;
   const summit = !!status?.impossible.summit;
+  // How high they have ever been, which is what the board shows. When the level
+  // they are standing on is lower, a new day has put them back at a checkpoint
+  // - and until this said so, the screen opened lower than they left off with
+  // no explanation, while the board above it still showed their best. The app
+  // appeared to remember and the game appeared to forget.
+  const best = status?.impossible.best ?? 0;
+  const backAtCheckpoint = !summit && best > level;
   // Health is the whole of it. Nothing else rations the climb: play as many
   // sessions as the bar will carry, and the bar comes back in the morning.
   const canClimb = !summit && health > 0;
@@ -229,7 +236,11 @@ export function ImpossibleBoardScreen({
             and saying it twice in two lines is how the earlier version of
             this footer read as broken. */}
         <Text style={[styles.best, { color: colors.textMuted }]}>
-          {summit ? 'You topped out this week' : `You are on level ${level}`}
+          {summit
+            ? 'You topped out this week'
+            : backAtCheckpoint
+              ? `Back at your checkpoint · level ${level} of ${best} reached`
+              : `You are on level ${level}`}
         </Text>
 
         <Pressable
