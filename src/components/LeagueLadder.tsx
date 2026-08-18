@@ -52,9 +52,17 @@ export function LeagueLadder({
           <Text style={[styles.label, { color: colors.textMuted }]}>LEAGUES THIS SEASON</Text>
 
           <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
-            {LEAGUES.map((l) => {
+            {LEAGUES.map((l, i) => {
               const here = l === league;
               const floor = LEAGUE_FLOOR[l];
+              // A band, not a doorway. The column read "200" against Silver
+              // and "you · 24" against your own row - the same space meaning
+              // a threshold on five rows and a score on the sixth, so neither
+              // was legible without working out which kind of number it was.
+              // Every row now states the range it covers, and where you are
+              // sits under your name where it cannot be mistaken for one.
+              const above = LEAGUES[i + 1];
+              const span = above ? `${floor}\u2013${LEAGUE_FLOOR[above] - 1}` : `${floor}+`;
               return (
                 <Pressable
                   key={l}
@@ -71,14 +79,15 @@ export function LeagueLadder({
                   ]}
                 >
                   <LeagueBadge league={l} size={18} />
-                  <Text style={[styles.name, { color: colors.text }]}>{l}</Text>
-                  {here && points !== null ? (
-                    <Text style={[styles.here, { color: LEAGUE_INK[l] }]}>you · {points}</Text>
-                  ) : (
-                    <Text style={[styles.floor, { color: colors.textMuted }]}>
-                      {l === 'Legend' ? `${floor} · 40 a day` : `${floor}`}
-                    </Text>
-                  )}
+                  <View style={styles.names}>
+                    <Text style={[styles.name, { color: colors.text }]}>{l}</Text>
+                    {here && points !== null && (
+                      <Text style={[styles.here, { color: LEAGUE_INK[l] }]}>
+                        You · {points} {points === 1 ? 'point' : 'points'}
+                      </Text>
+                    )}
+                  </View>
+                  <Text style={[styles.floor, { color: colors.textMuted }]}>{span}</Text>
                 </Pressable>
               );
             })}
@@ -111,9 +120,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10, paddingHorizontal: 10,
     borderRadius: 10, borderWidth: 1, borderColor: 'transparent', marginBottom: 4,
   },
-  name: { flex: 1, fontSize: 14, fontFamily: fonts.semiBold },
+  names: { flex: 1 },
+  name: { fontSize: 14, fontFamily: fonts.semiBold },
   floor: { fontSize: 12.5, fontFamily: fonts.medium },
-  here: { fontSize: 12.5, fontFamily: fonts.bold },
+  here: { fontSize: 11.5, fontFamily: fonts.bold, marginTop: 1 },
   note: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 17, marginTop: 12 },
   close: { alignSelf: 'center', paddingVertical: 12, paddingHorizontal: 20, marginTop: 4 },
   closeText: { fontSize: 14, fontFamily: fonts.semiBold },
