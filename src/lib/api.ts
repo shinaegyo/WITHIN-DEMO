@@ -1358,6 +1358,40 @@ export async function loadAllTimeLeaderboard(friends = false): Promise<AllTimeLe
   };
 }
 
+export interface LeagueBoard {
+  league: League;
+  /** How many are in the league, which can exceed the rows returned. */
+  total: number;
+  entries: {
+    /** Placed within the league, not the season. */
+    rank: number;
+    name: string;
+    avatar: string | null;
+    score: number;
+    days: number;
+    isMe: boolean;
+  }[];
+}
+
+/** Who is in one league this season. */
+export async function loadLeagueBoard(league: League): Promise<LeagueBoard> {
+  await ensureSignedIn();
+  const { data, error } = await supabase.rpc('league_board', { p_league: league, p_limit: 100 });
+  const raw = unwrap<any>(data, error);
+  return {
+    league: raw.league as League,
+    total: raw.total ?? 0,
+    entries: (raw.entries ?? []).map((e: any) => ({
+      rank: e.rank,
+      name: e.name,
+      avatar: e.avatar ?? null,
+      score: e.score ?? 0,
+      days: e.days ?? 0,
+      isMe: !!e.is_me,
+    })),
+  };
+}
+
 export async function loadSeasonLeaderboard(friends = false): Promise<SeasonLeaderboard> {
   await ensureSignedIn();
   const { data, error } = await supabase.rpc('season_leaderboard', { p_limit: 10, p_friends: friends });

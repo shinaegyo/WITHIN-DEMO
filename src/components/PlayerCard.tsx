@@ -3,6 +3,7 @@ import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-nat
 import { Text } from './AppText';
 import {
   ApiError,
+  League,
   PlayerCard as Card,
   challengeFriend,
   loadPlayerCard,
@@ -11,6 +12,7 @@ import {
   sendFriendRequest,
 } from '../lib/api';
 import { Avatar } from './Avatar';
+import { playTap } from '../utils/sound';
 import { feedbackColors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { LEAGUE_INK } from '../theme/leagues';
@@ -30,12 +32,19 @@ export function PlayerCardModal({
   username,
   onClose,
   onChallenged,
+  onOpenLeague,
 }: {
   /** Null keeps the modal shut. */
   username: string | null;
   onClose: () => void;
   /** Duel started, so the caller can send the player to it. */
   onChallenged?: () => void;
+  /**
+   * Show who else is in this player's league. The caller is expected to close
+   * this card first - a sheet opening on top of a sheet gives two Close buttons
+   * and no way to tell which one goes where.
+   */
+  onOpenLeague?: (league: League) => void;
 }) {
   const { colors } = useTheme();
   const [card, setCard] = useState<Card | null>(null);
@@ -132,12 +141,20 @@ export function PlayerCardModal({
                 {/* A crest, in the corner. The league is an identity rather
                     than a measurement, and it was being cut to "Br…" in a
                     column built for numbers. */}
-                <View style={styles.crest}>
+                <Pressable
+                  disabled={!onOpenLeague}
+                  onPress={() => {
+                    if (!onOpenLeague) return;
+                    playTap();
+                    onOpenLeague(card.league);
+                  }}
+                  style={({ pressed }) => [styles.crest, { opacity: pressed ? 0.7 : 1 }]}
+                >
                   <LeagueBadge league={card.league} size={30} />
                   <Text style={[styles.crestName, { color: LEAGUE_INK[card.league] }]}>
                     {card.league}
                   </Text>
-                </View>
+                </Pressable>
               </View>
               {/* No "last played" here. Nobody is playing every day yet, and a
                   card that opens with how long someone has been away makes a

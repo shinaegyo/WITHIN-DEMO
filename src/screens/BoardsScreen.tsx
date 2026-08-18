@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { PlayerCardModal } from '../components/PlayerCard';
+import { LeagueRoster } from '../components/LeagueRoster';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
@@ -159,6 +160,9 @@ export function BoardsScreen() {
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
+  // Opened from the crest on a player card. The card closes first, so there
+  // is never a sheet on top of a sheet with two Close buttons.
+  const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
   /**
    * Which sheet is open, in one value.
    *
@@ -701,7 +705,16 @@ export function BoardsScreen() {
         </ScrollView>
       )}
 
-      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
+      <PlayerCardModal
+        username={looking}
+        onClose={() => setLooking(null)}
+        onOpenLeague={(l) => {
+          setLooking(null);
+          setLeagueRoster(l);
+        }}
+      />
+
+      <LeagueRoster league={leagueRoster} onClose={() => setLeagueRoster(null)} />
 
       <Modal
         visible={sheet !== null}

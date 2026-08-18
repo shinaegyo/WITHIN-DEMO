@@ -30,6 +30,7 @@ import { LeagueUpOverlay } from '../components/LeagueUpOverlay';
 import { LeagueBadge } from '../components/LeagueBadge';
 import { LeagueStrip } from '../components/LeagueStrip';
 import { LeagueLadder } from '../components/LeagueLadder';
+import { LeagueRoster } from '../components/LeagueRoster';
 import { GamesUnlockedOverlay } from '../components/GamesUnlockedOverlay';
 import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
@@ -88,6 +89,9 @@ export function HomeScreen({
   // strip above it claimed nine hundred.
   const [seasonPoints, setSeasonPoints] = useState<number | null>(null);
   const [ladderOpen, setLadderOpen] = useState(false);
+  // Which league's roster is open. The ladder hands this over and closes
+  // itself, so the two sheets never stack.
+  const [roster, setRoster] = useState<League | null>(null);
   const [promotion, setPromotion] = useState<{ from: League; to: League } | null>(null);
 
   // The calm track. Outside the games the app is not silent any more - it has
@@ -758,7 +762,13 @@ export function HomeScreen({
         onClose={() => setLadderOpen(false)}
         league={league}
         points={seasonPoints}
+        onOpenLeague={(l) => {
+          setLadderOpen(false);
+          setRoster(l);
+        }}
       />
+
+      <LeagueRoster league={roster} onClose={() => setRoster(null)} />
     </SafeAreaView>
   );
 }
