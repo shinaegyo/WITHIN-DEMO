@@ -72,7 +72,16 @@ export function LeagueStrip({
 }
 
 const styles = StyleSheet.create({
-  wrap: { borderWidth: 1, borderRadius: 14, padding: 12, marginBottom: 14 },
+  // Stretched, not centred. Home centres its children, so without this the
+  // strip sized itself to its text and sat visibly narrower than the card
+  // above it - the only element on the screen not sharing the same margins.
+  wrap: {
+    alignSelf: 'stretch',
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
+  },
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   names: { flex: 1 },
   league: { fontSize: 14.5, fontFamily: fonts.bold },

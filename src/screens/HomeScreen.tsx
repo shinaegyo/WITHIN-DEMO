@@ -27,7 +27,6 @@ import { Avatar } from '../components/Avatar';
 import { Mark } from '../components/Mark';
 import { LevelUpOverlay } from '../components/LevelUpOverlay';
 import { LeagueUpOverlay } from '../components/LeagueUpOverlay';
-import { LeagueBadge } from '../components/LeagueBadge';
 import { LeagueStrip } from '../components/LeagueStrip';
 import { LeagueLadder } from '../components/LeagueLadder';
 import { LeagueRoster } from '../components/LeagueRoster';
@@ -36,7 +35,7 @@ import { gamesIntroSeen, markGamesIntroSeen } from '../utils/gamesIntroSeen';
 import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
 import { lastSeenLeague, markLeagueSeen } from '../utils/leagueSeen';
 import { League, loadSeasonLeaderboard } from '../lib/api';
-import { LEAGUE_INK, promoted } from '../theme/leagues';
+import { promoted } from '../theme/leagues';
 
 
 interface Props {
@@ -518,16 +517,13 @@ export function HomeScreen({
 
               <View style={[styles.cardRule, { backgroundColor: colors.border }]} />
               <View style={styles.cardFoot}>
-                {league ? (
-                  <View style={styles.leagueFoot}>
-                    <LeagueBadge league={league} size={16} />
-                    <Text style={[styles.footText, { color: LEAGUE_INK[league] }]}>{league}</Text>
-                  </View>
-                ) : (
-                  <Text style={[styles.footText, { color: colors.textMuted }]}>
-                    {game.stats.currentStreak} day streak
-                  </Text>
-                )}
+                {/* The streak, not the league. The strip below this card now
+                    carries the league properly - with the points and the
+                    distance to the next one - and two crests on one screen
+                    read as two different facts. */}
+                <Text style={[styles.footText, { color: colors.textMuted }]}>
+                  {game.stats.currentStreak} day streak
+                </Text>
                 <Text style={[styles.footText, { color: colors.textMuted }]}>
                   {game.stats.totalPoints.toLocaleString()} points
                 </Text>
@@ -550,6 +546,19 @@ export function HomeScreen({
               >
                 <Text style={[styles.primaryText, { color: colors.background }]}>{primaryLabel}</Text>
               </Pressable>
+            )}
+
+            {/* The same strip the pre-play screen carries. It lived only on
+                that screen, which is the one nobody sees for most of a day -
+                the moment round one scores, home becomes this card and the
+                league shrank to two words in its footer with no ladder behind
+                them and nothing about what the next rung costs. */}
+            {league && seasonPoints !== null && (
+              <LeagueStrip
+                league={league}
+                points={seasonPoints}
+                onPress={() => setLadderOpen(true)}
+              />
             )}
 
             {/* Named, because somebody arriving for the first time reads a
@@ -831,7 +840,6 @@ const styles = StyleSheet.create({
   scoreLine: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: 9 },
   scoreUnit: { fontSize: 14, fontFamily: fonts.bold },
   cardRule: { height: 1, alignSelf: 'stretch' },
-  leagueFoot: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   cardFoot: { flexDirection: 'row', justifyContent: 'space-between' },
   footText: { fontSize: 11.5, fontFamily: fonts.medium },
   sectionLabel: { alignSelf: 'flex-start', fontSize: 9.5, fontFamily: fonts.bold, letterSpacing: 1.5, marginTop: 26 },
