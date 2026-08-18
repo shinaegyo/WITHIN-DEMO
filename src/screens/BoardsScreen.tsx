@@ -183,11 +183,16 @@ export function BoardsScreen() {
   const [hints, setHints] = useState<PlayerSuggestion[]>([]);
   const [busy, setBusy] = useState(false);
 
+  // The league comes through here or not at all. The first ten rows are built
+  // from season_leaderboard and carry it; every row after them comes through
+  // this, which dropped it - so the badge column ended at rank ten and the
+  // board stopped saying the one thing it ranks people by.
   const toRow = (e: {
-    rank: number; name: string; avatar: string | null; score: number; avgOff: number; isMe: boolean;
+    rank: number; name: string; avatar: string | null; score: number; avgOff: number;
+    league?: League | null; isMe: boolean;
   }): Row => ({
     rank: e.rank, name: e.name, avatar: e.avatar,
-    value: `${e.score}`, isMe: e.isMe,
+    value: `${e.score}`, league: e.league ?? undefined, isMe: e.isMe,
   });
 
   // From the first keystroke. A friends list is short, so one letter narrows

@@ -1527,6 +1527,8 @@ export interface BoardWindow {
     score: number;
     avgOff: number;
     days: number;
+    /** Season only, and only from 0153 on. Null elsewhere, which hides the cell. */
+    league: League | null;
     isMe: boolean;
   }[];
 }
@@ -1544,6 +1546,12 @@ function toWindow(raw: any): BoardWindow {
       score: e.score ?? 0,
       avgOff: e.avg_off ?? 0,
       days: e.days ?? 0,
+      // Not defaulted to Bronze the way the top ten is. There, an absent league
+      // means a server older than the leagues and everyone really is at the
+      // bottom; here it also means a board that has no leagues at all, and
+      // stamping Bronze on the all-time board would invent a badge it has
+      // never had.
+      league: (e.league as League) ?? null,
       isMe: !!e.is_me,
     })),
   };

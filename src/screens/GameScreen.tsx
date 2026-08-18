@@ -42,7 +42,12 @@ const INTRO: Record<'cold' | 'clue' | 'bet', { kind: string; lede: string }> = {
   },
   bet: {
     kind: 'THE BET',
-    lede: 'Three free guesses that cost nothing and end nothing. Then commit to a range.',
+    // What the guesses are for, not just that they are free. The round paid
+    // out on how tight a range you dared name, and said so only on the commit
+    // card - which appears after the three guesses have been spent. So the
+    // first thing anybody saw was three guesses with no stated purpose and a
+    // range demanded at the end of them for no reason they had been given.
+    lede: 'Three free guesses to narrow it down. Then bet a range — the tighter it is, the more it pays.',
   },
 };
 
