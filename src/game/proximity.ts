@@ -41,8 +41,11 @@ export function getBandLabel(result: GuessResult, shades: 1 | 3 | 6 = 6): string
   // deliberately withheld.
   if (shades === 1) return result.tier === 'intense' ? 'WITHIN 10' : 'MORE THAN 10 AWAY';
   if (shades === 3) {
+    // 'dark' rather than 'medium' for the middle: it is the other tinted step
+    // on the alpha ramp, so the three bands render as three rather than as one
+    // tinted tile and two identical dark ones.
     if (result.tier === 'intense') return 'WITHIN 24';
-    if (result.tier === 'medium') return '25–249 AWAY';
+    if (result.tier === 'dark') return '25–249 AWAY';
     return '250+ AWAY';
   }
   if (result.tier === 'intense') return 'WITHIN 10';
