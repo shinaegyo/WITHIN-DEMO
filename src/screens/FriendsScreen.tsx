@@ -223,8 +223,18 @@ export function FriendsScreen({
         </Pressable>
       </View>
 
+      {/* A failure said in the quietest ink on the screen is a failure nobody
+          reads. Success was green and the thing that went wrong was muted grey
+          - dimmer than the body text around it - so a refused challenge looked
+          exactly like a button that did nothing. Both states are legible now,
+          and the one you need to act on is the louder of the two. */}
       {note && (
-        <Text style={[styles.note, { color: noteBad ? colors.textMuted : feedbackColors.correct }]}>
+        <Text
+          style={[
+            styles.note,
+            { color: noteBad ? feedbackColors.oneAway : feedbackColors.correct },
+          ]}
+        >
           {note}
         </Text>
       )}
