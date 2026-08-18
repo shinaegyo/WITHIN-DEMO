@@ -29,9 +29,14 @@ export type ClueKind = 'digits' | 'factors' | 'where';
  * ladder. That is what makes the choice a decision rather than a preference.
  */
 export const CLUE_PAYS: Record<ClueKind, number[]> = {
+  // All three the same, as of 0154. "where" was docked to a 12 ladder on the
+  // assumption that a quarter of the range is the soft option; measured, it
+  // leaves 250 numbers against written's 268 and factors' 265, and round two
+  // gives direction on every guess - so the search is the same bisection
+  // whether the survivors are a block or scattered.
   digits: [16, 14, 12, 10, 8, 6],
   factors: [16, 14, 12, 10, 8, 6],
-  where: [12, 10, 9, 8, 7, 6],
+  where: [16, 14, 12, 10, 8, 6],
 };
 
 const KINDS: { kind: ClueKind; title: string; detail: string }[] = [
