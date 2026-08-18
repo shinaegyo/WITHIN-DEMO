@@ -3,10 +3,12 @@ import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 're
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
+import { LeagueRoster } from '../components/LeagueRoster';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
   challengeFriend,
+  League,
   FriendsState,
   loadFriends,
   messageFor,
@@ -45,6 +47,7 @@ export function FriendsScreen({
   const [name, setName] = useState('');
   const [note, setNote] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
+  const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
   const [noteBad, setNoteBad] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -123,9 +126,14 @@ export function FriendsScreen({
           would read as a status of its own. */}
       {/* label is whose row this is. Passing the signed-in username here put
           your own initial on every friend in the list. */}
-      <Avatar value={avatar} size={30} name={label} />
+      {/* The face opens the card too. Only the name did, which is the half of
+          a person nobody taps - an avatar is the obvious target and it sat
+          there inert beside a name that worked. The buttons beside it still
+          act on their own. */}
+      <Pressable onPress={() => setLooking(label)}>
+        <Avatar value={avatar} size={30} name={label} />
+      </Pressable>
       {online && <View style={[styles.dot, { backgroundColor: feedbackColors.correct }]} />}
-      {/* The name itself opens their card; the buttons beside it still act. */}
       <Pressable style={styles.rowMain} onPress={() => setLooking(label)}>
         <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>
           {label}
@@ -293,7 +301,13 @@ export function FriendsScreen({
           setLooking(null);
           load();
         }}
+        onOpenLeague={(l) => {
+          setLooking(null);
+          setLeagueRoster(l);
+        }}
       />
+
+      <LeagueRoster league={leagueRoster} onClose={() => setLeagueRoster(null)} />
     </ScrollView>
   );
 }
