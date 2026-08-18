@@ -55,12 +55,8 @@ export function duelRules(): React.ReactNode[] {
     <>
       <H>Setting up</H>
       <P first>
-        Add someone as a friend and challenge them. Once they accept, you both choose: you set the
-        number they have to find, and they set yours.
-      </P>
-      <P>
-        Neither of you can guess until both numbers are in, so nobody starts while the other is
-        still deciding.
+        Challenge a friend. You set the number they have to find and they set yours, and neither of
+        you guesses until both are in.
       </P>
     </>,
 
@@ -69,42 +65,28 @@ export function duelRules(): React.ReactNode[] {
       <P first>A fresh number each round, always chosen by the other player.</P>
       <Table rows={[['Round 1', '', '7 attempts'], ['Round 2', '', '6 attempts'], ['Round 3', '', '5 attempts']]} />
       <P>
-        You never play at the same time, and you never see their board until the round is settled.
-        Finish a round and you wait for them — the next opens once you have both played it.
+        You never play at the same time, and never see their board until the round is settled.
       </P>
     </>,
 
     <>
-      <H>Winning a round</H>
-      <P first>A round goes to whoever found the number in fewer guesses.</P>
-      <P>
-        Solve it in the same number of guesses and the round is a tie, shown in orange, counting for
-        neither of you.
+      <H>Winning</H>
+      <P first>
+        Fewer guesses takes the round. The same number of guesses is a tie, and if only one of you
+        finds it at all, it is theirs.
       </P>
       <P>
-        If only one of you finds it, that round is theirs however many attempts it took. If neither
-        of you does, it is a tie.
+        Most rounds after three wins the duel. Level after three and a fourth number decides it,
+        with five attempts; tie that too and the duel is drawn.
       </P>
-    </>,
-
-    <>
-      <H>Ties</H>
-      <P first>Whoever has taken more rounds after three wins the duel.</P>
-      <P>
-        Level after three — one round each, all three tied, or any other way of arriving even — and
-        a fourth number decides it, with five attempts.
-      </P>
-      <P>If that one ties too, the duel is drawn and neither of you takes it.</P>
     </>,
 
     <>
       <H>What it is worth</H>
       <P first>
-        Duels are separate from your daily. They change no points, no streak and no place on the
-        leaderboard.
+        Separate from your daily — no points, no streak, no place on the leaderboard.
       </P>
       <Table rows={[['Win', '', '80 XP'], ['Loss', '', '25 XP']]} />
-      <P>Both pay toward your level, because turning up is most of it.</P>
     </>,
   ];
 }
@@ -130,34 +112,18 @@ export function rushRules(): React.ReactNode[] {
     <>
       <H>Reading the colors</H>
       <P first>
-        No clues, and no limit on guesses — the clock is the only thing you spend.
-      </P>
-      <P>
-        The colors work as they do everywhere else: blue means aim higher, red means lower, and the
-        stronger the color the closer you are.
+        No clues and no limit on guesses — the clock is the only thing you spend. Blue means aim
+        higher, red means lower, and the stronger the color the closer you are.
       </P>
     </>,
 
     <>
       <H>The clock</H>
       <P first>
-        One run a day, and it starts the moment you press the button — not when the first guess
-        lands.
+        One run a day, starting the moment you press the button. Leaving stops it, and coming back
+        gives you three seconds of countdown, so an interruption costs you nothing.
       </P>
-      <P>
-        Leaving stops it. Close the app, switch tabs or go Home and the clock holds where it was.
-        Coming back gives you three seconds of countdown before it starts again, so an interruption
-        costs you nothing.
-      </P>
-    </>,
-
-    <>
-      <H>Ties</H>
-      <P first>Equal scores break on guesses used.</P>
-      <P>
-        Two people who both found seven are separated by who spent fewer guesses getting there,
-        because reading the colors quickly is the whole skill of the mode.
-      </P>
+      <P>Equal scores break on guesses used.</P>
     </>,
   ];
 }
@@ -175,68 +141,56 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>The Impossible Climb</H>
       <P first>
-        Seventy-five numbers, one after another, and everyone plays the same sequence this week —
-        so how far you got compares directly. It resets on Monday. Five guesses a number, all the
-        way up. The Ground and the Sky hand you a clue; above them the climb takes something away
-        instead, a different thing each tier. Clear level 75 and you have topped out, and everyone
-        who finishes is ranked on guesses used. Almost nobody will.
+        Seventy-five numbers, one after another, five guesses each. Everyone plays the same
+        sequence this week, so how far you got compares directly. It resets on Monday.
       </P>
+      <P>Clear level 75 and you have topped out. Summits rank on guesses used.</P>
     </>,
 
     <>
       <H>Health</H>
       <P first>
-        You start every day at 100%. Running out of attempts on a number costs health, not the
-        climb — the same number is waiting and you try it again. What it costs depends on how high
-        you are: 18% on the Ground, rising a point a tier to 22% in Orbit. Solve a number you have never failed in two guesses or fewer and you take 10% back. A fall always costs more than a clean solve returns, so a day
-        is about four or five misses long.
+        You start every day at 100%. Running out of attempts costs health, not the climb — the same
+        number is waiting. A miss costs 18% on the Ground, rising a point a tier to 22% in Orbit,
+        so a day is four or five misses long.
       </P>
+      <P>Solve a number you have never failed in two guesses and you take 10% back.</P>
     </>,
 
     <>
       <H>What each tier takes</H>
       <P first>
-        The Ground and the Sky hand you a clue with every number. Above them the climb starts
-        taking things away instead.
+        The Ground and the Sky hand you a clue with every number. Above them the climb takes
+        something away instead.
       </P>
       <P>
-        In Stratosphere the arrow goes. The tile still tells you how close you are and never which
-        way, so every guess leaves you two possibilities to tell apart. The colour drains out with
-        it — there is no blue or red up there, only how strong the shade is.
-      </P>
-      <P>
-        In Thin air the colour arrives late — every guess shows its arrow at once and its shade
-        only once the next guess has landed, so you commit before you know how close you were.
-      </P>
-      <P>
-        Orbit gives it all back and takes nothing. Five guesses, the full colours, no clue and no
-        trick. It is the last fifteen numbers and there is nothing to hide behind.
+        Stratosphere hides the arrow: you learn how close you are, never which way. Thin air holds
+        the shade back a guess, so you commit before you know. Orbit takes nothing — five guesses,
+        full colours, no clue and no trick.
       </P>
     </>,
 
     <>
       <H>Checkpoints</H>
       <P first>
-        Every fifth level is a checkpoint, and so is the first level of a tier. You never start
-        further back than your last one — clear level 37 and stop, and tomorrow begins at 35. It is
-        also where you land at zero health.
+        Every fifth level is a checkpoint, and so is the first of a tier. You never start further
+        back than your last one — clear 37 and stop, and tomorrow begins at 35.
       </P>
     </>,
 
     <>
       <H>Running out</H>
       <P first>
-        Lose all your health and that is the day. Come back tomorrow at 100%. Nothing limits how
-        long you play, and nothing carries over — every day is a clean attempt.
+        Lose all your health and that is the day; you come back tomorrow at 100%, from your last
+        checkpoint. Nothing else limits how long you play.
       </P>
     </>,
 
     <>
       <H>The five tiers</H>
       <P first>
-        Fifteen levels each. Five guesses a number, all the way up — what changes is what a miss
-        costs and whether a clue arrives at all. Every number cleared pays 20 XP toward your level,
-        and reaching a new tier pays 50.
+        Fifteen levels each, five guesses a number. What changes is what a miss costs and whether a
+        clue arrives at all. A number cleared pays 20 XP, a new tier 50.
       </P>
       <TierTable />
     </>,
