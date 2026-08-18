@@ -25,7 +25,7 @@ import { fonts } from '../theme/fonts';
 import { MEDALS } from '../theme/medals';
 import { useTheme } from '../theme/ThemeContext';
 import { playTap } from '../utils/sound';
-import { radius, border } from '../theme/tokens';
+import { radius, border, type, numeral } from '../theme/tokens';
 
 /**
  * Where Impossible starts: how far everybody got, and then the button.
@@ -215,10 +215,25 @@ export function ImpossibleBoardScreen({
 
       {/* The way in sits under the standings rather than replacing them. */}
       <View style={[styles.foot, { borderColor: colors.border, backgroundColor: colors.background }]}>
-        <Text style={[styles.best, { color: colors.textMuted }]}>
-          {summit ? 'You topped out this week' : `You are on level ${level}`}
-          {!summit && health > 0 ? ` · ${health}% health` : ''}
-        </Text>
+        {/* The level as a figure, with everything about it in the line above.
+            "You are on level 1 · 100% health" buried the one number this
+            screen exists to tell you inside a sentence, at twelve points, in
+            the muted grey used for captions - smaller than the levels of the
+            people on the board above it.
+
+            Modest rather than enormous: this is an action bar with a button
+            under it, and a display-sized figure would take the room the
+            standings are using. */}
+        {summit ? (
+          <Text style={[styles.best, { color: colors.textMuted }]}>TOPPED OUT THIS WEEK</Text>
+        ) : (
+          <>
+            <Text style={[styles.best, { color: colors.textMuted }]}>
+              YOUR LEVEL{health > 0 ? ` · ${health}% HEALTH` : ''}
+            </Text>
+            <Text style={[styles.bestLevel, { color: colors.text }]}>{level}</Text>
+          </>
+        )}
         <Pressable
           onPress={async () => {
             playTap();
@@ -288,8 +303,9 @@ const styles = StyleSheet.create({
   tierName: { flex: 1, fontSize: 13, fontFamily: fonts.bold },
   tierRange: { fontSize: 11.5, fontFamily: fonts.bold, width: 46, textAlign: 'right' },
   tierAttempts: { fontSize: 11.5, fontFamily: fonts.medium, width: 74, textAlign: 'right' },
-  foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 8 },
-  best: { fontSize: 12, fontFamily: fonts.medium, textAlign: 'center' },
+  foot: { borderTopWidth: border.hairline, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 14, gap: 6 },
+  best: { fontSize: type.caption, fontFamily: fonts.bold, letterSpacing: 1.2 },
+  bestLevel: { ...numeral(30), fontFamily: fonts.extraBold },
   play: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   playText: { fontSize: 16, fontFamily: fonts.extraBold },
   caption: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 6 },
