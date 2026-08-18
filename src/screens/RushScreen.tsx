@@ -202,9 +202,12 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
             left, what its columns are on the right. The title used to float
             centred on a line of its own above them. */}
         <View style={styles.headRow}>
-          <Text style={[styles.boardTitle, { color: colors.textMuted }]}>{title}</Text>
-          <Text style={[styles.colHead, { color: colors.textMuted }]}>GUESSES</Text>
-          <Text style={[styles.colHeadRight, { color: colors.textMuted }]}>FOUND</Text>
+          {/* The climb's ink, not the muted grey. A heading in the colour
+              used for captions reads as a footnote to the board rather than
+              the label on its columns. */}
+          <Text style={[styles.boardTitle, { color: colors.text }]}>{title}</Text>
+          <Text style={[styles.colHead, { color: colors.text }]}>GUESSES</Text>
+          <Text style={[styles.colHeadRight, { color: colors.text }]}>FOUND</Text>
         </View>
         {shown.map((e, i) => (
           <React.Fragment key={`${e.rank}-${e.name}-${i}`}>

@@ -6,7 +6,6 @@ import { PlayerCardModal } from '../components/PlayerCard';
 import { LeagueRoster } from '../components/LeagueRoster';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
-import { PagedRules, RulesButton } from '../components/PagedRules';
 import { duelRules } from '../components/modeRules';
 import {
   ApiError,
@@ -61,7 +60,6 @@ export function DuelsScreen({
   const [looking, setLooking] = useState<string | null>(null);
   const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
   const [waiting, setWaiting] = useState<{ online: number } | null>(null);
-  const [rules, setRules] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -113,7 +111,6 @@ export function DuelsScreen({
     });
 
   // The rulebook takes the whole screen rather than sitting under it.
-  if (rules) return <PagedRules title="How Duels works" onBack={() => setRules(false)} sections={duelRules()} />;
 
   if (error) return <StatusScreen message={error} onRetry={load} />;
   if (!all) return <StatusScreen loading />;
@@ -350,7 +347,16 @@ export function DuelsScreen({
         )}
         {/* Rules last, as on every other mode screen: read once, scrolled past
             every time after. */}
-        <RulesButton onPress={() => setRules(true)} />
+        {/* Set out rather than folded behind a press, the way Rush and the
+            climb do it. This screen was a heading, a line of prose and a
+            button, with the rules on the far side of it - the emptiest screen
+            in the app hiding the one thing on it worth reading. */}
+        <Text style={[styles.introRulesHead, { color: colors.text }]}>How it works</Text>
+        {duelRules().map((section, i) => (
+          <View key={i} style={i === 0 ? undefined : styles.ruleGap}>
+            {section}
+          </View>
+        ))}
       </ScrollView>
 
       {/* The way in sits under everything rather than on top of it: the list
@@ -434,6 +440,9 @@ const styles = StyleSheet.create({
   // Sitting at the foot of the list, so it needs air above it: pressed against
   // the line before it, the heading read as part of that sentence.
   rulesHead: { fontSize: 15, fontFamily: fonts.extraBold, marginTop: 26, marginBottom: 4 },
+  /** The way-in heading, at the size Rush and the climb use for theirs. */
+  introRulesHead: { fontSize: 24, fontFamily: fonts.extraBold, marginTop: 30, marginBottom: 14 },
+  ruleGap: { marginTop: 20 },
   caption: { fontSize: 12.5, fontFamily: fonts.medium, lineHeight: 19, marginTop: 2 },
   foot: { borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
   waiting: { alignItems: 'center', gap: 6, paddingVertical: 8 },
