@@ -163,6 +163,10 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
   const weekOver = new Date().getDay() === 0;
 
   const arena = arenaFor(devStageLevel() ?? state.level);
+  // Ceiling, not floor: at 46% with a 45 fall you have two - one that leaves
+  // you on 1%, and one that ends the day. The last one still counts, because
+  // it is the one the warning is about.
+  const fallsLeft = Math.max(0, Math.ceil(state.health / arenaFor(state.level).fall));
   const hairline = 'rgba(255, 255, 255, 0.18)';
 
   // Topped out: there is no next number, and the screen should not pretend
@@ -234,7 +238,15 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                   ]}
                 />
               </View>
-              <Text style={[styles.badge, { color: arena.muted }]}>{state.health}%</Text>
+              {/* The number a player actually needs.
+                  A percentage hides the decision: 82% is nine more mistakes on
+                  the Ground and two in Orbit, because a fall costs 10 there and
+                  45 up here. Whether to spend a guess narrowing or commit to
+                  one turns entirely on which of those you are looking at, and
+                  the bar never said. */}
+              <Text style={[styles.badge, { color: arena.muted }]}>
+                {state.health}% · {fallsLeft} {fallsLeft === 1 ? 'fall' : 'falls'} left
+              </Text>
             </View>
           </View>
 
