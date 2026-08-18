@@ -83,10 +83,10 @@ export function PlayerCardModal({
     }
   };
 
-  const Stat = ({ label, value, ink }: { label: string; value: string; ink?: string }) => (
+  const Stat = ({ label, value }: { label: string; value: string }) => (
     <View style={styles.stat}>
       <Text
-        style={[styles.statValue, { color: ink ?? colors.text }]}
+        style={[styles.statValue, { color: colors.text }]}
         numberOfLines={1}
         adjustsFontSizeToFit
       >
@@ -168,37 +168,14 @@ export function PlayerCardModal({
                   explained by the league ladder now. */}
 
               <View style={styles.stats}>
-                {/* Two totals, then two things in play.
+                {/* Three, and all three about the person rather than a mode.
                     Points and level only ever grow - one from the daily, one
-                    from every mode. Streak and climb are both live: a run that
-                    is still going, and a week that has not finished. The old
-                    order put the daily's two first, which read well until you
-                    noticed it crossed from all-time to current and back again
-                    across four numbers. */}
+                    from every mode - and the streak says whether they are
+                    still turning up. The climb was a fourth column that reset
+                    every Monday and read as a dash for most people. */}
                 <Stat label="POINTS" value={`${card.points}`} />
                 <Stat label="LEVEL" value={`${card.level}`} />
                 <Stat label="STREAK" value={`${card.streak}`} />
-                {/* A best streak is a record of a run already over. How far
-                    they have climbed this week is a thing still happening. */}
-                {/* A summit is the same level for everybody who gets there, so the
-                    level stops saying anything and the guess count starts.
-                    This is the only place it is written down now that the
-                    board keeps its rows to a single number. */}
-                {/* Labelled GUESSES rather than SUMMIT, because a number under
-                    the word "summit" is the same puzzle the board just had:
-                    228 of what. The accent carries the achievement instead,
-                    and the word carries the unit. */}
-                <Stat
-                  label={card.climb?.topped ? 'GUESSES' : 'CLIMB'}
-                  ink={card.climb?.topped ? colors.accent : undefined}
-                  value={
-                    card.climb?.topped
-                      ? `${card.climb.guesses}`
-                      : card.impossible !== null && card.impossible > 0
-                        ? `${card.impossible}`
-                        : '—'
-                  }
-                />
               </View>
 
               {/* The day itself: one bar per round, green for found and red for
@@ -226,6 +203,17 @@ export function PlayerCardModal({
 
               <View style={[styles.rows, { borderColor: colors.border }]}>
                 <Row label="Daily challenges" value={`${card.daysPlayed}`} />
+                {/* Down here rather than as a fourth headline. Points, level
+                    and streak describe a person; the climb describes a mode,
+                    resets on Monday, and is a dash for most of the people
+                    whose card you open from the daily board. A summit is the
+                    same level for everyone who reaches it, so the guess count
+                    is what separates them and the label says which it is. */}
+                {card.climb?.topped ? (
+                  <Row label="Climb this week" value={`Topped out · ${card.climb.guesses} guesses`} />
+                ) : card.impossible !== null && card.impossible > 0 ? (
+                  <Row label="Climb this week" value={`Level ${card.impossible}`} />
+                ) : null}
                 {/* Only ever a finished day - a day in progress stays theirs. */}
                 {card.todayScore !== null && <Row label="Today" value={`${card.todayScore}`} />}
                 {card.ranked && (
