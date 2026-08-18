@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { AppFrame } from './src/components/AppFrame';
 import { invalidateSession } from './src/lib/supabase';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { reloadIfStale } from './src/utils/version';
@@ -55,7 +56,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <RootNavigator />
+        {/* Inside the theme, so the space either side of the column is the
+            app's own background rather than a browser's white. */}
+        <AppFrame>
+          <RootNavigator />
+        </AppFrame>
       </ThemeProvider>
     </SafeAreaProvider>
   );
