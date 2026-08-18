@@ -8,8 +8,8 @@ import { playTap } from '../utils/sound';
 /**
  * Round one asks for a bet before it asks for a guess.
  *
- * Say how many guesses you need. Make the call and take the prize; find it
- * later than you said and take 5; never find it and take 3. Seven is the whole
+ * Say how many guesses you need. Hit the call and take the points listed; find
+ * it later and take 5; never find it and take 3. Seven is the whole
  * allowance for the smallest prize, so refusing to bet is itself a bet - there
  * is no opt-out to hide in, and the only route to thirty is saying out loud
  * that one guess will do.
@@ -40,8 +40,8 @@ export function CallYourShot({ onCall, busy }: { onCall: (n: number) => void; bu
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[styles.label, { color: colors.textMuted }]}>CALL YOUR SHOT</Text>
       <Text style={[styles.lede, { color: colors.textMuted }]}>
-        Make the call and take the prize. Find it later than you said and take {LATE_PAY}; never
-        find it and take {MISS_PAY}.
+        Say how many guesses you'll need. Hit your call and take the points below. Find it later
+        and take {LATE_PAY}; never find it and take {MISS_PAY}.
       </Text>
 
       {/* One list rather than seven cards: this is a single decision, and seven

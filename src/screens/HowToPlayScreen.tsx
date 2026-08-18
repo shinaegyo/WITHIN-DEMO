@@ -98,8 +98,8 @@ export function HowToPlayScreen({ showTitle = true }: { showTitle?: boolean } = 
     <>
       <Text style={[styles.h2, { color: colors.text }]}>Round one — call your shot</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        Before your first guess, say how many guesses you need. Make the call and take the prize.
-        Find it later than you said and it pays 5; never find it and it pays 3.
+        Before your first guess, say how many guesses you need. Hit your call and take the points
+        listed. Find it later and it pays 5; never find it and it pays 3.
       </Text>
       <View style={[styles.scoreBox, { borderColor: colors.border }]}>
         {([
