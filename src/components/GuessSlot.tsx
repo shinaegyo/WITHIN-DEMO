@@ -6,7 +6,7 @@ import { GuessResult } from '../game/types';
 import { getTileAccent, getTileFill, getTileInk } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeContext';
-import { radius, border } from '../theme/tokens';
+import { radius, border, numeral } from '../theme/tokens';
 
 // Slots flex to share the available board height, but never grow so tall
 // they stop reading as a row of boxes.
@@ -160,11 +160,17 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     width: 26,
   },
+  // The number is the tile.
+  //
+  // It sat at 24 with half a point of POSITIVE tracking - the opposite of what
+  // heavy figures want - so the thing a player actually stares at for a whole
+  // round read as a value in a row rather than as the subject of it. A third
+  // larger, tracking pulled in, and the band and arrow beside it become what
+  // they always were: annotations on a number.
   guessText: {
     flex: 1,
-    fontSize: 24,
+    ...numeral(32),
     fontFamily: fonts.extraBold,
-    letterSpacing: 0.5,
   },
   band: {
     fontSize: 11,
