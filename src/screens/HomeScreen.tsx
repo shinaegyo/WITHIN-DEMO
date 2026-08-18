@@ -36,7 +36,7 @@ import { lastSeenLevel, markLevelSeen } from '../utils/levelSeen';
 import { lastSeenLeague, markLeagueSeen } from '../utils/leagueSeen';
 import { League, loadSeasonLeaderboard } from '../lib/api';
 import { promoted } from '../theme/leagues';
-import { radius, border } from '../theme/tokens';
+import { radius, border, type, numeral } from '../theme/tokens';
 
 
 interface Props {
@@ -469,12 +469,21 @@ export function HomeScreen({
                 )}
               </View>
 
+              {/* The number owns its line, and the unit goes above it.
+                  "24 points" set the figure and its label on one baseline, so
+                  the biggest thing on the screen was sharing a line with a
+                  13-point word and reading as data with a caption. Above it,
+                  in capitals, the number has the line to itself. */}
               <View style={styles.scoreLine}>
-                <Text style={[styles.score, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-                  {game.totalScore}
-                </Text>
                 <Text style={[styles.scoreUnit, { color: colors.textMuted }]}>
-                  {game.totalScore === 1 ? 'point' : 'points'}
+                  {game.totalScore === 1 ? 'POINT TODAY' : 'POINTS TODAY'}
+                </Text>
+                <Text
+                  style={[styles.score, { color: colors.text }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {game.totalScore}
                 </Text>
               </View>
 
@@ -829,8 +838,9 @@ const styles = StyleSheet.create({
   shareLink: { fontSize: 12.5, fontFamily: fonts.extraBold, textDecorationLine: 'underline' },
   // Centred over the round chips, which are a symmetric full-width row. Left
   // against the edge, the hero number lined up with nothing and left a hole.
-  scoreLine: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: 9 },
-  scoreUnit: { fontSize: 14, fontFamily: fonts.bold },
+  /** Label and figure are one block: the card's gap goes around them, not between. */
+  scoreLine: { gap: 2 },
+  scoreUnit: { fontSize: type.caption, fontFamily: fonts.bold, letterSpacing: 1.2 },
   cardRule: { height: 1, alignSelf: 'stretch' },
   cardFoot: { flexDirection: 'row', justifyContent: 'space-between' },
   footText: { fontSize: 11.5, fontFamily: fonts.medium },
@@ -913,13 +923,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     marginBottom: 6,
   },
-  score: {
-    fontSize: 84,
-    fontFamily: fonts.extraBold,
-    letterSpacing: -3,
-    lineHeight: 90,
-    includeFontPadding: false,
-  },
+  score: { ...numeral(84), fontFamily: fonts.extraBold },
   scoreMax: {
     fontSize: 11,
     fontFamily: fonts.bold,

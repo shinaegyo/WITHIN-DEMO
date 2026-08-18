@@ -64,3 +64,50 @@ export const space = {
   loose: 22,
   section: 30,
 } as const;
+
+/**
+ * The type scale.
+ *
+ * There were thirty-nine distinct font sizes in the app - 12, 12.5, 13, 13.5,
+ * 14, 14.5, 15, 15.5 and 16 all doing the job of "body text", each one a nudge
+ * made at a different keystroke on a different day. Nine steps inside four
+ * points is not a scale, it is a continuum, and a continuum has no shape: every
+ * screen arrives at the same volume because nothing is far enough from
+ * anything else to read as louder.
+ *
+ * Six steps, with gaps wide enough to mean something. A screen should have a
+ * shape before a word of it is read.
+ */
+export const type = {
+  /** A number as the thing you look at, not as data with a label under it. */
+  display: 64,
+  /** Screen titles. */
+  title: 40,
+  /** Section headings inside a screen. */
+  heading: 24,
+  /** Prose. */
+  body: 15,
+  /** Values, states, anything sitting beside something else. */
+  label: 12.5,
+  /** The small letterspaced capitals over a block. */
+  caption: 10.5,
+} as const;
+
+/**
+ * A figure set as artwork.
+ *
+ * Heavy type at size needs its tracking pulled in or the counters drift apart
+ * and the number reads as three separate glyphs. Five percent negative, and a
+ * line box just under the cap height so it sits tight to whatever is above it.
+ *
+ * React Native takes letterSpacing in points rather than em, so it has to be
+ * computed from the size rather than written once.
+ */
+export function numeral(size: number) {
+  return {
+    fontSize: size,
+    letterSpacing: -size * 0.05,
+    lineHeight: size * 0.95,
+    includeFontPadding: false,
+  } as const;
+}
