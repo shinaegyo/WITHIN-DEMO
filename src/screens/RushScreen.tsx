@@ -17,7 +17,6 @@ import { FeedbackOverlay, FeedbackTrigger } from '../components/FeedbackOverlay'
 import { GuessBoard } from '../components/GuessBoard';
 import { NumberInput } from '../components/NumberInput';
 import { StatusScreen } from '../components/StatusScreen';
-import { PagedRules, RulesButton } from '../components/PagedRules';
 import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { rushRules } from '../components/modeRules';
 import {
@@ -73,7 +72,6 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   const [found, setFound] = useState<number | null>(null);
   // 3, 2, 1 before the clock starts again, so nobody comes back mid-guess.
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [rules, setRules] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const ended = useRef(false);
   const running = useRef(false);
@@ -193,7 +191,6 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
   );
 
   // The rulebook takes the whole screen rather than sitting under it.
-  if (rules) return <PagedRules title="How Rush works" onBack={() => setRules(false)} sections={rushRules()} />;
 
   const rows = board?.entries ?? [];
   const { shown, hidden, breakAt } = topTen(rows, expanded);
@@ -291,7 +288,17 @@ export function RushScreen({ onExit }: { onExit: () => void }) {
                     read once and scrolled past every time after. */}
                 {standings('BEST TODAY')}
 
-                <RulesButton onPress={() => setRules(true)} />
+                {/* Set out rather than folded behind a button, the way the
+                    climb does it. A mode screen that offers a board and one
+                    link is mostly empty space with the rules on the far side
+                    of a press - and Rush costs a run to learn by playing, so
+                    it is the worst mode to hide them in. */}
+                <Text style={[styles.introRulesHead, { color: colors.text }]}>How it works</Text>
+                {rushRules().map((section, i) => (
+                  <View key={i} style={i === 0 ? undefined : styles.ruleGap}>
+                    {section}
+                  </View>
+                ))}
 
                 {note && <Text style={[styles.note, { color: feedbackColors.oneAway }]}>{note}</Text>}
               </ScrollView>
@@ -507,6 +514,11 @@ const styles = StyleSheet.create({
   factLabel: { fontSize: 13, fontFamily: fonts.bold },
   factNote: { flex: 1, fontSize: 11.5, fontFamily: fonts.medium, textAlign: 'right' },
   intro: { paddingTop: 10, paddingBottom: 20, gap: 12 },
+  /** The way-in screen only. Matched to the climb's, so the two mode screens
+      read as one pattern; the smaller rulesHead above belongs to the results
+      screen, where the rules sit under a score rather than over a button. */
+  introRulesHead: { fontSize: 24, fontFamily: fonts.extraBold, marginTop: 30, marginBottom: 14 },
+  ruleGap: { marginTop: 20 },
   rule: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19 },
   title: { fontSize: 46, fontFamily: fonts.extraBold, letterSpacing: -1 },
   body: { fontSize: 13.5, fontFamily: fonts.medium, lineHeight: 20, textAlign: 'center' },
