@@ -225,9 +225,11 @@ export function ImpossibleBoardScreen({
             An action bar states a status and gets out of the way. The number
             is not the subject here - the button is - and the level is set as a
             figure on the climb screen, where it is. */}
+        {/* The level only. The button underneath already says the health,
+            and saying it twice in two lines is how the earlier version of
+            this footer read as broken. */}
         <Text style={[styles.best, { color: colors.textMuted }]}>
           {summit ? 'You topped out this week' : `You are on level ${level}`}
-          {!summit && health > 0 ? ` · ${health}% health` : ''}
         </Text>
 
         <Pressable
