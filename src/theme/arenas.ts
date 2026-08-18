@@ -117,7 +117,19 @@ export function checkpointFor(level: number): number {
   // Mirrors endless_checkpoint: every fifth level, never below the tier floor.
   // The tiers are fifteen deep and the checkpoints five apart, so without the
   // floor, reaching 46 and falling would drop you back into Stratosphere.
-  return Math.max(Math.max(1, Math.floor(level / 5) * 5), arenaFor(level).from);
+  //
+  // Below the first checkpoint every level is its own, as of 0164. Integer
+  // division made the old version harsher than it read - Math.floor(4 / 5) * 5
+  // is zero, so anybody whose best was 2, 3 or 4 was sent back to level 1, and
+  // that fell entirely on new players in their first days.
+  //
+  // This has to match the server exactly. It is the same rule written twice,
+  // and the screen telling somebody what their level is worth would otherwise
+  // promise a checkpoint the server does not keep.
+  return Math.max(
+    level < 5 ? level : Math.floor(level / 5) * 5,
+    arenaFor(level).from,
+  );
 }
 
 /** The next one up, for telling somebody what the current level is worth. */
