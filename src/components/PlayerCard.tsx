@@ -143,17 +143,11 @@ export function PlayerCardModal({
                   card that opens with how long someone has been away makes a
                   quiet week look like a lapsed player. Someone with nothing yet
                   gets no line at all rather than a sentence about it. */}
-              {/* The season, because there is no all-time board to be second
-                  on any more. Points and days are the two numbers the league
-                  is made of, so the line explains the crest above it. */}
-              {card.daysPlayed > 0 && (
-                <Text style={[styles.sub, { color: colors.textMuted }]}>
-                  {card.seasonPoints} {card.seasonPoints === 1 ? 'point' : 'points'} this season
-                  {card.seasonDays > 0
-                    ? ` · ${card.seasonDays} ${card.seasonDays === 1 ? 'day' : 'days'}`
-                    : ''}
-                </Text>
-              )}
+              {/* No season line. It printed the same points as the POINTS
+                  stat directly below it, and paired them with a day count
+                  nothing on the card explained - "2 days" reads as an age, not
+                  as the season's rate. The crest it was there to justify is
+                  explained by the league ladder now. */}
 
               <View style={styles.stats}>
                 {/* Two totals, then two things in play.
@@ -317,7 +311,6 @@ const styles = StyleSheet.create({
   crest: { marginLeft: 'auto', alignItems: 'center', gap: 2 },
   crestName: { fontSize: 9.5, fontFamily: fonts.extraBold, letterSpacing: 0.8 },
   beltText: { fontSize: 9, fontFamily: fonts.extraBold, letterSpacing: 1.1 },
-  sub: { fontSize: 11.5, fontFamily: fonts.medium, marginTop: 2 },
   stats: { flexDirection: 'row', marginTop: 18, marginBottom: 4 },
   stat: { flex: 1 },
   statValue: { fontSize: 26, fontFamily: fonts.extraBold },
