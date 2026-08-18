@@ -365,6 +365,33 @@ export function HomeScreen({
         : 'A friend or a stranger';
   const duelWaiting = !!modes && (modes.duelsWaiting > 0 || modes.queued);
 
+  /**
+   * The ladder, which had no door.
+   *
+   * The screen, the queue, the rating and the belt have all been built and
+   * working; onOpenRanked was handed to this component and never rendered, so
+   * nothing ever asked the navigator to go there. A finished mode nobody could
+   * reach.
+   *
+   * The line leads with whichever fact is most urgent: your move first, then a
+   * match you are in, then the queue, then the belt, and a rating when none of
+   * those apply.
+   */
+  const rankedState = !modes
+    ? 'A rating and a belt'
+    : modes.ranked.needsMe
+      ? 'Your move'
+      : modes.ranked.inMatch
+        ? 'Match in progress'
+        : modes.ranked.queued
+          ? 'Looking for an opponent'
+          : modes.ranked.iHoldBelt
+            ? 'You hold the belt'
+            : modes.ranked.beltHolder
+              ? `${modes.ranked.beltHolder} holds the belt`
+              : `Rating ${modes.ranked.rating}`;
+  const rankedLive = !!modes && (modes.ranked.needsMe || modes.ranked.queued);
+
 
   /**
    * One thing to try, not a list.
@@ -644,6 +671,36 @@ export function HomeScreen({
               >
                 <Text style={[styles.featuredGoText, { color: colors.background }]}>
                   {duelWaiting ? 'Play' : 'Start'}
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={[styles.featured, { backgroundColor: colors.surface, borderWidth: border.hairline, borderColor: colors.border }]}>
+              <View style={styles.featuredMain}>
+                <Text style={[styles.featuredName, { color: colors.text }]}>Ranked</Text>
+                <Text
+                  style={[styles.featuredState, { color: rankedLive ? colors.accent : colors.textMuted }]}
+                  numberOfLines={1}
+                >
+                  {rankedState}
+                </Text>
+              </View>
+              <Pressable
+                disabled={modesLocked}
+                onPress={() => {
+                  playTap();
+                  onOpenRanked();
+                }}
+                style={({ pressed }) => [
+                  styles.featuredGo,
+                  {
+                    backgroundColor: colors.text,
+                    opacity: modesLocked ? 0.4 : pressed ? 0.8 : 1,
+                  },
+                ]}
+              >
+                <Text style={[styles.featuredGoText, { color: colors.background }]}>
+                  {modes?.ranked.needsMe ? 'Play' : 'Enter'}
                 </Text>
               </Pressable>
             </View>

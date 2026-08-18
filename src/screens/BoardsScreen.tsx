@@ -567,8 +567,11 @@ export function BoardsScreen() {
                   <Text style={[styles.hintName, { color: colors.text }]} numberOfLines={1}>
                     {h.name}
                   </Text>
+                  {/* The place, not the place and the score. A suggestion row
+                      answers "is this them, and where are they" - the score is
+                      on the row you land on a moment later. */}
                   <Text style={[styles.hintRank, { color: colors.textMuted }]}>
-                    {h.rank === null ? 'not played' : `#${h.rank} · ${h.score}`}
+                    {h.rank === null ? 'not played' : `#${h.rank}`}
                   </Text>
                 </Pressable>
               ))}
