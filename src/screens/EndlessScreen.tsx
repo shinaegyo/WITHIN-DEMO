@@ -21,7 +21,7 @@ import {
   startEndlessSession,
 } from '../lib/api';
 import { fonts } from '../theme/fonts';
-import { arenaFor, checkpointFor, nextCheckpoint, SUMMIT } from '../theme/arenas';
+import { arenaFor, checkpointFor, nextCheckpoint, shadesFor, SUMMIT } from '../theme/arenas';
 import { playLose, playWin } from '../utils/sound';
 import { useTrack } from '../utils/useTrack';
 import { climbTrack } from '../utils/climbTrack';
@@ -427,6 +427,7 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                 <GuessBoard
                   guesses={state.guesses}
                   attemptsAllowed={state.attemptsAllowed}
+                  shades={shadesFor(state.level)}
                   blindOneAway
                   ink={arena.text}
                   inkMuted={arena.muted}

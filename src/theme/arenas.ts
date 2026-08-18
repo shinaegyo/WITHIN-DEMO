@@ -80,7 +80,7 @@ export const ARENAS: Arena[] = [
     below: '#2F5BC4',
   },
   {
-    key: 'strato', name: 'Stratosphere', from: 31, attempts: 5, fall: 20, clueFrom: 0,
+    key: 'strato', name: 'Stratosphere', from: 31, attempts: 6, fall: 20, clueFrom: 0,
     track: 'climbStrato',
     background: '#2A3A72', backgroundDeep: '#1A2450', surface: '#16204A',
     text: '#EDF1FC', muted: '#9FAEDC', accent: '#7F9DEB',
@@ -89,14 +89,14 @@ export const ARENAS: Arena[] = [
   {
     // Between the indigo and the black: the last of the colour, and the tier
     // where a fall starts costing nearly half a day.
-    key: 'thin', name: 'Thin air', from: 46, attempts: 5, fall: 21, clueFrom: 0,
+    key: 'thin', name: 'Thin air', from: 46, attempts: 6, fall: 21, clueFrom: 0,
     track: 'climbThin',
     background: '#141C40', backgroundDeep: '#0A0F26', surface: '#101838',
     text: '#E7ECFB', muted: '#8B99CC', accent: '#8AA4F2',
     below: '#7EA0FF',
   },
   {
-    key: 'orbit', name: 'Orbit', from: 61, attempts: 5, fall: 22, clueFrom: 0,
+    key: 'orbit', name: 'Orbit', from: 61, attempts: 6, fall: 22, clueFrom: 0,
     track: 'climbOrbit',
     background: '#080A12', backgroundDeep: '#020306', surface: '#141A2B',
     text: '#EAEDF8', muted: '#7C86A8', accent: '#8FA6FF',
@@ -136,4 +136,22 @@ export function checkpointFor(level: number): number {
 export function nextCheckpoint(level: number): number | null {
   for (let n = level + 1; n <= SUMMIT; n++) if (checkpointFor(n) === n) return n;
   return null;
+}
+
+/**
+ * How many shades a level shows. Mirrors endless_shades.
+ *
+ * Six is the full ladder. The climb takes precision as you rise - three shades
+ * in Stratosphere, one in Orbit - and never takes the arrow, because direction
+ * is the bit a search needs and removing it turns the endgame into a coin flip.
+ *
+ * This has to match the server: it decides what a tile's label is allowed to
+ * claim, and a mismatch would print "within 10" over a band that only means
+ * "within 24".
+ */
+export function shadesFor(level: number): 1 | 3 | 6 {
+  if (level <= 30) return 6;
+  if (level <= 45) return 3;
+  if (level <= 60) return 6;
+  return 1;
 }

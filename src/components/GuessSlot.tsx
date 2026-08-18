@@ -24,6 +24,7 @@ const slotBase = {
 
 export function FilledSlot({
   result,
+  shades = 6,
   attemptNumber,
   blindOneAway,
   surface,
@@ -31,6 +32,8 @@ export function FilledSlot({
   belowFill,
 }: {
   result: GuessResult;
+  /** How many shades this level shows, so the label cannot overclaim. */
+  shades?: 1 | 3 | 6;
   attemptNumber: number;
   /**
    * Drop the arrow on a one-away guess. ONE AWAY plus a direction is the number
@@ -117,7 +120,7 @@ export function FilledSlot({
       <View style={[styles.accentBar, { backgroundColor: accent }]} />
       <Text style={[styles.attemptLabelFilled, { color: ink, opacity: 0.65 }]}>#{attemptNumber}</Text>
       <Text style={[styles.guessText, { color: ink }]}>{result.guess}</Text>
-      <Text style={[styles.band, { color: bandInk }]}>{getBandLabel(result)}</Text>
+      <Text style={[styles.band, { color: bandInk }]}>{getBandLabel(result, shades)}</Text>
       {!(blindOneAway && result.isOneAway) && (
         <Text style={[styles.arrow, { color: bandInk }]} accessibilityLabel={arrowLabel}>
           {arrow}

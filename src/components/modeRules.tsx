@@ -129,9 +129,9 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
         something away instead.
       </P>
       <P>
-        Stratosphere hides the arrow: you learn how close you are, never which way. Thin air holds
-        the shade back a guess, so you commit before you know. Orbit takes nothing — five guesses,
-        full colours, no clue and no trick.
+        You always know which way. What the altitude takes is how much it will tell you about the
+        distance: Stratosphere narrows six shades to three, Thin air holds the shade back a guess so
+        you commit before you know, and Orbit gives you one — you are within ten, or you are not.
       </P>
     </>,
 
@@ -154,8 +154,8 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>The five tiers</H>
       <P first>
-        Fifteen levels each, five guesses a number. What changes is what a miss costs and whether a
-        clue arrives at all. A number cleared pays 20 XP, a new tier 50.
+        Fifteen levels each. Five guesses on the Ground and in the Sky, six above them — the tiers
+        that tell you less give you more room to work. A number cleared pays 20 XP, a new tier 50.
       </P>
       <TierTable />
     </>,

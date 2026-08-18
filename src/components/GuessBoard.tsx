@@ -34,6 +34,8 @@ interface Props {
   tileSurface?: string;
   /** A stage's own blue, handed to every slot. */
   belowFill?: string;
+  /** Mirrors endless_shades: how much precision this level gives. */
+  shades?: 1 | 3 | 6;
 }
 
 /**
@@ -58,6 +60,7 @@ export function GuessBoard({
   inkMuted,
   tileSurface,
   belowFill,
+  shades = 6,
 }: Props) {
   const { colors } = useTheme();
   const remaining = Math.max(0, attemptsAllowed - guesses.length);
@@ -90,6 +93,7 @@ export function GuessBoard({
         .reverse()
         .map(({ result, attemptNumber }) => (
           <FilledSlot
+              shades={shades}
             belowFill={belowFill}
             key={attemptNumber}
             result={result}

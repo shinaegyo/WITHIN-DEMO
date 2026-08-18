@@ -23,7 +23,7 @@ function tierForDistance(distance: number): ProximityTier {
  * Deliberately a *band*, never the exact distance — the only precise
  * readings are ONE AWAY and CORRECT, which are intentional spec moments.
  */
-export function getBandLabel(result: GuessResult): string {
+export function getBandLabel(result: GuessResult, shades: 1 | 3 | 6 = 6): string {
   if (result.isCorrect) return 'CORRECT';
   // Stratosphere owes this tile its colour until the next guess lands. The
   // server blanks the proximity flags to match, so this has to come first -
@@ -35,6 +35,16 @@ export function getBandLabel(result: GuessResult): string {
   // Falls back to the tier when the flags are absent. Without this an
   // 'intense' guess whose isWithin10 never arrived dropped through every case
   // and printed the furthest band of all.
+  // A coarse tier reuses the ends of the ladder rather than inventing names,
+  // so the same tier value means a different span depending on the altitude.
+  // Labelling it from the tier alone would promise a precision the server
+  // deliberately withheld.
+  if (shades === 1) return result.tier === 'intense' ? 'WITHIN 10' : 'MORE THAN 10 AWAY';
+  if (shades === 3) {
+    if (result.tier === 'intense') return 'WITHIN 24';
+    if (result.tier === 'medium') return '25–249 AWAY';
+    return '250+ AWAY';
+  }
   if (result.tier === 'intense') return 'WITHIN 10';
   if (result.tier === 'dark') return '11–24 AWAY';
   if (result.tier === 'medium') return '25–99 AWAY';
