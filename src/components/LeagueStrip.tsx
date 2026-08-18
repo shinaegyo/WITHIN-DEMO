@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { League } from '../lib/api';
 import { LEAGUE_FLOOR, LEAGUE_INK, nextLeague } from '../theme/leagues';
 import { playTap } from '../utils/sound';
-import { radius, border } from '../theme/tokens';
+import { radius, border, space } from '../theme/tokens';
 
 /**
  * Where you are on the ladder, and how far the next rung is.
@@ -76,12 +76,18 @@ const styles = StyleSheet.create({
   // Stretched, not centred. Home centres its children, so without this the
   // strip sized itself to its text and sat visibly narrower than the card
   // above it - the only element on the screen not sharing the same margins.
+  // Standing on its own, not tucked under the card above it.
+  //
+  // With no top margin it sat against the daily card and the two read as one
+  // block - a season-long standing looking like a footnote to today's score.
+  // They are different clocks and the gap is what says so.
   wrap: {
     alignSelf: 'stretch',
     borderWidth: border.hairline,
     borderRadius: radius.card,
     padding: 12,
-    marginBottom: 14,
+    marginTop: space.section,
+    marginBottom: space.loose,
   },
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   names: { flex: 1 },
