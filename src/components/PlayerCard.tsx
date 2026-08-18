@@ -203,19 +203,23 @@ export function PlayerCardModal({
 
               <View style={[styles.rows, { borderColor: colors.border }]}>
                 <Row label="Daily challenges" value={`${card.daysPlayed}`} />
-                {/* Down here rather than as a fourth headline. Points, level
-                    and streak describe a person; the climb describes a mode,
-                    resets on Monday, and is a dash for most of the people
-                    whose card you open from the daily board. A summit is the
-                    same level for everyone who reaches it, so the guess count
-                    is what separates them and the label says which it is. */}
-                {card.climb?.topped ? (
-                  <Row label="Climb this week" value={`Topped out · ${card.climb.guesses} guesses`} />
-                ) : card.impossible !== null && card.impossible > 0 ? (
-                  <Row label="Climb this week" value={`Level ${card.impossible}`} />
-                ) : null}
+                {/* The label carries the unit so the values stay a column of
+                    bare numerals. "6", "Level 7", "40" was three formats in
+                    three rows - days, a level and points, one of them wearing
+                    its unit and two of them not. Moving the word left makes
+                    them line up and says what each number is at the same time.
+
+                    A summit is the same level for everybody who reaches it, so
+                    the guess count is what separates them - its own row rather
+                    than a sentence crammed into this one. */}
+                {card.impossible !== null && card.impossible > 0 && (
+                  <Row label="Climb level" value={`${card.impossible}`} />
+                )}
+                {card.climb?.topped && (
+                  <Row label="Summit guesses" value={`${card.climb.guesses}`} />
+                )}
                 {/* Only ever a finished day - a day in progress stays theirs. */}
-                {card.todayScore !== null && <Row label="Today" value={`${card.todayScore}`} />}
+                {card.todayScore !== null && <Row label="Today's points" value={`${card.todayScore}`} />}
                 {card.ranked && (
                   <Row
                     label="Ranked"
