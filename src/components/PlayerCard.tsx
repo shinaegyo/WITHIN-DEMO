@@ -168,14 +168,14 @@ export function PlayerCardModal({
                   explained by the league ladder now. */}
 
               <View style={styles.stats}>
-                {/* Three, and all three about the person rather than a mode.
-                    Points and level only ever grow - one from the daily, one
-                    from every mode - and the streak says whether they are
-                    still turning up. The climb was a fourth column that reset
-                    every Monday and read as a dash for most people. */}
+                {/* Two totals, and only totals.
+                    Points and level are the same kind of fact - they only ever
+                    grow, one from the daily and one from every mode - so they
+                    belong together and nothing else does. A streak is a live
+                    run that can end tonight, which is a different claim about
+                    a person and reads as one down in the list. */}
                 <Stat label="POINTS" value={`${card.points}`} />
                 <Stat label="LEVEL" value={`${card.level}`} />
-                <Stat label="STREAK" value={`${card.streak}`} />
               </View>
 
               {/* The day itself: one bar per round, green for found and red for
@@ -202,7 +202,12 @@ export function PlayerCardModal({
               )}
 
               <View style={[styles.rows, { borderColor: colors.border }]}>
-                <Row label="Daily challenges" value={`${card.daysPlayed}`} />
+                {/* "Day streak 6" over "Daily challenges 6" was two different
+                    facts - consecutive days, and days played at all - landing
+                    on the same number with nothing to tell them apart. Named
+                    for what each one counts. */}
+                <Row label="Day streak" value={`${card.streak}`} />
+                <Row label="Days played" value={`${card.daysPlayed}`} />
                 {/* The label carries the unit so the values stay a column of
                     bare numerals. "6", "Level 7", "40" was three formats in
                     three rows - days, a level and points, one of them wearing
