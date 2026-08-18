@@ -399,10 +399,17 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
               ) : (
                 <View style={[styles.noClue, { borderColor: hairline }]}>
                   <Text style={[styles.noClueText, { color: arena.muted }]}>
-                    {`A clue arrives on your ${
-                      ['', 'first', 'second', 'third', 'fourth', 'fifth'][arena.clueFrom] ??
-                      `${arena.clueFrom}th`
-                    } attempt.`}
+                    {/* clueFrom is 0 above the Sky, and 0 means "never" rather
+                        than "on the nought-th attempt". Read as an ordinal it
+                        indexed the empty string, so Orbit promised "a clue
+                        arrives on your  attempt" - a gap where a word should
+                        be, for a clue that was never coming. */}
+                    {arena.clueFrom === 0
+                      ? 'No clue at this altitude.'
+                      : `A clue arrives on your ${
+                          ['', 'first', 'second', 'third', 'fourth', 'fifth'][arena.clueFrom] ??
+                          `${arena.clueFrom}th`
+                        } attempt.`}
                   </Text>
                 </View>
               )}
