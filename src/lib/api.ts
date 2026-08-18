@@ -808,8 +808,6 @@ export interface HomeStatus {
     level: number;
     best: number;
   };
-  /** `played` means the clock ran out, not that a run exists. */
-  rush: { played: boolean; running: boolean; found: number };
 }
 
 export async function loadHomeStatus(): Promise<HomeStatus> {
@@ -854,11 +852,6 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
     // Absent until 0116 has run, and false is the honest reading of "we do not
     // know yet" - a mode that looks available and is not costs a tap, where one
     // that looks spent and is not costs the whole day.
-    rush: {
-      played: !!raw.rush?.played,
-      running: !!raw.rush?.running,
-      found: raw.rush?.found ?? 0,
-    },
   };
 }
 
@@ -1090,129 +1083,6 @@ export async function endlessGuess(guess: number) {
   };
 }
 
-export interface RushState {
-  started: boolean;
-  over: boolean;
-  /** The clock is stopped because the player left. */
-  paused: boolean;
-  found: number;
-  secondsLeft: number;
-  guesses: GuessResult[];
-}
-
-export interface RushEntry {
-  rank: number;
-  name: string;
-  avatar: string | null;
-  found: number;
-  attempts: number;
-  isMe: boolean;
-}
-
-export interface RushBoard {
-  entries: RushEntry[];
-  /** Everyone who ran today, including runs that found nothing. */
-  total: number;
-  me: {
-    found: number;
-    attempts: number;
-    rank: number;
-    /** Null until there are enough runs for a percentage to mean anything. */
-    topPercent: number | null;
-    /** The most you ever found before today. Null on a first run. */
-    best: number | null;
-    /** Other people on your exact score today. Ties break on guesses used. */
-    tied: number;
-  } | null;
-  /** How many players found each score today. */
-  distribution: { found: number; players: number }[];
-}
-
-export async function loadRush(): Promise<RushState> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('rush_state');
-  const raw = unwrap<any>(data, error);
-  return {
-    started: !!raw.started,
-    over: !!raw.over,
-    paused: !!raw.paused,
-    found: raw.found ?? 0,
-    secondsLeft: raw.secondsLeft ?? 0,
-    guesses: (raw.guesses ?? []).map(toGuessResult),
-  };
-}
-
-/** Starts the clock. It runs whether the app is open or not. */
-export async function startRush(): Promise<void> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('rush_start');
-  unwrap<any>(data, error);
-}
-
-/** Stops the clock. Called when the player leaves the screen or the app. */
-export async function pauseRush(): Promise<void> {
-  try {
-    await supabase.rpc('rush_pause');
-  } catch {
-    /* the run keeps running; better than a crash on the way out */
-  }
-}
-
-/** Starts it again, once the player has had their countdown. */
-export async function resumeRush(): Promise<void> {
-  await ensureSignedIn();
-  const { data, error } = await supabase.rpc('rush_resume');
-  unwrap<any>(data, error);
-}
-
-export async function rushGuess(guess: number) {
-  await ensureSignedIn();
-  const raw = await onceMore(async () => {
-    const { data, error } = await supabase.rpc('rush_guess', { p_guess: guess });
-    return unwrap<any>(data, error);
-  });
-  return {
-    solved: !!raw.solved,
-    found: raw.found as number,
-    secondsLeft: raw.secondsLeft as number,
-    over: !!raw.over,
-    result: toGuessResult(raw.guess),
-    answer: (raw.answer ?? null) as number | null,
-  };
-}
-
-export async function loadRushBoard(): Promise<RushBoard> {
-  await ensureSignedIn();
-  // Fifty, because the screen now shows ten and keeps the rest behind a
-  // button: a limit of 10 made "show more" a promise the server could not keep.
-  const { data, error } = await supabase.rpc('rush_leaderboard', { p_limit: 50 });
-  const raw = unwrap<any>(data, error);
-  return {
-    entries: (raw.entries ?? []).map((e: any) => ({
-      rank: e.rank,
-      name: e.name,
-      avatar: e.avatar ?? null,
-      found: e.found ?? 0,
-      attempts: e.attempts ?? 0,
-      isMe: !!e.is_me,
-    })),
-    total: raw.total ?? 0,
-    me: raw.me
-      ? {
-          found: raw.me.found ?? 0,
-          attempts: raw.me.attempts ?? 0,
-          rank: raw.me.rank ?? 0,
-          topPercent: raw.me.topPercent ?? null,
-          best: raw.me.best ?? null,
-          tied: raw.me.tied ?? 0,
-        }
-      : null,
-    distribution: (raw.distribution ?? []).map((d: any) => ({
-      found: d.found ?? 0,
-      players: d.players ?? 0,
-    })),
-  };
-}
 
 export interface XpState {
   xp: number;

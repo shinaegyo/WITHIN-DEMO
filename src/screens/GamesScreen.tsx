@@ -29,13 +29,11 @@ interface Row {
 export function GamesScreen({
   onDuels,
   onImpossible,
-  onRush,
   onPractice,
   practiceLeft,
 }: {
   onDuels: () => void;
   onImpossible: () => void;
-  onRush: () => void;
   onPractice: () => void;
   practiceLeft: number | null;
 }) {
@@ -109,24 +107,6 @@ export function GamesScreen({
             : '',
           urgent: false,
           onPress: onImpossible,
-        },
-      ],
-    },
-    {
-      label: 'ONE A DAY',
-      rows: [
-        {
-          label: 'Rush',
-          sub: 'Three minutes, as many numbers as you can find',
-          // A run still on the clock is the one case that must stay pressable -
-          // somebody who left mid-run has to be able to get back to it.
-          status: status?.rush.running
-            ? 'Still running'
-            : status?.rush.played
-              ? `${status.rush.found} found`
-              : 'One run a day',
-          urgent: !!status?.rush.running,
-          onPress: onRush,
         },
       ],
     },

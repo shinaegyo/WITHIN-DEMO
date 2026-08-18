@@ -92,43 +92,6 @@ export function duelRules(): React.ReactNode[] {
   ];
 }
 
-export function rushRules(): React.ReactNode[] {
-  return [
-    <>
-      <H>Three minutes</H>
-      <P first>
-        Find one number, the next appears immediately, and you keep going until the clock runs out.
-        Your score is how many you found.
-      </P>
-      <Table
-        rows={[
-          ['3:00', 'on the clock', 'once a day'],
-          ['∞', 'guesses', 'no limit'],
-          ['0', 'clues', 'colors only'],
-          ['15 XP', 'a number', 'found'],
-        ]}
-      />
-    </>,
-
-    <>
-      <H>Reading the colors</H>
-      <P first>
-        No clues and no limit on guesses — the clock is the only thing you spend. Blue means aim
-        higher, red means lower, and the stronger the color the closer you are.
-      </P>
-    </>,
-
-    <>
-      <H>The clock</H>
-      <P first>
-        One run a day, starting the moment you press the button. Leaving stops it, and coming back
-        gives you three seconds of countdown, so an interruption costs you nothing.
-      </P>
-      <P>Equal scores break on guesses used.</P>
-    </>,
-  ];
-}
-
 /**
  * `tiersFirst` puts the table before the prose, for the board screen.
  *

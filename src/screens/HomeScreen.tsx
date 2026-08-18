@@ -46,7 +46,6 @@ interface Props {
   onOpenFriends: () => void;
   onOpenDuels: () => void;
   onOpenRanked: () => void;
-  onRush: () => void;
   onOpenProfile: () => void;
   /** Bumped by the navigator so the count refreshes on return from practice. */
   practiceEpoch: number;
@@ -60,7 +59,6 @@ export function HomeScreen({
   onOpenFriends,
   onOpenDuels,
   onOpenRanked,
-  onRush,
   onOpenProfile,
   practiceEpoch,
   username,
@@ -347,12 +345,6 @@ export function HomeScreen({
    */
   const modeTiles = [
     {
-      name: 'Rush',
-      state: !modes ? 'Ready' : modes.rush.running ? 'In progress' : modes.rush.played ? `${modes.rush.found} found` : 'Ready',
-      live: !!modes?.rush.running,
-      go: onRush,
-    },
-    {
       // Last, with the two that need nobody ahead of it. It used to sit in the
       // middle so it would not read as third in a list of three of a kind -
       // but the Games tab now groups by what each mode asks of you, and a home
@@ -387,9 +379,6 @@ export function HomeScreen({
    */
   const suggestion = (() => {
     if (!modes || !finished) return null;
-    if (!modes.rush.played && !modes.rush.running) {
-      return 'Rush is still open today — three minutes, one run.';
-    }
     if (modes.duelsWaiting > 0) return 'A duel is waiting on your move.';
     return null;
   })();

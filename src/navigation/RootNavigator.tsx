@@ -10,7 +10,6 @@ import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameScreen } from '../screens/GameScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { HowToPlayScreen } from '../screens/HowToPlayScreen';
-import { RushScreen } from '../screens/RushScreen';
 import { AccountScreen } from '../screens/AccountScreen';
 import { FriendsScreen } from '../screens/FriendsScreen';
 import { DuelsScreen } from '../screens/DuelsScreen';
@@ -67,7 +66,6 @@ export type RootStackParamList = {
   Reminders: undefined;
   Avatar: undefined;
   Endless: undefined;
-  Rush: undefined;
   DuelGame: { duelId: string };
   Account: undefined;
   HowToPlay: undefined;
@@ -315,7 +313,6 @@ function Screens({
                   <GamesScreen
                     onDuels={() => navigation.navigate('Duels')}
                     onImpossible={() => navigation.navigate('ImpossibleBoard')}
-                    onRush={() => navigation.navigate('Rush')}
                     onPractice={startPractice}
                     practiceLeft={practiceLeft}
                   />
@@ -344,7 +341,6 @@ function Screens({
                     onOpenFriends={() => navigation.navigate('Friends')}
                     onOpenDuels={() => navigation.navigate('Duels')}
                     onOpenRanked={() => navigation.navigate('Ranked')}
-                    onRush={() => navigation.navigate('Rush')}
                     onOpenProfile={() => tab.navigation.navigate('You')}
                     practiceEpoch={practiceEpoch}
                     username={username}
@@ -403,14 +399,6 @@ function Screens({
         <Stack.Screen name="Endless" options={{ headerShown: false }}>
           {({ navigation }) => (
             <EndlessScreen
-              onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
-            />
-          )}
-        </Stack.Screen>
-
-        <Stack.Screen name="Rush" options={{ headerShown: false }}>
-          {({ navigation }) => (
-            <RushScreen
               onExit={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
             />
           )}
