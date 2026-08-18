@@ -12,6 +12,13 @@
 --                belt_holder() for the CROWN badge. It is opened from five
 --                screens, so this is the one that would have been noticed.
 --
+-- resolve_duel and duel_forfeit are rewritten too, and this is the one that
+-- would have hurt. Both called apply_ranked_result, and resolve_duel runs when
+-- ANY duel finishes - so dropping that helper would have broken every duel in
+-- the app, friendly ones included, the next time somebody won one. The first
+-- attempt at this migration found ensure_ranked_stats by failing on it; asking
+-- the database for its dependents found the rest.
+--
 -- duel_queue is untouched and unrelated - that is the stranger queue the Duels
 -- screen uses, and is_queued() reads it. Only the ranked queue goes.
 --
@@ -327,17 +334,129 @@ begin
 end;
 $$;
 
+create or replace function public.resolve_duel(p_duel_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_duel   public.duels%rowtype;
+  v_rounds int;
+  v_a int := 0;
+  v_b int := 0;
+  r int;
+  w text;
+begin
+  select * into v_duel from public.duels where id = p_duel_id for update;
+  if v_duel.id is null or v_duel.status <> 'active' then return; end if;
+
+  select coalesce(max(round), 0) into v_rounds from public.duel_progress
+  where duel_id = p_duel_id;
+
+  if v_rounds = 0 then return; end if;
+
+  for r in 1 .. v_rounds loop
+    w := public.duel_round_winner(p_duel_id, r);
+    if w is null then return; end if;
+    if w = 'a' then v_a := v_a + 1; end if;
+    if w = 'b' then v_b := v_b + 1; end if;
+  end loop;
+
+  if v_rounds < 3 then return; end if;
+  if v_a = v_b and v_rounds = 3 then return; end if;
+
+  update public.duels set
+    status = 'complete',
+    finished_at = now(),
+    winner_id = case
+      when v_a > v_b then v_duel.challenger_id
+      when v_b > v_a then v_duel.opponent_id
+      else null
+    end
+  where id = p_duel_id
+  returning * into v_duel;
+
+  -- Winning is worth more, but turning up is worth something: a duel you lost
+  -- was still three rounds of play.
+  if v_duel.winner_id is null then
+    perform public.award_xp(v_duel.challenger_id, 40);
+    perform public.award_xp(v_duel.opponent_id, 40);
+  else
+    perform public.award_xp(v_duel.winner_id, 80);
+    perform public.award_xp(
+      case when v_duel.winner_id = v_duel.challenger_id
+           then v_duel.opponent_id else v_duel.challenger_id end, 25);
+  end if;
+  -- Ranked is gone, and with it the rating this used to apply.
+end;
+$$;
+
+create or replace function public.duel_forfeit(p_duel_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid   uuid := auth.uid();
+  v_duel  public.duels%rowtype;
+  v_other uuid;
+begin
+  if v_uid is null then
+    return jsonb_build_object('error', 'not_authenticated');
+  end if;
+
+  select * into v_duel from public.duels
+  where id = p_duel_id and v_uid in (challenger_id, opponent_id)
+  for update;
+
+  if v_duel.id is null then
+    return jsonb_build_object('error', 'no_such_duel');
+  end if;
+
+  v_other := case when v_duel.challenger_id = v_uid then v_duel.opponent_id
+                  else v_duel.challenger_id end;
+
+  if v_duel.status = 'pending' then
+    update public.duels set status = 'declined', finished_at = now()
+    where id = v_duel.id;
+    return jsonb_build_object('status', 'withdrawn');
+  end if;
+
+  if v_duel.status <> 'active' then
+    return jsonb_build_object('error', 'no_such_duel');
+  end if;
+
+  update public.duels set
+    status = 'complete',
+    winner_id = v_other,
+    finished_at = now()
+  where id = v_duel.id;
+  -- Ranked is gone, and with it the rating this used to apply.
+
+  return jsonb_build_object('status', 'forfeited');
+end;
+$$;
+
 drop function if exists public.ranked_state();
 drop function if exists public.ranked_find();
 drop function if exists public.ranked_leave_queue();
 drop function if exists public.belt_holder();
+drop function if exists public.apply_ranked_result(uuid);
+drop function if exists public.ensure_ranked_stats(uuid);
+-- Pure arithmetic, but it computed a rating nothing has any more.
+drop function if exists public.elo_delta(integer, integer, numeric, integer);
 
 drop table if exists public.ranked_queue;
 drop table if exists public.ranked_stats;
 drop table if exists public.belt;
 
-grant execute on function public.home_status()      to authenticated;
-grant execute on function public.player_card(text)  to authenticated;
+grant execute on function public.home_status()          to authenticated;
+grant execute on function public.player_card(text)      to authenticated;
+revoke execute on function public.resolve_duel(uuid)    from public, anon;
+revoke execute on function public.duel_forfeit(uuid)    from public, anon;
+grant  execute on function public.duel_forfeit(uuid)    to authenticated;
 
 commit;
 

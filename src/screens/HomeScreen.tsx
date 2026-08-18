@@ -468,10 +468,16 @@ export function HomeScreen({
           empty room rather than a standing, and that is the first thing anyone
           sees. The leaderboard still has it for whoever goes looking. */}
 
+      {/* One screen, and it stays one screen.
+          The hero is already sized to the viewport, so scrolling only ever
+          moved a screen that had nothing under it - a few points of travel
+          that read as a page half-loaded. Home says what today did and offers
+          the ways in; anything that does not fit belongs on another tab. */}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={false}
         onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
       >
         <View style={[styles.hero, viewport ? { minHeight: viewport } : null]}>
