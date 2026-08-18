@@ -42,6 +42,8 @@ const VOLUME = 0.10;
 
 const players: Partial<Record<Track, AudioPlayer>> = {};
 let current: Track | null = null;
+/** The last track a screen asked for, whatever the setting was at the time. */
+let wanted: Track | null = null;
 
 function player(track: Track): AudioPlayer | null {
   try {
@@ -115,6 +117,11 @@ function handOver(from: AudioPlayer | null, to: AudioPlayer | null) {
 }
 
 export function playTrack(track: Track | null): void {
+  // Remembered whatever the setting says, so the answer can arrive late.
+  // The preference is read from storage after the first screen has already
+  // asked for its track; without keeping the request, a launch with music
+  // still unknown left nothing to start once it turned out to be on.
+  wanted = track;
   if (!musicEnabled()) track = null;
   if (track === current) return;
 
@@ -173,4 +180,21 @@ export function refreshMusic(track: Track | null): void {
   }
   current = null;
   playTrack(track);
+}
+
+/**
+ * Re-evaluates against the setting once it is actually known.
+ *
+ * Called when the stored preference finishes loading. Until then musicEnabled()
+ * answers false and nothing plays, so this is what starts the music for the
+ * people who want it - and what keeps the silence for the people who do not.
+ */
+export function applyMusicSetting(): void {
+  if (!musicEnabled()) {
+    stopMusic();
+    return;
+  }
+  const t = wanted;
+  current = null;
+  playTrack(t);
 }

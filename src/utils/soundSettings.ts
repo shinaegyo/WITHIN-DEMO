@@ -54,9 +54,18 @@ const MUSIC_KEY = 'within.music';
 // thirty seconds of an app you have never opened, where the sound is most of
 // what makes it feel like a game rather than a form.
 let music = true;
+// Whether the stored answer has been read yet.
+//
+// Without this, musicEnabled() said "on" from the first line of the app, and
+// the first screen to mount started a track on that word - before anybody had
+// asked the device what the player actually chose. Somebody who had turned
+// music off got it again on every launch: playing before the preference was
+// known, and at best stopped a moment later, which is the burst of music they
+// were complaining about. Unknown is not the same as on.
+let musicKnown = false;
 
 export function musicEnabled(): boolean {
-  return music;
+  return musicKnown && music;
 }
 
 export async function loadMusicSetting(): Promise<boolean> {
@@ -68,11 +77,13 @@ export async function loadMusicSetting(): Promise<boolean> {
   } catch {
     music = true;
   }
+  musicKnown = true;
   return music;
 }
 
 export function setMusicEnabled(on: boolean): void {
   music = on;
+  musicKnown = true;
   AsyncStorage.setItem(MUSIC_KEY, on ? 'on' : 'off').catch(() => {});
 }
 

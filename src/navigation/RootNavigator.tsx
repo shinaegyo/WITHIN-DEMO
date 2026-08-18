@@ -28,7 +28,14 @@ import { fonts } from '../theme/fonts';
 import { practiceRemaining, consumePracticeRound } from '../utils/practiceLimit';
 import { devSkipOnboarding, wantsDevSkip } from '../utils/devSkip';
 import { hasSeenIntro, markIntroSeen } from '../utils/intro';
-import { loadSoundSetting, loadVolumes, setSoundEnabled, soundEnabled } from '../utils/soundSettings';
+import {
+  loadMusicSetting,
+  loadSoundSetting,
+  loadVolumes,
+  setSoundEnabled,
+  soundEnabled,
+} from '../utils/soundSettings';
+import { applyMusicSetting } from '../utils/music';
 import { IntroScreen } from '../screens/IntroScreen';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Avatar } from '../components/Avatar';
@@ -221,6 +228,16 @@ function Screens({
   useEffect(() => {
     loadSoundSetting().then(setSound);
     loadVolumes();
+    // The music setting was read nowhere but the audio screen, so every launch
+    // began on the in-memory default of on, screens mounted, and the track
+    // started - and the stored "off" was only ever consulted by somebody who
+    // went back into settings. Turning music off worked until you next opened
+    // the app, at which point it was playing again. Every time.
+    //
+    // Stopped rather than only loaded, because this resolves after the first
+    // screen has already mounted and asked for its track. Whatever started in
+    // the meantime is silenced the moment the preference is known.
+    loadMusicSetting().then(applyMusicSetting);
     warmSounds();
   }, []);
   // Nudged whenever a round is consumed so Home refetches how many are left.
