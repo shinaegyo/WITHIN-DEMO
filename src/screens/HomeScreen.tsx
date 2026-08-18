@@ -359,11 +359,18 @@ export function HomeScreen({
       name: 'Duel',
       // Two words. A third of a phone width is not enough for a sentence, and
       // "Challenge a fri…" is worse than saying less.
+      //
+      // A name rather than a number when there is exactly one. "1 waiting" is
+      // a quantity of nothing in particular; "kristina waiting" is a person,
+      // and it is the same two words. Past one, the count is the honest
+      // summary again - naming the first of three would say less, not more.
       state: modes?.queued
         ? 'Waiting'
-        : modes && modes.duelsWaiting > 0
-          ? `${modes.duelsWaiting} waiting`
-          : 'Start one',
+        : modes && modes.duelsWaiting === 1 && modes.duelWaiting
+          ? `${modes.duelWaiting.name} waiting`
+          : modes && modes.duelsWaiting > 0
+            ? `${modes.duelsWaiting} waiting`
+            : 'Start one',
       live: !!modes && (modes.duelsWaiting > 0 || modes.queued),
       go: onOpenDuels,
     },

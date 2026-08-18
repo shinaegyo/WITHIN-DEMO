@@ -772,6 +772,13 @@ export async function respondToDuel(duelId: string, accept: boolean): Promise<st
 /** What each mode is worth opening for, gathered in one call. */
 export interface HomeStatus {
   duelsWaiting: number;
+  /**
+   * Who is waiting, when somebody is. Null otherwise.
+   *
+   * duelsWaiting counts; this names. A count is all the home tile ever had, so
+   * the most it could say about being challenged was "1 waiting".
+   */
+  duelWaiting: { duelId: string; name: string; avatar: string | null; pending: boolean } | null;
   /** You are in the duel queue, whatever screen you are looking at. */
   queued: boolean;
   ranked: {
@@ -811,6 +818,16 @@ export async function loadHomeStatus(): Promise<HomeStatus> {
   const raw = unwrap<any>(data, error);
   return {
     duelsWaiting: raw.duelsWaiting ?? 0,
+    // Absent on a server older than 0159, where the tile falls back to the
+    // count it has always shown.
+    duelWaiting: raw.duelWaiting
+      ? {
+          duelId: raw.duelWaiting.duelId,
+          name: raw.duelWaiting.name,
+          avatar: raw.duelWaiting.avatar ?? null,
+          pending: !!raw.duelWaiting.pending,
+        }
+      : null,
     queued: !!raw.queued,
     ranked: {
       rating: raw.ranked?.rating ?? null,
