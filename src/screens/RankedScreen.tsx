@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { PlayerCardModal } from '../components/PlayerCard';
+import { LeagueRoster } from '../components/LeagueRoster';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
+  League,
   RankedState,
   findRankedMatch,
   leaveRankedQueue,
@@ -37,6 +39,7 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
+  const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -208,7 +211,16 @@ export function RankedScreen({ onPlay }: { onPlay: (duelId: string) => void }) {
         </>
       )}
 
-      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
+      <PlayerCardModal
+        username={looking}
+        onClose={() => setLooking(null)}
+        onOpenLeague={(l) => {
+          setLooking(null);
+          setLeagueRoster(l);
+        }}
+      />
+
+      <LeagueRoster league={leagueRoster} onClose={() => setLeagueRoster(null)} />
     </ScrollView>
   );
 }

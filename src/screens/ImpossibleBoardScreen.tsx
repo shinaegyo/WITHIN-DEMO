@@ -6,10 +6,12 @@ import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
 import { TierGlyph, tierFor } from '../components/TierGlyph';
 import { PlayerCardModal } from '../components/PlayerCard';
+import { LeagueRoster } from '../components/LeagueRoster';
 import { ShowMore, StandingsBreak, topTen } from '../components/Standings';
 import { impossibleRules } from '../components/modeRules';
 import {
   ApiError,
+  League,
   EndlessEntry,
   HomeStatus,
   loadEndlessBoard,
@@ -58,6 +60,7 @@ export function ImpossibleBoardScreen({
   // modal every other board uses now answers it, and it is the only place the
   // guess count behind a summit is written down.
   const [looking, setLooking] = useState<string | null>(null);
+  const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -248,7 +251,16 @@ export function ImpossibleBoardScreen({
         </Pressable>
       </View>
 
-      <PlayerCardModal username={looking} onClose={() => setLooking(null)} />
+      <PlayerCardModal
+        username={looking}
+        onClose={() => setLooking(null)}
+        onOpenLeague={(l) => {
+          setLooking(null);
+          setLeagueRoster(l);
+        }}
+      />
+
+      <LeagueRoster league={leagueRoster} onClose={() => setLeagueRoster(null)} />
     </View>
   );
 }

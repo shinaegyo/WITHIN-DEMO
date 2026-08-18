@@ -3,12 +3,14 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
+import { LeagueRoster } from '../components/LeagueRoster';
 import { ScreenTitle } from '../components/ScreenTitle';
 import { StatusScreen } from '../components/StatusScreen';
 import { PagedRules, RulesButton } from '../components/PagedRules';
 import { duelRules } from '../components/modeRules';
 import {
   ApiError,
+  League,
   DuelSummary,
   Friend,
   challengeFriend,
@@ -57,6 +59,7 @@ export function DuelsScreen({
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState<string | null>(null);
+  const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
   const [waiting, setWaiting] = useState<{ online: number } | null>(null);
   const [rules, setRules] = useState(false);
 
@@ -392,7 +395,13 @@ export function DuelsScreen({
           setLooking(null);
           load();
         }}
+        onOpenLeague={(l) => {
+          setLooking(null);
+          setLeagueRoster(l);
+        }}
       />
+
+      <LeagueRoster league={leagueRoster} onClose={() => setLeagueRoster(null)} />
     </View>
   );
 }
