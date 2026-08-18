@@ -33,34 +33,60 @@ type SoundName = keyof typeof SOURCES;
 let ctx: AudioContext | null = null;
 const buffers: Partial<Record<SoundName, AudioBuffer>> = {};
 let loading = false;
+/** Set once at least one effect is decoded, so a failed run can be retried. */
+let ready = false;
 
 function context(): AudioContext | null {
   if (typeof window === 'undefined') return null;
-  const Ctor = window.AudioContext ?? (window as any).webkitAudioContext;
-  if (!Ctor) return null;
-  if (!ctx) ctx = new Ctor();
-  // A context created before the first tap starts suspended; every press is a
-  // gesture, so this is the right place to ask for it back.
-  if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-  return ctx;
+  // Constructing one can throw outright - Safari has refused it before a
+  // gesture in the past, and an exception here used to escape through preload
+  // and leave the loader permanently half-started.
+  try {
+    const Ctor = window.AudioContext ?? (window as any).webkitAudioContext;
+    if (!Ctor) return null;
+    if (!ctx) ctx = new Ctor();
+    // A context created before the first tap starts suspended; every press is
+    // a gesture, so this is the right place to ask for it back.
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  } catch {
+    return null;
+  }
 }
 
+/**
+ * Loads every effect once. Retryable, which it was not.
+ *
+ * `loading` was set on the way in and never cleared - not on success, not on
+ * failure. So a first attempt that got nowhere, because the audio context was
+ * not available yet or a fetch failed, left the flag stuck: play() would find
+ * no buffer, ask for a preload, and be turned away by a load that was not
+ * running and never would again. Effects were then silent for the rest of the
+ * session with the switch still reading on, which is exactly what a broken
+ * setting looks like.
+ */
 async function preload(): Promise<void> {
-  if (loading) return;
+  if (loading || ready) return;
   loading = true;
-  const c = context();
-  if (!c) return;
-  await Promise.all(
-    (Object.keys(SOURCES) as SoundName[]).map(async (name) => {
-      try {
-        const uri = Asset.fromModule(SOURCES[name]).uri;
-        const bytes = await (await fetch(uri)).arrayBuffer();
-        buffers[name] = await c.decodeAudioData(bytes);
-      } catch {
-        // One missing effect should never take the others down with it.
-      }
-    }),
-  );
+  try {
+    const c = context();
+    if (!c) return;
+    await Promise.all(
+      (Object.keys(SOURCES) as SoundName[]).map(async (name) => {
+        try {
+          const uri = Asset.fromModule(SOURCES[name]).uri;
+          const bytes = await (await fetch(uri)).arrayBuffer();
+          buffers[name] = await c.decodeAudioData(bytes);
+        } catch {
+          // One missing effect should never take the others down with it.
+        }
+      }),
+    );
+    // Only if something actually landed. An empty run is a run worth repeating.
+    ready = Object.keys(buffers).length > 0;
+  } finally {
+    loading = false;
+  }
 }
 
 function play(name: SoundName) {
