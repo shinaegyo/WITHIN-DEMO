@@ -309,6 +309,22 @@ export function EndlessScreen({ onExit }: { onExit: () => void }) {
                     ? `You got to level ${state.level}.`
                     : `Your next climb starts at level ${over.restartsAt ?? 1}. See you tomorrow.`}
               </Text>
+
+              {/* The one thing a player cannot work out for themselves, said at
+                  the only moment it changes what they do next.
+                  
+                  A level's number is fixed for the week, so running out of
+                  attempts takes health and leaves the number exactly where it
+                  was. The board is wiped though, and an empty board is
+                  overwhelming evidence of a fresh start - so the reasonable
+                  inference is a new number, and the retry gets spent searching
+                  ground already covered. A player lost most of a day's health
+                  to that, on a number he had already narrowed. */}
+              {!over.sessionOver && (
+                <Text style={[styles.overBody, { color: arena.text }]}>
+                  It is the same number. What you learned still counts.
+                </Text>
+              )}
               {!over.sessionOver ? (
                 <Pressable
                   onPress={again}

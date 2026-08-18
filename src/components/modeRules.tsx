@@ -114,9 +114,10 @@ export function impossibleRules(opts?: { tiersFirst?: boolean }): React.ReactNod
     <>
       <H>Health</H>
       <P first>
-        You start every day at 100%. Running out of attempts costs health, not the climb — the same
-        number is waiting. A miss costs 18% on the Ground, rising a point a tier to 22% in Orbit,
-        so a day is four or five misses long.
+        You start every day at 100%. Running out of attempts costs health, not the climb — the board
+        clears but the number does not change, so whatever you worked out still counts. A miss costs
+        18% on the Ground, rising a point a tier to 22% in Orbit, so a day is four or five misses
+        long.
       </P>
       <P>Solve a number you have never failed in two guesses and you take 10% back.</P>
     </>,
