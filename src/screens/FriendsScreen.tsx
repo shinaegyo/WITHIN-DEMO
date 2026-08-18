@@ -4,6 +4,7 @@ import { Text } from '../components/AppText';
 import { Avatar } from '../components/Avatar';
 import { PlayerCardModal } from '../components/PlayerCard';
 import { LeagueRoster } from '../components/LeagueRoster';
+import { PlayerSuggestion } from '../lib/api';
 import { StatusScreen } from '../components/StatusScreen';
 import {
   ApiError,
@@ -13,6 +14,7 @@ import {
   loadFriends,
   messageFor,
   removeFriend,
+  suggestPlayers,
   respondToFriendRequest,
   sendFriendRequest,
 } from '../lib/api';
@@ -48,6 +50,10 @@ export function FriendsScreen({
   const [note, setNote] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
   const [leagueRoster, setLeagueRoster] = useState<League | null>(null);
+  // Who matches what is being typed. The field took a name and an Add press
+  // and said nothing in between, so the only way to find out whether somebody
+  // existed - or how they spelled it - was to guess and send a request.
+  const [hints, setHints] = useState<PlayerSuggestion[]>([]);
   const [noteBad, setNoteBad] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -92,12 +98,34 @@ export function FriendsScreen({
     }
   };
 
+  // From the first character, like the Rank search. A friends list is short and
+  // a username is not a sentence: one letter narrows it as usefully as two, and
+  // waiting for a second reads as a field that has stopped working.
+  useEffect(() => {
+    const q = name.trim();
+    if (q.length < 1) {
+      setHints([]);
+      return;
+    }
+    let alive = true;
+    const id = setTimeout(() => {
+      suggestPlayers(q, 'season', false)
+        .then((p) => alive && setHints(p))
+        .catch(() => alive && setHints([]));
+    }, 180);
+    return () => {
+      alive = false;
+      clearTimeout(id);
+    };
+  }, [name]);
+
   const add = () =>
     run(async () => {
       const target = name.trim();
       if (!target) return;
       const result = await sendFriendRequest(target);
       setName('');
+      setHints([]);
       if (result === 'requested') say(`Request sent to ${target}.`);
       else if (result === 'accepted') say(`You and ${target} are now friends.`);
       else if (result === 'already_friends') say(`You're already friends with ${target}.`, true);
@@ -239,6 +267,34 @@ export function FriendsScreen({
         </Text>
       )}
 
+      {/* Tapping a match opens their card rather than filling the field. The
+          card already carries Add friend, along with everything you would want
+          to check before sending one - and it is the same card every other
+          list in the app opens, so a name means the same thing here. */}
+      {hints.map((h) => (
+        <Pressable
+          key={h.userId}
+          onPress={() => {
+            playTap();
+            setName('');
+            setHints([]);
+            setLooking(h.name);
+          }}
+          style={({ pressed }) => [
+            styles.hintRow,
+            { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+          ]}
+        >
+          <Avatar value={h.avatar} size={24} name={h.name} />
+          <Text style={[styles.hintName, { color: colors.text }]} numberOfLines={1}>
+            {h.name}
+          </Text>
+          {h.score !== null && (
+            <Text style={[styles.hintScore, { color: colors.textMuted }]}>{h.score}</Text>
+          )}
+        </Pressable>
+      ))}
+
       {state.incoming.length > 0 && (
         <>
           <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON YOU</Text>
@@ -350,6 +406,13 @@ const styles = StyleSheet.create({
   },
   addText: { fontSize: 14, fontFamily: fonts.extraBold },
   note: { fontSize: 12.5, fontFamily: fonts.medium, marginTop: 8 },
+  hintRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 9, paddingHorizontal: 10,
+    borderBottomWidth: 1, borderRadius: 8,
+  },
+  hintName: { flex: 1, fontSize: 14, fontFamily: fonts.semiBold },
+  hintScore: { fontSize: 12.5, fontFamily: fonts.medium },
   invite: {
     borderWidth: 1,
     borderRadius: 12,
