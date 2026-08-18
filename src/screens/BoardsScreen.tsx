@@ -139,16 +139,25 @@ interface Row {
 // nobody had asked about yet, on a screen somebody opened to see where they
 // came - and the sheet behind the header explains both boards properly for
 // anyone who does ask.
+// Season first, and open on it.
+//
+// Today only holds the people who have finished the daily in the last few
+// hours - three of them, most of the time - so a leaderboard opened on Today
+// was a leaderboard that looked empty. Season carries everyone who has played
+// at all this month, which is the board that answers "where do I stand".
+//
+// Today keeps its place beside it: it is the sharper question once there are
+// enough people playing to fill it, and it is one tap away.
 const TABS: { key: Board; label: string }[] = [
   // The columns are explained under the board rather than above it: nothing
   // should stand between opening this tab and seeing the standings, and the
   // question only occurs to somebody who has already looked at the rows.
-  { key: 'today', label: 'Today' },
+  { key: 'season', label: 'Season' },
   // One line each. The reasoning behind a board - why a season resets, what a
   // lifetime total is for - moved into the sheet with everything else, because
   // two lines of explanation above a leaderboard is read once and then skipped
   // forever.
-  { key: 'season', label: 'Season' },
+  { key: 'today', label: 'Today' },
 ];
 
 export function BoardsScreen() {
@@ -156,7 +165,7 @@ export function BoardsScreen() {
   // its own room rather than the game's.
   useTrack('home');
   const { colors } = useTheme();
-  const [tab, setTab] = useState<Board>('today');
+  const [tab, setTab] = useState<Board>('season');
   const [rows, setRows] = useState<Partial<Record<Board, Row[]>>>({});
   const [error, setError] = useState<string | null>(null);
   const [looking, setLooking] = useState<string | null>(null);
