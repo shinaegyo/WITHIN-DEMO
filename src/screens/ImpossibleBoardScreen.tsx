@@ -137,9 +137,8 @@ export function ImpossibleBoardScreen({
           }}
           style={[
             styles.row,
-            e.isMe
-              ? { borderColor: colors.accent, borderWidth: border.marked, backgroundColor: colors.surfaceAlt }
-              : { borderColor: colors.border, backgroundColor: colors.surface },
+            { borderBottomColor: colors.border },
+            e.isMe && { backgroundColor: colors.surfaceAlt },
           ]}
         >
           {MEDALS[e.rank] ? (
@@ -276,7 +275,7 @@ export function ImpossibleBoardScreen({
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
-  content: { padding: 16, gap: 8, paddingBottom: 20 },
+  content: { padding: 16, paddingBottom: 20 },
   // Bigger than the headings inside it. At 15 it was smaller than every
   // section title underneath, so the thing naming the whole rulebook read as a
   // caption on the first rule rather than as a title over all of them.
@@ -294,10 +293,12 @@ const styles = StyleSheet.create({
   play: { borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' },
   playText: { fontSize: 16, fontFamily: fonts.extraBold },
   caption: { fontSize: 12, fontFamily: fonts.medium, lineHeight: 18, marginBottom: 6 },
+  // A list, the same as Rank. Rows divided by a hairline rather than each one
+  // drawn as its own bordered, rounded, filled box.
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: radius.card,
+    borderBottomWidth: border.hairline,
     paddingVertical: 13,
     paddingHorizontal: 14,
     gap: 10,

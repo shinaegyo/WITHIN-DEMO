@@ -75,7 +75,8 @@ export function LeagueLadder({
                   }}
                   style={({ pressed }) => [
                     styles.row,
-                    here && { backgroundColor: colors.surfaceAlt, borderColor: LEAGUE_INK[l] },
+                    { borderBottomColor: colors.border },
+                    here && { backgroundColor: colors.surfaceAlt },
                     { opacity: pressed && onOpenLeague ? 0.7 : 1 },
                   ]}
                 >

@@ -84,7 +84,7 @@ export function LeagueRoster({
                   key={`${e.rank}-${e.name}`}
                   style={[
                     styles.row,
-                    { borderTopColor: colors.border },
+                    { borderBottomColor: colors.border },
                     e.isMe && { backgroundColor: colors.surfaceAlt },
                   ]}
                 >
@@ -118,9 +118,11 @@ const styles = StyleSheet.create({
   name: { fontSize: 16, fontFamily: fonts.bold },
   count: { flex: 1, fontSize: 12, fontFamily: fonts.medium, textAlign: 'right' },
   list: { maxHeight: 360 },
+  // Bottom rule rather than top, to match every other list, and no corner
+  // radius - a rounded box with a line down one side only is neither.
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 8, paddingHorizontal: 6, borderTopWidth: 1, borderRadius: 8,
+    paddingVertical: 10, paddingHorizontal: 6, borderBottomWidth: border.hairline,
   },
   rank: { width: 20, fontSize: 12, fontFamily: fonts.semiBold },
   player: { flex: 1, fontSize: 13.5, fontFamily: fonts.semiBold },
