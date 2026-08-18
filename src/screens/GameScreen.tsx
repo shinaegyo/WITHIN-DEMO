@@ -207,6 +207,12 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
     // board itself.
     const centreSheet = asking && round.guesses.length === 0;
     const intro = round.kind ? INTRO[round.kind] : null;
+    // Rounds two and three state a rule you act on before you guess - which
+    // clue to buy, how tight to bet - so the terms belong where the decision
+    // is, under the scores and above the input. Round one keeps its line at
+    // the foot: its terms are on the call card already, in the middle of the
+    // screen, and a second copy above it would say the same thing twice.
+    const ledeOnTop = !!intro && (round.kind === 'clue' || round.kind === 'bet');
     const used = round.attemptsUsed;
 
     /**
@@ -270,6 +276,12 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             showScore={false}
           />
 
+          {ledeOnTop && intro && (
+            <Text style={[styles.introLedeTop, { color: colors.textMuted }]} numberOfLines={2}>
+              {intro.lede}
+            </Text>
+          )}
+
           {/* A spacer rather than a wrapper. Wrapping the sheet in a flex-1
               view gave it a height to fill and squeezed the rail out of
               existence; an empty view has no intrinsic height at all, so it can
@@ -315,9 +327,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             />
           </View>
 
-          {/* One line, at the foot. The terms are worth having on screen and
-              not worth the top of it - a round is read once and then played. */}
-          {intro && (
+          {/* One line, at the foot - round one only now. */}
+          {intro && !ledeOnTop && (
             <Text
               style={[styles.introLede, { color: colors.textMuted }]}
               numberOfLines={2}
@@ -371,5 +382,13 @@ const styles = StyleSheet.create({
   spacer: { flex: 1 },
   /** The round's terms, stated once under its name. */
   introLede: { fontSize: 12.5, fontFamily: fonts.medium, textAlign: 'center', marginBottom: 20 },
+  introLedeTop: {
+    fontSize: 12.5,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+    marginTop: 12,
+    marginBottom: 4,
+    paddingHorizontal: 4,
+  },
   changeCall: { fontSize: 13, fontFamily: fonts.bold },
 });
