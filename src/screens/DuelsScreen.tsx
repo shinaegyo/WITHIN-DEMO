@@ -159,14 +159,28 @@ export function DuelsScreen({
     </View>
   );
 
+  /**
+   * The one you are meant to press, and the ones beside it.
+   *
+   * Every action here was a bare word in text: no fill, no border, no padding.
+   * Play - the thing a duel exists for - passed no tone at all and so came out
+   * in the muted grey used for captions, quieter than the opponent's name
+   * above it. A game waiting on you looked like a row of labels.
+   *
+   * `primary` fills. It is the only filled thing in its row, so there is never
+   * a question about which one continues and which one walks away, and the
+   * tap target is a button's rather than a word's.
+   */
   const Action = ({
     label,
     onPress,
     tone,
+    primary,
   }: {
     label: string;
     onPress: () => void;
     tone?: 'good' | 'warn';
+    primary?: boolean;
   }) => (
     <Pressable
       onPress={() => {
@@ -174,14 +188,19 @@ export function DuelsScreen({
         onPress();
       }}
       disabled={busy}
-      style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+      style={({ pressed }) => [
+        primary && [styles.primary, { backgroundColor: colors.text }],
+        { opacity: pressed ? 0.6 : 1 },
+      ]}
     >
       <Text
         style={[
           styles.action,
+          primary && styles.primaryText,
           {
-            color:
-              tone === 'good'
+            color: primary
+              ? colors.background
+              : tone === 'good'
                 ? feedbackColors.correct
                 : tone === 'warn'
                   ? feedbackColors.oneAway
@@ -216,11 +235,14 @@ export function DuelsScreen({
 
         {waitingOnYou.length > 0 && (
         <>
-          <Text style={[styles.heading, { color: colors.textMuted }]}>WAITING ON YOU</Text>
+          {/* Somebody is waiting on this one, which is the only heading here
+              that is about another person rather than about a list. It is
+              coloured accordingly. */}
+          <Text style={[styles.heading, { color: colors.accent }]}>WAITING ON YOU</Text>
           {waitingOnYou.map((d) => (
             <Row key={d.id} d={d}>
               <View style={styles.rowActions}>
-                <Action label="Accept" tone="good" onPress={() => run(async () => { await respondToDuel(d.id, true); })} />
+                <Action label="Accept" primary onPress={() => run(async () => { await respondToDuel(d.id, true); })} />
                 <Action label="Decline" onPress={() => run(async () => { await respondToDuel(d.id, false); })} />
               </View>
             </Row>
@@ -235,7 +257,7 @@ export function DuelsScreen({
               can be asked properly, not beside a duel nobody has entered. */}
           {yourTurn.map((d) => (
             <Row key={d.id} d={d}>
-              <Action label="Play ›" onPress={() => onPlay(d.id)} />
+              <Action label="Play ›" primary onPress={() => onPlay(d.id)} />
             </Row>
           ))}
         </>
@@ -448,5 +470,7 @@ const styles = StyleSheet.create({
   meta: { fontSize: 11, fontFamily: fonts.medium, marginTop: 1 },
   rowActions: { flexDirection: 'row', gap: 14 },
   action: { fontSize: 12.5, fontFamily: fonts.bold },
+  primary: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
+  primaryText: { fontSize: 13 },
   empty: { fontSize: 13, fontFamily: fonts.medium, lineHeight: 19, marginTop: 24 },
 });
